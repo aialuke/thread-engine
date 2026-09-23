@@ -1,4 +1,8 @@
-# status: queued | drafting | drafted | approved | shipped | killed
+# status: queued | planned | drafted | posted | shipped | killed
+# /next writes planned rows with: format, lane, experiment, arm, treatment,
+# hypothesis, post_at, leads. /draft-thread reads them. /posted sets posted + root_id.
+# format: settings | comparison | tool-swap | single-tip (missing = settings)
+# lane: main | other (see reference/audience.md)
 
 topics:
   - slug: macbook-battery
@@ -6,11 +10,13 @@ topics:
     example: examples/macbook-battery.md
 
   - slug: smart-tv
-    status: approved
+    status: drafted
+    format: settings
+    lane: main
     villain: motion smoothing + tracking
     locale: AU streaming apps
     draft: drafts/2026-09-22-smart-tv/
-    note: hook revised after APPROVED; re-read 01-hook.md before paste
+    note: hook revised after APPROVED, so the gate refuses it. Re-read the cards, then /approve smart-tv. It has 9 posts; /next may propose trimming it for the thread-length experiment.
 
   - slug: windows-laptop
     status: queued
@@ -39,3 +45,10 @@ topics:
   - slug: router-qos
     status: shipped
     example: examples/router-qos.md
+
+  - slug: paid-to-free-tools
+    status: shipped
+    format: tool-swap
+    lane: main
+    root_id: "2102737637346095128"
+    note: made outside the repo on 2026-09-23; best root so far. Backfilled in ledger/.

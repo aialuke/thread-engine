@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Daily 36-60 hour snapshots for thread-engine.
+  Runs `/snapshot` headless in Grok once a day at 20:00 local time. A daily run
+  always lands inside the 24-hour-wide snapshot window. If the Mac is asleep at
+  20:00, launchd runs it on wake.
+  Writes are limited to the repo by `--sandbox workspace`. The skill writes only
+  ledger/, loop/ and the generated summaries, then commits them.
+  Log: ~/Library/Logs/thread-engine-snapshot.log
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.exitzerocode.thread-engine.snapshot</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>-lc</string>
+    <string>cd "$HOME/src/thread-engine" &amp;&amp; echo "== $(date -u +%FT%TZ)" &amp;&amp; "$HOME/.grok/bin/grok" -p "/snapshot" --sandbox workspace --always-approve --effort low --max-turns 80 --output-format plain</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>20</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>/Users/lukemckenzie/Library/Logs/thread-engine-snapshot.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/lukemckenzie/Library/Logs/thread-engine-snapshot.log</string>
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>

@@ -1,22 +1,40 @@
 # thread-engine
 
-Local factory for Hidden Settings X threads. Drafts are the product. Posting is gated.
+Makes @exitzerocode posts and learns which ones grow the account. You type slash commands in Grok and paste posts into X. Grok runs everything else.
 
-## Cycle
+## The cycle
 
-1. `grok`
-2. `/plan` then `/draft-thread smart-tv`
-3. Edit the markdown
-4. Take the real screenshots listed in `images.md`
-5. `touch drafts/<slug>/APPROVED`
-6. Only then consider posting (manual, or a later script)
+1. **`/next`** — Grok catches up on results, then proposes one post: topic, format, what it tests, and when to post. Say yes or change it.
+2. **`/draft-thread <slug>`** — Grok researches, checks every path and claim, and writes the cards. Start with `/plan` if you want to see the plan first.
+3. **Read the cards.** Change anything you like.
+4. **`/approve <slug>`** — only you can do this. It approves the cards exactly as they are. If a card changes later, approve again.
+5. **`/ready <slug>`** — Grok checks the draft and puts card 1 on your clipboard. Paste it into X as a new post. Say `next` for each following card and post it as a reply to the one before.
+6. **`/posted <link to the first post>`** — Grok records what actually went live and asks how long it took.
 
-A human creates `APPROVED`. The agent never writes that file.
+Numbers are collected automatically 36 to 60 hours after each post by the daily snapshot job.
 
-## Commands
+## Learning
 
-`python3 scripts/draft.py smart-tv` prints `grok -p "/draft-thread smart-tv"`. Run `/plan` in that session first. The script does not start grok.
+- **`/results`** shows recent numbers any time. Once a week, `/next` writes a review in `reviews/` for you.
+- Each review can propose up to two rule changes, each backed by a test. **`/apply <lesson>`** accepts one. **`/undo-rule <lesson>`** takes it back.
+- One experiment runs at a time. A result needs 3 posts to look promising and 3 more to be adopted. With one or two posts a day, expect about one answer every week or two.
+- `experiments.md`, `learnings.md` and `ledger/SUMMARY.md` are always up to date to read. Never edit them; Grok rewrites them.
 
-`python3 scripts/post_thread.py drafts/2026-09-22-smart-tv` writes `POST.txt` and prints that run sheet once `APPROVED` exists. Until then it prints `human gate` and exits 2. The numbered cards are the posts. `thread.md` is not the payload.
+## What never changes
 
-`python3 scripts/post_thread.py drafts/2026-09-22-smart-tv --copy 1` copies the first card to the clipboard. Paste that into X. When the card has an image, Finder shows that file. The script does not call the X API.
+Only you approve a post. Nothing is posted for you. Every figure needs a source checked in the same session. The learning loop can change formats, length, timing, topics and hook style, never those rules.
+
+## One-time setup
+
+- **Hooks:** this folder must be trusted in Grok (`/hooks-trust`). It already is on this Mac.
+- **Daily snapshot job:** `ops/launchd/com.exitzerocode.thread-engine.snapshot.plist` runs `/snapshot` at 20:00 each day. Ask Claude Code to install it; it copies the file to `~/Library/LaunchAgents/` and loads it. Log: `~/Library/Logs/thread-engine-snapshot.log`.
+
+## Monthly outside check (optional)
+
+Grok drafts, measures and grades its own work. Once a month, ask a different model to check it blind. In a Claude Code session in this folder, say:
+
+> Read only `ledger/*.json` and `ledger/raw/`. Without opening `learnings.md`, `experiments.md` or `reviews/`, write down which formats, lengths and posting times did best and how sure you are. Then open `learnings.md` and list where it disagrees with you.
+
+## For maintainers
+
+Tests: `python3 -m unittest discover -s tests`. The contract for agents is `AGENTS.md`.

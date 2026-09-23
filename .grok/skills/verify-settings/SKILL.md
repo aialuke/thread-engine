@@ -1,12 +1,13 @@
 ---
 name: verify-settings
 description: >
-  Fact-check Hidden Settings paths against current official docs. Fail
-  closed. Write PATHS.md. Unconfirmed paths are VERIFY.
+  Fact-check a draft against current official pages. Fail closed. Paths
+  mode writes PATHS.md; claims mode writes CLAIMS.md. Unconfirmed rows are
+  VERIFY.
 when-to-use: >
   Use before a draft is marked ready, when a Settings path might have
   changed, or /verify-settings.
-argument-hint: "<draft-slug>"
+argument-hint: "<draft-slug> [paths|claims]"
 user-invocable: true
 ---
 
@@ -14,13 +15,15 @@ user-invocable: true
 
 Fail closed. A path missing from an official page this session is `VERIFY`.
 
-Copy is `/draft-thread`. Format is `/hidden-settings`.
+Copy is `/draft-thread`. Format rules are in the draft's format skill (`.grok/skills/format-<FORMAT>/SKILL.md`).
 
 ## Argument
 
 `<draft-slug>` is the folder under `drafts/` (`YYYY-MM-DD-slug` or a kebab slug). Omitted → the open draft. None open → ask for the slug.
 
-## Steps
+Mode: `paths` (default) checks menu paths into `PATHS.md`. `claims` checks every other factual claim (prices, free tiers, specs, platforms) into `CLAIMS.md`. A draft can need both.
+
+## Paths mode
 
 1. **Version assumptions.**
    Read the draft folder (`PATHS.md`, else `sources.md`, else the setting files). Each candidate gets OS / app / hardware (iOS version, Camera generation, gateway model, firmware family).
@@ -56,3 +59,23 @@ Copy is `/draft-thread`. Format is `/hidden-settings`.
 
 6. **Stop.**
    Tick Verify boxes in `CHECKLIST.md` when that file exists. `PATHS.md` is the deliverable. Confidence `VERIFY` means the draft is not ready.
+
+
+## Claims mode
+
+1. **List claims.** Every figure, price, free-tier statement, platform, spec, and "no watermark"-style promise in the cards. Each is one row.
+2. **Official source.** The vendor's own pricing, feature, spec or support page, opened this session. Reviews, forums, and memory are not sources.
+3. **Write `drafts/<slug>/CLAIMS.md`:**
+
+   ```markdown
+   # CLAIMS
+   Checked: YYYY-MM-DD
+
+   | Claim | Card | Task or model it applies to | Source URL | Date checked | Vendor-stated or tested | Confidence | Notes |
+   |-------|------|-----------------------------|------------|--------------|-------------------------|------------|-------|
+   ```
+
+   Confidence: `high` (the page states it), `medium` (the page states it for a narrower case; Notes says which), `VERIFY` (not found).
+   "Tested" only when the operator says they did it.
+4. **VERIFY.** Unconfirmed claims stay as `VERIFY` rows and come out of the cards. Never soften a claim to keep it.
+5. **Stop.** Tick the verify boxes in `CHECKLIST.md`.

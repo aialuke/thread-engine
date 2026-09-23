@@ -1,20 +1,21 @@
 ---
 name: hidden-settings
 description: >
-  Hidden Settings format contract: hook beat order, comparison hook,
-  card micro-structure, closer, emoji budget, banned phrases, truth
-  budget, farm tells.
+  Settings-thread format contract: hook beat order, card micro-structure,
+  closer, emoji budget. Shared voice is voice/exit-zero.md.
 when-to-use: >
-  Use for Hidden Settings format, voice, emoji budget, hook beats,
-  comparison hook, farm tells, card structure, closer rules, or
-  /hidden-settings.
+  Use for settings-thread format, hook beats, emoji budget, card
+  structure, closer rules, or /hidden-settings. Comparison threads use
+  /format-comparison.
 argument-hint: "[hook|card|closer|emoji|voice|farm-tells]"
 user-invocable: true
 ---
 
-# Hidden Settings format
+# Settings format (Hidden Settings)
 
-Voice texture: `voice/exit-zero.md`. Beat-check: `examples.md` (this folder). Full transcripts: `examples/`. Settings transcripts win on settings beat order after the opening. Posted settings gold opens on neglect. A new settings hook's first sentence is the result, and neglect is the next sentence. Comparison threads follow the comparison hook in this file. A ship adds a rule only when this file states it.
+This is the `settings` format. Shared voice, truth budget and image rules: `voice/exit-zero.md`. Beat-check: `examples.md` (this folder). Full transcripts: `examples/`. Settings transcripts win on settings beat order after the opening. Posted settings gold opens on neglect. A new settings hook's first sentence is the result, and neglect is the next sentence. Comparison threads use `.grok/skills/format-comparison/SKILL.md`.
+
+Rules here change only through an adopted lesson and `/apply` (see `learnings.md`).
 
 Write with `/draft-thread`. Paths with `/verify-settings`.
 
@@ -35,19 +36,9 @@ N in the snap, the promise, and the card count match.
 
 ## Root post
 
-For You can rank the root for someone who does not follow the account. Later cards are replies, so the root carries the result. Bookmarks are not a score this repo uses.
+For You shows one post per conversation, and a stranger can only be shown the root (`reference/x-algorithm.md` A1, A2). The root carries the result on its own. Keep the hook under 600 characters: scene and expert may share a sentence, and the no-list may be two or three lines.
 
-## Comparison hook
-
-Use this when the villain is that the new product looks like last year's. Settings threads keep the hook order above.
-
-1. **Both products** — the first sentence names them.
-2. **Question** — one question a scroller already understands.
-3. **✓ matches** — what is the same. Each match on its own line, starting with `✓`.
-4. **Count** — how many things differ. A count only. The cards name them.
-5. **🧵** — the mark alone.
-
-The count and the number of difference cards match.
+Card count N is 3 to 7. When the queue row names an experiment arm, the arm's card count wins.
 
 ## Card micro-structure
 
@@ -61,33 +52,12 @@ One setting per post. `Setting N: Name`.
 
 Skip line when the menu can be missing: `No Main Camera menu? Skip it.`
 
-### Difference card
-
-Use this when the post is a difference, not a Settings toggle.
-
-`N. Plain name`. A product term shares that line with what it does.
-
-1. **Title**
-2. **Use** — the next sentence is what a person notices
-3. **Spec** — the sourced figures
-4. **Path** — when `PATHS.md` has a control for this difference
-
-One difference per post. Numbers run from 1 and match the hook's count.
-
 ## Closer rules
-
-Settings threads:
 
 - `✓` recap of the setting names, one line
 - Same-object line: same phone / same gateway / same wedding. Different result
 - Time and money already used in the hook; repeat only those figures
 - Reply CTA asks for the fork that changes which settings matter (model, chip, age, or ISP) and promises which 3 of the N to do first.
-
-Comparison threads:
-
-- Open with `The full pass`
-- One `✓` line per difference, written `name = payoff`
-- The payoff uses that card's figure and the model it applies to
 
 ## Emoji budget
 
@@ -95,20 +65,15 @@ Comparison threads:
 |------|--------|-------|
 | 🧵 | hook | 1 |
 | – | each no-list line | 1 per skip |
-| ✓ | settings closer, on its one recap line. Comparison hook, each match. Comparison closer, each difference | 1 per line |
+| ✓ | closer, on its one recap line | 1 |
 | ⚠️ | first Pro-only / model-only caveat | 1 |
 
-## Banned phrases
+## Settings voice
 
-game changer · unlock · most people don't know · wait for it
+- Expert is a friend / tech / repair person in the room.
+- Negative parallel list. Each skip on its own line, starting with `–`.
+- Same object, different result.
+- One named person. One room. One failed result. A purchase they almost made, with a number only when that number is sourced.
+- The default has sat untouched since setup day. The fix was already in Settings.
 
-## Farm tells
-
-- "You're only using N% of your Mac" (any device)
-- Fake urgency, em-dash stacks, 🚨🔥👇
-- Omniscient IT-guy with no scene
-- Swapping a look every photo — pick one style and leave it
-
-## Truth budget
-
-Every figure is sourced this session: official docs, `PATHS.md`, or the human. Invented dB, %, and $ amounts stay out. Scene money is a purchase they almost made, with a number only when that number is sourced.
+Banned phrases, farm tells and the truth budget: `voice/exit-zero.md`.
