@@ -128,6 +128,14 @@ class PostsAndSnapshots(LoopCase):
         self.assertEqual(post["snapshots"][0]["outside_repliers"], ["other", "someone"])
         self.assertEqual(post["snapshots"][0]["outside_replies"], 3)
 
+    def test_incomplete_repliers_marked_as_lower_bound(self) -> None:
+        self.post("1000000045", T0)
+        data = {"root_id": "1000000045", "observed_at": hours(40),
+                "root": {"views": 9, "likes": 0, "reposts": 0, "quotes": 0, "replies": 32, "bookmarks": 0},
+                "repliers": ["a", "b"], "repliers_complete": False}
+        self.ok("record-snapshot", "--json", self.payload(data))
+        self.assertIn("| ≥2 |", (self.root / "ledger" / "SUMMARY.md").read_text())
+
     def test_missing_metric_recorded_not_zero(self) -> None:
         self.post("1000000050", T0)
         result = self.snap("1000000050", hours(40), None)
