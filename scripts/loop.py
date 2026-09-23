@@ -354,6 +354,26 @@ def cmd_record_snapshot(repo: Repo, args) -> dict:
             "missing": snap["missing"]}
 
 
+def cmd_set_repliers_complete(repo: Repo, args) -> dict:
+    """Correct whether a post's reply-author list was complete. Logged on the post."""
+    need(args.value in {"true", "false"}, "--value must be true or false")
+    need(bool(args.reason.strip()), "--reason required")
+    post = repo.post(args.root_id)
+    need(bool(post["snapshots"]), f"{args.root_id} has no snapshots")
+    value = args.value == "true"
+    changed = 0
+    for snap in post["snapshots"]:
+        if snap.get("repliers_complete") is not value:
+            snap["repliers_complete"] = value
+            changed += 1
+    if changed:
+        post.setdefault("amendments", []).append({
+            "at": iso(now_arg(args.now)), "field": "repliers_complete",
+            "value": value, "snapshots": changed, "reason": args.reason.strip()})
+        repo.save_post(post)
+    return {"root_id": args.root_id, "repliers_complete": value, "snapshots_changed": changed}
+
+
 def cmd_mark_missed(repo: Repo, args) -> dict:
     at = now_arg(args.now)
     marked = []
@@ -731,6 +751,7 @@ COMMANDS = {
     "due": cmd_due,
     "record-snapshot": cmd_record_snapshot,
     "mark-missed": cmd_mark_missed,
+    "set-repliers-complete": cmd_set_repliers_complete,
     "open-experiment": cmd_open_experiment,
     "evaluate": cmd_evaluate,
     "next-slot": cmd_next_slot,
@@ -766,6 +787,10 @@ def build_parser() -> argparse.ArgumentParser:
             sp.add_argument("--lesson", required=True)
         if name == "commit-rule":
             sp.add_argument("--files", required=True)
+        if name == "set-repliers-complete":
+            sp.add_argument("--root-id", required=True)
+            sp.add_argument("--value", required=True, help="true or false")
+            sp.add_argument("--reason", required=True)
         if name == "add-preference":
             sp.add_argument("--statement", required=True)
             sp.add_argument("--evidence", required=True, help="comma-separated post ids")

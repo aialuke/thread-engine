@@ -136,6 +136,22 @@ class PostsAndSnapshots(LoopCase):
         self.ok("record-snapshot", "--json", self.payload(data))
         self.assertIn("| ≥2 |", (self.root / "ledger" / "SUMMARY.md").read_text())
 
+    def test_set_repliers_complete_corrects_and_logs(self) -> None:
+        self.post("1000000046", T0)
+        self.snap("1000000046", hours(40), 9, repliers=["a"])
+        self.assertIn("| 1 |", (self.root / "ledger" / "SUMMARY.md").read_text())
+        self.assertIn("--reason", self.fails("set-repliers-complete", "--root-id", "1000000046",
+                                             "--value", "false", "--reason", " "))
+        done = self.ok("set-repliers-complete", "--root-id", "1000000046", "--value", "false",
+                       "--reason", "search returned fewer authors than replies", now=hours(50))
+        self.assertEqual(done["snapshots_changed"], 1)
+        self.assertIn("| ≥1 |", (self.root / "ledger" / "SUMMARY.md").read_text())
+        post = json.loads((self.root / "ledger" / "1000000046.json").read_text())
+        self.assertEqual(post["amendments"][0]["reason"], "search returned fewer authors than replies")
+        again = self.ok("set-repliers-complete", "--root-id", "1000000046", "--value", "false", "--reason", "x")
+        self.assertEqual(again["snapshots_changed"], 0)
+        self.assertEqual(self.ok("validate")["problems"], [])
+
     def test_missing_metric_recorded_not_zero(self) -> None:
         self.post("1000000050", T0)
         result = self.snap("1000000050", hours(40), None)
