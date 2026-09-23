@@ -7,7 +7,7 @@ when-to-use: >
   Use for settings-thread format, hook beats, emoji budget, card
   structure, closer rules, or /hidden-settings. Comparison threads use
   /format-comparison.
-argument-hint: "[hook|card|closer|emoji|voice|farm-tells]"
+argument-hint: "[hook|card|closer|emoji]"
 user-invocable: true
 ---
 

@@ -1,6 +1,6 @@
 # Exit Zero voice
 
-Shared tone for every format. Format rules live in `.grok/skills/format-*/`. The settings gold transcripts in `examples/` win on disagreement for settings threads only.
+Shared tone for every format. Format rules live in `.grok/skills/format-*/`. For settings threads, the gold transcripts in `examples/` win only on beat order after the opening; the root's opening and length follow `.grok/skills/hidden-settings/SKILL.md`.
 
 ## Rules
 
@@ -17,6 +17,8 @@ Dry. Specific. Competent. Receipts.
 Skip-if-missing is voice. Cut a card before guessing a path or a claim.
 
 ## Banned phrases
+
+These read as engagement-farm posting, which is the genre this account is built against. The gate refuses the multi-word phrases and the three emoji; "unlock" stays guidance only, because it is also a real settings word (Face ID unlock).
 
 game changer · unlock · most people don't know · wait for it · 🚨🔥👇
 

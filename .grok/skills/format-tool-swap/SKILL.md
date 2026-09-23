@@ -9,7 +9,7 @@ when-to-use: Use for a paid-to-free swap list, free alternatives, or /format-too
 
 # Format: tool-swap
 
-A list of swaps: `Paid → Free`, then one line on what the free tool does for a concrete task. Shared voice: `voice/exit-zero.md`. Reference post: `2102737637346095128` (the account's best root so far; its "No watermark" line had no recorded source).
+A list of swaps: `Paid → Free`, then one line on what the free tool does for a concrete task. Shared voice: `voice/exit-zero.md`. Reference post: `2102737637346095128`, for shape only. Its "No watermark" line had no source, which is what `CLAIMS.md` now prevents.
 
 ## Root
 

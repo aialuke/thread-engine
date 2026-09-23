@@ -27,7 +27,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
 2. **Topic.** Find the queue row. Note `format`, `lane`, `experiment`, `arm`, `treatment`, and `hypothesis` if present. A row with no `format` is `settings`.
    Done: slug, format and, if set, the experiment arm are written down.
 
-3. **Format.** Read `.grok/skills/format-<format>/SKILL.md` and every file it points to. A settings row also reads `.grok/skills/hidden-settings/examples.md` and the gold threads in `examples/`.
+3. **Format.** Read `.grok/skills/format-<format>/SKILL.md` and every file it points to. A settings row also reads `.grok/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening and length from the format, because the shipped roots predate the result-first, under-600-character rule.
    If the row is a `treatment` or `control` arm, the arm's description wins over the format's defaults (for example card count). Never change anything else about the post, so the test stays clean.
    Done: shape, research rule, image rule and checklist are known.
 
