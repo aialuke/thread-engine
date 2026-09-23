@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.venv/
+
+# Human approval markers are local state, never committed
+APPROVED

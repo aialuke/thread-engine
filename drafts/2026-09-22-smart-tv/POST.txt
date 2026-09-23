@@ -1,0 +1,13 @@
+Run sheet. Do not paste this file. Re-run post_thread.py after a card edit.
+Copy with: python3 scripts/post_thread.py drafts/2026-09-22-smart-tv --copy 1
+Long posts. X Premium can send these (up to 25,000 characters). A free account stops at 280.
+
+1  787  01-hook.md
+2  884  02-motion.md
+3  1108  03-picture-mode.md
+4  1083  04-energy-saving.md
+5  585  05-sharpness.md
+6  668  06-color-tone.md
+7  1018  07-hdmi-enhanced.md
+8  754  08-tracking.md
+9  315  09-closer.md

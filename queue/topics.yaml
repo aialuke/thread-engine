@@ -1,0 +1,41 @@
+# status: queued | drafting | drafted | approved | shipped | killed
+
+topics:
+  - slug: macbook-battery
+    status: shipped
+    example: examples/macbook-battery.md
+
+  - slug: smart-tv
+    status: approved
+    villain: motion smoothing + tracking
+    locale: AU streaming apps
+    draft: drafts/2026-09-22-smart-tv/
+    note: hook revised after APPROVED; re-read 01-hook.md before paste
+
+  - slug: windows-laptop
+    status: queued
+    villain: battery + startup apps
+
+  - slug: airpods-pro
+    status: queued
+
+  - slug: android-battery
+    status: queued
+
+  - slug: fridge-water-filter
+    status: queued
+    note: only if we can keep it non-clickbait
+
+  - slug: iphone-camera
+    status: shipped
+    example: examples/iphone-camera.md
+
+  - slug: iphone-18-pro-aperture
+    status: shipped
+    villain: 18 Pro looks like a 17 Pro; four differences
+    draft: drafts/2026-09-22-iphone-18-pro-aperture/
+    example: examples/iphone-18-pro-aperture.md
+
+  - slug: router-qos
+    status: shipped
+    example: examples/router-qos.md

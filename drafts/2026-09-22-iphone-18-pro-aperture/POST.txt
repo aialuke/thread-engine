@@ -1,0 +1,10 @@
+Run sheet. Do not paste this file. Re-run post_thread.py after a card edit.
+Copy with: python3 scripts/post_thread.py drafts/2026-09-22-iphone-18-pro-aperture --copy 1
+Long posts. X Premium can send these (up to 25,000 characters). A free account stops at 280.
+
+1  331  01-hook.md
+2  1608  02-lens.md
+3  587  03-gpu.md
+4  630  04-neural-engine.md
+5  468  05-battery.md
+6  537  06-closer.md
