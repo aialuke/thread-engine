@@ -1,0 +1,100 @@
+{
+  "root_id": "2101926639198441689",
+  "slug": "iphone-camera",
+  "format": "settings",
+  "lane": "main",
+  "posted_at": "2026-09-21T06:48:57Z",
+  "retrospective": true,
+  "made_in_repo": false,
+  "experiment": null,
+  "arm": "none",
+  "hypothesis": null,
+  "cards": [
+    {
+      "id": "2101928595648299132"
+    },
+    {
+      "id": "2101928001185444158"
+    },
+    {
+      "id": "2101929511705309680"
+    },
+    {
+      "id": "2101927707319951411"
+    },
+    {
+      "id": "2101928289426407476"
+    },
+    {
+      "id": "2101927156343529548"
+    },
+    {
+      "id": "2101929347426988524"
+    },
+    {
+      "id": "2101928139035480223"
+    }
+  ],
+  "media": [
+    "photo"
+  ],
+  "ai_media": false,
+  "production_minutes": null,
+  "edits": [],
+  "draft": null,
+  "snapshots": [
+    {
+      "observed_at": "2026-09-23T19:10:31Z",
+      "age_hours": 60.4,
+      "kind": "late",
+      "root": {
+        "views": 133,
+        "likes": 1,
+        "reposts": 0,
+        "quotes": 0,
+        "replies": 9,
+        "bookmarks": 2
+      },
+      "cards": [
+        {
+          "id": "2101928595648299132",
+          "views": 12
+        },
+        {
+          "id": "2101928001185444158",
+          "views": 50
+        },
+        {
+          "id": "2101929511705309680",
+          "views": 25
+        },
+        {
+          "id": "2101927707319951411",
+          "views": 22
+        },
+        {
+          "id": "2101928289426407476",
+          "views": 15
+        },
+        {
+          "id": "2101927156343529548",
+          "views": 55
+        },
+        {
+          "id": "2101929347426988524",
+          "views": 14
+        },
+        {
+          "id": "2101928139035480223",
+          "views": 19
+        }
+      ],
+      "outside_replies": 0,
+      "outside_repliers": [],
+      "followers": 34,
+      "raw_file": "ledger/raw/backfill-20260923T1910.json",
+      "missing": []
+    }
+  ],
+  "missed": false
+}

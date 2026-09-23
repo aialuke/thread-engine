@@ -1,0 +1,79 @@
+{
+  "root_id": "2102272933087363155",
+  "slug": "iphone-18-pro-aperture",
+  "format": "comparison",
+  "lane": "main",
+  "posted_at": "2026-09-22T05:45:00Z",
+  "retrospective": true,
+  "made_in_repo": true,
+  "experiment": null,
+  "arm": "none",
+  "hypothesis": null,
+  "cards": [
+    {
+      "id": "2102272934312128756"
+    },
+    {
+      "id": "2102272935213887532"
+    },
+    {
+      "id": "2102272936484782118"
+    },
+    {
+      "id": "2102272937457758451"
+    },
+    {
+      "id": "2102272938321891826"
+    }
+  ],
+  "media": [
+    "photo"
+  ],
+  "ai_media": false,
+  "production_minutes": null,
+  "edits": [],
+  "draft": null,
+  "snapshots": [
+    {
+      "observed_at": "2026-09-23T19:10:31Z",
+      "age_hours": 37.4,
+      "kind": "valid",
+      "root": {
+        "views": 464,
+        "likes": 1,
+        "reposts": 0,
+        "quotes": 1,
+        "replies": 1,
+        "bookmarks": 0
+      },
+      "cards": [
+        {
+          "id": "2102272934312128756",
+          "views": 66
+        },
+        {
+          "id": "2102272935213887532",
+          "views": 20
+        },
+        {
+          "id": "2102272936484782118",
+          "views": 52
+        },
+        {
+          "id": "2102272937457758451",
+          "views": 18
+        },
+        {
+          "id": "2102272938321891826",
+          "views": 6
+        }
+      ],
+      "outside_replies": 0,
+      "outside_repliers": [],
+      "followers": 34,
+      "raw_file": "ledger/raw/backfill-20260923T1910.json",
+      "missing": []
+    }
+  ],
+  "missed": false
+}

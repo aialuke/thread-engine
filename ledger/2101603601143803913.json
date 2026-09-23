@@ -1,0 +1,84 @@
+{
+  "root_id": "2101603601143803913",
+  "slug": "home-wifi",
+  "format": "settings",
+  "lane": "main",
+  "posted_at": "2026-09-20T09:25:19Z",
+  "retrospective": true,
+  "made_in_repo": false,
+  "experiment": null,
+  "arm": "none",
+  "hypothesis": null,
+  "cards": [
+    {
+      "id": "2101603846049214593"
+    },
+    {
+      "id": "2101603917230747837"
+    },
+    {
+      "id": "2101603775777784270"
+    },
+    {
+      "id": "2101603981373894824"
+    },
+    {
+      "id": "2101603687630266648"
+    },
+    {
+      "id": "2101604052656361871"
+    }
+  ],
+  "media": [],
+  "ai_media": false,
+  "production_minutes": null,
+  "edits": [],
+  "draft": null,
+  "snapshots": [
+    {
+      "observed_at": "2026-09-23T19:10:31Z",
+      "age_hours": 81.8,
+      "kind": "late",
+      "root": {
+        "views": 273,
+        "likes": 1,
+        "reposts": 0,
+        "quotes": 0,
+        "replies": 6,
+        "bookmarks": 2
+      },
+      "cards": [
+        {
+          "id": "2101603846049214593",
+          "views": 117
+        },
+        {
+          "id": "2101603917230747837",
+          "views": 4
+        },
+        {
+          "id": "2101603775777784270",
+          "views": 22
+        },
+        {
+          "id": "2101603981373894824",
+          "views": 21
+        },
+        {
+          "id": "2101603687630266648",
+          "views": 47
+        },
+        {
+          "id": "2101604052656361871",
+          "views": 9
+        }
+      ],
+      "outside_replies": 0,
+      "outside_repliers": [],
+      "followers": 34,
+      "raw_file": "ledger/raw/backfill-20260923T1910.json",
+      "missing": []
+    }
+  ],
+  "missed": false
+}

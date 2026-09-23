@@ -1,0 +1,49 @@
+{
+  "root_id": "2102194978269389269",
+  "slug": "connect-pin",
+  "format": "other",
+  "lane": "other",
+  "posted_at": "2026-09-22T00:35:14Z",
+  "retrospective": true,
+  "made_in_repo": false,
+  "experiment": null,
+  "arm": "none",
+  "hypothesis": null,
+  "cards": [],
+  "media": [],
+  "ai_media": false,
+  "production_minutes": null,
+  "edits": [],
+  "draft": null,
+  "snapshots": [
+    {
+      "observed_at": "2026-09-23T19:10:31Z",
+      "age_hours": 42.6,
+      "kind": "valid",
+      "root": {
+        "views": 849,
+        "likes": 23,
+        "reposts": 0,
+        "quotes": 0,
+        "replies": 32,
+        "bookmarks": 0
+      },
+      "cards": [],
+      "outside_replies": 8,
+      "outside_repliers": [
+        "_deep_star",
+        "annasoreskin",
+        "bear_stack_dev",
+        "marceguerra",
+        "monthlycap",
+        "mukundzha6",
+        "omegascorp",
+        "sagentlab"
+      ],
+      "followers": 34,
+      "raw_file": "ledger/raw/backfill-20260923T1910.json",
+      "missing": []
+    }
+  ],
+  "missed": false
+}

@@ -1,0 +1,100 @@
+{
+  "root_id": "2102172499031253210",
+  "slug": "macbook-battery",
+  "format": "settings",
+  "lane": "main",
+  "posted_at": "2026-09-21T23:05:54Z",
+  "retrospective": true,
+  "made_in_repo": false,
+  "experiment": null,
+  "arm": "none",
+  "hypothesis": null,
+  "cards": [
+    {
+      "id": "2102172856910241923"
+    },
+    {
+      "id": "2102172817882247302"
+    },
+    {
+      "id": "2102172903492157876"
+    },
+    {
+      "id": "2102172535295291403"
+    },
+    {
+      "id": "2102172773594640568"
+    },
+    {
+      "id": "2102172949495402757"
+    },
+    {
+      "id": "2102172622666805475"
+    },
+    {
+      "id": "2102172709614702948"
+    }
+  ],
+  "media": [
+    "photo"
+  ],
+  "ai_media": false,
+  "production_minutes": null,
+  "edits": [],
+  "draft": null,
+  "snapshots": [
+    {
+      "observed_at": "2026-09-23T19:10:31Z",
+      "age_hours": 44.1,
+      "kind": "valid",
+      "root": {
+        "views": 149,
+        "likes": 1,
+        "reposts": 0,
+        "quotes": 0,
+        "replies": 8,
+        "bookmarks": 1
+      },
+      "cards": [
+        {
+          "id": "2102172856910241923",
+          "views": 35
+        },
+        {
+          "id": "2102172817882247302",
+          "views": 17
+        },
+        {
+          "id": "2102172903492157876",
+          "views": 14
+        },
+        {
+          "id": "2102172535295291403",
+          "views": 40
+        },
+        {
+          "id": "2102172773594640568",
+          "views": 20
+        },
+        {
+          "id": "2102172949495402757",
+          "views": 34
+        },
+        {
+          "id": "2102172622666805475",
+          "views": 32
+        },
+        {
+          "id": "2102172709614702948",
+          "views": 28
+        }
+      ],
+      "outside_replies": 0,
+      "outside_repliers": [],
+      "followers": 34,
+      "raw_file": "ledger/raw/backfill-20260923T1910.json",
+      "missing": []
+    }
+  ],
+  "missed": false
+}
