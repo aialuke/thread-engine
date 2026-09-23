@@ -29,7 +29,7 @@ Run `python3 scripts/loop.py next-slot`.
 - **explore, no open experiment:** propose the next experiment from this list, first one not yet run:
   1. Standalone post (single-tip or tool-swap, root only) against the account's threads in the same lane. Cohort: main-lane threads with a valid or late snapshot.
   2. Short thread (3 cards) against the long threads already shipped (6 to 9 posts).
-  3. Posting hour: 07:00–09:00 against 19:00–21:00 Australia/Sydney.
+  3. Posting hour: 07:00–09:00 against 19:00–21:00 Australia/Brisbane.
   4. Root length: under 280 characters against 500–600.
   5. Replies: five substantive replies in the lane on a posting day against none, measured by followers gained that week.
   State: the question, the treatment, what it is compared with, and the cohort, meaning earlier posts from `ledger/SUMMARY.md` in the same lane that match the comparison format, at least 3. When the operator says yes, write `loop/inbox/experiment.json` (`question`, `treatment`, `control`, `cohort` ids, `primary` "views", `effect` 1.5, `reference_facts` like ["A1","A5"]) and run `python3 scripts/loop.py open-experiment --json loop/inbox/experiment.json`.
@@ -41,7 +41,7 @@ Run `python3 scripts/loop.py next-slot`.
 1. Lane: read `reference/audience.md`. If `lane.share` is below 0.8 (12 of 15), the next post must be `main`.
 2. Demand: run one or two `x_keyword_search` queries for recent questions in the lane (for example `"how do I" free video editor lang:en -filter:replies`). Record each hit as a lead: post id, the query, and that the search returns at most 10. Leads are not proof of demand.
 3. Queue: consider `status: queued` rows in `queue/topics.yaml`.
-4. Timing: propose a posting time in Australia/Sydney. Say how many hours since the last original; there is no fixed minimum.
+4. Timing: propose a posting time in Australia/Brisbane. Say how many hours since the last original; there is no fixed minimum.
 
 ## 5. Propose, then write the row
 
@@ -56,7 +56,7 @@ Propose one post in four lines: topic, format, experiment arm (or none), posting
     arm: <treatment|control or omit>
     treatment: <the arm's exact rule, or omit>
     hypothesis: <one sentence, written now, before posting>
-    post_at: <YYYY-MM-DD HH:MM Australia/Sydney>
+    post_at: <YYYY-MM-DD HH:MM Australia/Brisbane>
     leads: [<post ids>]
 ```
 

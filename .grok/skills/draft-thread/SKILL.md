@@ -37,7 +37,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
 5. **Verify.** Run `/verify-settings <folder>` in the mode the format names (`paths`, `claims`, or both). Cards use `high` and `medium` rows only. `VERIFY` rows stay in `PATHS.md` / `CLAIMS.md` and out of cards.
    Done: `PATHS.md` and/or `CLAIMS.md` exist in the draft folder.
 
-6. **Files.** `drafts/YYYY-MM-DD-slug/` (today's date in Australia/Sydney). Reuse the folder if it exists.
+6. **Files.** `drafts/YYYY-MM-DD-slug/` (today's date in Australia/Brisbane). Reuse the folder if it exists.
    - `FORMAT` — one word: `settings`, `comparison`, `tool-swap`, or `single-tip`
    - `01-hook.md` and further consecutive `NN-<name>.md` cards as the format's shape says. A single-tip has only `01-hook.md`.
    - `images.md` — what to attach, following the format's image rule. Write `Attach: none` when nothing is attached.

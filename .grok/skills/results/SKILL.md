@@ -13,7 +13,7 @@ Plain English. No JSON, no code in what the operator reads. Say "not enough data
 
 1. Run `python3 scripts/loop.py status` and `python3 scripts/loop.py evaluate`. Read `ledger/SUMMARY.md`, `experiments.md`, `learnings.md`, and the last review in `reviews/`.
 2. If the operator only wanted numbers (typed `/results` and no review is due), print the last 7 days from `ledger/SUMMARY.md` as a short table and stop.
-3. Otherwise write `reviews/week-YYYY-Www.md` (ISO week, Australia/Sydney) with these sections, each a few lines:
+3. Otherwise write `reviews/week-YYYY-Www.md` (ISO week, Australia/Brisbane) with these sections, each a few lines:
    - **Posts this week.** Table: posted, slug, format, views, bookmarks, outside replies, snapshot kind. Late or missed snapshots are named, not hidden.
    - **Experiment.** The open one: its question, rounds so far, posts still needed. Closed ones: result and lesson id.
    - **Lane.** `lane-share`: main posts out of the last 15. Below 12 means the next posts go to `main`.

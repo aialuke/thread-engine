@@ -8,7 +8,7 @@ Shared tone for every format. Format rules live in `.grok/skills/format-*/`. The
 - One villain per post or thread.
 - Concrete numbers only if sourced this session (truth budget below).
 - The root post stands alone: a stranger who sees only the root gets the whole payoff.
-- Locale default: Australia. Prices in AUD. Times in Australia/Sydney.
+- Locale default: Australia. Prices in AUD. Times in Australia/Brisbane.
 
 ## Texture
 

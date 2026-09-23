@@ -2,7 +2,7 @@
 
 # Ledger summary
 
-Times are Australia/Sydney. Snapshot is the valid 36–60 hour one, else the latest late one.
+Times are Australia/Brisbane. Snapshot is the valid 36–60 hour one, else the latest late one.
 
 | Posted | Slug | Format | Lane | Experiment | Views | Bookmarks | Outside replies | Snapshot |
 |---|---|---|---|---|---:|---:|---:|---|
