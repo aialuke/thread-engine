@@ -2,11 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
   Daily 36-60 hour snapshots for thread-engine.
-  Runs `/snapshot` headless in Grok once a day at 20:00 local time. A daily run
+  Runs scripts/snapshot.py once a day at 20:00 local time; it makes one read-only Grok call. A daily run
   always lands inside the 24-hour-wide snapshot window. If the Mac is asleep at
   20:00, launchd runs it on wake.
-  Writes are limited to the repo by `--sandbox workspace`. The skill writes only
-  ledger/, loop/ and the generated summaries, then commits them.
+  Grok runs read-only; only the script writes ledger/, loop/ and the generated
+  summaries, then commits them. Cost per run is appended to ledger/runs.log.
   Log: ~/Library/Logs/thread-engine-snapshot.log
 -->
 <plist version="1.0">
@@ -17,7 +17,7 @@
   <array>
     <string>/bin/zsh</string>
     <string>-lc</string>
-    <string>cd "$HOME/src/thread-engine" &amp;&amp; echo "== $(date -u +%FT%TZ)" &amp;&amp; "$HOME/.grok/bin/grok" -p "/snapshot" --sandbox workspace --always-approve --effort low --max-turns 80 --output-format plain</string>
+    <string>cd "$HOME/src/thread-engine" &amp;&amp; echo "== $(date -u +%FT%TZ)" &amp;&amp; python3 scripts/snapshot.py</string>
   </array>
   <key>StartCalendarInterval</key>
   <dict>

@@ -50,6 +50,7 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 - `ops/launchd/` — the daily snapshot job
 - `scripts/post_thread.py` — the gate. Needs `APPROVED` (exit 2 `human gate` without it). Refuses when: cards changed after approval; `FORMAT` is unknown; a settings hook opens on `Most `; a card contains `VERIFY`, `💬`, "your thoughts", or a banned phrase from `voice/exit-zero.md` other than "unlock"; a card number repeats; media comes from `images/sources/`. Otherwise writes `POST.txt`; `--copy N` copies card N
 - `scripts/loop.py` — loop state: posts, snapshots, experiments, lessons, rule commits. No network
+- `scripts/snapshot.py` — daily snapshots: one read-only Grok call for X numbers, the rest in code; cost per run in `ledger/runs.log`
 - `scripts/draft.py` — prints the grok draft command
 - `tests/` — `python3 -m unittest discover -s tests`
 

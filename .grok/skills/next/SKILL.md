@@ -14,7 +14,7 @@ The operator's main command. Speak plainly. The operator does not read code or J
 ## 1. Catch up
 
 1. Run `python3 scripts/loop.py status`.
-2. If `due.due` is not empty, follow `.grok/skills/snapshot/SKILL.md` step 1 for those posts. Then run `mark-missed` and `evaluate`.
+2. If `due.due` is not empty, run `python3 scripts/snapshot.py`.
 3. Tell the operator in two or three lines what changed: new snapshots, any missed ones, any experiment status change.
 
 ## 2. Weekly work, when `review.review_due` is true
