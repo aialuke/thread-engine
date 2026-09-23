@@ -10,7 +10,7 @@ argument-hint: "<link to the first post>"
 # Posted
 
 1. Take the root id from the link (the number after `/status/`).
-2. `x_thread_fetch` the root. Note the root and each of the author's own replies in order: id, `Timestamp`, text, media. Save the raw text to `ledger/raw/<root id>-posted.txt`.
+2. Read the live thread: `x_thread_fetch` the root when this session has it; otherwise run `python3 scripts/x_read.py thread <root id>`. Note the root and each of the author's own replies in order: id, time, text, media. Save the raw output to `ledger/raw/<root id>-posted.txt`.
 3. Match the queue row: the row with `status: approved` or `drafted` whose draft cards match the live text best. If unsure, ask the operator which slug. Read that row's `format`, `lane`, `experiment`, `arm`, `hypothesis`.
 4. Compare every live card with its draft card. Put each difference in exactly one class:
    - `preference` — wording, length, order, emphasis, a changed title. Nothing factual changed.

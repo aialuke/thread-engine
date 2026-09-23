@@ -31,4 +31,4 @@ Optional. A real screenshot of the setting beats an illustration. AI images only
 
 ## Checklist
 
-Copy `.grok/skills/format-single-tip/checklist.md` to the draft as `CHECKLIST.md`.
+Copy `.claude/skills/format-single-tip/checklist.md` to the draft as `CHECKLIST.md`.

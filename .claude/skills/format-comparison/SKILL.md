@@ -48,4 +48,4 @@ Own photos, or a labelled illustration. Never vendor press images.
 
 ## Checklist
 
-Copy `.grok/skills/format-comparison/checklist.md` to the draft as `CHECKLIST.md`.
+Copy `.claude/skills/format-comparison/checklist.md` to the draft as `CHECKLIST.md`.

@@ -20,7 +20,7 @@ Plain English. No JSON, no code in what the operator reads. Say "not enough data
    - **Spacing.** Hours between originals this week, as observations only.
    - **Your edits.** Group this week's `preference` edits by kind across all ledger posts. A kind seen on 3 or more posts is a candidate: propose it as one sentence. On the operator's yes, run `python3 scripts/loop.py add-preference --statement "<sentence>" --evidence <ids>`. List `violation` edits separately and say the gate may need a new refusal; that change is made in a Claude Code session, not here.
    - **Reader questions.** From outside repliers in the week's snapshots, up to 3 questions worth answering, each with the point a reply should make. Never a paste-ready reply: the operator writes it.
-   - **Rule changes proposed.** At most two, each tied to an `adopted` lesson with rule state `none`: the lesson id, the file under `.grok/skills/` or `voice/`, and the exact sentence to add or change. Say: "Type /apply <lesson id> to make this change, or ignore it."
+   - **Rule changes proposed.** At most two, each tied to an `adopted` lesson with rule state `none`: the lesson id, the file under `.claude/skills/` or `voice/`, and the exact sentence to add or change. Say: "Type /apply <lesson id> to make this change, or ignore it."
    - **Reverts proposed.** An applied rule whose next 3 posts all fell below their experiment bar or cohort median: say so and "Type /undo-rule <lesson id> to revert."
    - **Profile.** First review only: a one-sentence bio that matches `reference/audience.md`, and a pin suggestion with no link or a well-known link (algorithm fact A14).
 4. Run `python3 scripts/loop.py mark-reviewed`, then `python3 scripts/loop.py commit-data --message "weekly review YYYY-Www"`.

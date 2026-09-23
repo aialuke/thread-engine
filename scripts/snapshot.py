@@ -13,8 +13,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-GROK = Path.home() / ".grok" / "bin" / "grok"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from grok_read import ROOT, last_json_object, run_structured  # noqa: E402,F401
 HANDLE = "exitzerocode"
 
 COUNT = {"type": ["integer", "null"]}
@@ -55,20 +55,6 @@ def brief(due: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def last_json_object(text: str) -> dict:
-    decoder = json.JSONDecoder()
-    found, i = [], 0
-    while (start := text.find("{", i)) >= 0:
-        try:
-            obj, i = decoder.raw_decode(text, start)
-            found.append(obj)
-        except json.JSONDecodeError:
-            i = start + 1
-    if not found:
-        raise ValueError("no JSON object in Grok output")
-    return found[-1]
-
-
 def repliers_complete(post: dict, has_cards: bool) -> bool | None:
     replies = post["root"].get("replies")
     if replies is None:
@@ -86,14 +72,7 @@ def loop(*args: str) -> dict:
 
 
 def fetch(due: list[dict]) -> tuple[dict, float | None]:
-    result = subprocess.run(
-        [str(GROK), "-p", brief(due), "--json-schema", json.dumps(SCHEMA), "--output-format", "json",
-         "--sandbox", "read-only", "--deny", "Bash", "--deny", "Edit", "--deny", "Write", "--effort", "low"],
-        cwd=ROOT, capture_output=True, text=True, check=False, timeout=900)
-    if result.returncode != 0:
-        raise RuntimeError(f"grok exited {result.returncode}: {result.stderr.strip()[-300:]}")
-    envelope = last_json_object(result.stdout)
-    return last_json_object(envelope.get("text", "")), envelope.get("total_cost_usd")
+    return run_structured(brief(due), SCHEMA)
 
 
 def main(fetcher=fetch) -> int:

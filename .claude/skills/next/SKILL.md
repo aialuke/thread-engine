@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 # Next
 
-The operator's main command. Speak plainly. The operator does not read code or JSON: turn every helper output into a sentence.
+The operator's main command, in Grok or Claude Code. Speak plainly. The operator does not read code or JSON: turn every helper output into a sentence.
 
 ## 1. Catch up
 
@@ -19,7 +19,7 @@ The operator's main command. Speak plainly. The operator does not read code or J
 
 ## 2. Weekly work, when `review.review_due` is true
 
-1. Follow `.grok/skills/results/SKILL.md` (it writes the weekly review and ends with `mark-reviewed`).
+1. Follow `.claude/skills/results/SKILL.md` (it writes the weekly review and ends with `mark-reviewed`).
 2. Algorithm check: for each path under "Cited paths" in `reference/x-algorithm.md`, open `https://github.com/xai-org/x-algorithm/commits/main/<path>` and look for commits after the commit date in that file. If any: `python3 scripts/loop.py set-reference --status stale --files <paths>` and tell the operator which facts need a re-read before lessons that cite them are trusted. If none: `set-reference --status current`.
 
 ## 3. Pick the slot
@@ -39,7 +39,7 @@ Run `python3 scripts/loop.py next-slot`.
 ## 4. Pick the topic
 
 1. Lane: read `reference/audience.md`. If `lane.share` is below 0.8 (12 of 15), the next post must be `main`.
-2. Demand: run one or two `x_keyword_search` queries for recent questions in the lane (for example `"how do I" free video editor lang:en -filter:replies`). Record each hit as a lead: post id, the query, and that the search returns at most 10. Leads are not proof of demand.
+2. Demand: run one or two searches for recent questions in the lane (for example `"how do I" free video editor lang:en -filter:replies`). Use `x_keyword_search` when this session has it; otherwise run `python3 scripts/x_read.py search "<query>"`. Record each hit as a lead: post id, the query, and that the search returns at most 10. Leads are not proof of demand.
 3. Queue: consider `status: queued` rows in `queue/topics.yaml`.
 4. Timing: propose a posting time in Australia/Brisbane. Say how many hours since the last original; there is no fixed minimum.
 

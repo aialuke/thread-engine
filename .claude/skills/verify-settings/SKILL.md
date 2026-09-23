@@ -15,7 +15,7 @@ user-invocable: true
 
 Fail closed. A path missing from an official page this session is `VERIFY`.
 
-Copy is `/draft-thread`. Format rules are in the draft's format skill (`.grok/skills/format-<FORMAT>/SKILL.md`).
+Copy is `/draft-thread`. Format rules are in the draft's format skill (`.claude/skills/format-<FORMAT>/SKILL.md`).
 
 ## Argument
 

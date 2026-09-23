@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 scripts/loop.py:*)",
+      "Bash(python3 scripts/snapshot.py:*)",
+      "Bash(python3 scripts/x_read.py:*)",
+      "Bash(python3 scripts/post_thread.py:*)",
+      "WebFetch(domain:github.com)"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/approve.py\"", "timeout": 20 }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/guard_approved.py\"", "timeout": 10 }
+        ]
+      }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 # thread-engine
 
-Makes @exitzerocode posts and learns which ones grow the account. You type slash commands in Grok and paste posts into X. Grok runs everything else.
+Makes @exitzerocode posts and learns which ones grow the account. You type slash commands in Grok or Claude Code, whichever you have open, and paste posts into X. The agent runs everything else. X is always read through Grok, so Claude Code needs Grok installed too.
 
 ## The cycle
 
@@ -26,7 +26,7 @@ Only you approve a post. Nothing is posted for you. Every figure needs a source 
 
 ## One-time setup
 
-- **Hooks:** this folder must be trusted in Grok (`/hooks-trust`). It already is on this Mac.
+- **Commands and hooks:** both tools read `.claude/skills/` and `.claude/settings.json`. Grok needs this folder trusted (`/hooks-trust`); it already is on this Mac. Claude Code asks once to trust the project hooks.
 - **Daily snapshot job:** `ops/launchd/com.exitzerocode.thread-engine.snapshot.plist` runs `/snapshot` at 20:00 each day. Ask Claude Code to install it; it copies the file to `~/Library/LaunchAgents/` and loads it. Log: `~/Library/Logs/thread-engine-snapshot.log`.
 
 ## Monthly outside check (optional)

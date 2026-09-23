@@ -604,7 +604,7 @@ def cmd_commit_rule(repo: Repo, args) -> dict:
     need(bool(files), "--files required")
     for name in files:
         need(not name.startswith(("/", "..")), f"file {name} must be inside the repo")
-        need(name.startswith((".grok/skills/", "voice/")), f"{name} is not a rule file")
+        need(name.startswith((".claude/skills/", "voice/")), f"{name} is not a rule file")
     changed = repo.git("status", "--porcelain", "--", *files).strip()
     need(bool(changed), "none of those files has changes to commit")
     repo.git("add", "--", *files)

@@ -36,4 +36,4 @@ None needed. Never vendor logos or press images.
 
 ## Checklist
 
-Copy `.grok/skills/format-tool-swap/checklist.md` to the draft as `CHECKLIST.md`.
+Copy `.claude/skills/format-tool-swap/checklist.md` to the draft as `CHECKLIST.md`.

@@ -27,7 +27,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
 2. **Topic.** Find the queue row. Note `format`, `lane`, `experiment`, `arm`, `treatment`, and `hypothesis` if present. A row with no `format` is `settings`.
    Done: slug, format and, if set, the experiment arm are written down.
 
-3. **Format.** Read `.grok/skills/format-<format>/SKILL.md` and every file it points to. A settings row also reads `.grok/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening and length from the format, because the shipped roots predate the result-first, under-600-character rule.
+3. **Format.** Read `.claude/skills/format-<format>/SKILL.md` and every file it points to. A settings row also reads `.claude/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening and length from the format, because the shipped roots predate the result-first, under-600-character rule.
    If the row is a `treatment` or `control` arm, the arm's description wins over the format's defaults (for example card count). Never change anything else about the post, so the test stays clean.
    Done: shape, research rule, image rule and checklist are known.
 
@@ -41,7 +41,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
    - `FORMAT` — one word: `settings`, `comparison`, `tool-swap`, or `single-tip`
    - `01-hook.md` and further consecutive `NN-<name>.md` cards as the format's shape says. A single-tip has only `01-hook.md`.
    - `images.md` — what to attach, following the format's image rule. Write `Attach: none` when nothing is attached.
-   - `CHECKLIST.md` — copy of `.grok/skills/format-<format>/checklist.md`, boxes ticked where done
+   - `CHECKLIST.md` — copy of `.claude/skills/format-<format>/checklist.md`, boxes ticked where done
    Done: files exist. Card count matches the format, the hook, and the arm.
 
 7. **Queue.** Set the row's `status` to `drafted` and `draft:` to the folder.

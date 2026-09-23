@@ -6,11 +6,11 @@ Local factory for @exitzerocode X posts, with a learning loop. The goal is compe
 
 ## Operating rules
 
-- The operator does not code or run scripts. Every step is a slash command. Scripts exist, but Grok runs them.
+- The operator does not code or run scripts. Every step is a slash command, typed in Grok or Claude Code. Scripts exist, but the agent runs them.
 - Start non-trivial work in Plan mode.
 - One topic per draft folder.
 - Never invent a UI path or a claim. Unverified paths and claims are VERIFY and stay out of cards.
-- Never post, schedule, or call an X write API. X read tools are fine.
+- Never post, schedule, or call an X write API. X is read only through Grok's X tools or `scripts/x_read.py` / `scripts/snapshot.py`, which make one read-only Grok call.
 - Never create, edit or delete `APPROVED`. Only the operator's typed `/approve <slug>` creates it (a hook does it; another hook blocks every agent attempt).
 - Voice is `voice/exit-zero.md`. Format rules are the format skills. No "game changer", "unlock", "most people don't know", "wait for it", 🚨🔥👇.
 - Loop state lives in `loop/state.json` and `ledger/*.json` and changes only through `scripts/loop.py`. Never hand-edit them or the generated `experiments.md`, `learnings.md`, `ledger/SUMMARY.md`.
@@ -37,9 +37,9 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 - `README.md` — the operator's guide
 - `reference/x-algorithm.md` — verified X ranking facts with sources; `reference/audience.md` — audience promise and lane definition
 - `voice/exit-zero.md` — shared voice, truth budget, image and reply rules
-- `.grok/skills/format-{settings,comparison,tool-swap,single-tip}/` — one format each, with its checklist. Settings detail stays in `.grok/skills/hidden-settings/`
-- `.grok/skills/{next,draft-thread,verify-settings,ready,posted,snapshot,results,apply,undo-rule}/` — the commands
-- `.grok/hooks/` — `/approve` hook and the APPROVED guard
+- `.claude/skills/format-{settings,comparison,tool-swap,single-tip}/` — one format each, with its checklist. Settings detail stays in `.claude/skills/hidden-settings/`
+- `.claude/skills/{next,draft-thread,verify-settings,ready,posted,snapshot,results,apply,undo-rule}/` — the commands. Grok and Claude Code both load `.claude/skills/`
+- `.claude/hooks/` — the approve hook and the guard (approval marker and loop state); `.claude/settings.json` registers both hooks and the script allowlist for both tools
 - `queue/topics.yaml` — backlog and planned posts
 - `drafts/<date>-<slug>/` — numbered cards (`01-hook.md` …) are the posts; `FORMAT`; `PATHS.md` / `CLAIMS.md`; `CHECKLIST.md`; `images.md`; `POST.txt` run sheet; operator-created `APPROVED`
 - `ledger/` — one JSON per posted root, raw tool text in `ledger/raw/`, generated `SUMMARY.md`
@@ -50,9 +50,11 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 - `ops/launchd/` — the daily snapshot job
 - `scripts/post_thread.py` — the gate. Needs `APPROVED` (exit 2 `human gate` without it). Refuses when: cards changed after approval; `FORMAT` is unknown; a settings hook opens on `Most `; a card contains `VERIFY`, `💬`, "your thoughts", or a banned phrase from `voice/exit-zero.md` other than "unlock"; a card number repeats; media comes from `images/sources/`. Otherwise writes `POST.txt`; `--copy N` copies card N
 - `scripts/loop.py` — loop state: posts, snapshots, experiments, lessons, rule commits. No network
+- `scripts/grok_read.py` — the one read-only structured Grok call every X read goes through
+- `scripts/x_read.py` — `search "<query>"` or `thread <id>`, JSON out, for sessions without X tools
 - `scripts/snapshot.py` — daily snapshots: one read-only Grok call for X numbers, the rest in code; cost per run in `ledger/runs.log`
 - `scripts/draft.py` — prints the grok draft command
-- `tests/` — `python3 -m unittest discover -s tests`
+- `tests/` — `python3 -m unittest discover -s tests` (scripts, loop, snapshot, hooks)
 
 ## Git
 

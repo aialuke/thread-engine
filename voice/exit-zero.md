@@ -1,6 +1,6 @@
 # Exit Zero voice
 
-Shared tone for every format. Format rules live in `.grok/skills/format-*/`. For settings threads, the gold transcripts in `examples/` win only on beat order after the opening; the root's opening and length follow `.grok/skills/hidden-settings/SKILL.md`.
+Shared tone for every format. Format rules live in `.claude/skills/format-*/`. For settings threads, the gold transcripts in `examples/` win only on beat order after the opening; the root's opening and length follow `.claude/skills/hidden-settings/SKILL.md`.
 
 ## Rules
 

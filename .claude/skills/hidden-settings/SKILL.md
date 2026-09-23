@@ -13,7 +13,7 @@ user-invocable: true
 
 # Settings format (Hidden Settings)
 
-This is the `settings` format. Shared voice, truth budget and image rules: `voice/exit-zero.md`. Beat-check: `examples.md` (this folder). Full transcripts: `examples/`. Settings transcripts win on settings beat order after the opening. Posted settings gold opens on neglect. A new settings hook's first sentence is the result, and neglect is the next sentence. Comparison threads use `.grok/skills/format-comparison/SKILL.md`.
+This is the `settings` format. Shared voice, truth budget and image rules: `voice/exit-zero.md`. Beat-check: `examples.md` (this folder). Full transcripts: `examples/`. Settings transcripts win on settings beat order after the opening. Posted settings gold opens on neglect. A new settings hook's first sentence is the result, and neglect is the next sentence. Comparison threads use `.claude/skills/format-comparison/SKILL.md`.
 
 Rules here change only through an adopted lesson and `/apply` (see `learnings.md`).
 

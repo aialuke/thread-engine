@@ -305,7 +305,7 @@ class Rules(LoopCase):
         for args in (["init", "-q"], ["config", "user.email", "t@example.com"], ["config", "user.name", "t"],
                      ["config", "commit.gpgsign", "false"]):
             subprocess.run(["git", *args], cwd=self.root, check=True, capture_output=True)
-        skill = self.root / ".grok" / "skills" / "formats" / "single-tip" / "SKILL.md"
+        skill = self.root / ".claude" / "skills" / "format-single-tip" / "SKILL.md"
         skill.parent.mkdir(parents=True)
         skill.write_text("v1\n", encoding="utf-8")
         subprocess.run(["git", "add", "-A"], cwd=self.root, check=True, capture_output=True)
@@ -320,7 +320,7 @@ class Rules(LoopCase):
                                  "status": "no_effect", "evidence": ["2"], "reference_facts": [],
                                  "created_at": T0, "last_evidence_at": T0, "rule_state": "none"})
         state_path.write_text(json.dumps(state))
-        self.rel = ".grok/skills/formats/single-tip/SKILL.md"
+        self.rel = ".claude/skills/format-single-tip/SKILL.md"
 
     def test_apply_then_undo(self) -> None:
         self.skill.write_text("v2\n", encoding="utf-8")
