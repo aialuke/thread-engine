@@ -448,6 +448,18 @@ class FormatAndApproval(unittest.TestCase):
             code, _out, err = self._run(self.post.main, [str(draft)])
             self.assertEqual(code, expected, (fmt, err))
 
+    def test_banned_phrases_refused_but_unlock_allowed(self) -> None:
+        cases = (("This is a game changer.", 1), ("Most people don’t know this.", 1),
+                 ("Big news 🔥", 1), ("Turn on Face ID unlock.", 0))
+        for i, (text, expected) in enumerate(cases):
+            draft = self.root / f"banned-{i}"
+            draft.mkdir()
+            (draft / "FORMAT").write_text("single-tip\n", encoding="utf-8")
+            (draft / "01-hook.md").write_text(text + "\n", encoding="utf-8")
+            self._approve(draft)
+            code, _out, err = self._run(self.post.main, [str(draft)])
+            self.assertEqual(code, expected, (text, err))
+
     def test_unknown_format_refused(self) -> None:
         draft = self._single("meme", "A result.\n")
         code, _out, err = self._run(self.post.main, [str(draft)])

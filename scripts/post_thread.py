@@ -30,6 +30,7 @@ VERIFY_RE = re.compile(r"\bVERIFY\b")
 FORMATS = {"settings", "comparison", "tool-swap", "single-tip"}
 DIGEST_RE = re.compile(r"^cards-sha256:\s*([0-9a-f]{64})\s*$", re.MULTILINE)
 THOUGHTS_RE = re.compile(r"your thoughts", re.IGNORECASE)
+BANNED_RE = re.compile(r"game changer|most people don['’]?t know|wait for it|🚨|🔥|👇", re.IGNORECASE)
 
 
 def _add_hint(hints: list[str], seen: set[str], raw: str) -> None:
@@ -123,6 +124,9 @@ def card_refusals(draft: Path, found: list[Path]) -> list[str]:
             reasons.append(f"REFUSED: 💬 in {card.name}")
         if THOUGHTS_RE.search(text):
             reasons.append(f"REFUSED: thoughts CTA in {card.name}")
+        banned = BANNED_RE.search(text)
+        if banned:
+            reasons.append(f"REFUSED: banned phrase {banned.group(0)!r} in {card.name}")
         match = LEAD_NUMBER_RE.match(first_line(text))
         if match:
             number = match.group(1) or match.group(2)
