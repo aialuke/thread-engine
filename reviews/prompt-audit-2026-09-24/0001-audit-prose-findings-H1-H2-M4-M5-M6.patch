@@ -1,0 +1,75 @@
+From 3882c2670e248d889112885fd6446184fc2d23d6 Mon Sep 17 00:00:00 2001
+From: t <t@t>
+Date: Thu, 24 Sep 2026 05:41:57 +1000
+Subject: [PATCH 1/5] audit: prose findings H1 H2 M4 M5 M6
+
+---
+ .grok/skills/draft-thread/SKILL.md     | 2 +-
+ .grok/skills/format-tool-swap/SKILL.md | 2 +-
+ .grok/skills/hidden-settings/SKILL.md  | 2 +-
+ voice/exit-zero.md                     | 4 +++-
+ 4 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/.grok/skills/draft-thread/SKILL.md b/.grok/skills/draft-thread/SKILL.md
+index 69d97d8..d413801 100644
+--- a/.grok/skills/draft-thread/SKILL.md
++++ b/.grok/skills/draft-thread/SKILL.md
+@@ -27,7 +27,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
+ 2. **Topic.** Find the queue row. Note `format`, `lane`, `experiment`, `arm`, `treatment`, and `hypothesis` if present. A row with no `format` is `settings`.
+    Done: slug, format and, if set, the experiment arm are written down.
+ 
+-3. **Format.** Read `.grok/skills/format-<format>/SKILL.md` and every file it points to. A settings row also reads `.grok/skills/hidden-settings/examples.md` and the gold threads in `examples/`.
++3. **Format.** Read `.grok/skills/format-<format>/SKILL.md` and every file it points to. A settings row also reads `.grok/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening and length from the format, because the shipped roots predate the result-first, under-600-character rule.
+    If the row is a `treatment` or `control` arm, the arm's description wins over the format's defaults (for example card count). Never change anything else about the post, so the test stays clean.
+    Done: shape, research rule, image rule and checklist are known.
+ 
+diff --git a/.grok/skills/format-tool-swap/SKILL.md b/.grok/skills/format-tool-swap/SKILL.md
+index 8a2088e..39450df 100644
+--- a/.grok/skills/format-tool-swap/SKILL.md
++++ b/.grok/skills/format-tool-swap/SKILL.md
+@@ -9,7 +9,7 @@ when-to-use: Use for a paid-to-free swap list, free alternatives, or /format-too
+ 
+ # Format: tool-swap
+ 
+-A list of swaps: `Paid → Free`, then one line on what the free tool does for a concrete task. Shared voice: `voice/exit-zero.md`. Reference post: `2102737637346095128` (the account's best root so far; its "No watermark" line had no recorded source).
++A list of swaps: `Paid → Free`, then one line on what the free tool does for a concrete task. Shared voice: `voice/exit-zero.md`. Reference post: `2102737637346095128`, for shape only. Its "No watermark" line had no source, which is what `CLAIMS.md` now prevents.
+ 
+ ## Root
+ 
+diff --git a/.grok/skills/hidden-settings/SKILL.md b/.grok/skills/hidden-settings/SKILL.md
+index ab28571..3aae9ef 100644
+--- a/.grok/skills/hidden-settings/SKILL.md
++++ b/.grok/skills/hidden-settings/SKILL.md
+@@ -7,7 +7,7 @@ when-to-use: >
+   Use for settings-thread format, hook beats, emoji budget, card
+   structure, closer rules, or /hidden-settings. Comparison threads use
+   /format-comparison.
+-argument-hint: "[hook|card|closer|emoji|voice|farm-tells]"
++argument-hint: "[hook|card|closer|emoji]"
+ user-invocable: true
+ ---
+ 
+diff --git a/voice/exit-zero.md b/voice/exit-zero.md
+index 3fafdb7..380d0ca 100644
+--- a/voice/exit-zero.md
++++ b/voice/exit-zero.md
+@@ -1,6 +1,6 @@
+ # Exit Zero voice
+ 
+-Shared tone for every format. Format rules live in `.grok/skills/format-*/`. The settings gold transcripts in `examples/` win on disagreement for settings threads only.
++Shared tone for every format. Format rules live in `.grok/skills/format-*/`. For settings threads, the gold transcripts in `examples/` win only on beat order after the opening; the root's opening and length follow `.grok/skills/hidden-settings/SKILL.md`.
+ 
+ ## Rules
+ 
+@@ -18,6 +18,8 @@ Skip-if-missing is voice. Cut a card before guessing a path or a claim.
+ 
+ ## Banned phrases
+ 
++These read as engagement-farm posting, which is the genre this account is built against. The gate refuses the multi-word phrases and the three emoji; "unlock" stays guidance only, because it is also a real settings word (Face ID unlock).
++
+ game changer · unlock · most people don't know · wait for it · 🚨🔥👇
+ 
+ ## Farm tells (cut)
+-- 
+2.55.0
+

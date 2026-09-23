@@ -1,0 +1,72 @@
+From 93caf482a46010cf65adc4a64b18c9e04b27705c Mon Sep 17 00:00:00 2001
+From: t <t@t>
+Date: Thu, 24 Sep 2026 05:42:13 +1000
+Subject: [PATCH 2/5] audit M2: gate refuses banned phrases
+
+---
+ AGENTS.md              |  2 +-
+ scripts/post_thread.py |  4 ++++
+ tests/test_scripts.py  | 12 ++++++++++++
+ 3 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/AGENTS.md b/AGENTS.md
+index 5280960..a346d0f 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -48,7 +48,7 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate
+ - `reviews/` — weekly reviews and one-off reports
+ - `examples/`, `shipped/` — shipped gold and post-ship notes
+ - `ops/launchd/` — the daily snapshot job
+-- `scripts/post_thread.py` — the gate. Needs `APPROVED` (exit 2 `human gate` without it). Refuses when: cards changed after approval; `FORMAT` is unknown; a settings hook opens on `Most `; a card contains `VERIFY`, `💬` or "your thoughts"; a card number repeats; media comes from `images/sources/`. Otherwise writes `POST.txt`; `--copy N` copies card N
++- `scripts/post_thread.py` — the gate. Needs `APPROVED` (exit 2 `human gate` without it). Refuses when: cards changed after approval; `FORMAT` is unknown; a settings hook opens on `Most `; a card contains `VERIFY`, `💬`, "your thoughts", or a banned phrase from `voice/exit-zero.md` other than "unlock"; a card number repeats; media comes from `images/sources/`. Otherwise writes `POST.txt`; `--copy N` copies card N
+ - `scripts/loop.py` — loop state: posts, snapshots, experiments, lessons, rule commits. No network
+ - `scripts/draft.py` — prints the grok draft command
+ - `tests/` — `python3 -m unittest discover -s tests`
+diff --git a/scripts/post_thread.py b/scripts/post_thread.py
+index 24b5899..485e066 100644
+--- a/scripts/post_thread.py
++++ b/scripts/post_thread.py
+@@ -30,6 +30,7 @@ VERIFY_RE = re.compile(r"\bVERIFY\b")
+ FORMATS = {"settings", "comparison", "tool-swap", "single-tip"}
+ DIGEST_RE = re.compile(r"^cards-sha256:\s*([0-9a-f]{64})\s*$", re.MULTILINE)
+ THOUGHTS_RE = re.compile(r"your thoughts", re.IGNORECASE)
++BANNED_RE = re.compile(r"game changer|most people don['’]?t know|wait for it|🚨|🔥|👇", re.IGNORECASE)
+ 
+ 
+ def _add_hint(hints: list[str], seen: set[str], raw: str) -> None:
+@@ -123,6 +124,9 @@ def card_refusals(draft: Path, found: list[Path]) -> list[str]:
+             reasons.append(f"REFUSED: 💬 in {card.name}")
+         if THOUGHTS_RE.search(text):
+             reasons.append(f"REFUSED: thoughts CTA in {card.name}")
++        banned = BANNED_RE.search(text)
++        if banned:
++            reasons.append(f"REFUSED: banned phrase {banned.group(0)!r} in {card.name}")
+         match = LEAD_NUMBER_RE.match(first_line(text))
+         if match:
+             number = match.group(1) or match.group(2)
+diff --git a/tests/test_scripts.py b/tests/test_scripts.py
+index f49ca31..6ad6e47 100644
+--- a/tests/test_scripts.py
++++ b/tests/test_scripts.py
+@@ -448,6 +448,18 @@ class FormatAndApproval(unittest.TestCase):
+             code, _out, err = self._run(self.post.main, [str(draft)])
+             self.assertEqual(code, expected, (fmt, err))
+ 
++    def test_banned_phrases_refused_but_unlock_allowed(self) -> None:
++        cases = (("This is a game changer.", 1), ("Most people don’t know this.", 1),
++                 ("Big news 🔥", 1), ("Turn on Face ID unlock.", 0))
++        for i, (text, expected) in enumerate(cases):
++            draft = self.root / f"banned-{i}"
++            draft.mkdir()
++            (draft / "FORMAT").write_text("single-tip\n", encoding="utf-8")
++            (draft / "01-hook.md").write_text(text + "\n", encoding="utf-8")
++            self._approve(draft)
++            code, _out, err = self._run(self.post.main, [str(draft)])
++            self.assertEqual(code, expected, (text, err))
++
+     def test_unknown_format_refused(self) -> None:
+         draft = self._single("meme", "A result.\n")
+         code, _out, err = self._run(self.post.main, [str(draft)])
+-- 
+2.55.0
+
