@@ -5,3 +5,6 @@ __pycache__/
 
 # Human approval markers are local state, never committed
 APPROVED
+
+# Loop scratch payloads
+loop/inbox/

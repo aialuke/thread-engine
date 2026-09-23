@@ -8,6 +8,7 @@ v1 does not call the X API. --dry-run is the default and matches a plain run.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -26,6 +27,8 @@ LONG_POST = (
 )
 LEAD_NUMBER_RE = re.compile(r"^(?:Setting\s+(\d+)\b|(\d+)\.\s)")
 VERIFY_RE = re.compile(r"\bVERIFY\b")
+FORMATS = {"settings", "comparison", "tool-swap", "single-tip"}
+DIGEST_RE = re.compile(r"^cards-sha256:\s*([0-9a-f]{64})\s*$", re.MULTILINE)
 THOUGHTS_RE = re.compile(r"your thoughts", re.IGNORECASE)
 
 
@@ -75,12 +78,44 @@ def sources_media(hint: str) -> bool:
     return posix.startswith("images/sources/") or "/images/sources/" in f"/{posix}"
 
 
+def draft_format(draft: Path) -> str:
+    marker = draft / "FORMAT"
+    if not marker.is_file():
+        return "settings"
+    return marker.read_text(encoding="utf-8").strip()
+
+
+def cards_digest(found: list[Path]) -> str:
+    digest = hashlib.sha256()
+    for card in found:
+        digest.update(card.name.encode("utf-8") + b"\0")
+        digest.update(card.read_bytes() + b"\0")
+    return digest.hexdigest()
+
+
+def approval_refusal(draft: Path, found: list[Path]) -> str | None:
+    approved = draft / "APPROVED"
+    match = DIGEST_RE.search(approved.read_text(encoding="utf-8"))
+    if match:
+        if match.group(1) != cards_digest(found):
+            return "REFUSED: cards changed after approval. Type /approve again after re-reading them"
+        return None
+    approved_at = approved.stat().st_mtime
+    newer = [card.name for card in found if card.stat().st_mtime > approved_at]
+    if newer:
+        return "REFUSED: edited after approval: " + ", ".join(newer) + ". Type /approve again after re-reading them"
+    return None
+
+
 def card_refusals(draft: Path, found: list[Path]) -> list[str]:
     reasons: list[str] = []
     numbers: dict[str, str] = {}
+    fmt = draft_format(draft)
+    if fmt not in FORMATS:
+        reasons.append(f"REFUSED: unknown FORMAT {fmt!r}; expected one of {', '.join(sorted(FORMATS))}")
     for card in found:
         text = tweet_text(card)
-        if card.name == "01-hook.md" and setup_day_open(text):
+        if fmt == "settings" and card.name == "01-hook.md" and setup_day_open(text):
             reasons.append("REFUSED: hook opens on the setup-day line")
         if VERIFY_RE.search(text):
             reasons.append(f"REFUSED: VERIFY in {card.name}")
@@ -254,6 +289,9 @@ def main(
         return 1
 
     refused = card_refusals(draft, found)
+    stale = approval_refusal(draft, found)
+    if stale:
+        refused.insert(0, stale)
     if refused:
         print("\n".join(refused), file=sys.stderr)
         return 1

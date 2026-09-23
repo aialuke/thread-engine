@@ -137,7 +137,6 @@ class ScriptBehavior(unittest.TestCase):
     def _approved_draft(self) -> Path:
         draft = self.root / "topic"
         draft.mkdir()
-        (draft / "APPROVED").write_text("", encoding="utf-8")
         (draft / "02-card.md").write_text("CARD\nline\n", encoding="utf-8")
         (draft / "01-hook.md").write_text(
             "Same TV. The film stopped looking like a soap.\n",
@@ -149,7 +148,13 @@ class ScriptBehavior(unittest.TestCase):
         (images / "hook-before-after.jpg").write_bytes(b"jpg")
         (images / "hook-master.jpg").write_bytes(b"jpg")
         (self.root / "shipped").mkdir()
+        self._approve(draft)
         return draft
+
+    def _approve(self, draft: Path) -> None:
+        """What the /approve hook writes: the digest of the cards as they are now."""
+        digest = self.post.cards_digest(self.post.cards(draft))
+        (draft / "APPROVED").write_text(f"cards-sha256: {digest}\n", encoding="utf-8")
 
     def test_post_writes_run_sheet(self) -> None:
         draft = self._approved_draft()
@@ -172,6 +177,7 @@ class ScriptBehavior(unittest.TestCase):
     def test_long_post_note(self) -> None:
         draft = self._approved_draft()
         (draft / "02-card.md").write_text("y" * 281, encoding="utf-8")
+        self._approve(draft)
         _code, out, _err = self._run(self.post.main, [str(draft)])
         self.assertIn("Long posts.", out)
         self.assertNotIn("yyy", out)
@@ -225,6 +231,7 @@ class ScriptBehavior(unittest.TestCase):
             "See `images/menu.png` and `Settings`.\n",
             encoding="utf-8",
         )
+        self._approve(draft)
         code, out, _err = self._run(self.post.main, [str(draft), "--json"])
         self.assertEqual(code, 0)
         payload = json.loads(out)
@@ -266,6 +273,7 @@ class ScriptBehavior(unittest.TestCase):
             "Most 4K TVs get set up on delivery day and Picture is never opened again.\n"
         )
         (draft / "01-hook.md").write_text(opening, encoding="utf-8")
+        self._approve(draft)
         code, out, err = self._run(self.post.main, [str(draft)])
         self.assertEqual(code, 0)
         self.assertEqual(err, "")
@@ -295,6 +303,7 @@ class ScriptBehavior(unittest.TestCase):
             "Gateway plugged in on install day.\n",
             encoding="utf-8",
         )
+        self._approve(draft)
         code, out, err = self._run(self.post.main, [str(draft)])
         self.assertEqual(code, 0)
         self.assertEqual(err, "")
@@ -337,6 +346,7 @@ class ScriptBehavior(unittest.TestCase):
             encoding="utf-8",
         )
         copied: list[bytes] = []
+        self._approve(draft)
         code, out, err = self._run(
             self.post.main,
             [str(draft), "--copy", "1"],
@@ -357,6 +367,7 @@ class ScriptBehavior(unittest.TestCase):
             encoding="utf-8",
         )
         (draft / "PATHS.md").write_text("Confidence VERIFY\n", encoding="utf-8")
+        self._approve(draft)
         code, out, err = self._run(self.post.main, [str(draft)])
         self.assertEqual(code, 1)
         self.assertEqual(out, "")
@@ -370,6 +381,7 @@ class ScriptBehavior(unittest.TestCase):
     def test_unverified_word_is_not_verify(self) -> None:
         draft = self._approved_draft()
         (draft / "02-card.md").write_text("An UNVERIFIED label stays in PATHS.\n", encoding="utf-8")
+        self._approve(draft)
         code, out, err = self._run(self.post.main, [str(draft)])
         self.assertEqual(code, 0)
         self.assertEqual(err, "")
@@ -379,6 +391,7 @@ class ScriptBehavior(unittest.TestCase):
         draft = self._approved_draft()
         (draft / "02-card.md").write_text("3. Dual Neural Engine.\n", encoding="utf-8")
         (draft / "03-card.md").write_text("3. Improved battery life.\n", encoding="utf-8")
+        self._approve(draft)
         code, out, err = self._run(self.post.main, [str(draft)])
         self.assertEqual(code, 1)
         self.assertEqual(out, "")
@@ -391,6 +404,7 @@ class ScriptBehavior(unittest.TestCase):
             "Plate `images/sources/apple-18-battery.jpg`\n",
             encoding="utf-8",
         )
+        self._approve(draft)
         code, out, err = self._run(self.post.main, [str(draft), "--json"])
         self.assertEqual(code, 1)
         self.assertEqual(out, "")
@@ -411,6 +425,63 @@ class ScriptBehavior(unittest.TestCase):
         sheet = (draft / "POST.txt").read_text(encoding="utf-8")
         self.assertNotIn("hook-before-after.jpg", sheet)
         self.assertNotIn("Attach: none", sheet)
+
+
+class FormatAndApproval(unittest.TestCase):
+    setUp = ScriptBehavior.setUp
+    tearDown = ScriptBehavior.tearDown
+    _run = ScriptBehavior._run
+    _approve = ScriptBehavior._approve
+
+    def _single(self, fmt: str | None, text: str) -> Path:
+        draft = self.root / f"single-{fmt}"
+        draft.mkdir()
+        (draft / "01-hook.md").write_text(text, encoding="utf-8")
+        if fmt is not None:
+            (draft / "FORMAT").write_text(fmt + "\n", encoding="utf-8")
+        self._approve(draft)
+        return draft
+
+    def test_most_refused_for_settings_only(self) -> None:
+        for fmt, expected in (("settings", 1), (None, 1), ("tool-swap", 0), ("single-tip", 0), ("comparison", 0)):
+            draft = self._single(fmt, "Most free editors hold up.\n")
+            code, _out, err = self._run(self.post.main, [str(draft)])
+            self.assertEqual(code, expected, (fmt, err))
+
+    def test_unknown_format_refused(self) -> None:
+        draft = self._single("meme", "A result.\n")
+        code, _out, err = self._run(self.post.main, [str(draft)])
+        self.assertEqual(code, 1)
+        self.assertIn("unknown FORMAT", err)
+        self.assertFalse((draft / "POST.txt").exists())
+
+    def test_single_card_draft_passes(self) -> None:
+        draft = self._single("single-tip", "One tip, whole payoff.\n")
+        code, out, err = self._run(self.post.main, [str(draft)])
+        self.assertEqual(code, 0, err)
+        self.assertIn("01-hook.md", out)
+
+    def test_card_edit_after_digest_approval_refused(self) -> None:
+        draft = self._single("single-tip", "Approved text.\n")
+        (draft / "01-hook.md").write_text("Changed after approval.\n", encoding="utf-8")
+        code, _out, err = self._run(self.post.main, [str(draft)])
+        self.assertEqual(code, 1)
+        self.assertIn("changed after approval", err)
+        self.assertFalse((draft / "POST.txt").exists())
+
+    def test_legacy_empty_approval_uses_file_times(self) -> None:
+        import os
+        draft = self.root / "legacy"
+        draft.mkdir()
+        (draft / "01-hook.md").write_text("A result.\n", encoding="utf-8")
+        (draft / "APPROVED").write_text("", encoding="utf-8")
+        os.utime(draft / "01-hook.md", (1_000_000, 1_000_000))
+        os.utime(draft / "APPROVED", (2_000_000, 2_000_000))
+        self.assertEqual(self._run(self.post.main, [str(draft)])[0], 0)
+        os.utime(draft / "01-hook.md", (3_000_000, 3_000_000))
+        code, _out, err = self._run(self.post.main, [str(draft)])
+        self.assertEqual(code, 1)
+        self.assertIn("edited after approval: 01-hook.md", err)
 
 
 if __name__ == "__main__":
