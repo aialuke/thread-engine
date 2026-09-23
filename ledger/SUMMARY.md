@@ -9,7 +9,7 @@ Times are Australia/Brisbane. Snapshot is the valid 36–60 hour one, else the l
 | Sun 20 Sep 19:25 | home-wifi | settings | main | retro | 273 | 2 | 0 | late 81.8h |
 | Mon 21 Sep 16:48 | iphone-camera | settings | main | retro | 133 | 2 | 0 | late 60.4h |
 | Tue 22 Sep 09:05 | macbook-battery | settings | main | retro | 149 | 1 | 0 | valid 44.1h |
-| Tue 22 Sep 10:35 | connect-pin | other | other | retro | 849 | 0 | 8 | valid 42.6h |
+| Tue 22 Sep 10:35 | connect-pin | other | other | retro | 849 | 0 | ≥8 | valid 42.6h |
 | Tue 22 Sep 15:45 | iphone-18-pro-aperture | comparison | main | retro | 464 | 0 | 0 | valid 37.4h |
 | Wed 23 Sep 14:16 | prompt-vs-finish | other | other | retro | – | – | – | pending |
 | Wed 23 Sep 22:31 | paid-to-free-tools | tool-swap | main | retro | – | – | – | pending |

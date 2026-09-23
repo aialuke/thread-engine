@@ -42,8 +42,18 @@
       ],
       "followers": 34,
       "raw_file": "ledger/raw/backfill-20260923T1910.json",
-      "missing": []
+      "missing": [],
+      "repliers_complete": false
     }
   ],
-  "missed": false
+  "missed": false,
+  "amendments": [
+    {
+      "at": "2026-09-23T19:56:47Z",
+      "field": "repliers_complete",
+      "value": false,
+      "snapshots": 1,
+      "reason": "Backfill search returned 9 reply authors against 32 replies on 2026-09-23"
+    }
+  ]
 }
