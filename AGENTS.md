@@ -38,7 +38,7 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 - `reference/x-algorithm.md` — verified X ranking facts with sources; `reference/x-api.md` — what the X API can and cannot read, prices, and the privacy rules; `reference/audience.md` — audience promise and lane definition
 - `voice/exit-zero.md` — shared voice, truth budget, image and reply rules
 - `.claude/skills/format-{settings,comparison,tool-swap,single-tip,build-log,tool-verdict}/` — one format each, with its checklist. Settings detail stays in `.claude/skills/hidden-settings/`
-- `.claude/skills/{next,draft-thread,verify-settings,ready,posted,snapshot,results,apply,undo-rule}/` — the commands. Grok and Claude Code both load `.claude/skills/`
+- `.claude/skills/{next,draft-thread,verify-settings,ready,posted,snapshot,results,apply,undo-rule}/` — the commands. Grok and Claude Code both load `.claude/skills/`. `approve/` only registers `/approve` so Claude Code accepts it; the approve hook does the work
 - `.claude/hooks/` — the approve hook and the guard (approval marker and loop state); `.claude/settings.json` registers both hooks and the script allowlist for both tools
 - `queue/topics.yaml` — backlog and planned posts; `queue/research-backlog.md` — research and strategy to do later, operator-chosen; `queue/paid-free-roster.md` — the PAID → FREE roster (claims to check, never copy)
 - `drafts/<date>-<slug>/` — numbered cards (`01-hook.md` …) are the posts; `FORMAT`; `PATHS.md` / `CLAIMS.md`; `CHECKLIST.md`; `images.md`; `REPLIES.md` (tool-swap: talking points, never paste-ready); `POST.txt` run sheet; operator-created `APPROVED`

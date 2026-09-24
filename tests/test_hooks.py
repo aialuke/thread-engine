@@ -102,6 +102,14 @@ class Approve(unittest.TestCase):
                 self.assertIn("cards-sha256:", (draft / "APPROVED").read_text())
                 (draft / "APPROVED").unlink()
 
+    def test_approve_command_is_registered_for_the_operator_only(self) -> None:
+        # Claude Code rejects an unknown slash command before UserPromptSubmit runs,
+        # so /approve needs a skill. The model must never be able to invoke it.
+        skill = (REPO / ".claude" / "skills" / "approve" / "SKILL.md").read_text()
+        front = skill.split("---")[1]
+        self.assertIn("name: approve", front)
+        self.assertIn("disable-model-invocation: true", front)
+
     def test_other_prompts_pass_through(self) -> None:
         result = run(APPROVE, {"prompt": "please approve my draft", "cwd": "."})
         self.assertEqual((result.returncode, result.stdout), (0, ""))
