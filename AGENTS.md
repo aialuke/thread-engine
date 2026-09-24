@@ -40,7 +40,7 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 - `.claude/skills/format-{settings,comparison,tool-swap,single-tip,build-log,tool-verdict}/` — one format each, with its checklist. Settings detail stays in `.claude/skills/hidden-settings/`
 - `.claude/skills/{next,draft-thread,verify-settings,ready,posted,snapshot,results,apply,undo-rule}/` — the commands. Grok and Claude Code both load `.claude/skills/`
 - `.claude/hooks/` — the approve hook and the guard (approval marker and loop state); `.claude/settings.json` registers both hooks and the script allowlist for both tools
-- `queue/topics.yaml` — backlog and planned posts
+- `queue/topics.yaml` — backlog and planned posts; `queue/research-backlog.md` — research and strategy to do later, operator-chosen
 - `drafts/<date>-<slug>/` — numbered cards (`01-hook.md` …) are the posts; `FORMAT`; `PATHS.md` / `CLAIMS.md`; `CHECKLIST.md`; `images.md`; `POST.txt` run sheet; operator-created `APPROVED`
 - `ledger/` — one JSON per posted root, raw tool text in `ledger/raw/`, generated `SUMMARY.md`; `ledger/activity/` holds every post, reply and quote with its organic reads (`YYYY-MM.json`) and daily follower counts and follow credit (`account.json`), written only by `loop.py`
 - `loop/state.json` — experiments, lessons, applied rules. `loop/inbox/` is scratch; `loop/followers/` and `ledger/raw/api/` hold other people's data. None of the three is committed

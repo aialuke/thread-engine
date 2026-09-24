@@ -8,9 +8,11 @@ Chosen by the operator on 24 Sep 2026, from `reviews/audit-2026-09.md`. The week
 
 ## Main lane
 
+**For now (operator, 24 Sep 2026):** the account doesn't have enough builder material yet, so while formats are trialled, `main` covers **tech broadly**: AI, software, tools, devices and tech news. The builder path is the direction; posts from the build are preferred but not required. Test 1 below applies in this wider form until the operator narrows it.
+
 A post is in the `main` lane when all three are true:
 
-1. **It comes from building.** Something the operator built, ran, measured, broke or chose. Or a take on tools, AI or tech news from a builder's point of view.
+1. **It comes from building, or for now from tech broadly.** Something the operator built, ran, measured, broke or chose; a take on tools, AI or tech news from a builder's point of view; or, for now, any useful tech post.
 2. **A builder or an AI-using creator gets something from it:** a result, a lesson, a verdict on a tool, a workflow, a free tool that holds up, or a question worth answering.
 3. **Every claim in it shows its proof:** real output, a screenshot, a number or a named source. The truth budget in `voice/exit-zero.md` applies. A question or an opinion makes no claim, so it passes.
 
@@ -21,11 +23,11 @@ These fit:
 - the free tools the pipeline actually uses;
 - AI and tech-policy takes from a builder's point of view (government tech failures, AI regulation, the tools).
 
-Device and settings tips count as `main` only when they come from the build (for example, the Mac settings changed to run the pipeline).
+Device and settings tips count as `main` for now (tech broadly). Once the operator narrows the lane, they count only when they come from the build (for example, the Mac settings changed to run the pipeline).
 
 ## Other lane
 
-Everything else is `other`: networking and connect posts, personal banter, opinions with no builder angle (party politics included), and device tips with no link to the build.
+Everything else is `other`: networking and connect posts, personal banter, and opinions with no tech angle (party politics included).
 
 `other` posts are allowed. The topic-share check in the algorithm reference (fact A8) counts the last 15 **originals**; replies don't count. The target is at least 12 of the last 15 originals in `main`, an editorial choice, not a proven algorithm threshold.
 
