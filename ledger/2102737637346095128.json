@@ -45,5 +45,9 @@
       "missing": []
     }
   ],
-  "missed": false
+  "missed": false,
+  "nonorganic": {
+    "reason": "95% of 2,105 impressions non-organic (Premium Boost; API 2026-09-24: 99 organic)",
+    "at": "2026-09-24T01:20:34Z"
+  }
 }

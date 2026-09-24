@@ -12,4 +12,4 @@ Times are Australia/Brisbane. Snapshot is the valid 36–60 hour one, else the l
 | Tue 22 Sep 10:35 | connect-pin | other | other | retro | 849 | 0 | ≥8 | valid 42.6h |
 | Tue 22 Sep 15:45 | iphone-18-pro-aperture | comparison | main | retro | 464 | 0 | 0 | valid 37.4h |
 | Wed 23 Sep 14:16 | prompt-vs-finish | other | other | retro | – | – | – | pending |
-| Wed 23 Sep 22:31 | paid-to-free-tools | tool-swap | main | retro | – | – | – | pending |
+| Wed 23 Sep 22:31 | paid-to-free-tools | tool-swap | main | retro, non-organic | – | – | – | pending |
