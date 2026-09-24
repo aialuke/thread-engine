@@ -320,6 +320,116 @@ class Experiments(LoopCase):
         self.assertEqual((share["main"], share["window"]), (1, 2))
 
 
+class ApiData(LoopCase):
+    def item(self, item_id: str, created: str, kind: str = "reply", conv: str | None = None, **organic) -> dict:
+        base = {"impressions": 100, "likes": 2, "replies": 0, "reposts": 0, "profile_visits": 1, "url_clicks": 0}
+        base.update(organic)
+        return {"id": item_id, "kind": kind, "created_at": created, "conversation_id": conv or item_id,
+                "topics": ["Technology"], "text": "a reply",
+                "public": {"impressions": base["impressions"], "likes": base["likes"], "replies": 0, "reposts": 0,
+                           "quotes": 0, "bookmarks": 1},
+                "organic": base}
+
+    def activity(self, stage: str, observed: str, items: list[dict], cursor: dict | None = None) -> dict:
+        data = {"stage": stage, "observed_at": observed, "items": items}
+        if cursor:
+            data["cursor"] = cursor
+        return self.ok("record-activity", "--json", self.payload(data))
+
+    def rows(self) -> dict:
+        rows = {}
+        for path in (self.root / "ledger" / "activity").glob("????-??.json"):
+            rows.update(json.loads(path.read_text())["items"])
+        return rows
+
+    def test_activity_rows_labels_and_cursor(self) -> None:
+        made = self.activity("48h", hours(40), [self.item("9000000001", T0)], cursor={"read48_until": hours(4)})
+        self.assertEqual(made["cursors"]["read48_until"], hours(4))
+        self.assertEqual(self.rows()["9000000001"]["reads"]["48h"]["label"], "valid")
+        self.activity("48h", hours(40), [self.item("9000000001", T0)])
+        self.assertEqual(len(self.rows()), 1)
+        self.activity("48h", hours(80), [self.item("9000000001", T0, impressions=999)])
+        self.assertEqual(self.rows()["9000000001"]["reads"]["48h"]["organic"]["impressions"], 100)
+        self.assertIn("unknown organic", self.fails("record-activity", "--json", self.payload(
+            {"stage": "48h", "observed_at": hours(40), "items": [self.item("9000000002", T0, shares=3)]})))
+
+    def test_follow_credit_is_counts_only_and_a_lower_bound(self) -> None:
+        self.ok("record-interactions", "--json", self.payload({
+            "observed_at": hours(1), "self_ids": ["111"], "since_id": "9000000050",
+            "mentions": [{"id": "9000000050", "author_id": "501", "conversation_id": "9000000010",
+                          "replied_to": "9000000010", "created_at": hours(1)},
+                         {"id": "9000000051", "author_id": "111", "conversation_id": "9000000010",
+                          "replied_to": "9000000010", "created_at": hours(1)}],
+            "reply_targets": [{"item_id": "9000000020", "user_id": "502", "at": hours(1)}]}))
+        follow = lambda at, ids: self.ok("record-followers", "--json", self.payload(
+            {"observed_at": at, "self_ids": ["111"], "ids": ids, "total": len(ids)}))
+        self.assertTrue(follow(hours(2), ["400", "111"])["baseline"])
+        day = follow(hours(26), ["400", "501", "502", "503", "111"])
+        self.assertEqual((day["new"], day["lost"], day["unattributed"]), (3, 0, 1))
+        self.assertEqual(day["attributed"], {"9000000010": 1, "9000000020": 1})
+        again = follow(hours(30), ["400", "501", "502", "503", "111"])
+        self.assertEqual(again["new"], 3)
+        self.assertLessEqual(len(list((self.root / "loop" / "followers").glob("followers-*.json"))), 2)
+        committed = (self.root / "ledger" / "activity" / "account.json").read_text()
+        for private in ("501", "502", "503", "400"):
+            self.assertNotIn(f'"{private}"', committed)
+
+    def test_interactions_prune_old_people(self) -> None:
+        self.ok("record-interactions", "--json", self.payload({
+            "observed_at": hours(0), "reply_targets": [{"item_id": "9000000020", "user_id": "600", "at": hours(0)}]}))
+        later = self.ok("record-interactions", "--json", self.payload({"observed_at": hours(24 * 8)}))
+        self.assertEqual(later["people"], 0)
+
+    def test_auto_post_replaced_by_posted_record(self) -> None:
+        self.post("9100000001", T0, auto=True, retrospective=True, made_in_repo=False, lane="other", format="other")
+        self.snap("9100000001", hours(40), 50)
+        replaced = self.post("9100000001", T0, format="build-log")
+        self.assertTrue(replaced["recorded"])
+        post = json.loads((self.root / "ledger" / "9100000001.json").read_text())
+        self.assertEqual((post["format"], post["auto"], len(post["snapshots"])), ("build-log", False, 1))
+        self.assertFalse(self.post("9100000001", T0)["recorded"])
+
+    def test_set_lane_logs_amendment(self) -> None:
+        self.post("9200000001", T0, lane="other")
+        self.assertTrue(self.ok("set-lane", "--root-id", "9200000001", "--lane", "main", "--reason", "builder question")["changed"])
+        post = json.loads((self.root / "ledger" / "9200000001.json").read_text())
+        self.assertEqual((post["lane"], post["amendments"][0]["from"]), ("main", "other"))
+        self.assertIn("main or other", self.fails("set-lane", "--root-id", "9200000001", "--lane", "unset", "--reason", "x"))
+
+    def test_api_snapshot_and_final_read(self) -> None:
+        self.post("9300000001", T0)
+        data = {"root_id": "9300000001", "observed_at": hours(40), "source": "api", "outside_replies": 2,
+                "root": {"views": 300, "likes": 3, "reposts": 0, "quotes": 0, "replies": 5, "bookmarks": 1},
+                "organic": {"impressions": 280, "likes": 3, "replies": 5, "reposts": 0, "profile_visits": 2, "url_clicks": 0}}
+        made = self.ok("record-snapshot", "--json", self.payload(data))
+        self.assertEqual(made["kind"], "valid")
+        early_final = dict(data, observed_at=hours(24 * 20), stage="final")
+        self.assertIn("26 days", self.fails("record-snapshot", "--json", self.payload(early_final)))
+        final = dict(data, observed_at=hours(24 * 27), stage="final")
+        self.assertEqual(self.ok("record-snapshot", "--json", self.payload(final))["kind"], "final")
+        self.assertFalse(self.ok("record-snapshot", "--json", self.payload(final))["recorded"])
+        post = json.loads((self.root / "ledger" / "9300000001.json").read_text())
+        self.assertEqual(post["snapshots"][0]["outside_replies"], 2)
+        self.assertEqual(post["snapshots"][0]["outside_repliers"], [])
+        self.assertEqual(loop.best_snapshot(post)["kind"], "valid")
+
+    def test_summary_shows_organic_and_account(self) -> None:
+        self.post("9400000001", T0)
+        root = self.item("9400000001", T0, kind="original", impressions=90, profile_visits=3)
+        root["public"]["impressions"] = 100
+        self.activity("48h", hours(40), [root, self.item("9400000002", hours(1), conv="9400000001", impressions=60)])
+        self.ok("record-interactions", "--json", self.payload({
+            "observed_at": hours(41), "reply_targets": [{"item_id": "9400000002", "user_id": "700", "at": hours(41)}]}))
+        for at, ids in ((hours(41), ["1"]), (hours(66), ["1", "700"])):
+            self.ok("record-followers", "--json", self.payload({"observed_at": at, "ids": ids, "total": len(ids)}))
+        summary = (self.root / "ledger" / "SUMMARY.md").read_text()
+        row = next(line for line in summary.splitlines() if "s001" in line)
+        self.assertIn("| 90 | 10% | 3 |", row)
+        self.assertTrue(row.rstrip(" |").split("|")[-2].strip() == "1", row)
+        self.assertIn("## Account", summary)
+        self.assertIn("1 new, 0 lost; 1 of the new credited", summary)
+
+
 class Preferences(LoopCase):
     def test_needs_three_posts_with_preference_edits(self) -> None:
         for i in range(3):

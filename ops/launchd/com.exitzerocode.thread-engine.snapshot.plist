@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  Daily 36-60 hour snapshots for thread-engine.
-  Runs scripts/snapshot.py once a day at 20:00 local time; it makes one read-only Grok call. A daily run
-  always lands inside the 24-hour-wide snapshot window. If the Mac is asleep at
-  20:00, launchd runs it on wake.
-  Grok runs read-only; only the script writes ledger/, loop/ and the generated
-  summaries, then commits them. Cost per run is appended to ledger/runs.log.
+  Daily X API read for thread-engine.
+  Runs scripts/snapshot.py once a day at 20:00 local time. It reads the account's
+  own posts, replies, followers and mentions through scripts/x_api.py with the
+  read-only keys in the login Keychain. Read cursors mean a missed day (Mac asleep
+  or off) leaves no gap; the next run reads those posts late. If the Mac is asleep
+  at 20:00, launchd runs it on wake.
+  Only the script writes ledger/ and loop/, through loop.py, then commits. Cost per
+  run is appended to ledger/runs.log.
   Log: ~/Library/Logs/thread-engine-snapshot.log
 -->
 <plist version="1.0">

@@ -12,7 +12,7 @@ A post is in the `main` lane when all three are true:
 
 1. **It comes from building.** Something the operator built, ran, measured, broke or chose. Or a take on tools, AI or tech news from a builder's point of view.
 2. **A builder or an AI-using creator gets something from it:** a result, a lesson, a verdict on a tool, a workflow, a free tool that holds up, or a question worth answering.
-3. **It shows its proof.** Real output, a screenshot, a number or a named source. The truth budget in `voice/exit-zero.md` applies.
+3. **Every claim in it shows its proof:** real output, a screenshot, a number or a named source. The truth budget in `voice/exit-zero.md` applies. A question or an opinion makes no claim, so it passes.
 
 These fit:
 - build logs ("today the pipeline did X; here's the output and what broke");

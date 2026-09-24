@@ -42,7 +42,7 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 - `.claude/hooks/` — the approve hook and the guard (approval marker and loop state); `.claude/settings.json` registers both hooks and the script allowlist for both tools
 - `queue/topics.yaml` — backlog and planned posts
 - `drafts/<date>-<slug>/` — numbered cards (`01-hook.md` …) are the posts; `FORMAT`; `PATHS.md` / `CLAIMS.md`; `CHECKLIST.md`; `images.md`; `POST.txt` run sheet; operator-created `APPROVED`
-- `ledger/` — one JSON per posted root, raw tool text in `ledger/raw/`, generated `SUMMARY.md`
+- `ledger/` — one JSON per posted root, raw tool text in `ledger/raw/`, generated `SUMMARY.md`; `ledger/activity/` holds every post, reply and quote with its organic reads (`YYYY-MM.json`) and daily follower counts and follow credit (`account.json`), written only by `loop.py`
 - `loop/state.json` — experiments, lessons, applied rules. `loop/inbox/` is scratch; `loop/followers/` and `ledger/raw/api/` hold other people's data. None of the three is committed
 - `experiments.md`, `learnings.md` — generated views of the loop
 - `reviews/` — weekly reviews and one-off reports
@@ -53,7 +53,7 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 - `scripts/grok_read.py` — the one read-only structured Grok call every X read goes through
 - `scripts/x_read.py` — `search "<query>"` or `thread <id>`, JSON out, for sessions without X tools
 - `scripts/x_api.py` — read-only X API client for the account's own posts, mentions, followers and profile; GET only; `keys` checks the Keychain without reading values
-- `scripts/snapshot.py` — daily snapshots: one read-only Grok call for X numbers, the rest in code; cost per run in `ledger/runs.log`
+- `scripts/snapshot.py` — the daily X API read (via `x_api.py`): every post, reply and quote at 36–60 hours and again at 26–29 days, follower ids and mentions, all recorded through `loop.py`; a failed read records nothing; cost per run in `ledger/runs.log`; `--ingest` records a backfill
 - `scripts/draft.py` — prints the grok draft command
 - `tests/` — `python3 -m unittest discover -s tests` (scripts, loop, snapshot, hooks)
 

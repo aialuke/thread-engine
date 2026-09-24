@@ -6,6 +6,12 @@ Each command writes at most one data file, atomically, then re-renders the
 readable views (experiments.md, learnings.md, ledger/SUMMARY.md).
 
 No network access. Git is used only by commit-rule, undo and commit-data.
+
+X API data (from snapshot.py) lands in three places:
+- ledger/activity/YYYY-MM.json: one row per post, reply and quote, with its reads.
+- ledger/activity/account.json: daily follower counts and follow credit.
+- loop/followers/: follower ids and who interacted with the account. Other
+  people's data: gitignored, never committed, never rendered.
 """
 
 from __future__ import annotations
@@ -32,6 +38,10 @@ REVIEW_EVERY_DAYS = 7
 STALE_AFTER_DAYS = 42
 LANE_WINDOW = 15
 MIN_COHORT = 3
+FINAL_MIN_DAYS = 26
+FOLLOWER_FILES_KEPT = 2
+INTERACTION_DAYS = 7
+CONVERSATION_DAYS = 30
 
 FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "build-log", "tool-verdict", "other"}
 ARMS = {"treatment", "control", "none"}
@@ -43,6 +53,10 @@ UNSCORABLE = {
     "replies": "a root's replies count the account's own thread cards",
 }
 OPEN_STATES = {"testing", "promising", "unclear"}
+ITEM_KINDS = {"original", "quote", "reply", "thread_card", "repost"}
+READ_STAGES = {"backfill", "48h", "final"}
+PUBLIC_KEYS = ("impressions", "likes", "replies", "reposts", "quotes", "bookmarks")
+ORGANIC_KEYS = ("impressions", "likes", "replies", "reposts", "profile_visits", "url_clicks")
 POST_ID_RE = re.compile(r"^[0-9]{5,25}$")
 LESSON_RE = re.compile(r"^L-[0-9]{3}$")
 
@@ -139,6 +153,34 @@ class Repo:
     def save_post(self, post: dict) -> None:
         write_json(self.post_path(post["root_id"]), post)
 
+    # X API data
+
+    @property
+    def activity_dir(self) -> Path:
+        return self.ledger_dir / "activity"
+
+    @property
+    def account_path(self) -> Path:
+        return self.activity_dir / "account.json"
+
+    @property
+    def private_dir(self) -> Path:
+        return self.root / "loop" / "followers"
+
+    def activity(self) -> dict[str, dict]:
+        rows: dict[str, dict] = {}
+        if self.activity_dir.is_dir():
+            for path in sorted(self.activity_dir.glob("????-??.json")):
+                rows.update(read_json(path)["items"])
+        return rows
+
+    def account(self) -> dict:
+        return read_json(self.account_path) if self.account_path.is_file() else {"days": []}
+
+    def interactions(self) -> dict:
+        path = self.private_dir / "interactions.json"
+        return read_json(path) if path.is_file() else {"mentions_since_id": None, "people": {}, "conversations": {}}
+
     def git(self, *args: str) -> str:
         result = subprocess.run(
             ["git", *args], cwd=self.root, capture_output=True, text=True, check=False
@@ -186,12 +228,26 @@ def validate_post(post: dict) -> None:
 
 def validate_snapshot(snap: dict) -> None:
     parse_time(snap.get("observed_at", ""))
-    need(snap.get("kind") in {"valid", "late", "early"}, "snapshot kind bad")
+    need(snap.get("kind") in {"valid", "late", "early", "final"}, "snapshot kind bad")
     for metric in METRICS:
         check_count(snap.get("root", {}).get(metric), f"root.{metric}")
+    for key, value in (snap.get("organic") or {}).items():
+        need(key in ORGANIC_KEYS, f"unknown organic measure {key!r}")
+        check_count(value, f"organic.{key}")
     check_count(snap.get("followers"), "followers")
     for card in snap.get("cards", []):
         check_count(card.get("views"), "card views")
+
+
+def validate_item(item: dict) -> None:
+    need(POST_ID_RE.fullmatch(str(item.get("id", ""))) is not None, "item id missing or bad")
+    need(item.get("kind") in ITEM_KINDS, f"item kind must be one of {sorted(ITEM_KINDS)}")
+    parse_time(item.get("created_at", ""))
+    need(POST_ID_RE.fullmatch(str(item.get("conversation_id", ""))) is not None, "item conversation_id bad")
+    for group, keys in (("public", PUBLIC_KEYS), ("organic", ORGANIC_KEYS)):
+        for key, value in (item.get(group) or {}).items():
+            need(key in keys, f"unknown {group} measure {key!r}")
+            check_count(value, f"{group}.{key}")
 
 
 # ---------- helpers ----------
@@ -286,11 +342,18 @@ def cmd_record_post(repo: Repo, args) -> dict:
         "draft": payload.get("draft"),
         "snapshots": [],
         "missed": False,
+        "auto": bool(payload.get("auto", False)),
     }
     validate_post(post)
     path = repo.post_path(post["root_id"])
     if path.exists():
-        return {"recorded": False, "reason": "already recorded", "root_id": post["root_id"]}
+        existing = read_json(path)
+        if not (existing.get("auto") and not post["auto"]):
+            return {"recorded": False, "reason": "already recorded", "root_id": post["root_id"]}
+        # The daily run recorded this post on its own; the operator's /posted record replaces it.
+        for key in ("snapshots", "missed", "nonorganic", "amendments"):
+            if key in existing:
+                post[key] = existing[key]
     state = repo.state()
     if post["experiment"] is not None:
         exp = next((e for e in state["experiments"] if e["id"] == post["experiment"]), None)
@@ -335,31 +398,174 @@ def cmd_record_snapshot(repo: Repo, args) -> dict:
     hours = age_hours(post, observed)
     need(hours >= 0, "observed before the post existed")
     kind = snapshot_kind(hours)
+    if payload.get("stage") == "final":
+        need(hours >= FINAL_MIN_DAYS * 24, f"a final read needs a post at least {FINAL_MIN_DAYS} days old")
+        kind = "final"
+        if any(s["kind"] == "final" for s in post["snapshots"]):
+            return {"recorded": False, "reason": "final read already exists", "root_id": root_id}
     if kind == "valid" and valid_snapshot(post):
         return {"recorded": False, "reason": "valid snapshot already exists", "root_id": root_id}
     need(not (kind == "valid" and post["missed"]), "post already marked missed")
-    self_handles = set(state["self_handles"])
-    repliers = [str(h).lstrip("@").lower() for h in payload.get("repliers", [])]
-    outside = [h for h in repliers if h not in self_handles]
+    if payload.get("repliers") is not None:
+        self_handles = set(state["self_handles"])
+        repliers = [str(h).lstrip("@").lower() for h in payload["repliers"]]
+        outside = [h for h in repliers if h not in self_handles]
+        outside_count, outside_names = len(outside), sorted(set(outside))
+    else:
+        # X API reads count outside replies by id; names of other accounts are not stored.
+        outside_count, outside_names = payload.get("outside_replies"), []
+        check_count(outside_count, "outside_replies")
     root = {m: payload.get("root", {}).get(m) for m in METRICS}
     snap = {
         "observed_at": iso(observed),
         "age_hours": round(hours, 1),
         "kind": kind,
+        "source": payload.get("source", "grok"),
         "root": root,
         "cards": payload.get("cards", []),
-        "outside_replies": len(outside) if payload.get("repliers") is not None else None,
-        "outside_repliers": sorted(set(outside)),
+        "outside_replies": outside_count,
+        "outside_repliers": outside_names,
         "repliers_complete": payload.get("repliers_complete"),
         "followers": payload.get("followers"),
         "raw_file": payload.get("raw_file"),
         "missing": [m for m in METRICS if root[m] is None],
     }
+    if payload.get("organic") is not None:
+        snap["organic"] = {k: payload["organic"].get(k) for k in ORGANIC_KEYS}
     validate_snapshot(snap)
     post["snapshots"].append(snap)
     repo.save_post(post)
     return {"recorded": True, "root_id": root_id, "kind": kind, "age_hours": snap["age_hours"],
             "missing": snap["missing"]}
+
+
+def cmd_record_activity(repo: Repo, args) -> dict:
+    """One row per post, reply and quote, with a read per stage. Advances the read cursors last."""
+    state = repo.state()
+    payload = read_json(Path(args.json))
+    stage = payload.get("stage")
+    need(stage in READ_STAGES, f"stage must be one of {sorted(READ_STAGES)}")
+    observed = parse_time(payload.get("observed_at", ""))
+    months: dict[str, dict] = {}
+    recorded = 0
+    for item in payload.get("items", []):
+        validate_item(item)
+        month = item["created_at"][:7]
+        if month not in months:
+            path = repo.activity_dir / f"{month}.json"
+            months[month] = read_json(path) if path.is_file() else {"month": month, "items": {}}
+        row = months[month]["items"].setdefault(item["id"], {"id": item["id"]})
+        row.update({k: item[k] for k in ("kind", "created_at", "conversation_id")})
+        row["topics"] = item.get("topics", [])
+        row["text"] = item.get("text", "")
+        hours = (observed - parse_time(item["created_at"])).total_seconds() / 3600
+        label = snapshot_kind(hours) if stage == "48h" else stage
+        reads = row.setdefault("reads", {})
+        if stage == "48h" and reads.get("48h", {}).get("label") == "valid" and label != "valid":
+            continue
+        reads[stage] = {"at": iso(observed), "age_hours": round(hours, 1), "label": label,
+                        "public": {k: (item.get("public") or {}).get(k) for k in PUBLIC_KEYS},
+                        "organic": {k: (item.get("organic") or {}).get(k) for k in ORGANIC_KEYS}}
+        recorded += 1
+    for month, data in months.items():
+        data["items"] = dict(sorted(data["items"].items(), key=lambda kv: kv[1]["created_at"]))
+        write_json(repo.activity_dir / f"{month}.json", data)
+    api = state.setdefault("api", {})
+    for key in ("read48_until", "final_until"):
+        if (payload.get("cursor") or {}).get(key):
+            api[key] = iso(parse_time(payload["cursor"][key]))
+    repo.save_state(state)
+    return {"recorded": recorded, "stage": stage, "cursors": api}
+
+
+def _note_person(people: dict, user_id: str, item_id: str, at: str, how: str) -> None:
+    """Keep each account's most recent interaction with us."""
+    seen = people.get(user_id)
+    if seen is None or parse_time(at) >= parse_time(seen["at"]):
+        people[user_id] = {"item": item_id, "at": iso(parse_time(at)), "how": how}
+
+
+def cmd_record_interactions(repo: Repo, args) -> dict:
+    """Who replied to us, and who we replied to. Private: loop/followers/, gitignored."""
+    repo.state()
+    payload = read_json(Path(args.json))
+    observed = parse_time(payload.get("observed_at", ""))
+    self_ids = {str(i) for i in payload.get("self_ids", [])}
+    data = repo.interactions()
+    for mention in payload.get("mentions", []):
+        author = str(mention.get("author_id", ""))
+        if not author or author in self_ids:
+            continue
+        conv = data["conversations"].setdefault(str(mention["conversation_id"]),
+                                                {"at": mention["created_at"], "replies": []})
+        if mention["id"] not in conv["replies"]:
+            conv["replies"].append(mention["id"])
+        _note_person(data["people"], author, str(mention.get("replied_to") or mention["conversation_id"]),
+                     mention["created_at"], "replied")
+    for target in payload.get("reply_targets", []):
+        user = str(target.get("user_id", ""))
+        if user and user not in self_ids:
+            _note_person(data["people"], user, str(target["item_id"]), target["at"], "replied_to")
+    since = payload.get("since_id")
+    if since and (not data["mentions_since_id"] or int(since) > int(data["mentions_since_id"])):
+        data["mentions_since_id"] = str(since)
+    people_cut = observed - timedelta(days=INTERACTION_DAYS)
+    conv_cut = observed - timedelta(days=CONVERSATION_DAYS)
+    data["people"] = {u: p for u, p in data["people"].items() if parse_time(p["at"]) >= people_cut}
+    data["conversations"] = {c: v for c, v in data["conversations"].items() if parse_time(v["at"]) >= conv_cut}
+    write_json(repo.private_dir / "interactions.json", data)
+    return {"people": len(data["people"]), "mentions_since_id": data["mentions_since_id"],
+            "outside_replies": {c: len(v["replies"]) for c, v in data["conversations"].items()}}
+
+
+def cmd_record_followers(repo: Repo, args) -> dict:
+    """Compare today's follower ids with the last earlier day's and credit new followers.
+
+    Ids stay in loop/followers/ (gitignored). Only counts and per-item credit reach
+    ledger/activity/account.json. A new follower is credited once, to their most
+    recent interaction; anyone with none stays unattributed, so credit is a lower bound.
+    """
+    repo.state()
+    payload = read_json(Path(args.json))
+    observed = parse_time(payload.get("observed_at", ""))
+    self_ids = {str(i) for i in payload.get("self_ids", [])}
+    ids = sorted({str(i) for i in payload.get("ids", [])} - self_ids)
+    day = observed.date().isoformat()
+    earlier = [p for p in sorted(repo.private_dir.glob("followers-*.json")) if p.stem[len("followers-"):] < day]
+    previous = set(read_json(earlier[-1])["ids"]) if earlier else None
+    write_json(repo.private_dir / f"followers-{day}.json", {"at": iso(observed), "ids": ids})
+    for old in sorted(repo.private_dir.glob("followers-*.json"))[:-FOLLOWER_FILES_KEPT]:
+        old.unlink()
+    row = {"date": day, "at": iso(observed), "followers": payload.get("total", len(ids))}
+    if previous is None:
+        row["baseline"] = True
+    else:
+        new, lost = set(ids) - previous, previous - set(ids)
+        people = repo.interactions()["people"]
+        credit: dict[str, int] = {}
+        for user in new:
+            if user in people:
+                item = people[user]["item"]
+                credit[item] = credit.get(item, 0) + 1
+        row.update({"new": len(new), "lost": len(lost), "attributed": dict(sorted(credit.items())),
+                    "unattributed": len(new) - sum(credit.values())})
+    account = repo.account()
+    account["days"] = sorted([d for d in account["days"] if d["date"] != day] + [row], key=lambda d: d["date"])
+    write_json(repo.account_path, account)
+    return row
+
+
+def cmd_set_lane(repo: Repo, args) -> dict:
+    need(args.lane in {"main", "other"}, "--lane must be main or other")
+    need(bool(args.reason.strip()), "--reason required")
+    post = repo.post(args.root_id)
+    if post["lane"] == args.lane:
+        return {"changed": False, "root_id": args.root_id, "lane": args.lane}
+    post.setdefault("amendments", []).append({"at": iso(now_arg(args.now)), "field": "lane", "from": post["lane"],
+                                              "value": args.lane, "reason": args.reason.strip()})
+    post["lane"] = args.lane
+    repo.save_post(post)
+    return {"changed": True, "root_id": args.root_id, "lane": args.lane}
 
 
 def cmd_mark_nonorganic(repo: Repo, args) -> dict:
@@ -684,6 +890,7 @@ def cmd_status(repo: Repo, args) -> dict:
         "lane": cmd_lane_share(repo, args),
         "open_experiment": exp,
         "reference": state["reference"],
+        "api": state.get("api", {}),
         "stale_lessons": [l["id"] for l in state["lessons"] if l["status"] == "stale"],
     }
 
@@ -717,27 +924,105 @@ def fmt(value) -> str:
     return "–" if value is None else (f"{value:g}" if isinstance(value, float) else str(value))
 
 
+MIN_RATE_IMPRESSIONS = 50
+
+
+def best_read(row: dict | None) -> dict | None:
+    """An item's organic read to show: the 36-60h one, else the backfill."""
+    if not row:
+        return None
+    reads = row.get("reads", {})
+    return reads.get("48h") or reads.get("backfill")
+
+
+def nonorganic_pct(read: dict | None) -> str:
+    public = (read or {}).get("public", {}).get("impressions")
+    organic = (read or {}).get("organic", {}).get("impressions")
+    if not public or organic is None:
+        return "–"
+    return f"{max(0, public - organic) * 100 // public}%"
+
+
+def credited_follows(root_id: str, rows: dict[str, dict], days: list[dict]) -> int:
+    """Follows credited to a post, its thread cards, or replies in its conversation."""
+    total = 0
+    for day in days:
+        for item, count in day.get("attributed", {}).items():
+            if item == root_id or rows.get(item, {}).get("conversation_id") == root_id:
+                total += count
+    return total
+
+
+def account_lines(rows: dict[str, dict], days: list[dict]) -> list[str]:
+    if not days:
+        return []
+    anchor = parse_time(days[-1]["at"])
+    week = [d for d in days if parse_time(d["at"]) > anchor - timedelta(days=7)]
+    new = sum(d.get("new") or 0 for d in week)
+    lost = sum(d.get("lost") or 0 for d in week)
+    credited = sum(sum(d.get("attributed", {}).values()) for d in week)
+    recent = [r for r in rows.values() if anchor - timedelta(days=7) < parse_time(r["created_at"]) <= anchor]
+    lines = ["\n## Account\n\n",
+             f"Followers: {days[-1]['followers']} on {days[-1]['date']}. In the 7 days to then: {new} new, {lost} lost; "
+             f"{credited} of the new credited to a post or reply they engaged with (a lower bound).\n\n"]
+    visits = sum((best_read(r) or {}).get("organic", {}).get("profile_visits") or 0 for r in recent)
+    if visits:
+        lines.append(f"Follows per profile visit, items from those 7 days: {new} / {visits}.\n\n")
+    lines += ["| Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 |\n",
+              "|---|---:|---:|---:|---:|---:|\n"]
+    topics: dict[str, int] = {}
+    for kind in ("original", "quote", "reply", "thread_card"):
+        group = [r for r in recent if r["kind"] == kind]
+        reads = [best_read(r)["organic"] for r in group if best_read(r)]
+        if not group:
+            continue
+        impressions = sum(o.get("impressions") or 0 for o in reads)
+        visited = sum(o.get("profile_visits") or 0 for o in reads)
+        likes = sum(o.get("likes") or 0 for o in reads)
+        rate = f"{visited * 1000 / impressions:.1f}" if impressions >= MIN_RATE_IMPRESSIONS else "–"
+        lines.append(f"| {kind.replace('_', ' ')} | {len(group)} | {impressions} | {visited} | {likes} | {rate} |\n")
+    for r in recent:
+        organic = (best_read(r) or {}).get("organic", {}).get("impressions") or 0
+        for topic in r.get("topics", []):
+            topics[topic] = topics.get(topic, 0) + organic
+    top = sorted(topics.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
+    if top:
+        lines.append("\nTop topics by organic impressions (X's own labels, a proxy): "
+                     + ", ".join(f"{name} ({count})" for name, count in top) + ".\n")
+    return lines
+
+
 def render(repo: Repo) -> None:
     if not repo.state_path.is_file():
         return
     state = repo.state()
     posts = repo.posts()
+    rows = repo.activity()
+    days = repo.account()["days"]
     head = "<!-- Generated by scripts/loop.py. Do not edit; it is rewritten after every loop command. -->\n\n"
 
     lines = [head, "# Ledger summary\n\n",
-             "Times are Australia/Brisbane. Snapshot is the valid 36–60 hour one, else the latest late one. A leading ≥ means X search returned fewer reply authors than the reply count, so the true number is higher.\n\n",
-             "| Posted | Slug | Format | Lane | Experiment | Views | Bookmarks | Outside replies | Snapshot |\n",
-             "|---|---|---|---|---|---:|---:|---:|---|\n"]
+             "Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snapshot, else the latest late one. "
+             "Organic, Non-organic and Visits come from the X API read at 36–60 hours, else the September backfill. "
+             "Follows are new followers credited to the post or its conversation, a lower bound. "
+             "A leading ≥ means X search returned fewer reply authors than the reply count.\n\n",
+             "| Posted | Slug | Format | Lane | Experiment | Views | Organic | Non-organic | Visits | Bookmarks | "
+             "Outside replies | Follows | Snapshot |\n",
+             "|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|\n"]
     for post in posts:
         snap = best_snapshot(post)
         root = snap["root"] if snap else {}
+        read = best_read(rows.get(post["root_id"]))
+        organic = (read or {}).get("organic", {})
         where = f"{snap['kind']} {snap['age_hours']:g}h" if snap else ("missed" if post["missed"] else "pending")
         exp = f"{post['experiment']} {post['arm']}" if post.get("experiment") else ("retro" if post["retrospective"] else "–")
         if post.get("nonorganic"):
             exp += ", non-organic"
         lines.append(f"| {local(post['posted_at'])} | {post['slug']} | {post['format']} | {post['lane']} | {exp} | "
-                     f"{fmt(root.get('views'))} | {fmt(root.get('bookmarks'))} | "
-                     f"{fmt_replies(snap)} | {where} |\n")
+                     f"{fmt(root.get('views'))} | {fmt(organic.get('impressions'))} | {nonorganic_pct(read)} | "
+                     f"{fmt(organic.get('profile_visits'))} | {fmt(root.get('bookmarks'))} | "
+                     f"{fmt_replies(snap)} | {credited_follows(post['root_id'], rows, days)} | {where} |\n")
+    lines += account_lines(rows, days)
     atomic_write(repo.ledger_dir / "SUMMARY.md", "".join(lines))
 
     lines = [head, "# Experiments\n\n", "One runs at a time. Rules are fixed when it opens.\n\n"]
@@ -780,6 +1065,10 @@ COMMANDS = {
     "mark-missed": cmd_mark_missed,
     "set-repliers-complete": cmd_set_repliers_complete,
     "mark-nonorganic": cmd_mark_nonorganic,
+    "record-activity": cmd_record_activity,
+    "record-interactions": cmd_record_interactions,
+    "record-followers": cmd_record_followers,
+    "set-lane": cmd_set_lane,
     "open-experiment": cmd_open_experiment,
     "evaluate": cmd_evaluate,
     "next-slot": cmd_next_slot,
@@ -806,7 +1095,8 @@ def build_parser() -> argparse.ArgumentParser:
         sp = sub.add_parser(name)
         if name == "init":
             sp.add_argument("--self-handles", required=True)
-        if name in {"record-post", "record-snapshot", "open-experiment"}:
+        if name in {"record-post", "record-snapshot", "open-experiment", "record-activity",
+                    "record-interactions", "record-followers"}:
             sp.add_argument("--json", required=True, help="payload file")
         if name == "set-reference":
             sp.add_argument("--status", required=True)
@@ -819,9 +1109,11 @@ def build_parser() -> argparse.ArgumentParser:
             sp.add_argument("--root-id", required=True)
             sp.add_argument("--value", required=True, help="true or false")
             sp.add_argument("--reason", required=True)
-        if name == "mark-nonorganic":
+        if name in {"mark-nonorganic", "set-lane"}:
             sp.add_argument("--root-id", required=True)
             sp.add_argument("--reason", required=True)
+        if name == "set-lane":
+            sp.add_argument("--lane", required=True)
         if name == "add-preference":
             sp.add_argument("--statement", required=True)
             sp.add_argument("--evidence", required=True, help="comma-separated post ids")

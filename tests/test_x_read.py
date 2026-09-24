@@ -34,6 +34,10 @@ class GrokRead(unittest.TestCase):
         denied = [cmd[i + 1] for i, part in enumerate(cmd) if part == "--deny"]
         self.assertEqual(sorted(denied), ["Bash", "Edit", "Write"])
 
+    def test_last_json_object_takes_final_complete_object(self) -> None:
+        text = '{"posts": [{"root_id": "1", "error": "pending"}]} partial {"posts": []}'
+        self.assertEqual(grok_read.last_json_object(text), {"posts": []})
+
     def test_nonzero_exit_raises(self) -> None:
         runner = lambda cmd, **kw: subprocess.CompletedProcess(cmd, 1, "", "auth expired")
         with self.assertRaises(RuntimeError):
