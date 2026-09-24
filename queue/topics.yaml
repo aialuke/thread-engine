@@ -66,10 +66,20 @@ topics:
   # to about late October; /results says when two remain. Roster: queue/paid-free-roster.md.
 
   - slug: paid-free-developer
-    status: queued
+    status: drafted
     format: tool-swap
     lane: main
     category: developer
+    hypothesis: >-
+      A sourced, unboosted PAID → FREE post at a US-overlap hour earns more organic reach and
+      profile visits at the 36–60 hour read than post 1's organic 99 impressions and 1 visit.
+    post_at: 2026-09-25 06:00 Australia/Brisbane
+    leads: ["2101965724382286092", "2100279289036099721", "2092266377499558009", "2098165104147870068"]
+    draft: drafts/2026-09-24-paid-free-developer/
+    drafted_note: >-
+      Drafted 24 Sep with three swaps: Postman Team → Bruno, Navicat Premium → Beekeeper Studio,
+      ngrok Pay-as-you-go → Cloudflare Tunnel. Docker Desktop and DataGrip cut (both free for most
+      of the audience; CLAIMS.md). Shout-out @use_bruno, handle checked 24 Sep.
     note: >-
       Session draft: Postman → Bruno (API collections as files in the repo); Navicat / DataGrip →
       Beekeeper Studio (SQL client for Postgres, MySQL, SQLite); Ngrok → Cloudflare Tunnels (share
