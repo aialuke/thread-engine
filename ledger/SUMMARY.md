@@ -6,23 +6,21 @@ Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snap
 
 | Posted | Slug | Format | Lane | Experiment | Views | Organic | Non-organic | Visits | Bookmarks | Outside replies | Follows | Snapshot |
 |---|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|
-| Sun 20 Sep 19:25 | home-wifi | settings | main | retro | 285 | 285 | 0% | 0 | 2 | 0 | 0 | late 87.9h |
-| Mon 21 Sep 16:48 | iphone-camera | settings | main | retro | 137 | 137 | 0% | 0 | 2 | 0 | 0 | late 66.5h |
-| Tue 22 Sep 09:05 | macbook-battery | settings | main | retro | 149 | 151 | 0% | 0 | 1 | 0 | 0 | valid 44.1h |
+| Sun 20 Sep 19:25 | home-wifi | settings | other | retro | 285 | 285 | 0% | 0 | 2 | 0 | 0 | late 87.9h |
+| Mon 21 Sep 16:48 | iphone-camera | settings | other | retro | 137 | 137 | 0% | 0 | 2 | 0 | 0 | late 66.5h |
+| Tue 22 Sep 09:05 | macbook-battery | settings | other | retro | 149 | 151 | 0% | 0 | 1 | 0 | 0 | valid 44.1h |
 | Tue 22 Sep 10:35 | connect-pin | other | other | retro | 849 | 856 | 0% | 20 | 0 | ≥8 | 0 | valid 42.6h |
-| Tue 22 Sep 15:45 | iphone-18-pro-aperture | comparison | main | retro | 464 | 509 | 0% | 0 | 0 | 0 | 0 | valid 37.4h |
+| Tue 22 Sep 15:45 | iphone-18-pro-aperture | comparison | other | retro | 464 | 509 | 0% | 0 | 0 | 0 | 0 | valid 37.4h |
 | Wed 23 Sep 13:17 | x-2102598207410950545 | other | other | retro | – | 217 | 0% | 0 | – | – | 0 | pending |
-| Wed 23 Sep 14:16 | prompt-vs-finish | other | other | retro | – | 54 | 0% | 0 | – | – | 0 | pending |
-| Wed 23 Sep 22:31 | paid-to-free-tools | tool-swap | main | retro, non-organic | – | 99 | 95% | 1 | – | – | 0 | pending |
+| Wed 23 Sep 14:16 | prompt-vs-finish | other | main | retro | – | 54 | 0% | 0 | – | – | 0 | pending |
+| Wed 23 Sep 22:31 | paid-to-free-tools | tool-swap | other | retro, non-organic | – | 99 | 95% | 1 | – | – | 0 | pending |
 | Thu 24 Sep 08:37 | x-2102890124275228747 | other | other | retro | – | 15 | 0% | 0 | – | – | 0 | pending |
 | Thu 24 Sep 10:30 | x-2102918437060444581 | other | other | retro | – | 2 | 0% | 0 | – | – | 0 | pending |
 | Thu 24 Sep 11:08 | x-2102928143749447858 | other | other | retro | – | 4 | 0% | 0 | – | – | 0 | pending |
 
 ## Account
 
-Followers: 36 on 2026-09-24. In the 7 days to then: 0 new, 0 lost; 0 of the new credited to a post or reply they engaged with (a lower bound).
-
-Follows per profile visit, items from those 7 days: 0 / 58.
+Followers: 36 on 2026-09-24. This is the first count; follower changes and credit start from the next day's read.
 
 | Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 |
 |---|---:|---:|---:|---:|---:|

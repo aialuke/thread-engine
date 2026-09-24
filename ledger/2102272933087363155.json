@@ -2,7 +2,7 @@
   "root_id": "2102272933087363155",
   "slug": "iphone-18-pro-aperture",
   "format": "comparison",
-  "lane": "main",
+  "lane": "other",
   "posted_at": "2026-09-22T05:45:00Z",
   "retrospective": true,
   "made_in_repo": true,
@@ -75,5 +75,14 @@
       "missing": []
     }
   ],
-  "missed": false
+  "missed": false,
+  "amendments": [
+    {
+      "at": "2026-09-24T01:52:11Z",
+      "field": "lane",
+      "from": "main",
+      "value": "other",
+      "reason": "device comparison with no link to the build (audience.md, 24 Sep)"
+    }
+  ]
 }

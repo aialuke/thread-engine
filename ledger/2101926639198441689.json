@@ -2,7 +2,7 @@
   "root_id": "2101926639198441689",
   "slug": "iphone-camera",
   "format": "settings",
-  "lane": "main",
+  "lane": "other",
   "posted_at": "2026-09-21T06:48:57Z",
   "retrospective": true,
   "made_in_repo": false,
@@ -158,5 +158,14 @@
       }
     }
   ],
-  "missed": false
+  "missed": false,
+  "amendments": [
+    {
+      "at": "2026-09-24T01:52:11Z",
+      "field": "lane",
+      "from": "main",
+      "value": "other",
+      "reason": "device settings tip with no link to the build (audience.md, 24 Sep)"
+    }
+  ]
 }

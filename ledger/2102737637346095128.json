@@ -2,7 +2,7 @@
   "root_id": "2102737637346095128",
   "slug": "paid-to-free-tools",
   "format": "tool-swap",
-  "lane": "main",
+  "lane": "other",
   "posted_at": "2026-09-23T12:31:34Z",
   "retrospective": true,
   "made_in_repo": false,
@@ -83,5 +83,14 @@
   "nonorganic": {
     "reason": "95% of 2,105 impressions non-organic (Premium Boost; API 2026-09-24: 99 organic)",
     "at": "2026-09-24T01:20:34Z"
-  }
+  },
+  "amendments": [
+    {
+      "at": "2026-09-24T01:52:11Z",
+      "field": "lane",
+      "from": "main",
+      "value": "other",
+      "reason": "tool list not from the build, and its 'No watermark' claim has no source (audience.md tests 1 and 3)"
+    }
+  ]
 }
