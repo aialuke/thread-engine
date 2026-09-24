@@ -2,7 +2,7 @@
   "root_id": "2102172499031253210",
   "slug": "macbook-battery",
   "format": "settings",
-  "lane": "other",
+  "lane": "main",
   "posted_at": "2026-09-21T23:05:54Z",
   "retrospective": true,
   "made_in_repo": false,
@@ -104,6 +104,13 @@
       "from": "main",
       "value": "other",
       "reason": "device settings tip with no link to the build (audience.md, 24 Sep)"
+    },
+    {
+      "at": "2026-09-24T03:11:09Z",
+      "field": "lane",
+      "from": "other",
+      "value": "main",
+      "reason": "device settings tip: tech broadly counts as main for now (audience.md, operator 24 Sep)"
     }
   ]
 }
