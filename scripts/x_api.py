@@ -147,7 +147,7 @@ class Client:
             return XApiError(f"GET {path} failed: HTTP {exc.code} {detail}")
         return XApiError(f"GET {path} failed: {getattr(exc, 'reason', exc)}")
 
-    def request(self, method: str, path: str, params: dict, rate: float) -> dict:
+    def request(self, method: str, path: str, params: dict, rate: float, partial_ok: bool = False) -> dict:
         if method != "GET":
             raise XApiError(f"{method} refused: this client only reads")
         url = API + path
@@ -168,7 +168,7 @@ class Client:
                 self.no_access_header.append(path)
         elif level != "read":
             raise XApiError(f"X reports access level {level!r} for these keys; the app must be read-only. Stopping.")
-        if "data" not in body and body.get("errors"):
+        if "data" not in body and body.get("errors") and not partial_ok:
             raise XApiError(f"GET {path} returned errors: {json.dumps(body['errors'])[:400]}")
         data = body.get("data")
         count = len(data) if isinstance(data, list) else (1 if data else 0)
@@ -245,6 +245,21 @@ def thread(client: Client, root_id: str, now: datetime | None = None) -> dict:
     cards = sorted((i for i in items if i["id"] != root_id and i.get("conversation_id") == root_id
                     and kind(i) == "thread_card"), key=lambda i: int(i["id"]))
     return {"root": root, "cards": cards}
+
+
+def lookup(client: Client, ids: list[str]) -> list[dict]:
+    """Anyone's posts by id, with the author's handle. Not an owned read: about $0.005 a post and
+    $0.010 an author. Ids X doesn't know are simply absent from the result."""
+    ids = [i for i in dict.fromkeys(ids) if i.isdigit()][:100]
+    if not ids:
+        return []
+    params = {"ids": ",".join(ids), "tweet.fields": "created_at,author_id,public_metrics,text",
+              "expansions": "author_id", "user.fields": "username"}
+    body = client.request("GET", "/2/tweets", params, POST, partial_ok=True)
+    users = {u["id"]: u.get("username") for u in (body.get("includes") or {}).get("users", [])}
+    client.items += len(users)
+    client.cost += len(users) * USER
+    return [{**post, "author": users.get(post.get("author_id"))} for post in body.get("data") or []]
 
 
 # ---------- item helpers ----------

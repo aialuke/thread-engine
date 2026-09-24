@@ -23,6 +23,7 @@ This is what the X API can and cannot tell the loop about the account's own post
 | P11 | `GET /2/tweets/analytics` (per-post `follows`, `unfollows`, `shares`, `user_profile_clicks`, hourly to total) and `GET /2/media/analytics` return 403 `client-not-enrolled` on pay-per-use. X staff said on 12 Mar and 27 May 2026 that both are Enterprise-only. | Live test; devcommunity threads 259582 and 266576 | Per-post follows are credited by matching (see below), or read from the analytics CSV export if it has them. |
 | P12 | `context_annotations` gives X's own entity and topic labels for each post (e.g. "Computer software", "Animation"). | Live test | Topic mix in reviews. **A proxy**: it's not the topic-share classifier in `x-algorithm.md` A8. |
 | P13 | The account's user ID is `1994313953191833600`. | Live test (`/2/users/me`) | Hardcoded in `x_api.py`. |
+| P14 | Looking up anyone's posts by id (`GET /2/tweets?ids=` with the author expanded) works on pay-per-use, about $0.005 a post plus $0.010 an author. An id X doesn't have is simply absent. A Grok-invented id (2102145678901234567) came back absent; a real one came back with its author. | Live test, 24 Sep 2026 | `x_read.py` checks every post Grok returns this way before anything uses it. |
 
 ## X's analytics export has what the API doesn't
 

@@ -140,6 +140,20 @@ class Reads(unittest.TestCase):
         with self.assertRaisesRegex(x_api.XApiError, "not one of"):
             x_api.thread(c, root_id, now=NOW)
 
+    def test_lookup_returns_known_posts_with_authors_and_costs_both(self) -> None:
+        body = {"data": [{"id": "2102736605039776235", "author_id": "77", "text": "real"}],
+                "includes": {"users": [{"id": "77", "username": "sidchhaya"}]},
+                "errors": [{"resource_id": "2102145678901234567", "title": "Not Found Error"}]}
+        c, opener = client(FakeResponse(body))
+        found = x_api.lookup(c, ["2102736605039776235", "2102145678901234567", "bad"])
+        self.assertEqual([(p["id"], p["author"]) for p in found], [("2102736605039776235", "sidchhaya")])
+        self.assertEqual(round(c.cost, 4), 0.015)
+        query = parse_qs(urlsplit(opener.requests[0].full_url).query)
+        self.assertEqual(query["ids"], ["2102736605039776235,2102145678901234567"])
+        c, opener = client(FakeResponse({"errors": [{"title": "Not Found Error"}]}))
+        self.assertEqual(x_api.lookup(c, ["2102145678901234567"]), [])
+        self.assertEqual(x_api.lookup(c, []), [])
+
     def test_kind_and_nonorganic_share(self) -> None:
         uid = x_api.USER_ID
         self.assertEqual(x_api.kind({}), "original")
