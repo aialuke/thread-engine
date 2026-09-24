@@ -40,7 +40,7 @@ Run `python3 scripts/loop.py next-slot`.
 
 ## 4. Pick the topic
 
-1. Lane: read `reference/audience.md`. If `lane.share` is below 0.8 (12 of 15), the next post must be `main`.
+1. Lane: read `reference/audience.md`. Say the `lane.share` in one line. While the operator trials formats, a share below 0.8 (12 of 15) is reported, not a reason to refuse an `other` post.
 2. Demand: run one or two searches for recent questions in the lane (for example `"how do I" free video editor lang:en -filter:replies`). Use `x_keyword_search` when this session has it; otherwise run `python3 scripts/x_read.py search "<query>"`. Record each hit as a lead: post id, the query, and that the search returns at most 10. Leads are not proof of demand.
 3. Queue: consider `status: queued` rows in `queue/topics.yaml`.
 4. Timing: propose a posting time in Australia/Brisbane. Say how many hours since the last original; there is no fixed minimum.

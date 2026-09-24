@@ -27,13 +27,16 @@ Device and settings tips count as `main` only when they come from the build (for
 
 Everything else is `other`: networking and connect posts, personal banter, opinions with no builder angle (party politics included), and device tips with no link to the build.
 
-`other` posts are allowed. The topic-share check in the algorithm reference (fact A8) counts the last 15 **originals**; replies don't count. Keep at least 12 of the last 15 originals in `main`. The 80% is an editorial choice, not a proven algorithm threshold.
+`other` posts are allowed. The topic-share check in the algorithm reference (fact A8) counts the last 15 **originals**; replies don't count. The target is at least 12 of the last 15 originals in `main`, an editorial choice, not a proven algorithm threshold.
+
+**While the operator trials formats** (settings threads, comparisons and single tips included), the share is **reported, not enforced**. Every post keeps its lane label, so the review can show how each lane performs.
 
 ## Replies
 
 Replies bring most of the account's reach. They work toward this promise when they are:
 - specific replies to builders' progress posts (name the project, ask a real question);
-- early, substantive replies in big AI and tool conversations.
+- early, substantive replies in big AI and tool conversations;
+- news and politics takes when the story connects to tech (voice rules in `voice/exit-zero.md`).
 
 ## Before 24 Sep
 

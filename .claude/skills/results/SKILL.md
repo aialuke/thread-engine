@@ -16,7 +16,7 @@ Plain English. No JSON, no code in what the operator reads. Say "not enough data
 3. Otherwise write `reviews/week-YYYY-Www.md` (ISO week, Australia/Brisbane) with these sections, each a few lines:
    - **Posts this week.** Table: posted, slug, format, views, bookmarks, outside replies, snapshot kind. Late or missed snapshots are named, not hidden.
    - **Experiment.** The open one: its question, rounds so far, posts still needed. Closed ones: result and lesson id.
-   - **Lane.** `lane-share`: main posts out of the last 15. Below 12 means the next posts go to `main`.
+   - **Lane.** `lane-share`: main posts out of the last 15, against the target of 12. While the operator trials formats this is reported, not enforced; say how `main` and `other` posts compare on organic reach and profile visits.
    - **Spacing.** Hours between originals this week, as observations only.
    - **Your edits.** Group this week's `preference` edits by kind across all ledger posts. A kind seen on 3 or more posts is a candidate: propose it as one sentence. On the operator's yes, run `python3 scripts/loop.py add-preference --statement "<sentence>" --evidence <ids>`. List `violation` edits separately and say the gate may need a new refusal; that change is made in a Claude Code session, not here.
    - **Reader questions.** From outside repliers in the week's snapshots, up to 3 questions worth answering, each with the point a reply should make. Never a paste-ready reply: the operator writes it.

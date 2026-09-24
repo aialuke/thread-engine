@@ -38,5 +38,18 @@ Every figure is sourced this session: an official page, `PATHS.md` / `CLAIMS.md`
 
 ## Replies
 
-- Never post the same reply twice, and never reply in bulk.
-- Grok may suggest what a reply should say. The operator writes it in their own words (the reply scorer sees whether a reply was pasted, algorithm fact A12).
+- Never post the same reply twice, and never reply in bulk. On 22 Sep one line went out 12 times in 3 minutes, and a bare "👋" 6 times; duplicate reply text is clustered as spam (algorithm fact A13).
+- Keep volume to what the operator would write by hand. The reply scorer sees the last 24 hours' reply count (A12); the peak so far was 68.
+- Grok may suggest what a reply should say. The operator writes it in their own words (the reply scorer also sees whether a reply was pasted, A12).
+- Politics and news: reply from this account when the story connects to tech (for example OpenAI and the government breach). Political replies with no tech link are the operator's call.
+
+## Networking
+
+- Personal networking, yes: reply to a builder's progress post by naming the project and asking a real question.
+- Bare "👋", repeated lines and "drop a hi" posts, no.
+- An occasional connect post is allowed in the `other` lane, at most 1 in 15 originals, written for that moment.
+
+## Boosting
+
+- No boosts until the profile and pinned post match the builder audience in `reference/audience.md`.
+- Never boost a post that's part of an experiment. The loop marks any post with more than 10% non-organic reach and keeps it out of comparisons.
