@@ -12,11 +12,12 @@ disable-model-invocation: true
 
 Plain English. No JSON, no code in what the operator reads. Say "not enough data yet" whenever it is true.
 
-1. Run `python3 scripts/loop.py status` and `python3 scripts/loop.py evaluate`. Read `ledger/SUMMARY.md`, `experiments.md`, `learnings.md`, and the last review in `reviews/`.
-2. If the operator only wanted numbers (typed `/results` and no review is due), print the last 7 days from `ledger/SUMMARY.md` as a short table and stop.
-3. Otherwise write `reviews/week-YYYY-Www.md` (ISO week, Australia/Brisbane) with these sections, each a few lines:
-   - **Posts this week.** Table from `ledger/SUMMARY.md`: posted, slug, format, lane, organic impressions, non-organic %, profile visits, bookmarks, outside replies, credited follows, snapshot kind. Name late or missed reads and any post marked non-organic (boosted or otherwise); non-organic posts never count as wins.
-   - **Followers.** From the Account block in `ledger/SUMMARY.md`: followers now, new and lost this week, how many new followers were credited to something they engaged with (a lower bound), and follows per profile visit. If the operator dropped an X analytics export in `loop/inbox/`, compare its per-post "New follows" with the credited follows and say how far apart they are.
+1. If the operator has exported X analytics (a file named `account_analytics_content_*.csv` in `~/Downloads`), move the newest one into `loop/inbox/` and run `python3 scripts/loop.py record-export --csv loop/inbox/<file>`. Its per-post "New follows" become the exact follow numbers. If there is none from the last 7 days, ask the operator once to export it: X on a computer → Premium → Analytics → Content → Export, last 7 days.
+2. Run `python3 scripts/loop.py status` and `python3 scripts/loop.py evaluate`. Read `ledger/SUMMARY.md`, `experiments.md`, `learnings.md`, and the last review in `reviews/`.
+3. If the operator only wanted numbers (typed `/results` and no review is due), print the last 7 days from `ledger/SUMMARY.md` as a short table and stop.
+4. Otherwise write `reviews/week-YYYY-Www.md` (ISO week, Australia/Brisbane) with these sections, each a few lines:
+   - **Posts this week.** Table from `ledger/SUMMARY.md`: posted, slug, format, lane, organic impressions, non-organic %, profile visits, bookmarks, outside replies, follows, snapshot kind. Name late or missed reads and any post marked non-organic (boosted or otherwise); non-organic posts never count as wins.
+   - **Followers.** From the Account block in `ledger/SUMMARY.md`: followers now, new and lost this week, follows per profile visit, and which posts and replies brought the new followers (exact from the export; otherwise the credited lower bound). Say how far the credited count is from the export's, so the matching can be trusted or not.
    - **Replies.** From this week's `reply` rows in `ledger/activity/`: how many, their organic reach, and their profile visits, grouped by topic (read the account's own reply text and X's labels). Name the reply that earned the most visits. Flag any reply text used twice and the busiest 24 hours of replies (`voice/exit-zero.md`).
    - **Experiment.** The open one: its question, rounds so far, posts still needed. Closed ones: result and lesson id.
    - **Lane.** `lane-share`: main posts out of the last 15, against the target of 12. While the operator trials formats this is reported, not enforced; say how `main` and `other` posts compare on organic reach and profile visits.
@@ -27,5 +28,5 @@ Plain English. No JSON, no code in what the operator reads. Say "not enough data
    - **Rule changes proposed.** At most two, each tied to an `adopted` lesson with rule state `none`: the lesson id, the file under `.claude/skills/` or `voice/`, and the exact sentence to add or change. Say: "Type /apply <lesson id> to make this change, or ignore it."
    - **Reverts proposed.** An applied rule whose next 3 posts all fell below their experiment bar or cohort median: say so and "Type /undo-rule <lesson id> to revert."
    - **Profile.** Run `python3 scripts/x_api.py me`. Say whether the bio and the pinned post match `reference/audience.md`. If not, suggest a one-sentence bio and a pin with no link or a well-known link (algorithm fact A14).
-4. Run `python3 scripts/loop.py mark-reviewed`, then `python3 scripts/loop.py commit-data --message "weekly review YYYY-Www"`.
-5. Tell the operator the three things that matter most, in three sentences, and where the full review is.
+5. Run `python3 scripts/loop.py mark-reviewed`, then `python3 scripts/loop.py commit-data --message "weekly review YYYY-Www"`.
+6. Tell the operator the three things that matter most, in three sentences, and where the full review is.

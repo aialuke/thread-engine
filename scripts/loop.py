@@ -17,6 +17,7 @@ X API data (from snapshot.py) lands in three places:
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
 import re
@@ -57,6 +58,11 @@ ITEM_KINDS = {"original", "quote", "reply", "thread_card", "repost"}
 READ_STAGES = {"backfill", "48h", "final"}
 PUBLIC_KEYS = ("impressions", "likes", "replies", "reposts", "quotes", "bookmarks")
 ORGANIC_KEYS = ("impressions", "likes", "replies", "reposts", "profile_visits", "url_clicks")
+# X's analytics export (Analytics → Content → Export): organic, per post, with the follows and
+# shares the pay-per-use API cannot read (reference/x-api.md P11).
+EXPORT_COLUMNS = {"Impressions": "impressions", "Likes": "likes", "Replies": "replies", "Reposts": "reposts",
+                  "Bookmarks": "bookmarks", "Shares": "shares", "New follows": "new_follows",
+                  "Profile visits": "profile_visits"}
 POST_ID_RE = re.compile(r"^[0-9]{5,25}$")
 LESSON_RE = re.compile(r"^L-[0-9]{3}$")
 
@@ -476,6 +482,38 @@ def cmd_record_activity(repo: Repo, args) -> dict:
             api[key] = iso(parse_time(payload["cursor"][key]))
     repo.save_state(state)
     return {"recorded": recorded, "stage": stage, "cursors": api}
+
+
+def cmd_record_export(repo: Repo, args) -> dict:
+    """Add an X analytics export's per-post numbers to the activity rows. The latest export wins,
+    because X's numbers are cumulative per post."""
+    path = Path(args.csv)
+    need(path.is_file(), f"missing {path}")
+    with path.open(encoding="utf-8-sig", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    need(bool(rows) and "Post id" in rows[0] and "New follows" in rows[0],
+         "not an X analytics content export: no 'Post id' or 'New follows' column")
+    at = iso(now_arg(args.now))
+    months: dict[str, dict] = {}
+    for month_path in sorted(repo.activity_dir.glob("????-??.json")) if repo.activity_dir.is_dir() else []:
+        months[month_path.stem] = read_json(month_path)
+    recorded, unknown = 0, 0
+    for row in rows:
+        item_id = str(row.get("Post id", "")).strip()
+        month = next((m for m, data in months.items() if item_id in data["items"]), None)
+        if month is None:
+            unknown += 1
+            continue
+        numbers = {}
+        for column, key in EXPORT_COLUMNS.items():
+            raw = (row.get(column) or "0").replace(",", "").strip()
+            need(raw.isdigit(), f"{item_id}: {column} is not a whole number")
+            numbers[key] = int(raw)
+        months[month]["items"][item_id].setdefault("reads", {})["export"] = {"at": at, "file": path.name, **numbers}
+        recorded += 1
+    for month, data in months.items():
+        write_json(repo.activity_dir / f"{month}.json", data)
+    return {"recorded": recorded, "not_in_activity": unknown, "file": path.name}
 
 
 def _note_person(people: dict, user_id: str, item_id: str, at: str, how: str) -> None:
@@ -953,6 +991,17 @@ def credited_follows(root_id: str, rows: dict[str, dict], days: list[dict]) -> i
     return total
 
 
+def follows_cell(root_id: str, rows: dict[str, dict], days: list[dict]) -> str:
+    """X's exported follows for the post and its thread cards when known; else the credited lower bound."""
+    group = [r for r in rows.values() if r["id"] == root_id or
+             (r.get("conversation_id") == root_id and r.get("kind") == "thread_card")]
+    exported = [r["reads"]["export"]["new_follows"] for r in group if "export" in r.get("reads", {})]
+    if exported:
+        return str(sum(exported))
+    credited = credited_follows(root_id, rows, days)
+    return f"≥{credited}" if credited else "–"
+
+
 def account_lines(rows: dict[str, dict], days: list[dict]) -> list[str]:
     if not days:
         return []
@@ -972,8 +1021,8 @@ def account_lines(rows: dict[str, dict], days: list[dict]) -> list[str]:
     visits = sum((best_read(r) or {}).get("organic", {}).get("profile_visits") or 0 for r in recent)
     if visits and compared:
         lines.append(f"Follows per profile visit, items from those 7 days: {new} / {visits}.\n\n")
-    lines += ["| Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 |\n",
-              "|---|---:|---:|---:|---:|---:|\n"]
+    lines += ["| Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 | New follows (X export) |\n",
+              "|---|---:|---:|---:|---:|---:|---:|\n"]
     topics: dict[str, int] = {}
     for kind in ("original", "quote", "reply", "thread_card"):
         group = [r for r in recent if r["kind"] == kind]
@@ -984,7 +1033,9 @@ def account_lines(rows: dict[str, dict], days: list[dict]) -> list[str]:
         visited = sum(o.get("profile_visits") or 0 for o in reads)
         likes = sum(o.get("likes") or 0 for o in reads)
         rate = f"{visited * 1000 / impressions:.1f}" if impressions >= MIN_RATE_IMPRESSIONS else "–"
-        lines.append(f"| {kind.replace('_', ' ')} | {len(group)} | {impressions} | {visited} | {likes} | {rate} |\n")
+        exported = [r["reads"]["export"]["new_follows"] for r in group if "export" in r.get("reads", {})]
+        follows = str(sum(exported)) if exported else "–"
+        lines.append(f"| {kind.replace('_', ' ')} | {len(group)} | {impressions} | {visited} | {likes} | {rate} | {follows} |\n")
     for r in recent:
         organic = (best_read(r) or {}).get("organic", {}).get("impressions") or 0
         for topic in r.get("topics", []):
@@ -1008,7 +1059,8 @@ def render(repo: Repo) -> None:
     lines = [head, "# Ledger summary\n\n",
              "Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snapshot, else the latest late one. "
              "Organic, Non-organic and Visits come from the X API read at 36–60 hours, else the September backfill. "
-             "Follows are new followers credited to the post or its conversation, a lower bound. "
+             "Follows are from X's analytics export (the post and its thread cards) when one has been recorded; "
+             "≥n is the lower bound from matching new followers to who engaged. "
              "A leading ≥ means X search returned fewer reply authors than the reply count.\n\n",
              "| Posted | Slug | Format | Lane | Experiment | Views | Organic | Non-organic | Visits | Bookmarks | "
              "Outside replies | Follows | Snapshot |\n",
@@ -1025,7 +1077,7 @@ def render(repo: Repo) -> None:
         lines.append(f"| {local(post['posted_at'])} | {post['slug']} | {post['format']} | {post['lane']} | {exp} | "
                      f"{fmt(root.get('views'))} | {fmt(organic.get('impressions'))} | {nonorganic_pct(read)} | "
                      f"{fmt(organic.get('profile_visits'))} | {fmt(root.get('bookmarks'))} | "
-                     f"{fmt_replies(snap)} | {credited_follows(post['root_id'], rows, days)} | {where} |\n")
+                     f"{fmt_replies(snap)} | {follows_cell(post['root_id'], rows, days)} | {where} |\n")
     lines += account_lines(rows, days)
     atomic_write(repo.ledger_dir / "SUMMARY.md", "".join(lines))
 
@@ -1073,6 +1125,7 @@ COMMANDS = {
     "record-interactions": cmd_record_interactions,
     "record-followers": cmd_record_followers,
     "set-lane": cmd_set_lane,
+    "record-export": cmd_record_export,
     "open-experiment": cmd_open_experiment,
     "evaluate": cmd_evaluate,
     "next-slot": cmd_next_slot,
@@ -1118,6 +1171,8 @@ def build_parser() -> argparse.ArgumentParser:
             sp.add_argument("--reason", required=True)
         if name == "set-lane":
             sp.add_argument("--lane", required=True)
+        if name == "record-export":
+            sp.add_argument("--csv", required=True, help="X analytics content export")
         if name == "add-preference":
             sp.add_argument("--statement", required=True)
             sp.add_argument("--evidence", required=True, help="comma-separated post ids")

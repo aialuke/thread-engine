@@ -374,6 +374,23 @@ class ApiData(LoopCase):
         for private in ("501", "502", "503", "400"):
             self.assertNotIn(f'"{private}"', committed)
 
+    def test_export_gives_exact_follows_for_post_and_its_cards(self) -> None:
+        self.post("9500000001", T0)
+        self.activity("48h", hours(40), [self.item("9500000001", T0, kind="original"),
+                                         self.item("9500000002", T0, kind="thread_card", conv="9500000001"),
+                                         self.item("9500000003", T0, conv="7000000000")])
+        export = self.root / "export.csv"
+        export.write_text("\ufeffPost id,Date,Post text,Impressions,Likes,Replies,Reposts,Bookmarks,Shares,New follows,Profile visits\n"
+                          "9500000001,x,t,855,24,32,0,0,0,13,20\n9500000002,x,t,10,0,0,0,0,0,1,0\n"
+                          "9500000003,x,t,40,0,0,0,0,0,2,0\n9599999999,x,t,1,0,0,0,0,0,0,0\n", encoding="utf-8")
+        made = self.ok("record-export", "--csv", str(export))
+        self.assertEqual((made["recorded"], made["not_in_activity"]), (3, 1))
+        row = next(l for l in (self.root / "ledger" / "SUMMARY.md").read_text().splitlines() if "s001" in l)
+        self.assertEqual(row.rstrip(" |").split("|")[-2].strip(), "14", row)
+        bad = self.root / "other.csv"
+        bad.write_text("a,b\n1,2\n", encoding="utf-8")
+        self.assertIn("not an X analytics", self.fails("record-export", "--csv", str(bad)))
+
     def test_interactions_prune_old_people(self) -> None:
         self.ok("record-interactions", "--json", self.payload({
             "observed_at": hours(0), "reply_targets": [{"item_id": "9000000020", "user_id": "600", "at": hours(0)}]}))
@@ -425,7 +442,7 @@ class ApiData(LoopCase):
         summary = (self.root / "ledger" / "SUMMARY.md").read_text()
         row = next(line for line in summary.splitlines() if "s001" in line)
         self.assertIn("| 90 | 10% | 3 |", row)
-        self.assertTrue(row.rstrip(" |").split("|")[-2].strip() == "1", row)
+        self.assertEqual(row.rstrip(" |").split("|")[-2].strip(), "≥1", row)
         self.assertIn("## Account", summary)
         self.assertIn("1 new, 0 lost; 1 of the new credited", summary)
 

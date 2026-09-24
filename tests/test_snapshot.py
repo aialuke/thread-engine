@@ -155,7 +155,7 @@ class DailyRun(unittest.TestCase):
         self.assertIn("1 of the new credited", out)
         summary = (self.root / "ledger" / "SUMMARY.md").read_text()
         row = next(line for line in summary.splitlines() if "x-1000000001" in line)
-        self.assertEqual(row.split("|")[12].strip(), "1")
+        self.assertEqual(row.split("|")[12].strip(), "≥1")
 
     def test_final_read_at_26_days(self) -> None:
         old = tweet("1000000009", 24 * 27, organic=300)

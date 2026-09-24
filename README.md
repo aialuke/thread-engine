@@ -16,6 +16,7 @@ Numbers are collected automatically by the daily job: every post, reply and quot
 ## Learning
 
 - **`/results`** shows recent numbers any time. Once a week, `/next` writes a review in `reviews/` for you.
+- **Once a week, export your X analytics:** on a computer, X → Premium → Analytics → Content → Export, last 7 days. Leave the file in Downloads; `/results` picks it up. It's the only way to see which posts bring new followers.
 - Each review can propose up to two rule changes, each backed by a test. **`/apply <lesson>`** accepts one. **`/undo-rule <lesson>`** takes it back.
 - One experiment runs at a time. A result needs 3 posts to look promising and 3 more to be adopted. With one or two posts a day, expect about one answer every week or two.
 - **Experiments are paused until there are two weeks of organic numbers** (from 24 Sep 2026). Until then, posts are recorded and compared, but nothing is declared a winner.

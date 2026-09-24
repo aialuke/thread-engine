@@ -24,6 +24,13 @@ This is what the X API can and cannot tell the loop about the account's own post
 | P12 | `context_annotations` gives X's own entity and topic labels for each post (e.g. "Computer software", "Animation"). | Live test | Topic mix in reviews. **A proxy**: it's not the topic-share classifier in `x-algorithm.md` A8. |
 | P13 | The account's user ID is `1994313953191833600`. | Live test (`/2/users/me`) | Hardcoded in `x_api.py`. |
 
+## X's analytics export has what the API doesn't
+
+On a computer, X → Premium → Analytics → Content → Export gives a CSV (`account_analytics_content_<from>_<to>.csv`) with one row per post and reply. Columns: Post id, Date, Post text, Post Link, Impressions, Likes, Engagements, Bookmarks, **Shares**, **New follows**, Replies, Reposts, **Profile visits**, Detail Expands, URL Clicks, Hashtag Clicks, Permalink Clicks. Checked 24 Sep 2026 on the export for 18–24 Sep.
+- Its numbers are organic. The boosted tool-swap shows 98 impressions, against the API's organic 99 and public 2,105.
+- Its profile visits match the API's (58 total).
+- `loop.py record-export --csv <file>` adds each row to the activity file; the latest export wins, because X's numbers are cumulative per post. **The export is the exact per-post follow source.** The matching below is the fallback between exports.
+
 ## Follow credit without the analytics endpoint
 
 The loop compares follower IDs day to day. Each new follower is credited once, to the most recent of: replying to one of our posts (from mentions), or being an account one of our replies went to (`in_reply_to_user_id`). Anyone who followed without either stays unattributed, so per-post credit is a lower bound. Quoters aren't matched: a quote that doesn't tag us never appears in mentions.
