@@ -29,8 +29,24 @@ LEAD_NUMBER_RE = re.compile(r"^(?:Setting\s+(\d+)\b|(\d+)\.\s)")
 VERIFY_RE = re.compile(r"\bVERIFY\b")
 FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "build-log", "tool-verdict"}
 # Formats whose skill caps the root at 600 characters (a stranger sees only the root, algorithm facts A1-A2).
-ROOT_LIMIT_FORMATS = {"settings", "single-tip", "build-log", "tool-verdict"}
+ROOT_LIMIT_FORMATS = {"settings", "single-tip", "build-log", "tool-verdict", "tool-swap"}
 ROOT_LIMIT = 600
+SHORT_LIMIT = 280
+# X's weighted length (twitter-text v3): these code points count 1, every other one 2 (so → ▷ and emoji
+# count 2), and a link counts 23. X cut post 1 of PAID → FREE at 277 by this count, 270 by Python's.
+X_ONE_WEIGHT = ((0, 4351), (8192, 8205), (8208, 8223), (8242, 8247))
+URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
+X_URL_LENGTH = 23
+# The PAID → FREE series header (.claude/skills/format-tool-swap/SKILL.md). Every tool-swap root opens with it.
+SWAP_LABEL = "PAID → FREE"
+SWAP_WORDS = ("creator", "productivity", "developer", "privacy", "system", "storage", "diagram", "finance",
+              "local AI", "self-hosting", "support")
+SWAP_STEM_RE = re.compile(r"Finding free (?:" + "|".join(re.escape(w) for w in SWAP_WORDS)
+                          + r") tools that actually hold up\.")
+HANDLE_RE = re.compile(r"(?<![\w@])@\w{1,15}")
+HASHTAG_RE = re.compile(r"(?<![\w&#])#[^\W\d]\w*")
+PART_RE = re.compile(r"^\s*(\d{1,2})/(\d{1,2})\b|\b(\d{1,2})/(\d{1,2})\s*$", re.MULTILINE)
+SHOUTOUT_WAIT = "Wait 10–20 minutes after card 1, then post card 2 as a reply (the shout-out)."
 DIGEST_RE = re.compile(r"^cards-sha256:\s*([0-9a-f]{64})\s*$", re.MULTILINE)
 THOUGHTS_RE = re.compile(r"your thoughts", re.IGNORECASE)
 # X's Original Content Rewards rules: "Do not solicit engagements: repeatedly instructing users to engage
@@ -45,7 +61,45 @@ SOLICIT_RE = re.compile(
     r"|\bsave this (?:post|thread|tweet|for later|before)"
     r"|\bcomment below\b|\breply with\b|\btag (?:a friend|someone|your)",
     re.IGNORECASE)
-BANNED_RE = re.compile(r"game changer|most people don['’]?t know|wait for it|🚨|🔥|👇", re.IGNORECASE)
+BANNED_RE = re.compile(r"game changer|most people don['’]?t know|wait for it|🚨|🔥|👇"
+                       r"|juggernaut|neural graph|zero server dependenc(?:y|ies)|hollywood[- ]grade"
+                       r"|drop-in replacement|let['’]?s grow together", re.IGNORECASE)
+
+
+def x_length(text: str) -> int:
+    """Characters as X counts them. Emoji sequences are approximate (counted per code point)."""
+    links = URL_RE.findall(text)
+    rest = URL_RE.sub("", text)
+    weight = sum(1 if any(lo <= ord(ch) <= hi for lo, hi in X_ONE_WEIGHT) else 2 for ch in rest)
+    return weight + X_URL_LENGTH * len(links)
+
+
+def thread_part(text: str) -> str | None:
+    """A thread counter like 1/5 at the start or end of a line; 24/7 is not one."""
+    for match in PART_RE.finditer(text):
+        first, total = (match.group(1), match.group(2)) if match.group(1) else (match.group(3), match.group(4))
+        if 1 <= int(first) <= int(total) and int(total) > 1:
+            return match.group(0).strip()
+    return None
+
+
+def swap_root_refusals(text: str) -> list[str]:
+    reasons: list[str] = []
+    lines = text.splitlines()
+    header_ok = (len(lines) >= 2 and lines[0].strip() == SWAP_LABEL and bool(SWAP_STEM_RE.fullmatch(lines[1].strip())))
+    if not header_ok:
+        reasons.append(f"REFUSED: a tool-swap root opens with the series header: '{SWAP_LABEL}', then "
+                       f"'Finding free <word> tools that actually hold up.' with <word> one of: {', '.join(SWAP_WORDS)}")
+    handle = HANDLE_RE.search(text)
+    if handle:
+        reasons.append(f"REFUSED: {handle.group(0)} in the tool-swap root; handles go in the shout-out card only")
+    tag = HASHTAG_RE.search(text)
+    if tag:
+        reasons.append(f"REFUSED: hashtag {tag.group(0)} in the tool-swap root")
+    part = thread_part(text)
+    if part:
+        reasons.append(f"REFUSED: thread counter {part!r} in the tool-swap root")
+    return reasons
 
 
 def _add_hint(hints: list[str], seen: set[str], raw: str) -> None:
@@ -133,8 +187,11 @@ def card_refusals(draft: Path, found: list[Path]) -> list[str]:
         text = tweet_text(card)
         if fmt == "settings" and card.name == "01-hook.md" and setup_day_open(text):
             reasons.append("REFUSED: hook opens on the setup-day line")
-        if fmt in ROOT_LIMIT_FORMATS and card.name == "01-hook.md" and len(text) > ROOT_LIMIT:
-            reasons.append(f"REFUSED: 01-hook.md is {len(text)} characters; the {fmt} format caps the root at {ROOT_LIMIT}")
+        if fmt in ROOT_LIMIT_FORMATS and card.name == "01-hook.md" and x_length(text) > ROOT_LIMIT:
+            reasons.append(f"REFUSED: 01-hook.md is {x_length(text)} characters as X counts them; "
+                           f"the {fmt} format caps the root at {ROOT_LIMIT}")
+        if fmt == "tool-swap" and card.name == "01-hook.md":
+            reasons.extend(swap_root_refusals(text))
         if VERIFY_RE.search(text):
             reasons.append(f"REFUSED: VERIFY in {card.name}")
         if "💬" in text:
@@ -213,18 +270,34 @@ def run_sheet(draft: Path, found: list[Path]) -> str:
     over_short_limit = False
     for index, card in enumerate(found, start=1):
         text = tweet_text(card)
-        if len(text) > 280:
+        if x_length(text) > SHORT_LIMIT:
             over_short_limit = True
-        row = f"{index}  {len(text)}  {card.name}"
+        row = f"{index}  {x_length(text)}  {card.name}"
         hints = media_hints(draft, card, text)
         if hints:
             row += "  attach " + ", ".join(hints)
         rows.append(row)
     if over_short_limit:
         lines.append(LONG_POST)
+    if draft_format(draft) == "tool-swap" and len(found) > 1:
+        lines.append(SHOUTOUT_WAIT)
     lines.append("")
     lines.extend(rows)
     return "\n".join(lines) + "\n"
+
+
+def count_sheet(draft: Path, found: list[Path]) -> str:
+    fmt = draft_format(draft)
+    rows = ["Characters as X counts them (→, ▷ and emoji count 2; a link counts 23)."]
+    for card in found:
+        length = x_length(tweet_text(card))
+        notes = []
+        if length > SHORT_LIMIT:
+            notes.append("over 280: a free account can't post it, and the feed shows the start then 'Show more'")
+        if fmt in ROOT_LIMIT_FORMATS and card.name == "01-hook.md" and length > ROOT_LIMIT:
+            notes.append(f"over the {fmt} root cap of {ROOT_LIMIT}")
+        rows.append(f"{length}  {card.name}" + (f"  ({'; '.join(notes)})" if notes else ""))
+    return "\n".join(rows) + "\n"
 
 
 def copy_utf8(data: bytes) -> None:
@@ -247,6 +320,8 @@ def copy_message(draft: Path, found: list[Path], number: int) -> str:
         opening = first_line(text)
         if opening:
             rows.append("open: " + opening)
+    if number == 1 and len(found) > 1 and draft_format(draft) == "tool-swap":
+        rows.append("wait: " + SHOUTOUT_WAIT)
     if number < len(found):
         rows.append(f"next: python3 scripts/post_thread.py {draft} --copy {number + 1}")
     else:
@@ -276,6 +351,11 @@ def main(
         help="Print the JSON payload to stdout. Still writes POST.txt.",
     )
     parser.add_argument(
+        "--count",
+        action="store_true",
+        help="Print each card's length as X counts it. Needs no approval and writes nothing.",
+    )
+    parser.add_argument(
         "--copy",
         type=int,
         default=None,
@@ -288,6 +368,14 @@ def main(
     if not draft.is_dir():
         print(f"REFUSED: not a draft folder {draft}", file=sys.stderr)
         return 1
+
+    if args.count:
+        counted = cards(draft)
+        if not counted:
+            print(f"REFUSED: no numbered cards in {draft}", file=sys.stderr)
+            return 1
+        sys.stdout.write(count_sheet(draft, counted))
+        return 0
 
     if not (draft / "APPROVED").is_file():
         print("human gate")

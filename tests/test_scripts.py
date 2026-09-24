@@ -51,6 +51,25 @@ def _reads_environ(path: Path) -> bool:
     return False
 
 
+SWAP_HEADER = "PAID → FREE\nFinding free creator tools that actually hold up."
+POST_ONE = SWAP_HEADER + """
+
+Photoshop → Photopea
+▷ Browser editor. Opens PSDs.
+
+Premiere Pro → DaVinci Resolve
+▷ Edit, colour, and audio. No watermark.
+
+After Effects → Blender
+▷ 3D and motion. Modelling, animation, render.
+
+Streamlabs Ultra → OBS Studio
+▷ Record and stream. Scenes, camera, separate audio.
+
+Procreate → Krita
+▷ Painting and illustration. Desktop and Android."""
+
+
 class ImportGate(unittest.TestCase):
     def test_post_thread_has_no_http_imports(self) -> None:
         tops = _imported_tops(SCRIPTS / "post_thread.py")
@@ -443,7 +462,7 @@ class FormatAndApproval(unittest.TestCase):
         return draft
 
     def test_most_refused_for_settings_only(self) -> None:
-        for fmt, expected in (("settings", 1), (None, 1), ("tool-swap", 0), ("single-tip", 0), ("comparison", 0),
+        for fmt, expected in (("settings", 1), (None, 1), ("single-tip", 0), ("comparison", 0),
                               ("build-log", 0), ("tool-verdict", 0)):
             draft = self._single(fmt, "Most free editors hold up.\n")
             code, _out, err = self._run(self.post.main, [str(draft)])
@@ -452,8 +471,11 @@ class FormatAndApproval(unittest.TestCase):
     def test_root_over_600_refused_where_the_format_caps_it(self) -> None:
         long_root = "A result. " * 61  # 610 characters
         for fmt, expected in (("settings", 1), ("single-tip", 1), ("build-log", 1), ("tool-verdict", 1),
-                              ("comparison", 0), ("tool-swap", 0)):
-            draft = self._single(fmt, long_root.strip() + "\n")
+                              ("comparison", 0), ("tool-swap", 1)):
+            text = long_root.strip() + "\n"
+            if fmt == "tool-swap":
+                text = SWAP_HEADER + "\n" + text
+            draft = self._single(fmt, text)
             code, _out, err = self._run(self.post.main, [str(draft)])
             self.assertEqual(code, expected, (fmt, err))
             if expected:
@@ -485,6 +507,102 @@ class FormatAndApproval(unittest.TestCase):
             self._approve(draft)
             code, _out, err = self._run(self.post.main, [str(draft)])
             self.assertEqual(code, expected, (text, err))
+
+    def test_root_cap_counts_as_x_does(self) -> None:
+        # 300 arrows are 300 characters to Python and 600 to X; one more is over the cap.
+        self.assertEqual(self.post.x_length("→" * 300), 600)
+        self.assertEqual(self.post.x_length("a–b’c"), 5)  # en dash and curly quote count 1
+        self.assertEqual(self.post.x_length("…"), 2)  # the ellipsis is outside X's one-weight ranges
+        self.assertEqual(self.post.x_length("see https://example.com/a/very/long/path/indeed ok"), 4 + 23 + 3)
+        self.assertEqual(self.post.x_length("🔥"), 2)
+        self.assertEqual(self._run(self.post.main, [str(self._single("single-tip", "→" * 300 + "\n"))])[0], 0)
+        code, _out, err = self._run(self.post.main, [str(self._single("build-log", "→" * 301 + "\n"))])
+        self.assertEqual(code, 1)
+        self.assertIn("602 characters as X counts them", err)
+
+    def test_post_one_cut_point_matches_x(self) -> None:
+        # X's API cut post 1's text here: 270 characters to Python, 277 to X; " Ultra" would make 283.
+        self.assertEqual(self.post.x_length(POST_ONE[:270]), 277)
+        self.assertTrue(POST_ONE[:270].endswith("Streamlabs"))
+        self.assertEqual(self.post.x_length(POST_ONE), 422)
+
+    def test_tool_swap_root_needs_the_series_header(self) -> None:
+        cases = ((POST_ONE, 0),
+                 (POST_ONE.replace("creator", "local AI"), 0),
+                 (POST_ONE.replace("creator", "video"), 1),
+                 (POST_ONE.replace("PAID → FREE", "Stop paying for subscriptions."), 1),
+                 ("Stop paying for these. Here are 10 FREE alternatives.\n", 1))
+        for i, (text, expected) in enumerate(cases):
+            draft = self.root / f"swap-header-{i}"
+            draft.mkdir()
+            (draft / "FORMAT").write_text("tool-swap\n", encoding="utf-8")
+            (draft / "01-hook.md").write_text(text + "\n", encoding="utf-8")
+            self._approve(draft)
+            code, _out, err = self._run(self.post.main, [str(draft)])
+            self.assertEqual(code, expected, (text[:40], err))
+            if expected:
+                self.assertIn("opens with the series header", err)
+
+    def test_tool_swap_root_refuses_handles_hashtags_and_counters(self) -> None:
+        cases = (("Photoshop → Photopea @photopeacom", "@photopeacom"), ("Free tools #free", "hashtag #free"),
+                 ("🧵 1/5", "thread counter"), ("Runs 24/7 on a Pi", None), ("C# and F# both work", None),
+                 ("Mail a@b.com for help", None))
+        for i, (line, refusal) in enumerate(cases):
+            draft = self.root / f"swap-root-{i}"
+            draft.mkdir()
+            (draft / "FORMAT").write_text("tool-swap\n", encoding="utf-8")
+            (draft / "01-hook.md").write_text(SWAP_HEADER + "\n\n" + line + "\n", encoding="utf-8")
+            (draft / "02-shoutout.md").write_text("@photopeacom thanks for answering people.\n", encoding="utf-8")
+            self._approve(draft)
+            code, _out, err = self._run(self.post.main, [str(draft)])
+            self.assertEqual(code, 1 if refusal else 0, (line, err))
+            if refusal:
+                self.assertIn(refusal, err)
+
+    def test_brochure_and_flyer_phrases_refused_in_every_format(self) -> None:
+        for i, text in enumerate(("An open-source juggernaut.", "A neural graph of notes.",
+                                  "Zero server dependency.", "Hollywood-grade colour.", "A drop-in replacement.",
+                                  "Hey, let's grow together.")):
+            draft = self.root / f"brochure-{i}"
+            draft.mkdir()
+            (draft / "FORMAT").write_text(("comparison", "settings", "single-tip")[i % 3] + "\n", encoding="utf-8")
+            (draft / "01-hook.md").write_text(text + "\n", encoding="utf-8")
+            self._approve(draft)
+            code, _out, err = self._run(self.post.main, [str(draft)])
+            self.assertEqual(code, 1, text)
+            self.assertIn("banned phrase", err)
+
+    def test_tool_swap_run_sheet_and_copy_say_to_wait_for_the_shoutout(self) -> None:
+        draft = self.root / "swap"
+        draft.mkdir()
+        (draft / "FORMAT").write_text("tool-swap\n", encoding="utf-8")
+        (draft / "01-hook.md").write_text(POST_ONE + "\n", encoding="utf-8")
+        (draft / "02-shoutout.md").write_text("@photopeacom still ships features and answers people.\n",
+                                              encoding="utf-8")
+        self._approve(draft)
+        code, out, err = self._run(self.post.main, [str(draft)])
+        self.assertEqual(code, 0, err)
+        self.assertIn("Wait 10–20 minutes after card 1", out)
+        self.assertIn("1  422  01-hook.md", out)
+        copied: list[bytes] = []
+        code, out, _err = self._run(self.post.main, [str(draft), "--copy", "1"],
+                                    copy_text=copied.append, reveal=lambda _p: None)
+        self.assertEqual(code, 0)
+        self.assertIn("wait: Wait 10–20 minutes", out)
+        single = self._single("single-tip", "One tip.\n")
+        self.assertNotIn("Wait 10–20", self._run(self.post.main, [str(single)])[1])
+
+    def test_count_needs_no_approval_and_writes_nothing(self) -> None:
+        draft = self.root / "counted"
+        draft.mkdir()
+        (draft / "FORMAT").write_text("tool-swap\n", encoding="utf-8")
+        (draft / "01-hook.md").write_text(SWAP_HEADER + "\n" + "→" * 300 + "\n", encoding="utf-8")
+        before = sorted(p.name for p in draft.iterdir())
+        code, out, err = self._run(self.post.main, [str(draft), "--count"])
+        self.assertEqual((code, err), (0, ""))
+        self.assertIn("  01-hook.md", out)
+        self.assertIn("over the tool-swap root cap of 600", out)
+        self.assertEqual(sorted(p.name for p in draft.iterdir()), before)
 
     def test_unknown_format_refused(self) -> None:
         draft = self._single("meme", "A result.\n")
