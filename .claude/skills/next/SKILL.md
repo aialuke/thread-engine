@@ -21,7 +21,7 @@ The operator's main command, in Grok or Claude Code. Speak plainly. The operator
 ## 2. Weekly work, when `review.review_due` is true
 
 1. Follow `.claude/skills/results/SKILL.md` (it writes the weekly review and ends with `mark-reviewed`).
-2. Algorithm check: for each path under "Cited paths" in `reference/x-algorithm.md`, open `https://github.com/xai-org/x-algorithm/commits/main/<path>` and look for commits after the commit date in that file. If any: `python3 scripts/loop.py set-reference --status stale --files <paths>` and tell the operator which facts need a re-read before lessons that cite them are trusted. If none: `set-reference --status current`.
+2. Algorithm check: follow the refresh rule in `reference/x-algorithm.md` (compare each cited file's blob SHA with `main`). If any changed or is gone: `python3 scripts/loop.py set-reference --status stale --files <paths>` and tell the operator which facts need a re-read before lessons that cite them are trusted. If none: `set-reference --status current`.
 
 ## 3. Pick the slot
 
