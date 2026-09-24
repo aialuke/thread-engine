@@ -4,7 +4,7 @@ A running record of decisions about a Thread Engine interface: what was decided,
 
 Mock: https://claude.ai/artifact/8zaBcxWAknJaXWkReQQPqg (private until the operator shares it).
 
-## Decided (operator, 24 Sep 2026)
+## Decided (operator, 24–25 Sep 2026)
 
 | # | Decision | Why | Rejected |
 |---|---|---|---|
@@ -31,8 +31,26 @@ Mock: https://claude.ai/artifact/8zaBcxWAknJaXWkReQQPqg (private until the opera
 | D21 | Dark mode, designed rather than inverted: warm charcoal instead of paper, off-white text, a lighter blue, a light primary button, the glow kept. Chart colours re-picked for the dark card and checked with the colour-blindness validator. Settings has Light, Dark and "Match iPhone / Mac". | Operator. Posting at 06:00 is often in the dark, and anyone the app is shared with will expect it. | No dark mode; an automatic colour flip. |
 | D22 | Results has three tabs (Posts, Replies, Growth) under one row of date range and "Show as table"; four number tiles per tab; bars and columns only (no pies or gauges); counts and views as separate charts, never two axes; a table view for every chart; "Ask Cortex about these results" below. On topic and off topic colours checked with the colour-blindness validator in light and dark. | Operator: "Result charts are settled and good." | Pies, gauges, dual-axis charts. |
 | D23 | A one-tap sun/moon toggle with two states: the icon shows what you'd switch to, and a tap flips it. Your choice is kept even if the device changes later. The full Light / Dark / Match choice stays in Settings. Mac: beside the profile button at the bottom of the sidebar. iPhone: the top row of the profile sheet; the app follows the phone by default. | Operator: "It's great how it is." Sources: Lea Verou, "Dark mode toggles: two states are enough" (2026); web.dev, "Building a theme switch component"; Apple HIG, Dark Mode. | A three-way toggle in the header; a toggle in the iPhone header. |
+| D24 | Approve stays a press-and-hold button with no Touch ID or Face ID (D13 kept). | Operator kept the decision after the 24 Sep review raised that an agent with screen-control tools could press it. The build must stop agents reaching the button or what it calls (build note). | Touch ID-signed approvals; typed /approve as the only gate. |
+| D25 | A **Capture** inbox: screenshots, screen recordings and voice notes from builds, each with one line on what happened, become the seeds of build-log and tool-verdict drafts. Reader questions and waiting replies can be turned into post ideas. | Product review, adopted: first-hand material is the top growth lever and what X's originality rules favour; nothing in the UI captured it. | A UI that only runs the PAID → FREE queue. |
+| D26 | Before approval, cards can be edited freely, with a choice of 2–3 hooks and a "my take" line that goes into the card. Every edit is recorded as a preference signal for the loop. "About a minute" goes. | Product review, adopted: makes each post the operator's own and gives the loop something to learn from. | Approval as a one-minute formality; editing framed as a cost. |
+| D27 | Results opens on Growth. Today shows progress: verified followers against 500 and qualified impressions against 500,000 (from X's screen, weekly). Posts are sorted by follows, then visits, then views. Reply views are a footnote, since they don't count toward rewards. | Product review, adopted: views were the vanity number; the goal numbers were in the third tab. | Views first. |
+| D28 | Replies gets a small **Builders** list: people with a real exchange, whether they're verified, whether each of you follows the other, the last exchange, and one number, mutuals on topic. Worth joining leans toward verified builders who aren't mutuals yet. The "replies sent" chart goes. | Product review, adopted: mutual follows drive reach (A6, A10); reply volume doesn't. | A replies-sent chart; ranking reply topics by views. |
+| D29 | After posting, a **first hour** card: when the first like arrived and the replies to answer now. It closes after an hour. Time to first like is recorded per post. | Product review, adopted: strangers only see a post after its first like, and the first hour decides reach (A6). | Ending the flow about 20 minutes in, at Done. |
+| D30 | The on-topic comparison becomes the share that matters: on-topic posts in the last 15 originals against the target of 12. Retired formats (the connect post) are labelled. Lane comparisons wait until each side has enough posts. | Product review, adopted: one connect post made off-topic look like the winner. | The on/off-topic bar comparison. |
+| D31 | The Cortex chat stays. Build order is phone first; the Mac app and dark mode come later, with their designs kept. | Operator kept the chat; the product review's other deferrals were adopted. To confirm in the build session. | Deferring the Cortex chat. |
+
+## To apply to the mock (from `reviews/ui-review-2026-09-24.md`)
+
+All of part A (design flaws) and part B (accessibility) are accepted as a fix list. The iPhone mock is updated first (D31); the Mac mock follows when the Mac app is built.
+
+## For the loop, not the UI
+
+- The product review suggests testing build-log against PAID → FREE before the queued experiments. That changes `/next`'s experiment list and belongs in a loop session.
 
 ## Build notes (not decisions; needed before the real thing)
+
+- **Build path:** to be decided in a separate session (operator, 25 Sep). Part C of the review lists what the build must solve: the iPhone can't run anything today, "Waiting for you" needs more data, live features need a poller and push, and third-party data stays private.
 
 - **Fold line (D16):** compute exactly where X shows "Show more" for the real post, instead of the mock's fixed position.
 - **Approve button (D13):** the agent rule stands: no model, script or scheduled job may approve. Today the guard blocks agents from writing the approval file; it must also block them from calling whatever the button calls. The typed `/approve` stays as a backup.
