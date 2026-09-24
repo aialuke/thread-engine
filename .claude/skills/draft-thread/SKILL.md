@@ -31,7 +31,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
    If the row is a `treatment` or `control` arm, the arm's description wins over the format's defaults (for example card count). Never change anything else about the post, so the test stays clean.
    Done: shape, research rule, image rule and checklist are known.
 
-4. **Research, then write.** Finish research before any card prose, following the format's research rule. No official source → the item is omitted. A build-log or tool-verdict starts with the format's **Material** questions to the operator; without their answers and real proof, stop and suggest another format.
+4. **Research, then write.** Finish research before any card prose, following the format's research rule. No official source → the item is omitted. A build-log, tool-verdict or tool-swap starts with the format's **Material** step with the operator (for a tool-swap, the operator tests each free tool and screenshots it); without their answers and real proof, stop and suggest another format.
    Done: a candidate list exists. `01-hook.md` does not.
 
 5. **Verify.** Run `/verify-settings <folder>` in the mode the format names (`paths`, `claims`, or both). Cards use `high` and `medium` rows only. `VERIFY` rows stay in `PATHS.md` / `CLAIMS.md` and out of cards.
@@ -39,7 +39,8 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
 
 6. **Files.** `drafts/YYYY-MM-DD-slug/` (today's date in Australia/Brisbane). Reuse the folder if it exists.
    - `FORMAT` — one word: `settings`, `comparison`, `tool-swap`, `single-tip`, `build-log`, or `tool-verdict`
-   - `01-hook.md` and further consecutive `NN-<name>.md` cards as the format's shape says. A single-tip has only `01-hook.md`; a build-log or tool-verdict has at most one card after it.
+   - `01-hook.md` and further consecutive `NN-<name>.md` cards as the format's shape says. A single-tip has only `01-hook.md`; a build-log, tool-verdict or tool-swap has at most one card after it (a tool-swap's is the maker shout-out, `02-shoutout.md`).
+   - `REPLIES.md` for a tool-swap: talking points from `CLAIMS.md`, never paste-ready replies
    - `images.md` — what to attach, following the format's image rule. Write `Attach: none` when nothing is attached.
    - `CHECKLIST.md` — copy of `.claude/skills/format-<format>/checklist.md`, boxes ticked where done
    Done: files exist. Card count matches the format, the hook, and the arm.
@@ -50,5 +51,5 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
 8. **Gate.** Never create, edit or delete `APPROVED`. A hook blocks it anyway.
    Done: `APPROVED` is absent.
 
-9. **Preview.** Print every card in order, separated by `---`, with each card's character count. Then list leftover `VERIFY` rows and what `images.md` asks for. End with exactly:
+9. **Preview.** Print every card in order, separated by `---`, with each card's character count as X counts it (`python3 scripts/post_thread.py <folder> --count`; `→`, `▷` and emoji count 2). Then list leftover `VERIFY` rows and what `images.md` asks for. For a tool-swap with no screenshot from the operator's test attached, say so: the post then reads as a list anyone could copy, which X's rewards program doesn't count as original. End with exactly:
    `Read the cards. If you change any, that's fine. When they're right, type /approve <slug>. Then /ready <slug>.`
