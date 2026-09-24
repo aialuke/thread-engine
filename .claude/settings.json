@@ -4,6 +4,7 @@
       "Bash(python3 scripts/loop.py:*)",
       "Bash(python3 scripts/snapshot.py:*)",
       "Bash(python3 scripts/x_read.py:*)",
+      "Bash(python3 scripts/x_api.py:*)",
       "Bash(python3 scripts/post_thread.py:*)",
       "WebFetch(domain:github.com)"
     ]

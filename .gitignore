@@ -8,3 +8,7 @@ APPROVED
 
 # Loop scratch payloads
 loop/inbox/
+
+# X API raw responses and follower ids: other people's data, kept on this Mac only
+ledger/raw/api/
+loop/followers/

@@ -55,6 +55,18 @@ class Guard(unittest.TestCase):
                 self.assert_denied(make(edit, {"file_path": path, "old_string": "a", "new_string": "b"}),
                                    "scripts/loop.py")
 
+    def test_new_loop_data_folders_denied_for_edit_tools(self) -> None:
+        for path in ("ledger/activity/2026-09.json", "loop/followers/2026-09-24.json"):
+            self.assert_denied(claude("Write", {"file_path": path, "content": "{}"}), "scripts/loop.py")
+
+    def test_keychain_reads_denied_in_both_shells(self) -> None:
+        for make, shell in ((grok, "run_terminal_command"), (claude, "Bash")):
+            for command in ("security find-generic-password -s thread-engine-x -a consumer_key -w",
+                            "cd /tmp && security  find-internet-password -s x",
+                            "security dump-keychain"):
+                self.assert_denied(make(shell, {"command": command}), "Keychain")
+        self.assert_allowed(claude("Bash", {"command": "python3 scripts/x_api.py keys"}))
+
     def test_prose_mentions_stay_editable(self) -> None:
         self.assert_allowed(claude("Edit", {"file_path": "AGENTS.md", "old_string": "x",
                                             "new_string": "Never edit APPROVED or loop/state.json by hand."}))

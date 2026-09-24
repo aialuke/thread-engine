@@ -69,9 +69,9 @@ class LoopCase(unittest.TestCase):
         data.update(extra)
         return self.ok("record-post", "--json", self.payload(data))
 
-    def snap(self, root_id: str, observed_at: str, views: int | None, repliers=None) -> dict:
+    def snap(self, root_id: str, observed_at: str, views: int | None, repliers=None, bookmarks: int = 0) -> dict:
         data = {"root_id": root_id, "observed_at": observed_at,
-                "root": {"views": views, "likes": 1, "reposts": 0, "quotes": 0, "replies": 1, "bookmarks": 0},
+                "root": {"views": views, "likes": 1, "reposts": 0, "quotes": 0, "replies": 1, "bookmarks": bookmarks},
                 "followers": 40}
         if repliers is not None:
             data["repliers"] = repliers
@@ -174,21 +174,21 @@ class Experiments(LoopCase):
         for i, value in enumerate(values):
             root_id = f"20000000{i:02d}"
             self.post(root_id, hours(-500 + i), retrospective=True, made_in_repo=False)
-            self.snap(root_id, hours(-400 + i), value)
+            self.snap(root_id, hours(-400 + i), 1000, bookmarks=value)
             ids.append(root_id)
         return ids
 
     def open(self, cohort: list[str]) -> dict:
         return self.ok("open-experiment", "--json", self.payload({
             "question": "Standalone beats a thread?", "treatment": "standalone post",
-            "control": "3-card thread", "cohort": cohort}), now=T0)
+            "control": "3-card thread", "primary": "bookmarks", "cohort": cohort}), now=T0)
 
     def treatment(self, start: int, values: list[int]) -> None:
         for i, value in enumerate(values):
             root_id = f"30000000{start + i:02d}"
             posted = hours(10 * (start + i))
             self.post(root_id, posted, experiment="E-001", arm="treatment")
-            self.snap(root_id, hours(40, posted), value)
+            self.snap(root_id, hours(40, posted), 1000, bookmarks=value)
 
     def test_cohort_frozen_median_and_threshold(self) -> None:
         opened = self.open(self.seed_cohort())
@@ -198,14 +198,14 @@ class Experiments(LoopCase):
     def test_cohort_too_small(self) -> None:
         ids = self.seed_cohort((100, 200))
         error = self.fails("open-experiment", "--json", self.payload({
-            "question": "q", "treatment": "t", "control": "c", "cohort": ids}))
+            "question": "q", "treatment": "t", "control": "c", "primary": "bookmarks", "cohort": ids}))
         self.assertIn("at least 3", error)
 
     def test_one_experiment_at_a_time(self) -> None:
         ids = self.seed_cohort()
         self.open(ids)
         self.assertIn("one at a time", self.fails("open-experiment", "--json", self.payload({
-            "question": "q", "treatment": "t", "control": "c", "cohort": ids})))
+            "question": "q", "treatment": "t", "control": "c", "primary": "bookmarks", "cohort": ids})))
 
     def test_pass_then_replicate_adopts(self) -> None:
         self.open(self.seed_cohort())
@@ -253,8 +253,43 @@ class Experiments(LoopCase):
             root_id = f"40000000{i:02d}"
             posted = hours(10 * i)
             self.post(root_id, posted, experiment="E-001", arm="control")
-            self.snap(root_id, hours(40, posted), 900)
+            self.snap(root_id, hours(40, posted), 900, bookmarks=900)
         self.assertEqual(self.ok("evaluate", now=hours(200))["events"], [])
+
+    def attempt(self, cohort: list[str], primary: str) -> str:
+        return self.fails("open-experiment", "--json", self.payload({
+            "question": "q", "treatment": "t", "control": "c", "primary": primary, "cohort": cohort}))
+
+    def test_views_and_replies_cannot_be_scored(self) -> None:
+        ids = self.seed_cohort()
+        self.assertIn("paid", self.attempt(ids, "views"))
+        self.assertIn("thread cards", self.attempt(ids, "replies"))
+        self.assertIn("primary must be one of", self.fails("open-experiment", "--json", self.payload({
+            "question": "q", "treatment": "t", "control": "c", "cohort": ids})))
+
+    def test_zero_median_cohort_refused(self) -> None:
+        self.assertIn("median", self.attempt(self.seed_cohort((0, 0, 5)), "bookmarks"))
+
+    def test_nonorganic_post_kept_out_of_cohorts_and_rounds(self) -> None:
+        ids = self.seed_cohort()
+        marked = self.ok("mark-nonorganic", "--root-id", ids[0], "--reason", "95% boosted")
+        self.assertTrue(marked["marked"])
+        self.assertFalse(self.ok("mark-nonorganic", "--root-id", ids[0], "--reason", "again")["marked"])
+        self.assertIn("non-organic", self.attempt(ids, "bookmarks"))
+        self.assertIn("non-organic", (self.root / "ledger" / "SUMMARY.md").read_text())
+        self.open(ids[1:] + [self.extra_cohort()])
+        self.treatment(0, [300, 400])
+        boosted = "3000000009"
+        self.post(boosted, hours(95), experiment="E-001", arm="treatment")
+        self.snap(boosted, hours(40, hours(95)), 1000, bookmarks=5000)
+        self.ok("mark-nonorganic", "--root-id", boosted, "--reason", "boosted after posting")
+        self.assertEqual(self.ok("evaluate", now=hours(300))["posts_needed_for_next_round"], 1)
+
+    def extra_cohort(self) -> str:
+        root_id = "2000000099"
+        self.post(root_id, hours(-450), retrospective=True, made_in_repo=False)
+        self.snap(root_id, hours(-350), 1000, bookmarks=220)
+        return root_id
 
     def test_arm_without_experiment_refused(self) -> None:
         data = {"root_id": "5000000001", "slug": "x", "format": "settings", "lane": "main",

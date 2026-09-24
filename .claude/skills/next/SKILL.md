@@ -24,6 +24,8 @@ The operator's main command, in Grok or Claude Code. Speak plainly. The operator
 
 ## 3. Pick the slot
 
+**Experiments are paused** until the loop has two weeks of organic X API data (`reference/x-api.md`). `open-experiment` refuses views, root replies, a cohort whose median is 0, and non-organic posts, so the list below cannot run yet. Until the pause is lifted, skip this section: propose the post with no experiment arm, and tell the operator in one line that experiments restart once the organic numbers are in.
+
 Run `python3 scripts/loop.py next-slot`.
 
 - **explore, no open experiment:** propose the next experiment from this list, first one not yet run:

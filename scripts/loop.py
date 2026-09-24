@@ -37,6 +37,11 @@ FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "other"}
 ARMS = {"treatment", "control", "none"}
 EDIT_CLASSES = {"preference", "correction", "deviation", "violation"}
 METRICS = ("views", "likes", "reposts", "quotes", "replies", "bookmarks")
+# Stored, but never an experiment's primary: they cannot tell a better post from a worse one.
+UNSCORABLE = {
+    "views": "views include paid (boosted) reach and say nothing about follows",
+    "replies": "a root's replies count the account's own thread cards",
+}
 OPEN_STATES = {"testing", "promising", "unclear"}
 POST_ID_RE = re.compile(r"^[0-9]{5,25}$")
 LESSON_RE = re.compile(r"^L-[0-9]{3}$")
@@ -172,6 +177,9 @@ def validate_post(post: dict) -> None:
     for edit in post.get("edits", []):
         need(edit.get("class") in EDIT_CLASSES, f"edit class must be one of {sorted(EDIT_CLASSES)}")
     check_count(post.get("production_minutes"), "production_minutes")
+    mark = post.get("nonorganic")
+    need(mark is None or (isinstance(mark, dict) and isinstance(mark.get("reason"), str)),
+         "nonorganic must be null or {reason, at}")
     for snap in post.get("snapshots", []):
         validate_snapshot(snap)
 
@@ -354,6 +362,17 @@ def cmd_record_snapshot(repo: Repo, args) -> dict:
             "missing": snap["missing"]}
 
 
+def cmd_mark_nonorganic(repo: Repo, args) -> dict:
+    """Mark a post whose reach is mostly paid or otherwise non-organic. It never enters a cohort or a round."""
+    need(bool(args.reason.strip()), "--reason required")
+    post = repo.post(args.root_id)
+    if post.get("nonorganic"):
+        return {"marked": False, "reason": "already marked", "root_id": args.root_id}
+    post["nonorganic"] = {"reason": args.reason.strip(), "at": iso(now_arg(args.now))}
+    repo.save_post(post)
+    return {"marked": True, "root_id": args.root_id}
+
+
 def cmd_set_repliers_complete(repo: Repo, args) -> dict:
     """Correct whether a post's reply-author list was complete. Logged on the post."""
     need(args.value in {"true", "false"}, "--value must be true or false")
@@ -391,15 +410,19 @@ def cmd_open_experiment(repo: Repo, args) -> dict:
     state = repo.state()
     need(open_experiment(state) is None, "an experiment is already open; one at a time")
     payload = read_json(Path(args.json))
-    metric = payload.get("primary", "views")
+    metric = str(payload.get("primary") or "")
     need(metric in METRICS, f"primary must be one of {METRICS}")
+    need(metric not in UNSCORABLE, f"primary {metric!r} cannot be scored: {UNSCORABLE.get(metric, '')}")
     effect = float(payload.get("effect", 1.5))
     need(effect > 1.0, "effect must be above 1.0")
     cohort = [str(c) for c in payload.get("cohort", [])]
     need(len(cohort) >= MIN_COHORT, f"cohort needs at least {MIN_COHORT} posts")
     values, used = [], []
     for root_id in cohort:
-        snap = best_snapshot(repo.post(root_id))
+        post = repo.post(root_id)
+        need(not post.get("nonorganic"),
+             f"{root_id} is marked non-organic ({(post.get('nonorganic') or {}).get('reason')}); it cannot be in a cohort")
+        snap = best_snapshot(post)
         value = primary_value(snap, metric)
         if snap is not None and value is not None:
             values.append(value)
@@ -408,6 +431,8 @@ def cmd_open_experiment(repo: Repo, args) -> dict:
     for field in ("question", "treatment", "control"):
         need(isinstance(payload.get(field), str) and payload[field].strip(), f"{field} required")
     median = statistics.median(values)
+    need(median > 0, f"the cohort's median {metric} is 0, so every post would clear the bar; "
+                     "pick a measure the cohort actually has")
     exp = {
         "id": next_id("E", state["experiments"]),
         "question": payload["question"],
@@ -461,7 +486,7 @@ def cmd_evaluate(repo: Repo, args) -> dict:
     for post in repo.posts():
         if post.get("experiment") != exp["id"] or post.get("arm") != "treatment":
             continue
-        if post["root_id"] in consumed:
+        if post["root_id"] in consumed or post.get("nonorganic"):
             continue
         snap = valid_snapshot(post)
         value = primary_value(snap, exp["primary"])
@@ -708,6 +733,8 @@ def render(repo: Repo) -> None:
         root = snap["root"] if snap else {}
         where = f"{snap['kind']} {snap['age_hours']:g}h" if snap else ("missed" if post["missed"] else "pending")
         exp = f"{post['experiment']} {post['arm']}" if post.get("experiment") else ("retro" if post["retrospective"] else "–")
+        if post.get("nonorganic"):
+            exp += ", non-organic"
         lines.append(f"| {local(post['posted_at'])} | {post['slug']} | {post['format']} | {post['lane']} | {exp} | "
                      f"{fmt(root.get('views'))} | {fmt(root.get('bookmarks'))} | "
                      f"{fmt_replies(snap)} | {where} |\n")
@@ -752,6 +779,7 @@ COMMANDS = {
     "record-snapshot": cmd_record_snapshot,
     "mark-missed": cmd_mark_missed,
     "set-repliers-complete": cmd_set_repliers_complete,
+    "mark-nonorganic": cmd_mark_nonorganic,
     "open-experiment": cmd_open_experiment,
     "evaluate": cmd_evaluate,
     "next-slot": cmd_next_slot,
@@ -790,6 +818,9 @@ def build_parser() -> argparse.ArgumentParser:
         if name == "set-repliers-complete":
             sp.add_argument("--root-id", required=True)
             sp.add_argument("--value", required=True, help="true or false")
+            sp.add_argument("--reason", required=True)
+        if name == "mark-nonorganic":
+            sp.add_argument("--root-id", required=True)
             sp.add_argument("--reason", required=True)
         if name == "add-preference":
             sp.add_argument("--statement", required=True)

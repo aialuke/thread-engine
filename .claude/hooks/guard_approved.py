@@ -3,7 +3,9 @@
 
 The model may never create, change or remove a draft's approval marker file, or
 start another agent session to type the approve command for it. Edit tools may
-not write loop state, which changes only through scripts/loop.py. Checks look at
+not write loop state, which changes only through scripts/loop.py. No session may
+read the X API keys from the Keychain; scripts/x_api.py reads them in its own
+process, which this hook never sees. Checks look at
 file paths and shell write verbs, never at prose, so docs and skills that mention
 these files stay editable.
 
@@ -29,7 +31,9 @@ NO_WRITE = {
     "Agent", "Task", "Skill", "ToolSearch", "TodoWrite", "AskUserQuestion",
 }
 SHELL = {"run_terminal_command", "Bash"}
-LOOP_STATE = re.compile(r"(^|/)(loop/state\.json|ledger/[0-9]+\.json|ledger/SUMMARY\.md|experiments\.md|learnings\.md)$")
+LOOP_STATE = re.compile(r"(^|/)(loop/state\.json|ledger/[0-9]+\.json|ledger/SUMMARY\.md|experiments\.md|learnings\.md"
+                        r"|ledger/activity/[^/]+|loop/followers/[^/]+)$")
+SHELL_KEYCHAIN = re.compile(r"\bsecurity\s+(find-(generic|internet)-password|dump-keychain)\b")
 SHELL_MARKER_WRITE = re.compile(
     rf"/{MARKER}\b"                                                   # any path ending in the marker
     rf"|\b(touch|tee|cp|mv|rm|ln|install|truncate)\b[^;&|\n]*\b{MARKER}\b"
@@ -72,6 +76,9 @@ def main() -> None:
         command = str(tool_input.get("command", "")) if isinstance(tool_input, dict) else ""
         if SHELL_MARKER_WRITE.search(command) or SHELL_NESTED_APPROVE.search(command):
             deny(approval_reason)
+        if SHELL_KEYCHAIN.search(command):
+            deny("X API keys stay in the Keychain and never enter a session. "
+                 "Check them with python3 scripts/x_api.py keys; the client reads them itself.")
         sys.exit(0)
     for path in path_values(tool_input):
         if PurePosixPath(path).name == MARKER:
