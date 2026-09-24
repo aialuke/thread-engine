@@ -1,3 +1,4 @@
 2026-09-23T19:45:29+00:00 snapshot due=0 recorded=0 skipped=0 cost_usd=0
 2026-09-24T01:20:27Z x_api backfill ok api_items=256 cost_usd=0.265
 2026-09-24T01:50:38Z snapshot ingest ledger/raw/api/backfill-20260924T0120.json items=157
+2026-09-24T01:52:18Z snapshot ok read48=0 final=0 followers=36 api_items=37 cost_usd=0.037
