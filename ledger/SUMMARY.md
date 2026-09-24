@@ -18,6 +18,15 @@ Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snap
 | Thu 24 Sep 10:30 | x-2102918437060444581 | other | other | retro | – | 2 | 0% | 0 | – | – | – | pending |
 | Thu 24 Sep 11:08 | x-2102928143749447858 | other | other | retro | – | 4 | 0% | 0 | – | – | – | pending |
 
+## Original Content Rewards
+
+Needs 500 verified followers and 500,000 verified Home Timeline impressions on originals in 90 days (no replies, no boosted reach).
+
+- X's eligibility screen, read 2026-09-24: 26 verified followers, 337 qualified impressions.
+- Verified followers from the daily read: 27 of 500.
+- Organic impressions on originals and quotes, last 90 days: 2,329. This counts every viewer on every surface, so it is an upper bound; X counts only Premium viewers on the Home feed.
+- Share that qualified at the last screen reading: 14% (the two readings may be from different days).
+
 ## Account
 
 Followers: 36 on 2026-09-24. This is the first count; follower changes and credit start from the next day's read.
