@@ -27,7 +27,7 @@ LONG_POST = (
 )
 LEAD_NUMBER_RE = re.compile(r"^(?:Setting\s+(\d+)\b|(\d+)\.\s)")
 VERIFY_RE = re.compile(r"\bVERIFY\b")
-FORMATS = {"settings", "comparison", "tool-swap", "single-tip"}
+FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "build-log", "tool-verdict"}
 DIGEST_RE = re.compile(r"^cards-sha256:\s*([0-9a-f]{64})\s*$", re.MULTILINE)
 THOUGHTS_RE = re.compile(r"your thoughts", re.IGNORECASE)
 BANNED_RE = re.compile(r"game changer|most people don['’]?t know|wait for it|🚨|🔥|👇", re.IGNORECASE)

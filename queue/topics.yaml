@@ -1,7 +1,7 @@
 # status: queued | planned | drafted | posted | shipped | killed
 # /next writes planned rows with: format, lane, experiment, arm, treatment,
 # hypothesis, post_at, leads. /draft-thread reads them. /posted sets posted + root_id.
-# format: settings | comparison | tool-swap | single-tip (missing = settings)
+# format: settings | comparison | tool-swap | single-tip | build-log | tool-verdict (missing = settings)
 # lane: main | other (see reference/audience.md)
 
 topics:

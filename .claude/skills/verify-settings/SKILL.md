@@ -77,5 +77,6 @@ Mode: `paths` (default) checks menu paths into `PATHS.md`. `claims` checks every
 
    Confidence: `high` (the page states it), `medium` (the page states it for a narrower case; Notes says which), `VERIFY` (not found).
    "Tested" only when the operator says they did it.
+   **The operator's own run** (build-log and tool-verdict claims such as "the pipeline made this script in 4 minutes" or "Grok caught 3 bugs Codex missed"): Source URL is `operator, <date>` plus the artifact that shows it, a screenshot in the draft's `images/` or a log file path. Vendor-stated or tested: `tested`. No artifact means the row is `VERIFY`.
 4. **VERIFY.** Unconfirmed claims stay as `VERIFY` rows and come out of the cards. Never soften a claim to keep it.
 5. **Stop.** Tick the verify boxes in `CHECKLIST.md`.

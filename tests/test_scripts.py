@@ -443,7 +443,8 @@ class FormatAndApproval(unittest.TestCase):
         return draft
 
     def test_most_refused_for_settings_only(self) -> None:
-        for fmt, expected in (("settings", 1), (None, 1), ("tool-swap", 0), ("single-tip", 0), ("comparison", 0)):
+        for fmt, expected in (("settings", 1), (None, 1), ("tool-swap", 0), ("single-tip", 0), ("comparison", 0),
+                              ("build-log", 0), ("tool-verdict", 0)):
             draft = self._single(fmt, "Most free editors hold up.\n")
             code, _out, err = self._run(self.post.main, [str(draft)])
             self.assertEqual(code, expected, (fmt, err))

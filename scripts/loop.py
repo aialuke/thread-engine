@@ -33,7 +33,7 @@ STALE_AFTER_DAYS = 42
 LANE_WINDOW = 15
 MIN_COHORT = 3
 
-FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "other"}
+FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "build-log", "tool-verdict", "other"}
 ARMS = {"treatment", "control", "none"}
 EDIT_CLASSES = {"preference", "correction", "deviation", "violation"}
 METRICS = ("views", "likes", "reposts", "quotes", "replies", "bookmarks")

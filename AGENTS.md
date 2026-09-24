@@ -37,7 +37,7 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 - `README.md` — the operator's guide
 - `reference/x-algorithm.md` — verified X ranking facts with sources; `reference/x-api.md` — what the X API can and cannot read, prices, and the privacy rules; `reference/audience.md` — audience promise and lane definition
 - `voice/exit-zero.md` — shared voice, truth budget, image and reply rules
-- `.claude/skills/format-{settings,comparison,tool-swap,single-tip}/` — one format each, with its checklist. Settings detail stays in `.claude/skills/hidden-settings/`
+- `.claude/skills/format-{settings,comparison,tool-swap,single-tip,build-log,tool-verdict}/` — one format each, with its checklist. Settings detail stays in `.claude/skills/hidden-settings/`
 - `.claude/skills/{next,draft-thread,verify-settings,ready,posted,snapshot,results,apply,undo-rule}/` — the commands. Grok and Claude Code both load `.claude/skills/`
 - `.claude/hooks/` — the approve hook and the guard (approval marker and loop state); `.claude/settings.json` registers both hooks and the script allowlist for both tools
 - `queue/topics.yaml` — backlog and planned posts

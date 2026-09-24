@@ -52,7 +52,7 @@ Propose one post in four lines: topic, format, experiment arm (or none), posting
 ```yaml
   - slug: <kebab-slug>
     status: planned
-    format: <settings|comparison|tool-swap|single-tip>
+    format: <settings|comparison|tool-swap|single-tip|build-log|tool-verdict>
     lane: <main|other>
     experiment: <E-00N or omit>
     arm: <treatment|control or omit>

@@ -31,15 +31,15 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
    If the row is a `treatment` or `control` arm, the arm's description wins over the format's defaults (for example card count). Never change anything else about the post, so the test stays clean.
    Done: shape, research rule, image rule and checklist are known.
 
-4. **Research, then write.** Finish research before any card prose, following the format's research rule. No official source → the item is omitted.
+4. **Research, then write.** Finish research before any card prose, following the format's research rule. No official source → the item is omitted. A build-log or tool-verdict starts with the format's **Material** questions to the operator; without their answers and real proof, stop and suggest another format.
    Done: a candidate list exists. `01-hook.md` does not.
 
 5. **Verify.** Run `/verify-settings <folder>` in the mode the format names (`paths`, `claims`, or both). Cards use `high` and `medium` rows only. `VERIFY` rows stay in `PATHS.md` / `CLAIMS.md` and out of cards.
    Done: `PATHS.md` and/or `CLAIMS.md` exist in the draft folder.
 
 6. **Files.** `drafts/YYYY-MM-DD-slug/` (today's date in Australia/Brisbane). Reuse the folder if it exists.
-   - `FORMAT` — one word: `settings`, `comparison`, `tool-swap`, or `single-tip`
-   - `01-hook.md` and further consecutive `NN-<name>.md` cards as the format's shape says. A single-tip has only `01-hook.md`.
+   - `FORMAT` — one word: `settings`, `comparison`, `tool-swap`, `single-tip`, `build-log`, or `tool-verdict`
+   - `01-hook.md` and further consecutive `NN-<name>.md` cards as the format's shape says. A single-tip has only `01-hook.md`; a build-log or tool-verdict has at most one card after it.
    - `images.md` — what to attach, following the format's image rule. Write `Attach: none` when nothing is attached.
    - `CHECKLIST.md` — copy of `.claude/skills/format-<format>/checklist.md`, boxes ticked where done
    Done: files exist. Card count matches the format, the hook, and the arm.
