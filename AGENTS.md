@@ -48,7 +48,7 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 - `reviews/` — weekly reviews and one-off reports
 - `examples/`, `shipped/` — shipped gold and post-ship notes
 - `ops/launchd/` — the daily snapshot job
-- `scripts/post_thread.py` — the gate. Needs `APPROVED` (exit 2 `human gate` without it). Refuses when: cards changed after approval; `FORMAT` is unknown; a settings hook opens on `Most `; a card contains `VERIFY`, `💬`, "your thoughts", or a banned phrase from `voice/exit-zero.md` other than "unlock"; a card number repeats; media comes from `images/sources/`. Otherwise writes `POST.txt`; `--copy N` copies card N
+- `scripts/post_thread.py` — the gate. Needs `APPROVED` (exit 2 `human gate` without it). Refuses when: cards changed after approval; `FORMAT` is unknown; a settings hook opens on `Most `; the hook is over 600 characters in a settings, single-tip, build-log or tool-verdict draft; a card contains `VERIFY`, `💬`, "your thoughts", or a banned phrase from `voice/exit-zero.md` other than "unlock"; a card number repeats; media comes from `images/sources/`. Otherwise writes `POST.txt`; `--copy N` copies card N
 - `scripts/loop.py` — loop state: posts, snapshots, experiments, lessons, rule commits. No network
 - `scripts/grok_read.py` — the one read-only structured Grok call every X read goes through
 - `scripts/x_read.py` — `search "<query>"` or `thread <id>`, JSON out, for sessions without X tools

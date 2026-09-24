@@ -449,6 +449,16 @@ class FormatAndApproval(unittest.TestCase):
             code, _out, err = self._run(self.post.main, [str(draft)])
             self.assertEqual(code, expected, (fmt, err))
 
+    def test_root_over_600_refused_where_the_format_caps_it(self) -> None:
+        long_root = "A result. " * 61  # 610 characters
+        for fmt, expected in (("settings", 1), ("single-tip", 1), ("build-log", 1), ("tool-verdict", 1),
+                              ("comparison", 0), ("tool-swap", 0)):
+            draft = self._single(fmt, long_root.strip() + "\n")
+            code, _out, err = self._run(self.post.main, [str(draft)])
+            self.assertEqual(code, expected, (fmt, err))
+            if expected:
+                self.assertIn("caps the root at 600", err)
+
     def test_banned_phrases_refused_but_unlock_allowed(self) -> None:
         cases = (("This is a game changer.", 1), ("Most people don’t know this.", 1),
                  ("Big news 🔥", 1), ("Turn on Face ID unlock.", 0))

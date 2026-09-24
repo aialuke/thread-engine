@@ -28,6 +28,9 @@ LONG_POST = (
 LEAD_NUMBER_RE = re.compile(r"^(?:Setting\s+(\d+)\b|(\d+)\.\s)")
 VERIFY_RE = re.compile(r"\bVERIFY\b")
 FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "build-log", "tool-verdict"}
+# Formats whose skill caps the root at 600 characters (a stranger sees only the root, algorithm facts A1-A2).
+ROOT_LIMIT_FORMATS = {"settings", "single-tip", "build-log", "tool-verdict"}
+ROOT_LIMIT = 600
 DIGEST_RE = re.compile(r"^cards-sha256:\s*([0-9a-f]{64})\s*$", re.MULTILINE)
 THOUGHTS_RE = re.compile(r"your thoughts", re.IGNORECASE)
 BANNED_RE = re.compile(r"game changer|most people don['’]?t know|wait for it|🚨|🔥|👇", re.IGNORECASE)
@@ -118,6 +121,8 @@ def card_refusals(draft: Path, found: list[Path]) -> list[str]:
         text = tweet_text(card)
         if fmt == "settings" and card.name == "01-hook.md" and setup_day_open(text):
             reasons.append("REFUSED: hook opens on the setup-day line")
+        if fmt in ROOT_LIMIT_FORMATS and card.name == "01-hook.md" and len(text) > ROOT_LIMIT:
+            reasons.append(f"REFUSED: 01-hook.md is {len(text)} characters; the {fmt} format caps the root at {ROOT_LIMIT}")
         if VERIFY_RE.search(text):
             reasons.append(f"REFUSED: VERIFY in {card.name}")
         if "💬" in text:
