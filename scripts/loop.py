@@ -962,11 +962,15 @@ def account_lines(rows: dict[str, dict], days: list[dict]) -> list[str]:
     lost = sum(d.get("lost") or 0 for d in week)
     credited = sum(sum(d.get("attributed", {}).values()) for d in week)
     recent = [r for r in rows.values() if anchor - timedelta(days=7) < parse_time(r["created_at"]) <= anchor]
-    lines = ["\n## Account\n\n",
-             f"Followers: {days[-1]['followers']} on {days[-1]['date']}. In the 7 days to then: {new} new, {lost} lost; "
-             f"{credited} of the new credited to a post or reply they engaged with (a lower bound).\n\n"]
+    compared = [d for d in week if not d.get("baseline")]
+    lines = ["\n## Account\n\n", f"Followers: {days[-1]['followers']} on {days[-1]['date']}. "]
+    if not compared:
+        lines.append("This is the first count; follower changes and credit start from the next day's read.\n\n")
+    else:
+        lines.append(f"In the 7 days to then: {new} new, {lost} lost; {credited} of the new credited to a post "
+                     f"or reply they engaged with (a lower bound).\n\n")
     visits = sum((best_read(r) or {}).get("organic", {}).get("profile_visits") or 0 for r in recent)
-    if visits:
+    if visits and compared:
         lines.append(f"Follows per profile visit, items from those 7 days: {new} / {visits}.\n\n")
     lines += ["| Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 |\n",
               "|---|---:|---:|---:|---:|---:|\n"]
