@@ -13,9 +13,10 @@ The operator's main command, in Grok or Claude Code. Speak plainly. The operator
 
 ## 1. Catch up
 
-1. Run `python3 scripts/loop.py status`.
-2. If `due.due` is not empty, run `python3 scripts/snapshot.py`.
-3. Tell the operator in two or three lines what changed: new snapshots, any missed ones, any experiment status change.
+1. Run `python3 scripts/snapshot.py`. Run it every time: a repeat on the same day costs nothing and records nothing twice.
+2. Run `python3 scripts/loop.py status`.
+3. Read the last lines of `ledger/runs.log`. If the last run says `snapshot failed`, or the last `snapshot ok` is more than 30 hours old, say that first, in one sentence, with the likely cause: the Mac was off or locked, or the X API credits ran out.
+4. Tell the operator in two or three lines what changed: new reads, follower change, anything marked non-organic, any experiment status change.
 
 ## 2. Weekly work, when `review.review_due` is true
 
@@ -61,5 +62,14 @@ Propose one post in four lines: topic, format, experiment arm (or none), posting
     post_at: <YYYY-MM-DD HH:MM Australia/Brisbane>
     leads: [<post ids>]
 ```
+
+## 6. Replies worth making today
+
+Replies bring most of the account's reach (`reviews/audit-2026-09.md`). Find 2 or 3 conversations from the last few hours worth a reply, through Grok (`x_keyword_search` when this session has it, otherwise `python3 scripts/x_read.py search "<query>"`):
+- a builder's progress post in the lane (AI tools, agents, video pipelines, shipping);
+- an early spot in a big AI or tool conversation;
+- tech news, including politics when the story connects to tech.
+
+For each: the link, and in one line the point a reply could make. Never paste-ready text: the operator writes every reply (algorithm fact A12). Remind them once: never the same reply twice, and keep volume to what they'd write by hand (`voice/exit-zero.md`).
 
 End with: `Next: /draft-thread <slug>` (start with /plan if you want to review the plan first).

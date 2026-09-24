@@ -6,6 +6,7 @@
     python3 scripts/x_api.py timeline --start <ISO> [--end <ISO>]
     python3 scripts/x_api.py followers
     python3 scripts/x_api.py mentions [--since-id <post id>]
+    python3 scripts/x_api.py thread <root post id>
     python3 scripts/x_api.py backfill --since <ISO>
 
 Keys come from the macOS Keychain (service thread-engine-x) and are never printed.
@@ -227,6 +228,25 @@ def mentions(client: Client, since_id: str | None = None) -> list[dict]:
     return client.pages(f"/2/users/{USER_ID}/mentions", params, OWNED)
 
 
+def posted_at(post_id: str) -> datetime:
+    """X post ids carry their creation time (snowflake: milliseconds since X's epoch, shifted 22 bits)."""
+    return datetime.fromtimestamp(((int(post_id) >> 22) + 1288834974657) / 1000, tz=timezone.utc)
+
+
+def thread(client: Client, root_id: str, now: datetime | None = None) -> dict:
+    """The account's own root post and its thread cards, read from the timeline around the post's time."""
+    if not root_id.isdigit():
+        raise XApiError(f"bad post id {root_id!r}")
+    start = posted_at(root_id) - timedelta(minutes=1)
+    items = timeline(client, iso(start), iso(start + timedelta(hours=6)), now=now)
+    root = next((i for i in items if i["id"] == root_id), None)
+    if root is None:
+        raise XApiError(f"{root_id} is not one of @{HANDLE}'s posts in the 6 hours after it was made")
+    cards = sorted((i for i in items if i["id"] != root_id and i.get("conversation_id") == root_id
+                    and kind(i) == "thread_card"), key=lambda i: int(i["id"]))
+    return {"root": root, "cards": cards}
+
+
 # ---------- item helpers ----------
 
 
@@ -286,6 +306,8 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("followers")
     sp = sub.add_parser("mentions")
     sp.add_argument("--since-id")
+    sp = sub.add_parser("thread")
+    sp.add_argument("root_id")
     sp = sub.add_parser("backfill")
     sp.add_argument("--since", required=True)
     return parser
@@ -306,6 +328,8 @@ def main(argv: list[str] | None = None, client: Client | None = None) -> int:
             result = {"items": followers(client)}
         elif args.command == "mentions":
             result = {"items": mentions(client, args.since_id)}
+        elif args.command == "thread":
+            result = thread(client, args.root_id)
         else:
             result = backfill(client, args.since)
             with (ROOT / "ledger" / "runs.log").open("a", encoding="utf-8") as log:

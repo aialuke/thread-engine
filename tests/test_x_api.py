@@ -124,6 +124,22 @@ class Reads(unittest.TestCase):
             x_api.me(c)
         self.assertEqual(len(opener.requests), 1)
 
+    def test_thread_reads_root_and_cards_from_the_timeline(self) -> None:
+        root_id = "2102737637346095128"
+        self.assertEqual(x_api.iso(x_api.posted_at(root_id)), "2026-09-23T12:31:34Z")
+        card = {"id": "2102737637346095999", "conversation_id": root_id, "in_reply_to_user_id": x_api.USER_ID,
+                "referenced_tweets": [{"type": "replied_to", "id": root_id}]}
+        other = {"id": "2102737637346095555", "conversation_id": "1", "in_reply_to_user_id": "9",
+                 "referenced_tweets": [{"type": "replied_to", "id": "1"}]}
+        c, opener = client(FakeResponse({"data": [{"id": root_id, "conversation_id": root_id}, card, other]}))
+        found = x_api.thread(c, root_id, now=NOW)
+        self.assertEqual((found["root"]["id"], [x["id"] for x in found["cards"]]), (root_id, [card["id"]]))
+        query = parse_qs(urlsplit(opener.requests[0].full_url).query)
+        self.assertEqual(query["start_time"], ["2026-09-23T12:30:34Z"])
+        c, _ = client(FakeResponse({"data": [other]}))
+        with self.assertRaisesRegex(x_api.XApiError, "not one of"):
+            x_api.thread(c, root_id, now=NOW)
+
     def test_kind_and_nonorganic_share(self) -> None:
         uid = x_api.USER_ID
         self.assertEqual(x_api.kind({}), "original")
