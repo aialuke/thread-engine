@@ -216,9 +216,10 @@ def timeline(client: Client, start: str, end: str | None = None, now: datetime |
 
 
 def followers(client: Client) -> list[dict]:
-    """Follower ids and handles. Owned read. Callers store ids only."""
-    found = client.pages(f"/2/users/{USER_ID}/followers", {"max_results": "1000"}, OWNED)
-    return [{"id": u["id"], "username": u.get("username")} for u in found]
+    """Follower ids, handles and whether each is verified. Owned read. Callers store ids only."""
+    found = client.pages(f"/2/users/{USER_ID}/followers",
+                         {"max_results": "1000", "user.fields": "verified,verified_type"}, OWNED)
+    return [{"id": u["id"], "username": u.get("username"), "verified": bool(u.get("verified"))} for u in found]
 
 
 def mentions(client: Client, since_id: str | None = None) -> list[dict]:

@@ -22,6 +22,17 @@ Numbers are collected automatically by the daily job: every post, reply and quot
 - **Experiments are paused until there are two weeks of organic numbers** (from 24 Sep 2026). Until then, posts are recorded and compared, but nothing is declared a winner.
 - `experiments.md`, `learnings.md` and `ledger/SUMMARY.md` are always up to date to read. Never edit them; Grok rewrites them.
 
+## Staying eligible for X's rewards program
+
+The target is X's Original Content Rewards: 500 verified followers and 500,000 verified Home Timeline impressions on your own posts in 90 days (replies and boosted reach don't count). `ledger/SUMMARY.md` shows progress. Things only you can do:
+
+- **Account basics X requires:** two-factor authentication on, a verified email, and a complete profile (name, bio, avatar and header).
+- **Once a week:** export your analytics (X → Premium → Analytics → Content → Export, last 7 days) and read the two numbers on X → Creator Studio → Original Content Rewards. `/results` asks for both.
+- **Now and then:** check x.com/i/under_the_hood for any label on the account.
+- **Don't boost.** Boosted reach doesn't count and X's terms treat it as inflating views.
+- **Keep the pinned post link-free**, or linked only to a well-known site. A pin with a link X rates as low quality can hide all your posts from Home for a week.
+- **Grok balance:** `/next`'s research runs on Grok Build. If it says the balance ran out, top it up.
+
 ## What never changes
 
 Only you approve a post. Nothing is posted for you. Every figure needs a source checked in the same session. The learning loop can change formats, length, timing, topics and hook style, never those rules.

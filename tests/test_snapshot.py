@@ -66,7 +66,8 @@ class FakeReader:
         return {"calls": 4, "items_read": 9, "cost_usd": 0.009, "missing_access_header": []}
 
 
-FOLLOWERS = [{"id": "11", "username": "builder"}, {"id": "22", "username": "AwakenLuke"}]
+FOLLOWERS = [{"id": "11", "username": "builder", "verified": True},
+             {"id": "22", "username": "AwakenLuke", "verified": True}]
 MENTION = {"id": "3000000001", "author_id": "800", "conversation_id": "1000000001", "created_at": at(38),
            "referenced_tweets": [{"type": "replied_to", "id": "1000000001"}]}
 
@@ -133,6 +134,9 @@ class DailyRun(unittest.TestCase):
         self.assertNotIn("loop/followers", tracked)
         self.assertNotIn("ledger/raw/api", tracked)
         self.assertIn("non-organic", out)
+        day = json.loads((self.root / "ledger" / "activity" / "account.json").read_text())["days"][-1]
+        self.assertEqual(day["verified_followers"], 1)  # the operator's own second account doesn't count
+        self.assertIn("Verified followers: 1 of the 500", out)
 
     def test_failed_read_records_nothing_and_moves_no_cursor(self) -> None:
         code, out = self.run_once(FakeReader(FOLLOWERS, self.items, fail=True))

@@ -575,6 +575,9 @@ def cmd_record_followers(repo: Repo, args) -> dict:
     for old in sorted(repo.private_dir.glob("followers-*.json"))[:-FOLLOWER_FILES_KEPT]:
         old.unlink()
     row = {"date": day, "at": iso(observed), "followers": payload.get("total", len(ids))}
+    if payload.get("verified") is not None:
+        check_count(payload["verified"], "verified")
+        row["verified_followers"] = payload["verified"]
     if previous is None:
         row["baseline"] = True
     else:
@@ -591,6 +594,21 @@ def cmd_record_followers(repo: Repo, args) -> dict:
     account["days"] = sorted([d for d in account["days"] if d["date"] != day] + [row], key=lambda d: d["date"])
     write_json(repo.account_path, account)
     return row
+
+
+def cmd_record_eligibility(repo: Repo, args) -> dict:
+    """The two numbers on X's Original Content Rewards eligibility screen, as the operator reads them."""
+    repo.state()
+    for value, name in ((args.verified_followers, "--verified-followers"),
+                        (args.qualified_impressions, "--qualified-impressions")):
+        need(value.isdigit(), f"{name} must be a whole number")
+    at = iso(now_arg(args.now))
+    account = repo.account()
+    account.setdefault("eligibility", []).append({
+        "at": at, "verified_followers": int(args.verified_followers),
+        "qualified_impressions": int(args.qualified_impressions)})
+    write_json(repo.account_path, account)
+    return account["eligibility"][-1]
 
 
 def cmd_set_lane(repo: Repo, args) -> dict:
@@ -1002,6 +1020,44 @@ def follows_cell(root_id: str, rows: dict[str, dict], days: list[dict]) -> str:
     return f"≥{credited}" if credited else "–"
 
 
+ELIGIBILITY_FOLLOWERS = 500
+ELIGIBILITY_IMPRESSIONS = 500_000
+
+
+def latest_organic(row: dict) -> int:
+    """The highest organic impressions any read of this item saw (X's numbers only grow)."""
+    reads = row.get("reads", {})
+    seen = [(reads.get("export") or {}).get("impressions")]
+    seen += [(reads.get(stage) or {}).get("organic", {}).get("impressions") for stage in ("final", "48h", "backfill")]
+    return max([v for v in seen if isinstance(v, int)], default=0)
+
+
+def eligibility_lines(rows: dict[str, dict], account: dict) -> list[str]:
+    days, screens = account.get("days", []), account.get("eligibility", [])
+    if not days and not screens:
+        return []
+    anchor = max([parse_time(d["at"]) for d in days] + [parse_time(s["at"]) for s in screens])
+    window = [r for r in rows.values() if r["kind"] in {"original", "quote"}
+              and anchor - timedelta(days=90) < parse_time(r["created_at"]) <= anchor]
+    proxy = sum(latest_organic(r) for r in window)
+    verified = next((d["verified_followers"] for d in reversed(days) if "verified_followers" in d), None)
+    lines = ["\n## Original Content Rewards\n\n",
+             f"Needs {ELIGIBILITY_FOLLOWERS} verified followers and {ELIGIBILITY_IMPRESSIONS:,} verified Home Timeline "
+             "impressions on originals in 90 days (no replies, no boosted reach).\n\n"]
+    if screens:
+        last = screens[-1]
+        lines.append(f"- X's eligibility screen, read {last['at'][:10]}: {last['verified_followers']} verified followers, "
+                     f"{last['qualified_impressions']:,} qualified impressions.\n")
+    if verified is not None:
+        lines.append(f"- Verified followers from the daily read: {verified} of {ELIGIBILITY_FOLLOWERS}.\n")
+    lines.append(f"- Organic impressions on originals and quotes, last 90 days: {proxy:,}. This counts every viewer "
+                 "on every surface, so it is an upper bound; X counts only Premium viewers on the Home feed.\n")
+    if screens and proxy:
+        lines.append(f"- Share that qualified at the last screen reading: {screens[-1]['qualified_impressions'] * 100 // proxy}%"
+                     " (the two readings may be from different days).\n")
+    return lines
+
+
 def account_lines(rows: dict[str, dict], days: list[dict]) -> list[str]:
     if not days:
         return []
@@ -1078,6 +1134,7 @@ def render(repo: Repo) -> None:
                      f"{fmt(root.get('views'))} | {fmt(organic.get('impressions'))} | {nonorganic_pct(read)} | "
                      f"{fmt(organic.get('profile_visits'))} | {fmt(root.get('bookmarks'))} | "
                      f"{fmt_replies(snap)} | {follows_cell(post['root_id'], rows, days)} | {where} |\n")
+    lines += eligibility_lines(rows, repo.account())
     lines += account_lines(rows, days)
     atomic_write(repo.ledger_dir / "SUMMARY.md", "".join(lines))
 
@@ -1126,6 +1183,7 @@ COMMANDS = {
     "record-followers": cmd_record_followers,
     "set-lane": cmd_set_lane,
     "record-export": cmd_record_export,
+    "record-eligibility": cmd_record_eligibility,
     "open-experiment": cmd_open_experiment,
     "evaluate": cmd_evaluate,
     "next-slot": cmd_next_slot,
@@ -1171,6 +1229,9 @@ def build_parser() -> argparse.ArgumentParser:
             sp.add_argument("--reason", required=True)
         if name == "set-lane":
             sp.add_argument("--lane", required=True)
+        if name == "record-eligibility":
+            sp.add_argument("--verified-followers", required=True)
+            sp.add_argument("--qualified-impressions", required=True)
         if name == "record-export":
             sp.add_argument("--csv", required=True, help="X analytics content export")
         if name == "add-preference":

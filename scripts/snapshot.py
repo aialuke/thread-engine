@@ -115,8 +115,11 @@ def process(observed: datetime, followers: list[dict], windows: list[tuple[str, 
         "reply_targets": targets, "since_id": since}))
     outside = talk["outside_replies"]
 
+    verified = sum(1 for f in followers if f.get("verified") and f["id"] not in self_ids)
     follow = loop("record-followers", "--json", inbox("followers.json", {
-        "observed_at": at, "self_ids": sorted(self_ids), "ids": [f["id"] for f in followers], "total": len(followers)}))
+        "observed_at": at, "self_ids": sorted(self_ids), "ids": [f["id"] for f in followers],
+        "total": len(followers), "verified": verified}))
+    lines.append(f"Verified followers: {follow.get('verified_followers')} of the 500 X's rewards program needs.")
     if follow.get("baseline"):
         lines.append(f"Followers: {follow['followers']} (first count, nothing to compare yet).")
     else:

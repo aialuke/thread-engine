@@ -459,6 +459,21 @@ class FormatAndApproval(unittest.TestCase):
             if expected:
                 self.assertIn("caps the root at 600", err)
 
+    def test_engagement_solicitation_refused_but_questions_and_tech_wording_pass(self) -> None:
+        cases = (("Drop a hi and let's connect.", 1), ("What is your current project? Drop it below.", 1),
+                 ("Reply with your router model.", 1), ("Save this before you book the repair.", 1),
+                 ("Like and repost if this helped.", 1), ("Follow for more tips.", 1),
+                 ("Which model is yours? The menu differs.", 0), ("Motion smoothing can drop a frame.", 0),
+                 ("Tap Save this preset, then Done.", 0), ("The router replies with its firmware version.", 0))
+        for i, (text, expected) in enumerate(cases):
+            draft = self.root / f"solicit-{i}"
+            draft.mkdir()
+            (draft / "FORMAT").write_text("single-tip\n", encoding="utf-8")
+            (draft / "01-hook.md").write_text(text + "\n", encoding="utf-8")
+            self._approve(draft)
+            code, _out, err = self._run(self.post.main, [str(draft)])
+            self.assertEqual(code, expected, (text, err))
+
     def test_banned_phrases_refused_but_unlock_allowed(self) -> None:
         cases = (("This is a game changer.", 1), ("Most people don’t know this.", 1),
                  ("Big news 🔥", 1), ("Turn on Face ID unlock.", 0))

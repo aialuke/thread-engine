@@ -35,7 +35,7 @@ One difference per post. Numbers run from 1, never repeat, and match the hook's 
 
 - Open with `The full pass`
 - One `✓` line per difference, written `name = payoff`, using that card's figure and model
-- Reply ask names the fork: which model the reader has now. Never "your thoughts", never 💬.
+- A real question names the fork: which model the reader has now ("Still on a 16 Pro?"). Never an instruction to reply, save or share (X's rewards rules ban engagement solicitation), never "your thoughts", never 💬.
 
 ## Research and fact-check
 

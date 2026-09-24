@@ -4,7 +4,7 @@ Beat-check. A new settings draft takes its beat order from `SKILL.md`. Posted tr
 
 Sourced dollars below are from the shipped gold. A new draft omits a figure until it has a source.
 
-MacBook battery shipped gold is `examples/macbook-battery.md` (conversation `2102172499031253210`). Where snap, thesis, or the reply CTA differ from A and B, follow `SKILL.md`.
+MacBook battery shipped gold is `examples/macbook-battery.md` (conversation `2102172499031253210`). Where snap, thesis, or the reply CTA differ from A and B, follow `SKILL.md`. Every "Reply with…" and "Save this before…" line in these examples is now refused by the gate (engagement solicitation); write the closing question as a real question instead.
 
 iPhone 18 Pro vs 17 Pro shipped gold is `examples/iphone-18-pro-aperture.md` (conversation `2102272933087363155`). Comparison hook, difference card, and comparison closer: follow `.claude/skills/format-comparison/SKILL.md`. Settings drafts follow the A and B lists below: result, then neglect, then the remaining beats.
 

@@ -391,6 +391,23 @@ class ApiData(LoopCase):
         bad.write_text("a,b\n1,2\n", encoding="utf-8")
         self.assertIn("not an X analytics", self.fails("record-export", "--csv", str(bad)))
 
+    def test_eligibility_block_tracks_both_thresholds(self) -> None:
+        self.activity("48h", hours(40), [self.item("9600000001", T0, kind="original", impressions=900),
+                                         self.item("9600000002", T0, kind="reply", impressions=5000)])
+        self.ok("record-followers", "--json", self.payload(
+            {"observed_at": hours(41), "ids": ["1", "2", "3"], "total": 3, "verified": 2}))
+        made = self.ok("record-eligibility", "--verified-followers", "26", "--qualified-impressions", "337",
+                       now=hours(42))
+        self.assertEqual((made["verified_followers"], made["qualified_impressions"]), (26, 337))
+        self.assertIn("whole number", self.fails("record-eligibility", "--verified-followers", "x",
+                                                 "--qualified-impressions", "1"))
+        summary = (self.root / "ledger" / "SUMMARY.md").read_text()
+        self.assertIn("## Original Content Rewards", summary)
+        self.assertIn("26 verified followers, 337 qualified impressions", summary)
+        self.assertIn("Verified followers from the daily read: 2 of 500", summary)
+        self.assertIn("last 90 days: 900.", summary)  # the reply's 5,000 never counts
+        self.assertIn("qualified at the last screen reading: 37%", summary)
+
     def test_interactions_prune_old_people(self) -> None:
         self.ok("record-interactions", "--json", self.payload({
             "observed_at": hours(0), "reply_targets": [{"item_id": "9000000020", "user_id": "600", "at": hours(0)}]}))

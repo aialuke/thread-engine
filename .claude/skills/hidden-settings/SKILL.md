@@ -57,7 +57,7 @@ Skip line when the menu can be missing: `No Main Camera menu? Skip it.`
 - `✓` recap of the setting names, one line
 - Same-object line: same phone / same gateway / same wedding. Different result
 - Time and money already used in the hook; repeat only those figures
-- Reply CTA asks for the fork that changes which settings matter (model, chip, age, or ISP) and promises which 3 of the N to do first.
+- The closing question asks for the fork that changes which settings matter (model, chip, age, or ISP) and promises which 3 of the N to do first. Write it as a real question ("Which TV is yours? The menus differ, and 3 of these 7 matter most on each"), never an instruction to reply, save, bookmark, follow or repost: X's rewards rules ban engagement solicitation, and the gate refuses "reply with" and "save this before". The gold examples' "Reply with…" and "Save this before…" lines predate this rule; don't copy them.
 
 ## Emoji budget
 

@@ -33,6 +33,18 @@ ROOT_LIMIT_FORMATS = {"settings", "single-tip", "build-log", "tool-verdict"}
 ROOT_LIMIT = 600
 DIGEST_RE = re.compile(r"^cards-sha256:\s*([0-9a-f]{64})\s*$", re.MULTILINE)
 THOUGHTS_RE = re.compile(r"your thoughts", re.IGNORECASE)
+# X's Original Content Rewards rules: "Do not solicit engagements: repeatedly instructing users to engage
+# with posts, such as asking to like, reply, bookmark, follow, or repost." Instructions only; a real
+# question ("Which model is yours?") is fine. Tuned so tech wording ("drop a frame", "save this preset") passes.
+SOLICIT_RE = re.compile(
+    r"\bdrop (?:a|an) (?:hi|hello|comment|reply|link|👋)"
+    r"|\bdrop (?:it|them|yours|your \w+) (?:below|here|in the comments)"
+    r"|\bfollow (?:me )?for (?:more|part)"
+    r"|\blike (?:and|&|\+) (?:repost|retweet|share|follow|comment)"
+    r"|\b(?:repost|retweet|bookmark) this\b"
+    r"|\bsave this (?:post|thread|tweet|for later|before)"
+    r"|\bcomment below\b|\breply with\b|\btag (?:a friend|someone|your)",
+    re.IGNORECASE)
 BANNED_RE = re.compile(r"game changer|most people don['’]?t know|wait for it|🚨|🔥|👇", re.IGNORECASE)
 
 
@@ -129,6 +141,10 @@ def card_refusals(draft: Path, found: list[Path]) -> list[str]:
             reasons.append(f"REFUSED: 💬 in {card.name}")
         if THOUGHTS_RE.search(text):
             reasons.append(f"REFUSED: thoughts CTA in {card.name}")
+        solicit = SOLICIT_RE.search(text)
+        if solicit:
+            reasons.append(f"REFUSED: asks for engagement ({solicit.group(0)!r}) in {card.name}; "
+                           "ask a real question instead (X's rewards rules ban engagement solicitation)")
         banned = BANNED_RE.search(text)
         if banned:
             reasons.append(f"REFUSED: banned phrase {banned.group(0)!r} in {card.name}")

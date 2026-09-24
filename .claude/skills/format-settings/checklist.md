@@ -14,7 +14,7 @@
 ## Cards and closer
 - [ ] N in the hook equals the card count, and matches the experiment arm if there is one
 - [ ] Each card: title, default, path, one action, payoff
-- [ ] Closer: ✓ recap, same-object line, reply ask for the fork that matters
+- [ ] Closer: ✓ recap, same-object line, a real question about the fork that matters (no "reply with", "save this", or other instruction to engage)
 
 ## Voice and images
 - [ ] voice/exit-zero.md banned phrases and farm tells cut; no unsourced figures
