@@ -183,5 +183,14 @@ class DailyRun(unittest.TestCase):
         self.assertEqual(self.activity()["1000000001"]["reads"]["backfill"]["label"], "backfill")
 
 
+class Normalize(unittest.TestCase):
+    def test_keeps_the_whole_text_without_handles(self) -> None:
+        whole = "PAID → FREE\n" + "Photoshop → Photopea\n" * 30 + "@OBSProject thanks"
+        item = {**tweet("1000000009", 40), "text": whole[:270], "note_tweet": {"text": whole}}
+        text = snapshot.normalize(item)["text"]
+        self.assertEqual(text, whole.replace("@OBSProject", "@_"))
+        self.assertGreater(len(text), 300)
+
+
 if __name__ == "__main__":
     unittest.main()

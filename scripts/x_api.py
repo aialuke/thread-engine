@@ -7,6 +7,7 @@
     python3 scripts/x_api.py followers
     python3 scripts/x_api.py mentions [--since-id <post id>]
     python3 scripts/x_api.py thread <root post id>
+    python3 scripts/x_api.py user <handle>
     python3 scripts/x_api.py backfill --since <ISO>
 
 Keys come from the macOS Keychain (service thread-engine-x) and are never printed.
@@ -27,6 +28,7 @@ import base64
 import hashlib
 import hmac
 import json
+import re
 import secrets
 import subprocess
 import sys
@@ -49,10 +51,13 @@ MAX_PAGES = 50
 RETRY_SECONDS = 20
 # Estimated USD per item returned (reference/x-api.md, pricing read 2026-09-24).
 OWNED, POST, USER = 0.001, 0.005, 0.010
-TWEET_FIELDS = ",".join(("created_at", "text", "conversation_id", "in_reply_to_user_id", "referenced_tweets",
-                         "public_metrics", "organic_metrics", "non_public_metrics", "context_annotations"))
+# note_tweet carries the whole text of a post over 280 characters; `text` alone is cut (reference/x-api.md P16).
+TWEET_FIELDS = ",".join(("created_at", "text", "note_tweet", "conversation_id", "in_reply_to_user_id",
+                         "referenced_tweets", "public_metrics", "organic_metrics", "non_public_metrics",
+                         "context_annotations"))
 MENTION_FIELDS = "created_at,author_id,conversation_id,in_reply_to_user_id,referenced_tweets"
 NONORGANIC_SHARE = 0.10
+HANDLE_RE = re.compile(r"[A-Za-z0-9_]{1,15}")
 
 
 class XApiError(Exception):
@@ -212,7 +217,7 @@ def timeline(client: Client, start: str, end: str | None = None, now: datetime |
     params = {"max_results": "100", "tweet.fields": TWEET_FIELDS, "start_time": iso(begin)}
     if end:
         params["end_time"] = iso(parse_time(end))
-    return client.pages(f"/2/users/{USER_ID}/tweets", params, OWNED)
+    return [with_full_text(item) for item in client.pages(f"/2/users/{USER_ID}/tweets", params, OWNED)]
 
 
 def followers(client: Client) -> list[dict]:
@@ -254,16 +259,47 @@ def lookup(client: Client, ids: list[str]) -> list[dict]:
     ids = [i for i in dict.fromkeys(ids) if i.isdigit()][:100]
     if not ids:
         return []
-    params = {"ids": ",".join(ids), "tweet.fields": "created_at,author_id,public_metrics,text",
+    params = {"ids": ",".join(ids), "tweet.fields": "created_at,author_id,public_metrics,text,note_tweet",
               "expansions": "author_id", "user.fields": "username"}
     body = client.request("GET", "/2/tweets", params, POST, partial_ok=True)
     users = {u["id"]: u.get("username") for u in (body.get("includes") or {}).get("users", [])}
     client.items += len(users)
     client.cost += len(users) * USER
-    return [{**post, "author": users.get(post.get("author_id"))} for post in body.get("data") or []]
+    return [{**with_full_text(post), "author": users.get(post.get("author_id"))} for post in body.get("data") or []]
+
+
+def user(client: Client, handle: str) -> dict:
+    """One account by handle: who it is and when it last posted, to check a handle before tagging it.
+    Not an owned read: about $0.010."""
+    handle = handle.removeprefix("@")
+    if not HANDLE_RE.fullmatch(handle):
+        raise XApiError(f"bad handle {handle!r}")
+    fields = "created_at,verified,verified_type,public_metrics,most_recent_tweet_id"
+    body = client.request("GET", f"/2/users/by/username/{handle}", {"user.fields": fields}, USER, partial_ok=True)
+    data = body.get("data")
+    if not data:
+        detail = "; ".join(e.get("detail") or e.get("title", "") for e in body.get("errors") or [])
+        raise XApiError(f"@{handle} not found on X{': ' + detail if detail else ''}")
+    latest = data.get("most_recent_tweet_id")
+    return {"handle": data.get("username"), "name": data.get("name"), "id": data.get("id"),
+            "verified": bool(data.get("verified")), "verified_type": data.get("verified_type"),
+            "created_at": data.get("created_at"),
+            "followers": (data.get("public_metrics") or {}).get("followers_count"),
+            "latest_post_at": iso(posted_at(latest)) if latest and latest.isdigit() else None}
 
 
 # ---------- item helpers ----------
+
+
+def full_text(item: dict) -> str:
+    """The whole post: X cuts `text` at about 280 characters and puts the rest in note_tweet."""
+    return (item.get("note_tweet") or {}).get("text") or item.get("text", "")
+
+
+def with_full_text(item: dict) -> dict:
+    if item.get("note_tweet"):
+        item = {**item, "text": full_text(item)}
+    return item
 
 
 def kind(item: dict) -> str:
@@ -324,6 +360,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--since-id")
     sp = sub.add_parser("thread")
     sp.add_argument("root_id")
+    sp = sub.add_parser("user")
+    sp.add_argument("handle")
     sp = sub.add_parser("backfill")
     sp.add_argument("--since", required=True)
     return parser
@@ -346,6 +384,8 @@ def main(argv: list[str] | None = None, client: Client | None = None) -> int:
             result = {"items": mentions(client, args.since_id)}
         elif args.command == "thread":
             result = thread(client, args.root_id)
+        elif args.command == "user":
+            result = {"data": user(client, args.handle)}
         else:
             result = backfill(client, args.since)
             with (ROOT / "ledger" / "runs.log").open("a", encoding="utf-8") as log:

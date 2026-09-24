@@ -154,6 +154,40 @@ class Reads(unittest.TestCase):
         self.assertEqual(x_api.lookup(c, ["2102145678901234567"]), [])
         self.assertEqual(x_api.lookup(c, []), [])
 
+    def test_long_posts_come_back_whole(self) -> None:
+        whole = "PAID → FREE\n" + "row\n" * 100
+        long_post = {"id": "1", "text": whole[:270], "note_tweet": {"text": whole}}
+        c, opener = client(FakeResponse({"data": [long_post, {"id": "2", "text": "short"}]}))
+        items = x_api.timeline(c, "2026-09-20T00:00:00Z", now=NOW)
+        self.assertEqual([i["text"] for i in items], [whole, "short"])
+        query = parse_qs(urlsplit(opener.requests[0].full_url).query)
+        self.assertIn("note_tweet", query["tweet.fields"][0].split(","))
+        c, opener = client(FakeResponse({"data": [{**long_post, "author_id": "77"}],
+                                         "includes": {"users": [{"id": "77", "username": "someone"}]}}))
+        self.assertEqual(x_api.lookup(c, ["2102736605039776235"])[0]["text"], whole)
+        query = parse_qs(urlsplit(opener.requests[0].full_url).query)
+        self.assertIn("note_tweet", query["tweet.fields"][0].split(","))
+
+    def test_user_reports_who_and_when_they_last_posted(self) -> None:
+        body = {"data": {"id": "11", "username": "photopeacom", "name": "Photopea", "verified": True,
+                         "public_metrics": {"followers_count": 5000},
+                         "most_recent_tweet_id": "2102737637346095128"}}
+        c, opener = client(FakeResponse(body))
+        found = x_api.user(c, "@photopeacom")
+        self.assertEqual((found["handle"], found["followers"], found["latest_post_at"]),
+                         ("photopeacom", 5000, "2026-09-23T12:31:34Z"))
+        self.assertTrue(opener.requests[0].full_url.startswith(f"{x_api.API}/2/users/by/username/photopeacom?"))
+        self.assertEqual(opener.requests[0].get_method(), "GET")
+        self.assertEqual(round(c.cost, 4), 0.01)
+        c, _ = client(FakeResponse({"errors": [{"title": "Not Found Error", "detail": "Could not find user"}]}))
+        with self.assertRaisesRegex(x_api.XApiError, "not found on X: Could not find user"):
+            x_api.user(c, "nobody_here")
+        c, opener = client()
+        for bad in ("two words", "a/b", "x" * 16, ""):
+            with self.assertRaisesRegex(x_api.XApiError, "bad handle"):
+                x_api.user(c, bad)
+        self.assertEqual(opener.requests, [])
+
     def test_kind_and_nonorganic_share(self) -> None:
         uid = x_api.USER_ID
         self.assertEqual(x_api.kind({}), "original")

@@ -65,7 +65,7 @@ def normalize(item: dict) -> dict:
         "conversation_id": item.get("conversation_id") or item["id"],
         "topics": sorted({a["entity"]["name"] for a in item.get("context_annotations") or []}),
         # The account's own words; other accounts' handles are not kept.
-        "text": re.sub(r"@\w+", "@_", item.get("text", ""))[:300],
+        "text": re.sub(r"@\w+", "@_", x_api.full_text(item)),
         "public": {"impressions": public.get("impression_count"), "likes": public.get("like_count"),
                    "replies": public.get("reply_count"), "reposts": public.get("retweet_count"),
                    "quotes": public.get("quote_count"), "bookmarks": public.get("bookmark_count")},
@@ -134,7 +134,7 @@ def process(observed: datetime, followers: list[dict], windows: list[tuple[str, 
             if x_api.kind(item) not in {"original", "quote"}:
                 continue
             if item["id"] not in ledger:
-                cards = [{"id": c["id"], "text": c.get("text", "")} for c in items
+                cards = [{"id": c["id"], "text": x_api.full_text(c)} for c in items
                          if x_api.kind(c) == "thread_card" and c.get("conversation_id") == item["id"]]
                 loop("record-post", "--json", inbox(f"post-{item['id']}.json", {
                     "root_id": item["id"], "slug": f"x-{item['id']}", "format": "other", "lane": "other",
