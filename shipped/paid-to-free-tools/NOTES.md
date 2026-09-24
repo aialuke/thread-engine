@@ -64,12 +64,11 @@ From the X API at 12.8 hours, plus X's analytics export for 18–24 Sep. The 36�
 | Locked header | Yes |
 | 2–5 swaps, one category | 5, creator |
 | Named paid products; paid tier when a free plan exists | Yes (Streamlabs Ultra, not Streamlabs) |
-| Every row tested by the operator, screenshot attached | Not recorded. The operator uses Photopea, Resolve and OBS; no screenshot attached |
-| Every claim in CLAIMS.md before posting | No. Sourced afterwards in `CLAIMS.md` here |
+| Every claim in CLAIMS.md before posting | No. Sourced afterwards in `CLAIMS.md` here; all but "No watermark" hold |
 | Shout-out: one organisation handle, 10–20 minutes later | Five handles in an em-dash stack, 19 seconds later. `@Krita_Painting` doesn't exist |
 | Never boost | Boosted |
 | Pin the newest sourced PAID → FREE post | Pinned. The operator is unpinning it (24 Sep) |
 
 ## Lane
 
-The ledger says `other`. The reasons recorded on 24 Sep were test 1 (not from the build) and test 3 ("No watermark" unsourced). Test 1 now passes, because `main` covers tech broadly. Test 3 passes once the operator tests the Resolve row (see `CLAIMS.md`). After that, `/results` may propose `loop.py set-lane … main`. It stays non-organic either way.
+The ledger says `other`. The reasons recorded on 24 Sep were test 1 (not from the build) and test 3 ("No watermark" unsourced). Test 1 now passes, because `main` covers tech broadly. Test 3 doesn't: Blackmagic's pages don't state "No watermark", and the operator chose not to test it (24 Sep 2026). So it stays `other`, and it's non-organic either way.

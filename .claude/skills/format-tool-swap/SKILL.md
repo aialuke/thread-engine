@@ -2,8 +2,8 @@
 name: format-tool-swap
 description: >
   PAID → FREE series: a fixed two-line header, then 2 to 5 swaps from one
-  roster category, each a named paid tool, the free tool the operator
-  tested, and one proof line. Optional one-handle maker shout-out.
+  roster category, each a named paid tool, a free tool, and one sourced
+  proof line. Optional one-handle maker shout-out.
   Used by /draft-thread.
 when-to-use: Use for a PAID → FREE post, a paid-to-free swap list, free alternatives, or /format-tool-swap.
 ---
@@ -52,27 +52,28 @@ Paid product → Free tool
   - Say "open source" only when `CLAIMS.md` shows it. Photopea isn't, and neither are Raycast or OrbStack.
 - **Proof lines.**
   - Positive, specific, short, and true as written for the task they name.
-  - Written from the operator's own test, never paraphrased from the roster.
+  - Written from the sources (and the operator's test, if there is one), never paraphrased from the roster.
   - Name the job the free tool does, never "replaces" or a promised 1:1 swap.
   - No feature sheets ("3D Modeling, Sculpting and printing, …"), no changelog or LTS wording, no negatives. Limits live in `CLAIMS.md` and `REPLIES.md`.
 - **No @handles, hashtags or `1/5`** in the root; the gate refuses them.
 - **The payoff stands alone.** A stranger who sees only the root gets every swap.
 
-## Material: the operator's test
+## Research, and an optional test
 
-X's rewards program counts content "you have personally created" and not "aggregated summaries" ([X Help Center](https://web.archive.org/web/20260916150107/https://help.x.com/en/using-x/original-content-rewards)). A list anyone could copy from a roster is the second kind. The operator's test is what makes the header true.
+Research is enough: every row stands on the vendors' own pages (below). Testing isn't a gate (operator, 24 Sep 2026: "I don't need to test something to research and understand it").
 
-Before any card, ask the operator to run each free tool on its row's task (for example "open a layered PSD in Photopea") and save a screenshot to the draft's `images/`. The operator offered to test before each post (24 Sep 2026). Tools they already use: Photopea, DaVinci Resolve, OBS, Obsidian.
+A test adds value when it's easy. Offer it once per draft, never as a condition. The operator already uses Photopea, DaVinci Resolve, OBS and Obsidian, and a quick test (for example "open a layered PSD in Photopea") gives the post:
+- a real screenshot;
+- a `tested` row;
+- first-hand proof. X's rewards program counts content "you have personally created" and not "aggregated summaries" ([X Help Center](https://web.archive.org/web/20260916150107/https://help.x.com/en/using-x/original-content-rewards)). What makes a PAID → FREE post the operator's own is the choice of swaps and the judgement in the proof lines; a test or screenshot adds to that.
 
-- Every row is `tested` in `CLAIMS.md`, with its screenshot as the artifact.
-- A row the operator can't test is cut, not posted as vendor-stated.
-- Without tests, stop and suggest another format.
+A test matters in one case: when the vendor's page doesn't state a claim (post 1's "No watermark" is the example), a test is the only way that claim reaches a card. Otherwise the claim, not the row, is cut.
 
 ## Research and fact-check
 
 `/verify-settings <folder> claims` writes `CLAIMS.md` in its usual table. Each swap needs these rows:
 
-- **The operator's test:** the task ("open a layered PSD") and its screenshot. `tested`.
+- **The task it does:** from the free tool's own feature page ("opens and saves PSDs"). `vendor-stated`, or `tested` with a screenshot when the operator tried it.
 - **Free tier covers the task:** from the free tool's own pricing or feature page, checked this session.
 - **The paid side is paid:** from the paid product's pricing page. If it has a free plan, the row says so and the card names the paid tier.
 - **The limit that matters:** quota, resolution cap, watermark, ads, platform, account needed. It feeds `REPLIES.md`.
@@ -115,12 +116,12 @@ Talking points for replies under the post, with sources. Never paste-ready: the 
 
 ## Images
 
-One real screenshot from the operator's test, attached to the root by default. `/draft-thread` flags a draft without one. Never vendor logos or press images, never anything in `images/sources/`.
+Optional. A real screenshot from the operator's own use is the best image the post can carry. Never vendor logos or press images, never anything in `images/sources/`.
 
 ## Series operations
 
 - **Cadence:** one PAID → FREE parent every other day, inside the account's cap of two originals a day, hours apart (operator, 24 Sep 2026). Categories go in `queue/topics.yaml` order.
-- **Pin:** pin the newest PAID → FREE post that's live, tested, sourced and unboosted, with no link (A14). The operator pins on X.
+- **Pin:** pin the newest PAID → FREE post that's live, sourced and unboosted, with no link (A14). The operator pins on X.
 - **Makers:** the rules in `voice/exit-zero.md` → Makers. One maker touch a day; repost only makers' release posts; quote only makers' news; never quote a premium vendor to pick a fight.
 - **Never boost** (`voice/exit-zero.md` → Boosting).
 

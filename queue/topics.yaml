@@ -56,13 +56,13 @@ topics:
     note: >-
       PAID → FREE post 1, made in a Grok chat outside the repo on 2026-09-23. Boosted, 95% of
       2,105 impressions; 99 organic, 1 visit, 0 follows. Not the best root: organically among the
-      weakest, and untested as a format. Lane other (as the ledger) until its Resolve row is
-      tested (shipped/paid-to-free-tools/CLAIMS.md). OBS and Krita are spent except as singles.
+      weakest, and untested as a format. Lane other (as the ledger): its "No watermark" has no
+      official source and the operator chose not to test it. OBS and Krita are spent except as singles.
 
   # PAID → FREE series (.claude/skills/format-tool-swap/SKILL.md). One parent every other day, in
   # this order (operator, 24 Sep 2026). Draft rows came from the Grok session
-  # (reviews/paid-free-session-2026-09.md) and are candidates, not copy: every row is tested by the
-  # operator and sourced before it reaches a card. About 10 categories at one every other day runs
+  # (reviews/paid-free-session-2026-09.md) and are candidates, not copy: every claim is sourced
+  # before it reaches a card. Operator tests are optional extras. About 10 categories at one every other day runs
   # to about late October; /results says when two remain. Roster: queue/paid-free-roster.md.
 
   - slug: paid-free-developer
@@ -89,7 +89,7 @@ topics:
       Session draft: "Paid chat apps" → Ollama + Open WebUI (models run on your machine, chat UI in
       the browser); GitHub Copilot → Cline (agent in the editor, pointed at a local model). Fixes:
       name the paid product (the roster has ChatGPT Plus and Claude Pro). The account's own pipeline
-      runs on paid Claude, Codex and Grok, so rows claim only jobs the operator ran locally.
+      runs on paid Claude, Codex and Grok, so don't imply the operator replaced them.
       Copilot has a free plan (2,000 completions and 50 chats a month), so name Copilot Pro or cut.
       Cline for Continue is right: Cursor acquired Continue around 16 Jun 2026 and wound it down.
       Shout-out candidate: @ollama.
@@ -103,9 +103,9 @@ topics:
       Session draft: Notion → Obsidian (local markdown, graph and plugins on your machine);
       Microsoft 365 → OnlyOffice (Word, Excel, PowerPoint files stay in shape); Trello → Focalboard.
       Fixes: cut Focalboard, whose repo "is currently not maintained" (Mattermost stopped fixes on
-      15 Sep 2023); use Toggl Track → ActivityWatch from the roster, or two rows. Obsidian is
-      tested (the operator uses it). Notion and Trello have free plans. Test OnlyOffice's "files
-      stay in shape". Obsidian's paid Sync and Publish go in REPLIES.md. Shout-out: @obsdmd, not
+      15 Sep 2023); use Toggl Track → ActivityWatch from the roster, or two rows. The operator
+      uses Obsidian, so a screenshot is easy if wanted. Notion and Trello have free plans. Source OnlyOffice's "files
+      stay in shape" or cut it. Obsidian's paid Sync and Publish go in REPLIES.md. Shout-out: @obsdmd, not
       @Obsidian (a game studio).
 
   - slug: paid-free-privacy
@@ -146,7 +146,7 @@ topics:
     format: tool-swap
     lane: main
     category: self-hosting
-    note: Roster rows Coolify, Netdata and Caddy. Testing needs a server. Not drafted.
+    note: Roster rows Coolify, Netdata and Caddy. Not drafted.
 
   - slug: paid-free-finance
     status: queued

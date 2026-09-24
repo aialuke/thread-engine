@@ -14,7 +14,7 @@ A post is in the `main` lane when all three are true:
 
 1. **It comes from building, or for now from tech broadly.** Something the operator built, ran, measured, broke or chose; a take on tools, AI or tech news from a builder's point of view; or, for now, any useful tech post.
 2. **A builder or an AI-using creator gets something from it:** a result, a lesson, a verdict on a tool, a workflow, a free tool that holds up, or a question worth answering.
-3. **Every claim in it shows its proof:** real output, a screenshot, a number or a named source. The truth budget in `voice/exit-zero.md` applies. A question or an opinion makes no claim, so it passes. A PAID → FREE post passes when every row is tested by the operator and sourced in `CLAIMS.md`, and the post shows the test (a screenshot from it).
+3. **Every claim in it shows its proof:** real output, a screenshot, a number or a named source. The truth budget in `voice/exit-zero.md` applies. A question or an opinion makes no claim, so it passes. A PAID → FREE post passes when every claim in it is sourced in `CLAIMS.md` (the vendor's own page, or the operator's test).
 
 These fit:
 - build logs ("today the pipeline did X; here's the output and what broke");
