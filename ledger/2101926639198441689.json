@@ -94,6 +94,68 @@
       "followers": 34,
       "raw_file": "ledger/raw/backfill-20260923T1910.json",
       "missing": []
+    },
+    {
+      "observed_at": "2026-09-24T01:20:24Z",
+      "age_hours": 66.5,
+      "kind": "late",
+      "source": "api",
+      "root": {
+        "views": 137,
+        "likes": 1,
+        "reposts": 0,
+        "quotes": 0,
+        "replies": 9,
+        "bookmarks": 2
+      },
+      "cards": [
+        {
+          "id": "2101928595648299132",
+          "views": 12
+        },
+        {
+          "id": "2101928001185444158",
+          "views": 54
+        },
+        {
+          "id": "2101929511705309680",
+          "views": 25
+        },
+        {
+          "id": "2101927707319951411",
+          "views": 22
+        },
+        {
+          "id": "2101928289426407476",
+          "views": 17
+        },
+        {
+          "id": "2101927156343529548",
+          "views": 57
+        },
+        {
+          "id": "2101929347426988524",
+          "views": 14
+        },
+        {
+          "id": "2101928139035480223",
+          "views": 19
+        }
+      ],
+      "outside_replies": 0,
+      "outside_repliers": [],
+      "repliers_complete": true,
+      "followers": 36,
+      "raw_file": "ledger/raw/api/backfill-20260924T0120.json",
+      "missing": [],
+      "organic": {
+        "impressions": 137,
+        "likes": 1,
+        "replies": 9,
+        "reposts": 0,
+        "profile_visits": 0,
+        "url_clicks": 0
+      }
     }
   ],
   "missed": false

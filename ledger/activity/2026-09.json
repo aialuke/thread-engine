@@ -1,0 +1,5154 @@
+{
+  "month": "2026-09",
+  "items": {
+    "2101603601143803913": {
+      "id": "2101603601143803913",
+      "kind": "original",
+      "created_at": "2026-09-20T09:25:19Z",
+      "conversation_id": "2101603601143803913",
+      "topics": [
+        "Services",
+        "Social media",
+        "Technology",
+        "Technology Business",
+        "Wi-Fi",
+        "YouTube"
+      ],
+      "text": "Most home wifi routers get plugged in once and then left alone for years.\n\nA family was paying $90/month for a \"premium speed\" upgrade because Zoom kept freezing mid-call and YouTube kept buffering on 4K every single evening.\n\nTheir IT-guy came over and spent just 10 minutes in",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 87.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 285,
+            "likes": 1,
+            "replies": 6,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 2
+          },
+          "organic": {
+            "impressions": 285,
+            "likes": 1,
+            "replies": 6,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101603687630266648": {
+      "id": "2101603687630266648",
+      "kind": "thread_card",
+      "created_at": "2026-09-20T09:25:39Z",
+      "conversation_id": "2101603601143803913",
+      "topics": [
+        "Technology",
+        "Technology Business",
+        "Wi-Fi"
+      ],
+      "text": "Setting 1: Wi-Fi Channel Selection\n\nRouters auto-select a wireless channel on setup day and then never touch it again — even as neighbors' routers pile onto that same channel over the following years.\n\nIn dense neighborhoods or apartment buildings, this creates constant",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 87.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 49,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 49,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101603775777784270": {
+      "id": "2101603775777784270",
+      "kind": "thread_card",
+      "created_at": "2026-09-20T09:26:00Z",
+      "conversation_id": "2101603601143803913",
+      "topics": [
+        "Entertainment & Leisure Business"
+      ],
+      "text": "Setting 2: 5GHz vs 2.4GHz Band Priority\n\nMost devices default to connecting to whichever band they saw first — and once connected, they never automatically switch, even when a faster band is sitting right there unused.\n\nThe family's smart TV and laptop were both stuck on the",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 87.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 22,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 22,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101603846049214593": {
+      "id": "2101603846049214593",
+      "kind": "thread_card",
+      "created_at": "2026-09-20T09:26:17Z",
+      "conversation_id": "2101603601143803913",
+      "topics": [
+        "B2B",
+        "Services - B2B",
+        "Zoom"
+      ],
+      "text": "Setting 3: QoS (Quality of Service)\n\nWithout QoS enabled, the router treats every device and every task with equal priority — meaning a phone downloading an app update can throttle a Zoom call happening at the exact same moment.\n\nMost routers have this feature sitting disabled by",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 87.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 122,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 122,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101603917230747837": {
+      "id": "2101603917230747837",
+      "kind": "thread_card",
+      "created_at": "2026-09-20T09:26:34Z",
+      "conversation_id": "2101603601143803913",
+      "topics": [],
+      "text": "Setting 4: Firmware Update\n\nRouters almost never update themselves automatically, and most people have no idea firmware updates are even a thing that exists for their router.\n\nAn outdated firmware version means the router is missing years of speed improvements, security patches,",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 87.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101603981373894824": {
+      "id": "2101603981373894824",
+      "kind": "thread_card",
+      "created_at": "2026-09-20T09:26:49Z",
+      "conversation_id": "2101603601143803913",
+      "topics": [],
+      "text": "Setting 5: DNS Server Change\n\nEvery device on the network uses whatever DNS server the ISP auto-assigns by default — and most ISP-provided DNS servers are slower and less reliable than free public alternatives.\n\nDNS is what translates a website name into an actual connection, so",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 87.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 22,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 22,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101604052656361871": {
+      "id": "2101604052656361871",
+      "kind": "thread_card",
+      "created_at": "2026-09-20T09:27:06Z",
+      "conversation_id": "2101603601143803913",
+      "topics": [],
+      "text": "Setting 6: Connected Devices Cleanup\n\nOver years of use, routers accumulate dozens of \"ghost\" devices still technically connected or remembered — old phones, guests' laptops, devices that were sold or thrown away long ago.\n\nEach of these can still be holding a reserved connection",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 87.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 10,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 10,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101926639198441689": {
+      "id": "2101926639198441689",
+      "kind": "original",
+      "created_at": "2026-09-21T06:48:57Z",
+      "conversation_id": "2101926639198441689",
+      "topics": [
+        "Apple",
+        "Apple - iPhone",
+        "Arts & culture",
+        "Cell Phones",
+        "Mobile",
+        "Photographers",
+        "Photography",
+        "Technology",
+        "Technology Business",
+        "Wedding photography",
+        "Weddings"
+      ],
+      "text": "Most iPhones get set up on day one and the Camera app is never touched again.\n\nA wedding guest was about to spend $1,200 on a “real camera” because every reception photo came out flat, crooked, and weirdly wide. The photographer at the next table borrowed the phone for four https://t.co/hA601s2t8d",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 66.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 137,
+            "likes": 1,
+            "replies": 9,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 2
+          },
+          "organic": {
+            "impressions": 137,
+            "likes": 1,
+            "replies": 9,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101927156343529548": {
+      "id": "2101927156343529548",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T06:51:00Z",
+      "conversation_id": "2101926639198441689",
+      "topics": [
+        "Apple",
+        "Apple - iPhone",
+        "Cell Phones",
+        "Events",
+        "Mobile",
+        "Tech events",
+        "Technology",
+        "Technology Business",
+        "Travel",
+        "Travel & Transportation Business",
+        "Travel novelty",
+        "Travel photography"
+      ],
+      "text": "Setting 1: Grid and Level\nThe iPhone camera defaults to a blank viewfinder. No guides. So almost every photo lands with the subject dead-center and the horizon a few degrees off. \n\nThat is the single fastest way to make a good scene look like a tourist snap.\n\nGo to Settings → https://t.co/gBvJ3Id0hh",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 66.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 57,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 57,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101927707319951411": {
+      "id": "2101927707319951411",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T06:53:12Z",
+      "conversation_id": "2101926639198441689",
+      "topics": [],
+      "text": "Setting 2: AE/AF Lock\n\nTap the screen once and the phone keeps guessing. Move a step, and the face goes soft or the window blows out.\n\nTap and hold the thing you actually care about until a yellow banner says AE/AF LOCK.\n\nFocus and exposure freeze. Then slide a finger up or down https://t.co/HnrwWvZ",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 66.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 22,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 22,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101928001185444158": {
+      "id": "2101928001185444158",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T06:54:22Z",
+      "conversation_id": "2101926639198441689",
+      "topics": [
+        "Apple"
+      ],
+      "text": "Setting 3: Photographic Styles\n\nThis is not a filter. A filter sits on top of a finished image. A Photographic Style changes how the camera processes colour and tone while the photo is being taken.\n\nApple ships it on Standard: safe, flat, inoffensive. Fine for everyone. Great for https://t.co/PQ3Xm8",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 66.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 54,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 54,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101928139035480223": {
+      "id": "2101928139035480223",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T06:54:54Z",
+      "conversation_id": "2101926639198441689",
+      "topics": [
+        "Apple",
+        "Apple - iPhone",
+        "B2B",
+        "Cell Phones",
+        "Dell",
+        "Mobile",
+        "Services - B2B",
+        "Technology",
+        "Technology Business",
+        "WhatsApp",
+        "Zoom"
+      ],
+      "text": "Setting 4: Resolution\n\nOn a lot of recent iPhones the sensor can capture 24MP or 48MP. The camera still defaults lower to save storage.\n\nThat is the right default for WhatsApp. It is the wrong default if you crop, print, or zoom a reception photo later.\n\nGo to Settings → Camera",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 66.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 19,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 19,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101928289426407476": {
+      "id": "2101928289426407476",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T06:55:30Z",
+      "conversation_id": "2101926639198441689",
+      "topics": [],
+      "text": "Setting 5: Default focal length\n\nOn Pro models the main camera opens at 1x — usually a 24mm-equivalent. It fits the whole table. It also stretches faces and dumps clutter into the edges.\n\nGo to Settings → Camera → Main Camera (some models say Fusion Camera).\n\nTurn on the extra",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 66.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 17,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 17,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101928595648299132": {
+      "id": "2101928595648299132",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T06:56:43Z",
+      "conversation_id": "2101926639198441689",
+      "topics": [
+        "Gaming Business"
+      ],
+      "text": "Setting 6: Volume button as the shutter\n\nTapping the on-screen shutter is how most blur happens. Your finger moves the phone at the exact moment it needs to be still.\n\nThe Volume Up button is a shutter. Press once for a photo. Hold for burst.\n\nHold the phone like a camera, not https://t.co/8cWCUd5Gc",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 66.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 12,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 12,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101929347426988524": {
+      "id": "2101929347426988524",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T06:59:43Z",
+      "conversation_id": "2101926639198441689",
+      "topics": [
+        "Apple"
+      ],
+      "text": "Setting 7: Preserve Settings\nThis is the one that makes the first six actually stick.\nBy default, close Camera and Apple puts you back to the safe factory setup. Style, exposure, resolution, mode — gone.\nGo to Settings → Camera → Preserve Settings.\n\nTurn on:\n✓ Grid + Level\n✓",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 66.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 14,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 14,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2101929511705309680": {
+      "id": "2101929511705309680",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T07:00:22Z",
+      "conversation_id": "2101926639198441689",
+      "topics": [
+        "Apple"
+      ],
+      "text": "The full pass.\n\nGrid + Level. AE/AF Lock. Photographic Style. Resolution. 28/35mm default. Volume shutter. Preserve Settings.\n\nSame phone. Same lens. Same wedding. Different photos.\n\nFour minutes. No app. No $1,200 body.\n\nApple set the Camera app up so anyone can point and shoot",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 66.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 25,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 25,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102164742609809555": {
+      "id": "2102164742609809555",
+      "kind": "reply",
+      "created_at": "2026-09-21T22:35:05Z",
+      "conversation_id": "2101926639198441689",
+      "topics": [],
+      "text": "@_ Glad to hear it!",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 50.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 18,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 18,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102172499031253210": {
+      "id": "2102172499031253210",
+      "kind": "original",
+      "created_at": "2026-09-21T23:05:54Z",
+      "conversation_id": "2102172499031253210",
+      "topics": [
+        "Apple",
+        "Apple Mac",
+        "Apple Macbook",
+        "Coffee",
+        "Drinks",
+        "Food & Beverage Business",
+        "Gaming Business",
+        "Generic Drinks",
+        "Technology",
+        "Technology Business",
+        "Wi-Fi"
+      ],
+      "text": "Most MacBooks get unboxed, signed into iCloud, and then never opened past Wi-Fi and display brightness.\nSomeone charged to 100% before a workday. By 3pm the machine was dead in a cafe, still mid-document. They were one click away from booking Apple’s battery replacement.\nA friend https://t.co/Ur7O8a",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 50.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 151,
+            "likes": 1,
+            "replies": 8,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 1
+          },
+          "organic": {
+            "impressions": 151,
+            "likes": 1,
+            "replies": 8,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102172535295291403": {
+      "id": "2102172535295291403",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T23:06:03Z",
+      "conversation_id": "2102172499031253210",
+      "topics": [
+        "Apple",
+        "Events",
+        "Food",
+        "Food & Beverage Business",
+        "Food Blogs",
+        "Lunch",
+        "Tech events",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "Setting 1: Low Power Mode on battery only\nmacOS defaults to Automatic. Fine on paper. In practice the machine keeps doing background work while you’re unplugged and wondering why 80% became 40% before lunch.\nApple menu → System Settings → Battery\nSet Low Power Mode to Only on",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 50.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 42,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 42,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102172622666805475": {
+      "id": "2102172622666805475",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T23:06:24Z",
+      "conversation_id": "2102172499031253210",
+      "topics": [
+        "Apple",
+        "Apple Mac",
+        "Apple Macbook",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "Setting 2: Wake for network access\nYour MacBook can wake itself from sleep to check mail, iCloud, and shared folders. Then it goes back to sleep. Then it wakes again.\nThat is how a lid-closed machine loses 20–30% overnight in a bag.\nSystem Settings → Battery → Options\nWake for",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 50.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 32,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 32,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102172709614702948": {
+      "id": "2102172709614702948",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T23:06:45Z",
+      "conversation_id": "2102172499031253210",
+      "topics": [
+        "Apple",
+        "Technology Business"
+      ],
+      "text": "Setting 3: Power Nap off\nPower Nap is Apple’s name for “keep doing work while you think this thing is asleep.” Mail. Time Machine. iCloud. Updates.\nUseful on a desktop that sits on a desk. Less useful on a laptop that lives in a backpack.\nSystem Settings → Battery → Options",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 50.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 28,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 28,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102172773594640568": {
+      "id": "2102172773594640568",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T23:07:00Z",
+      "conversation_id": "2102172499031253210",
+      "topics": [
+        "Adobe",
+        "Backstage",
+        "Enterprise software",
+        "Entertainment",
+        "Entertainment & Leisure Business",
+        "Google ",
+        "Google brand conversation",
+        "Music",
+        "Music industry",
+        "Music streaming service",
+        "Online Services - Entertainment",
+        "Services",
+        "Spotify",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "Setting 4: Login Items and background apps\nOpen the lid and 15 helpers wake up with you. Dropbox. Adobe. Teams. Spotify. A Google updater for a browser you used twice in 2024.\nNone of them ask. They just sit there.\nSystem Settings → General → Login Items &amp; Extensions\nCheck both",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 50.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 20,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 20,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102172817882247302": {
+      "id": "2102172817882247302",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T23:07:10Z",
+      "conversation_id": "2102172499031253210",
+      "topics": [
+        "Apple"
+      ],
+      "text": "Setting 5: Activity Monitor, Energy tab\nSettings can only catch what Apple labelled. The real drain is usually one app you left open.\nCommand + Space → type Activity Monitor → open it → click Energy\nSort by Energy Impact.\nThe top one or two rows are the story. Chrome with 40",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 50.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 17,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 17,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102172856910241923": {
+      "id": "2102172856910241923",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T23:07:20Z",
+      "conversation_id": "2102172499031253210",
+      "topics": [
+        "Coffee",
+        "Drinks",
+        "Food",
+        "Food & Beverage Business",
+        "Food Blogs",
+        "Generic Drinks",
+        "Lunch",
+        "Technology",
+        "Technology Business",
+        "Wi-Fi"
+      ],
+      "text": "Setting 6: Pause iCloud Photos on battery\niCloud Photos will happily chew a charge uploading original-size images over cafe Wi-Fi. On a slow connection it can flatten a battery before you finish lunch.\nOpen Photos → Settings → iCloud\nPause for a day when you are out. Resume",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 50.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 35,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 35,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102172903492157876": {
+      "id": "2102172903492157876",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T23:07:31Z",
+      "conversation_id": "2102172499031253210",
+      "topics": [
+        "Computer hardware",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "Setting 7: Stop Spotlight indexing the whole disk\nAfter an OS update, Spotlight can reindex for hours and sit on the CPU while you work. On older machines it feels like the laptop is sick.\nSystem Settings → Spotlight\nUncheck result categories you never search (fonts, web, Siri",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 50.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 16,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 16,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102172949495402757": {
+      "id": "2102172949495402757",
+      "kind": "thread_card",
+      "created_at": "2026-09-21T23:07:42Z",
+      "conversation_id": "2102172499031253210",
+      "topics": [
+        "Apple",
+        "Apple Mac",
+        "Apple Macbook",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "The full pass.\n✓ Low Power Mode on battery only\n✓ Wake for network access off\n✓ Power Nap off\n✓ Login Items cleaned\n✓ Energy tab checked\n✓ iCloud Photos paused when out\n✓ Spotlight privacy trimmed\n\nSame MacBook. Same battery. Different day.\n\nEight minutes. $0. No",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 50.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 34,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 34,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102180067912904710": {
+      "id": "2102180067912904710",
+      "kind": "reply",
+      "created_at": "2026-09-21T23:35:59Z",
+      "conversation_id": "2102056418727845930",
+      "topics": [],
+      "text": "@_ Heard, learnt.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 6,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102180278781497366": {
+      "id": "2102180278781497366",
+      "kind": "reply",
+      "created_at": "2026-09-21T23:36:49Z",
+      "conversation_id": "2102070348367761821",
+      "topics": [
+        "Grok Ai",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ C) Grok",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 49,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 49,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102180877065429203": {
+      "id": "2102180877065429203",
+      "kind": "reply",
+      "created_at": "2026-09-21T23:39:12Z",
+      "conversation_id": "2102110761912860996",
+      "topics": [],
+      "text": "@_ Cry.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 11,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 11,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102183600716439823": {
+      "id": "2102183600716439823",
+      "kind": "reply",
+      "created_at": "2026-09-21T23:50:01Z",
+      "conversation_id": "2102070348367761821",
+      "topics": [
+        "Grok Ai",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ I was using Claude as my main and Codex and Grok for blind reviews. I found Grok was always catching more bugs.\n\nI have now switched to Grok and so far I am loving it!",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 22,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 22,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102184429171179837": {
+      "id": "2102184429171179837",
+      "kind": "reply",
+      "created_at": "2026-09-21T23:53:19Z",
+      "conversation_id": "2102111430379987187",
+      "topics": [],
+      "text": "@_ X",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 121,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 121,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102185380271603931": {
+      "id": "2102185380271603931",
+      "kind": "reply",
+      "created_at": "2026-09-21T23:57:06Z",
+      "conversation_id": "2102144335697547512",
+      "topics": [],
+      "text": "@_ I type, but I wish I got use to talking without stumbling over my words. Wish there was a tool that would extract the important specifics when you talk and removes the slop.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 39,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 39,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102186476553515262": {
+      "id": "2102186476553515262",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:01:27Z",
+      "conversation_id": "2101905078668128296",
+      "topics": [],
+      "text": "@_ hi 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102190022082564283": {
+      "id": "2102190022082564283",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:15:32Z",
+      "conversation_id": "2102012938186006563",
+      "topics": [],
+      "text": "@_ Slop coder.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.1,
+          "label": "backfill",
+          "public": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102190689006346736": {
+      "id": "2102190689006346736",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:18:11Z",
+      "conversation_id": "2101951886199001455",
+      "topics": [],
+      "text": "@_ 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 17,
+            "likes": 2,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 17,
+            "likes": 2,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 2,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102191674076357011": {
+      "id": "2102191674076357011",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:22:06Z",
+      "conversation_id": "2102156648207040841",
+      "topics": [],
+      "text": "@_ 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 66,
+            "likes": 3,
+            "replies": 3,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 66,
+            "likes": 3,
+            "replies": 3,
+            "reposts": 0,
+            "profile_visits": 3,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102191746440667351": {
+      "id": "2102191746440667351",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:22:23Z",
+      "conversation_id": "2101993883223875921",
+      "topics": [],
+      "text": "@_ 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 1,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 1,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102191842934833348": {
+      "id": "2102191842934833348",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:22:46Z",
+      "conversation_id": "2102065703797027055",
+      "topics": [],
+      "text": "@_ 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 49.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 8,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 8,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102192267520008468": {
+      "id": "2102192267520008468",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:24:28Z",
+      "conversation_id": "2102029283459793307",
+      "topics": [],
+      "text": "@_ 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 1,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 1,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102192417030254809": {
+      "id": "2102192417030254809",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:25:03Z",
+      "conversation_id": "2102038296075600016",
+      "topics": [],
+      "text": "@_ 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 44,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 44,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102192713991147740": {
+      "id": "2102192713991147740",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:26:14Z",
+      "conversation_id": "2101955796787765307",
+      "topics": [],
+      "text": "@_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 18,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 18,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102192748518609297": {
+      "id": "2102192748518609297",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:26:22Z",
+      "conversation_id": "2101853922373861622",
+      "topics": [],
+      "text": "@_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 11,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 11,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102192800565768680": {
+      "id": "2102192800565768680",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:26:35Z",
+      "conversation_id": "2101530977835135281",
+      "topics": [],
+      "text": "@_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 6,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102192825576358197": {
+      "id": "2102192825576358197",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:26:41Z",
+      "conversation_id": "2101118680796942785",
+      "topics": [],
+      "text": "@_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 7,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 7,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102193304851111969": {
+      "id": "2102193304851111969",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:28:35Z",
+      "conversation_id": "2101877007701495937",
+      "topics": [],
+      "text": "@_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 11,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 11,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102193343761719803": {
+      "id": "2102193343761719803",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:28:44Z",
+      "conversation_id": "2102124566202265662",
+      "topics": [
+        "X"
+      ],
+      "text": "@_ @_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 17,
+            "likes": 3,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 17,
+            "likes": 3,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102193371100201102": {
+      "id": "2102193371100201102",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:28:51Z",
+      "conversation_id": "2101903698679230957",
+      "topics": [],
+      "text": "@_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 20,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 20,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 2,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102193439416930563": {
+      "id": "2102193439416930563",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:29:07Z",
+      "conversation_id": "2101876784971313515",
+      "topics": [],
+      "text": "@_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 8,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 8,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102193483608117625": {
+      "id": "2102193483608117625",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:29:18Z",
+      "conversation_id": "2099949323119202690",
+      "topics": [],
+      "text": "@_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 2,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 2,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102193533256180219": {
+      "id": "2102193533256180219",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:29:29Z",
+      "conversation_id": "2100049404652618155",
+      "topics": [],
+      "text": "@_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 2,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 2,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102193583327719476": {
+      "id": "2102193583327719476",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:29:41Z",
+      "conversation_id": "2101050878908142050",
+      "topics": [],
+      "text": "@_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102193616513016186": {
+      "id": "2102193616513016186",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:29:49Z",
+      "conversation_id": "2101690590312140822",
+      "topics": [],
+      "text": "@_ Would love to connect and see what others are creating 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 2,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 2,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102194978269389269": {
+      "id": "2102194978269389269",
+      "kind": "original",
+      "created_at": "2026-09-22T00:35:14Z",
+      "conversation_id": "2102194978269389269",
+      "topics": [
+        "Information Privacy Worldwide",
+        "Political issues",
+        "Politics",
+        "X"
+      ],
+      "text": "Hey @_ \n\nI’m looking to connect with people creating awesome stuff using AI:\n\n- Indie Hackers\n- Founders\n- App builders \n\nDevelopers, engineers, founders, builders or anyone with an idea. 💡 \n\nDrop a “hi” 👋 and let’s connect. \n\nLet’s grow together.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 856,
+            "likes": 24,
+            "replies": 32,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 856,
+            "likes": 24,
+            "replies": 32,
+            "reposts": 0,
+            "profile_visits": 20,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102195164840329393": {
+      "id": "2102195164840329393",
+      "kind": "thread_card",
+      "created_at": "2026-09-22T00:35:58Z",
+      "conversation_id": "2102156648207040841",
+      "topics": [],
+      "text": "@_ Hey pixel",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 12,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 12,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 2,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102195727791489084": {
+      "id": "2102195727791489084",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:38:13Z",
+      "conversation_id": "2102194978269389269",
+      "topics": [
+        "X"
+      ],
+      "text": "@_ @_ Hey Luke!",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 20,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 20,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102197839908733203": {
+      "id": "2102197839908733203",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:46:36Z",
+      "conversation_id": "2102009598370885896",
+      "topics": [],
+      "text": "@_ You can do it! +1",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 7,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 7,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102198141101711368": {
+      "id": "2102198141101711368",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:47:48Z",
+      "conversation_id": "2101944414721470618",
+      "topics": [],
+      "text": "@_ You can do it! Let's connect 👊",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 0,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 0,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102198407247135219": {
+      "id": "2102198407247135219",
+      "kind": "reply",
+      "created_at": "2026-09-22T00:48:51Z",
+      "conversation_id": "2101882549966430380",
+      "topics": [],
+      "text": "@_ Amazing progress Daria! Let's connect 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 0,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 0,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102202441790013747": {
+      "id": "2102202441790013747",
+      "kind": "reply",
+      "created_at": "2026-09-22T01:04:53Z",
+      "conversation_id": "2102194978269389269",
+      "topics": [
+        "X"
+      ],
+      "text": "@_ @_ Absolutely, great to connect. 👋",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 20,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 20,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102203460116718025": {
+      "id": "2102203460116718025",
+      "kind": "reply",
+      "created_at": "2026-09-22T01:08:56Z",
+      "conversation_id": "2102200907127767218",
+      "topics": [],
+      "text": "@_ Good to know it's not just me! 🙃",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 10,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 10,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102204276558929985": {
+      "id": "2102204276558929985",
+      "kind": "reply",
+      "created_at": "2026-09-22T01:12:11Z",
+      "conversation_id": "2102143944142487935",
+      "topics": [],
+      "text": "@_ Amazing progress Arden! 🎉",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.1,
+          "label": "backfill",
+          "public": {
+            "impressions": 7,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 7,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102206601532952798": {
+      "id": "2102206601532952798",
+      "kind": "reply",
+      "created_at": "2026-09-22T01:21:25Z",
+      "conversation_id": "2102199816742658355",
+      "topics": [],
+      "text": "@_ @_ Good to know it's not just me! 🙃",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 48.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 7,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 7,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102217153709813922": {
+      "id": "2102217153709813922",
+      "kind": "reply",
+      "created_at": "2026-09-22T02:03:21Z",
+      "conversation_id": "2102194978269389269",
+      "topics": [
+        "X"
+      ],
+      "text": "@_ @_ Hey, I am from Australia too! Great to connect with other Aussie creators building things 😀",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 47.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 22,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 22,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102219802114965726": {
+      "id": "2102219802114965726",
+      "kind": "reply",
+      "created_at": "2026-09-22T02:13:52Z",
+      "conversation_id": "2102194978269389269",
+      "topics": [
+        "X"
+      ],
+      "text": "@_ @_ Your app Aurator looks great! I always struggle with dictation from stumbling over my words. I was wondering if any products similar to this can help extract key points and remove/reduce slop?",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 47.1,
+          "label": "backfill",
+          "public": {
+            "impressions": 16,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 16,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102220485467779310": {
+      "id": "2102220485467779310",
+      "kind": "reply",
+      "created_at": "2026-09-22T02:16:35Z",
+      "conversation_id": "2102194978269389269",
+      "topics": [
+        "B2B",
+        "Computer programming",
+        "GitHub",
+        "Services - B2B",
+        "Technology",
+        "Technology Business",
+        "X"
+      ],
+      "text": "@_ @_ Hey Mukund, great to connect! \n\nHazzel looks interesting, just gave it a ⭐️ on Github!",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 47.1,
+          "label": "backfill",
+          "public": {
+            "impressions": 11,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 11,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 2,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102221811266318774": {
+      "id": "2102221811266318774",
+      "kind": "reply",
+      "created_at": "2026-09-22T02:21:51Z",
+      "conversation_id": "2102194978269389269",
+      "topics": [
+        "X"
+      ],
+      "text": "@_ @_ I have been working on AI video content creation, it takes in idea, researches &amp; builds the script, generates the video, voice over and iterates through the workflow.\n\nI have been able to nail down the video using @_ and voice using Kokoro but the part I am struggling with",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 47.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 9,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 9,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102222820067717217": {
+      "id": "2102222820067717217",
+      "kind": "reply",
+      "created_at": "2026-09-22T02:25:52Z",
+      "conversation_id": "2102222163227152541",
+      "topics": [],
+      "text": "@_ Awesome progress! 🎉",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 46.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 4,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102224130758299737": {
+      "id": "2102224130758299737",
+      "kind": "reply",
+      "created_at": "2026-09-22T02:31:04Z",
+      "conversation_id": "2101894014551138735",
+      "topics": [],
+      "text": "@_ Do they provide reasoning for why they ban accounts? This is news to me too! 😅",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 46.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102225180320002302": {
+      "id": "2102225180320002302",
+      "kind": "reply",
+      "created_at": "2026-09-22T02:35:15Z",
+      "conversation_id": "2102047146123882935",
+      "topics": [],
+      "text": "@_ You seem to be winning! 🎉",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 46.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 60,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 60,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102225513595187679": {
+      "id": "2102225513595187679",
+      "kind": "reply",
+      "created_at": "2026-09-22T02:36:34Z",
+      "conversation_id": "2102194978269389269",
+      "topics": [
+        "X"
+      ],
+      "text": "@_ @_ Thank you! I will give Aurator a go at some stage and see if it works well for me :)\n\nWould love to pick your brain and get your ideas on how I could nail the scripting!",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 46.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102226150349217947": {
+      "id": "2102226150349217947",
+      "kind": "reply",
+      "created_at": "2026-09-22T02:39:06Z",
+      "conversation_id": "2102047146123882935",
+      "topics": [],
+      "text": "@_ Well I would love to see what you collect, only just embarking on this winning quest myself 😂",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 46.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102245595373359461": {
+      "id": "2102245595373359461",
+      "kind": "reply",
+      "created_at": "2026-09-22T03:56:22Z",
+      "conversation_id": "2101877007701495937",
+      "topics": [
+        "Blockchain",
+        "Business & finance",
+        "Financial Services Business",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ @_ Hey Ritik, aweomse to see what you are creating on the Blockchain!\n\nI have been working on AI video content creation, it takes in idea, researches &amp; builds the script, generates the video, voice over and iterates through the workflow.  I have been able to nail down the video",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 45.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102272935213887532": {
+      "id": "2102272935213887532",
+      "kind": "thread_card",
+      "created_at": "2026-09-22T05:45:00Z",
+      "conversation_id": "2102272933087363155",
+      "topics": [
+        "Apple",
+        "Gaming",
+        "Gaming Business",
+        "Gaming hardware & accessories"
+      ],
+      "text": "2. 7-core GPU.\n\nGames hold a higher frame rate, and a long session stays faster than on a 17 Pro.\n\nThe A20 Pro has a 7-core GPU with Neural Accelerators. The 17 Pro's GPU is 6-core.\n\nApple says graphics are up to 40 percent faster than the 17 Pro. Reviews that ran their own tests https://t.co/s0D3TM",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 43.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 20,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 20,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102272934312128756": {
+      "id": "2102272934312128756",
+      "kind": "thread_card",
+      "created_at": "2026-09-22T05:45:00Z",
+      "conversation_id": "2102272933087363155",
+      "topics": [],
+      "text": "1. Iris lens that opens and closes.\n\nDark video gets more light, Night mode finishes faster, and a group stays sharper when the lens closes down.\n\nThe main lens has four openings. f/1.48, f/1.8, f/2.8, and f/4.0. Six blades. A 17 Pro main lens is fixed at f/1.78.\n\nf/1.48 is the https://t.co/zdIWvvsD",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 43.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 75,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 1,
+            "quotes": 0,
+            "bookmarks": 1
+          },
+          "organic": {
+            "impressions": 75,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 1,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102272933087363155": {
+      "id": "2102272933087363155",
+      "kind": "original",
+      "created_at": "2026-09-22T05:45:00Z",
+      "conversation_id": "2102272933087363155",
+      "topics": [
+        "Apple",
+        "Apple - iPhone",
+        "Cell Phones",
+        "Events",
+        "Gaming Business",
+        "Mobile",
+        "Tech events",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "Matching up @_'s latest iPhone 18 Pro against the 17 Pro.\n\nAt first glance, is this just last year's phone?\n\n✓ Same screen size, resolution, brightness &amp; refresh rate.\n✓ Same wireless MagSafe charging rate.\n✓ Same front camera.\n✓ Same IP68 rating\n\nFour things are https://t.co/eaRoS2sRcJ",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 43.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 509,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 1,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 509,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102272938321891826": {
+      "id": "2102272938321891826",
+      "kind": "thread_card",
+      "created_at": "2026-09-22T05:45:01Z",
+      "conversation_id": "2102272933087363155",
+      "topics": [],
+      "text": "The full pass\n✓  New lens = Improved low-light video, faster night mode shots &amp; sharper group photos.\n✓ 7 Core GPU = up to 40% faster than the 17 Pro.\n✓ Dual Neural Engine = AI processing up to 40% faster than the 17 Pro.\n✓ Improved battery life = up to 6 hours longer than",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 43.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102272937457758451": {
+      "id": "2102272937457758451",
+      "kind": "thread_card",
+      "created_at": "2026-09-22T05:45:01Z",
+      "conversation_id": "2102272933087363155",
+      "topics": [],
+      "text": "3. Improved battery life.\n\nThe Max is rated six hours longer than a 17 Pro Max. The smaller 18 Pro is rated at up to 36 hours.\n\nThose are the eSIM-only models. The Max figure is 45 hours of video playback. They pick up two extra hours by using the space a physical SIM would have https://t.co/F3W7Lfh",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 43.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 18,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 18,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102272936484782118": {
+      "id": "2102272936484782118",
+      "kind": "thread_card",
+      "created_at": "2026-09-22T05:45:01Z",
+      "conversation_id": "2102272933087363155",
+      "topics": [
+        "Apple"
+      ],
+      "text": "3. Dual 16-core Neural Engine.\n\nOn-device AI work finishes sooner, and a heavier model has more room to stay on the phone.\n\nThe A20 Pro has two 16-core Neural Engines. The 17 Pro has one. Apple calls that double the AI processing.\n\nThis block does not draw the screen. It runs the https://t.co/UEzAyq",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 43.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 52,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 52,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102299791304859670": {
+      "id": "2102299791304859670",
+      "kind": "reply",
+      "created_at": "2026-09-22T07:31:43Z",
+      "conversation_id": "2097940507456663725",
+      "topics": [
+        "Apple",
+        "Apple - iPhone",
+        "Cell Phones",
+        "Events",
+        "Mobile",
+        "Tech events",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ A review on what's new this year compared it's predecessor.\nhttps://t.co/c3hQvelEbm",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 41.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 331,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 331,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102522114591105394": {
+      "id": "2102522114591105394",
+      "kind": "reply",
+      "created_at": "2026-09-22T22:15:09Z",
+      "conversation_id": "2102474887973785972",
+      "topics": [],
+      "text": "@_ Jesus was the 13th disciple.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 27.1,
+          "label": "backfill",
+          "public": {
+            "impressions": 270,
+            "likes": 2,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 270,
+            "likes": 2,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102598207410950545": {
+      "id": "2102598207410950545",
+      "kind": "quote",
+      "created_at": "2026-09-23T03:17:31Z",
+      "conversation_id": "2102598207410950545",
+      "topics": [],
+      "text": "he's the guy. he co-invented RLHF.\nthey still named it jev https://t.co/wV9AdQfsUP https://t.co/peV221b6wo",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 22.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 217,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 1,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 217,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102598711427936396": {
+      "id": "2102598711427936396",
+      "kind": "thread_card",
+      "created_at": "2026-09-23T03:19:31Z",
+      "conversation_id": "2102598207410950545",
+      "topics": [],
+      "text": "genuine question: is it actually Jevons, or did they know",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 22.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 20,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 20,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102612965770014863": {
+      "id": "2102612965770014863",
+      "kind": "original",
+      "created_at": "2026-09-23T04:16:10Z",
+      "conversation_id": "2102612965770014863",
+      "topics": [],
+      "text": "What do you tell someone who can prompt anything and still cannot finish?",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 21.1,
+          "label": "backfill",
+          "public": {
+            "impressions": 54,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 54,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102613048959902059": {
+      "id": "2102613048959902059",
+      "kind": "thread_card",
+      "created_at": "2026-09-23T04:16:30Z",
+      "conversation_id": "2102612965770014863",
+      "topics": [],
+      "text": "not a prompt. I start things. I want how people actually close.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 21.1,
+          "label": "backfill",
+          "public": {
+            "impressions": 45,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 45,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102615344993218854": {
+      "id": "2102615344993218854",
+      "kind": "reply",
+      "created_at": "2026-09-23T04:25:37Z",
+      "conversation_id": "2102459368130150742",
+      "topics": [],
+      "text": "@_ @_ Just what I was gonna say before you beat me to it! 😂 Great minds.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 20.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 16,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 16,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102618942024081512": {
+      "id": "2102618942024081512",
+      "kind": "reply",
+      "created_at": "2026-09-23T04:39:55Z",
+      "conversation_id": "2102397474996711738",
+      "topics": [],
+      "text": "@_ Congrats Josh! Great milestone. I am intrigued by crawlrr, would love to know more about it.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 20.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 14,
+            "likes": 0,
+            "replies": 2,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 14,
+            "likes": 0,
+            "replies": 2,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102622577776849399": {
+      "id": "2102622577776849399",
+      "kind": "reply",
+      "created_at": "2026-09-23T04:54:22Z",
+      "conversation_id": "2102397474996711738",
+      "topics": [],
+      "text": "@_ Initially, I was trying to figure  it out. Saw the feed, but the stats &amp; trending topics really caught my eye. Finally found the description in the Chrome tab &amp; understood a bit more. Very interesting stuff, I would love to hear what it actually is from the Dev himself :)",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 20.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 13,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 13,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102626514709913927": {
+      "id": "2102626514709913927",
+      "kind": "reply",
+      "created_at": "2026-09-23T05:10:00Z",
+      "conversation_id": "2102397474996711738",
+      "topics": [],
+      "text": "@_ Intrigued to find out more. From what I can see you have created a website/social network specifically for AI agents? Looks really cool!",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 20.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 17,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 17,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102629023142863199": {
+      "id": "2102629023142863199",
+      "kind": "reply",
+      "created_at": "2026-09-23T05:19:58Z",
+      "conversation_id": "2102488604216013265",
+      "topics": [],
+      "text": "@_ No, but just starting out I don't expect it will yet 😅 One reply at a time!",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 20.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 13,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 13,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102629099525304475": {
+      "id": "2102629099525304475",
+      "kind": "reply",
+      "created_at": "2026-09-23T05:20:16Z",
+      "conversation_id": "2102397474996711738",
+      "topics": [],
+      "text": "@_ I am looking forward to hearing it :)",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 20.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 12,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 12,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102636257377743208": {
+      "id": "2102636257377743208",
+      "kind": "reply",
+      "created_at": "2026-09-23T05:48:43Z",
+      "conversation_id": "2102629031568896328",
+      "topics": [],
+      "text": "@_ My success story, I’ve been vibe coding for a while but only looked up and learnt what SaaS meant today. 😂",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 19.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 16,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 16,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102726077252771965": {
+      "id": "2102726077252771965",
+      "kind": "reply",
+      "created_at": "2026-09-23T11:45:38Z",
+      "conversation_id": "2102675832175235093",
+      "topics": [],
+      "text": "@_ 👏",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 13.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 14,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 14,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102737637346095128": {
+      "id": "2102737637346095128",
+      "kind": "original",
+      "created_at": "2026-09-23T12:31:34Z",
+      "conversation_id": "2102737637346095128",
+      "topics": [
+        "3D animation",
+        "3D modeling",
+        "Animation",
+        "Animation software",
+        "Blender",
+        "Computer software",
+        "Multimedia & design software",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "PAID → FREE\nFinding free creator tools that actually hold up.\n\nPhotoshop → Photopea\n▷ Browser editor. Opens PSDs.\n\nPremiere Pro → DaVinci Resolve\n▷ Edit, colour, and audio. No watermark.\n\nAfter Effects → Blender\n▷ 3D and motion. Modelling, animation, render.\n\nStreamlabs",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 12.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 2105,
+            "likes": 2,
+            "replies": 2,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 1
+          },
+          "organic": {
+            "impressions": 99,
+            "likes": 2,
+            "replies": 2,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102737717763150186": {
+      "id": "2102737717763150186",
+      "kind": "thread_card",
+      "created_at": "2026-09-23T12:31:53Z",
+      "conversation_id": "2102737637346095128",
+      "topics": [
+        "3D animation",
+        "Animation",
+        "Animation software",
+        "Blender",
+        "Computer programming",
+        "Open source",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ — still ships features and answers people.\n@_ — steady Resolve releases and an active forum.\n@_ — consistent updates and releases.\n@_ — regular Studio builds and a public tracker.\n@_ — steady desktop releases and a real",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 12.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 12,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 12,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102813743566709168": {
+      "id": "2102813743566709168",
+      "kind": "reply",
+      "created_at": "2026-09-23T17:33:59Z",
+      "conversation_id": "2102557980424323554",
+      "topics": [
+        "Grok Ai",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ $100 if you went with Grok.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 7.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 2,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 2,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102816055337074745": {
+      "id": "2102816055337074745",
+      "kind": "reply",
+      "created_at": "2026-09-23T17:43:10Z",
+      "conversation_id": "2102663271035637763",
+      "topics": [],
+      "text": "@_ Congrats Tom! A great milestone. 🎉",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 7.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 1,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 1,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102816770847572151": {
+      "id": "2102816770847572151",
+      "kind": "reply",
+      "created_at": "2026-09-23T17:46:01Z",
+      "conversation_id": "2102781174682624023",
+      "topics": [],
+      "text": "@_ Slow and steady wins the race!",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 7.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 16,
+            "likes": 2,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 16,
+            "likes": 2,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102820010070814971": {
+      "id": "2102820010070814971",
+      "kind": "reply",
+      "created_at": "2026-09-23T17:58:53Z",
+      "conversation_id": "2102741269126811813",
+      "topics": [],
+      "text": "@_ That I will have less excuse for not shipping anything.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 7.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 11,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 11,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102820255856996569": {
+      "id": "2102820255856996569",
+      "kind": "reply",
+      "created_at": "2026-09-23T17:59:52Z",
+      "conversation_id": "2102486979841769814",
+      "topics": [],
+      "text": "@_ Do people not realise X shows whether people follow back 😅",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 7.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 8,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 8,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102820413491552313": {
+      "id": "2102820413491552313",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:00:29Z",
+      "conversation_id": "2102709562826703271",
+      "topics": [],
+      "text": "@_ and 90% of that 1% “want to connect” 😂",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 7.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 23,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 23,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102822035584094319": {
+      "id": "2102822035584094319",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:06:56Z",
+      "conversation_id": "2102651490800210162",
+      "topics": [],
+      "text": "@_ As long as the engagement is authentic and not copy pasta.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 7.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102822471447831018": {
+      "id": "2102822471447831018",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:08:40Z",
+      "conversation_id": "2102743043757806066",
+      "topics": [],
+      "text": "@_ Building developers don’t vibe code.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 7.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 628,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 627,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 2,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102822774423367870": {
+      "id": "2102822774423367870",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:09:52Z",
+      "conversation_id": "2102529230206898262",
+      "topics": [],
+      "text": "@_ Agreed, with how fast new models are shifting and advancing you don’t want to have been stuck with Opus 5 for that whole saga 😅",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 7.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102823470069698593": {
+      "id": "2102823470069698593",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:12:38Z",
+      "conversation_id": "2102557100237037606",
+      "topics": [],
+      "text": "@_ That I only just found out I have a startup and have to explain that to 10,000 people.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 7.1,
+          "label": "backfill",
+          "public": {
+            "impressions": 23,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 23,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102825378587058578": {
+      "id": "2102825378587058578",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:20:13Z",
+      "conversation_id": "2102760011113906184",
+      "topics": [],
+      "text": "@_ Creating content and ideas for posts, being a newer account engaging with others and replying seems to pay off so much more than posts.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 7.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102826264302432500": {
+      "id": "2102826264302432500",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:23:44Z",
+      "conversation_id": "2102759896051798190",
+      "topics": [],
+      "text": "@_ It’s existence.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102826743640076363": {
+      "id": "2102826743640076363",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:25:38Z",
+      "conversation_id": "2102707332191043640",
+      "topics": [],
+      "text": "@_ Sales skills.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102826985626251590": {
+      "id": "2102826985626251590",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:26:36Z",
+      "conversation_id": "2102524955837558964",
+      "topics": [],
+      "text": "@_ People rely on AI to create the plan and don’t know it well enough themselves to close.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102827257836486828": {
+      "id": "2102827257836486828",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:27:41Z",
+      "conversation_id": "2102548499439190487",
+      "topics": [],
+      "text": "@_ Only if I know what I am looking for but don’t know the actual website.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 49,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 49,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102827829633389032": {
+      "id": "2102827829633389032",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:29:57Z",
+      "conversation_id": "2102822806220112031",
+      "topics": [],
+      "text": "@_ Ramble the same prompts slightly different each time.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 16,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 16,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102828356186304960": {
+      "id": "2102828356186304960",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:32:03Z",
+      "conversation_id": "2102717135466442753",
+      "topics": [],
+      "text": "@_ Yes. I read all 3 of them. https://t.co/qKlIKqIXH5",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102828563896639649": {
+      "id": "2102828563896639649",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:32:52Z",
+      "conversation_id": "2102469244197929215",
+      "topics": [],
+      "text": "@_ Look at their profile, if you genuinely find what they are doing interesting then ask them about it.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 2,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 2,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102828764510269501": {
+      "id": "2102828764510269501",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:33:40Z",
+      "conversation_id": "2102745593080885600",
+      "topics": [],
+      "text": "@_ With verbs like those your agent musn’t have much hair left.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102829095407198301": {
+      "id": "2102829095407198301",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:34:59Z",
+      "conversation_id": "2102653486873948259",
+      "topics": [],
+      "text": "@_ That apparently everyone wants to “connect” with me. https://t.co/sZBREOgNsh",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102829641128116517": {
+      "id": "2102829641128116517",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:37:09Z",
+      "conversation_id": "2102588339945668860",
+      "topics": [],
+      "text": "@_ Only from your sentence structure.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 7,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 7,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102830556664967314": {
+      "id": "2102830556664967314",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:40:48Z",
+      "conversation_id": "2102494372591735052",
+      "topics": [],
+      "text": "@_ Only excessively.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 11,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 11,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102830852468351039": {
+      "id": "2102830852468351039",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:41:58Z",
+      "conversation_id": "2102471750546067536",
+      "topics": [],
+      "text": "@_ Pineapple belongs on pizza.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102831290349437004": {
+      "id": "2102831290349437004",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:43:42Z",
+      "conversation_id": "2102577525398687878",
+      "topics": [],
+      "text": "@_ Tell that to Notes.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102832032288284841": {
+      "id": "2102832032288284841",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:46:39Z",
+      "conversation_id": "2102691189057102174",
+      "topics": [],
+      "text": "@_ I think they call this “part-time”.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102832348467548471": {
+      "id": "2102832348467548471",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:47:55Z",
+      "conversation_id": "2102498752783323514",
+      "topics": [],
+      "text": "@_ sounds good.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102832828811813372": {
+      "id": "2102832828811813372",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:49:49Z",
+      "conversation_id": "2102553048614642095",
+      "topics": [],
+      "text": "@_ Be honest, you probably said the same thing about Anthropic during the Opus slop saga 😂",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 1324,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 1321,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102833147239149712": {
+      "id": "2102833147239149712",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:51:05Z",
+      "conversation_id": "2102578904414449937",
+      "topics": [],
+      "text": "@_ Yes, I am scared that it will become too affordable.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 18,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 18,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102834188663841094": {
+      "id": "2102834188663841094",
+      "kind": "reply",
+      "created_at": "2026-09-23T18:55:14Z",
+      "conversation_id": "2102774992022983054",
+      "topics": [],
+      "text": "@_ Addition.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 6.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102841391454040233": {
+      "id": "2102841391454040233",
+      "kind": "reply",
+      "created_at": "2026-09-23T19:23:51Z",
+      "conversation_id": "2102733215807291492",
+      "topics": [],
+      "text": "@_ 1 because each project has it’s own folder. 😂",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 5.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 14,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 14,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102845461698932805": {
+      "id": "2102845461698932805",
+      "kind": "reply",
+      "created_at": "2026-09-23T19:40:01Z",
+      "conversation_id": "2102799218154881486",
+      "topics": [],
+      "text": "@_ @_ thanks for the tip! 👍",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 5.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 3881,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3878,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102845771720925262": {
+      "id": "2102845771720925262",
+      "kind": "reply",
+      "created_at": "2026-09-23T19:41:15Z",
+      "conversation_id": "2102642155777110128",
+      "topics": [],
+      "text": "@_ How does that go on a brand new project?",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 5.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102887471310831796": {
+      "id": "2102887471310831796",
+      "kind": "reply",
+      "created_at": "2026-09-23T22:26:57Z",
+      "conversation_id": "2102862047583084859",
+      "topics": [],
+      "text": "@_ To be honest, it’s Australia. Haiku could have done the job.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 2.9,
+          "label": "backfill",
+          "public": {
+            "impressions": 522,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 519,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102888507757015368": {
+      "id": "2102888507757015368",
+      "kind": "reply",
+      "created_at": "2026-09-23T22:31:04Z",
+      "conversation_id": "2102859049297752218",
+      "topics": [],
+      "text": "@_ Yeah, Albanese says a lot of things, he probably still uses Ask Jeeves",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 2.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 2558,
+            "likes": 8,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 2557,
+            "likes": 8,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 3,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102888838687604879": {
+      "id": "2102888838687604879",
+      "kind": "reply",
+      "created_at": "2026-09-23T22:32:23Z",
+      "conversation_id": "2102864639994274219",
+      "topics": [],
+      "text": "@_ Did the Chinese already in the system alert them?",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 2.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 36,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 36,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 4,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102890124275228747": {
+      "id": "2102890124275228747",
+      "kind": "quote",
+      "created_at": "2026-09-23T22:37:30Z",
+      "conversation_id": "2102890124275228747",
+      "topics": [
+        "Anthony Albanese",
+        "Australian Federal Election 2022",
+        "Political figures",
+        "Politics"
+      ],
+      "text": "Sheesh, Albo must be nervous, wouldn’t want the fraud stats getting out there. 😅 https://t.co/I7jNwsL9WD",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 2.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 15,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 15,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102892297239306385": {
+      "id": "2102892297239306385",
+      "kind": "reply",
+      "created_at": "2026-09-23T22:46:08Z",
+      "conversation_id": "2102876041383747654",
+      "topics": [
+        "Artificial intelligence",
+        "OpenAI",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ Man, with the CCP and OpenAI in there, must be getting crowded.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 2.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 549,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 547,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 2,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102894084256067658": {
+      "id": "2102894084256067658",
+      "kind": "reply",
+      "created_at": "2026-09-23T22:53:14Z",
+      "conversation_id": "2102864829853860307",
+      "topics": [
+        "Anthony Albanese",
+        "Australian Federal Election 2022",
+        "Political figures",
+        "Politics"
+      ],
+      "text": "@_ @_ Next, he will try to spin this as the reason fuel prices are so bad.  #firetheliar https://t.co/sEiisPLpfL",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 2.5,
+          "label": "backfill",
+          "public": {
+            "impressions": 133,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 132,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102895916789403896": {
+      "id": "2102895916789403896",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:00:31Z",
+      "conversation_id": "2102886488405143576",
+      "topics": [
+        "2024 US Presidential Election",
+        "Pauline Hanson",
+        "Politics",
+        "United States politics"
+      ],
+      "text": "@_ Probably needed some air after the recent polls and thought this would distract. https://t.co/zgttNdfOfT",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 2.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 694,
+            "likes": 11,
+            "replies": 0,
+            "reposts": 1,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 693,
+            "likes": 11,
+            "replies": 0,
+            "reposts": 1,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102896292112523580": {
+      "id": "2102896292112523580",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:02:00Z",
+      "conversation_id": "2102864358456099004",
+      "topics": [],
+      "text": "@_ Depending on the statistics, I wonder how much potential fraud could be in there.... 🤔",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 2.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 72,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 72,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102900948909920395": {
+      "id": "2102900948909920395",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:20:30Z",
+      "conversation_id": "2102896818380218471",
+      "topics": [],
+      "text": "@_ just like this. https://t.co/1myKgXkrED",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 2.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 280,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 279,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102903602226573693": {
+      "id": "2102903602226573693",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:31:03Z",
+      "conversation_id": "2102823665851314381",
+      "topics": [
+        "Google ",
+        "Google brand conversation",
+        "Services"
+      ],
+      "text": "@_ People saying that should realise those are already farmed by Google and sold to Meta for ads 😂",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 262,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 260,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102904414742949941": {
+      "id": "2102904414742949941",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:34:17Z",
+      "conversation_id": "2102876894144381299",
+      "topics": [],
+      "text": "@_ Not hard when Government systems be like. https://t.co/WAdToYA94w",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 10,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 10,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102904960065376541": {
+      "id": "2102904960065376541",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:36:27Z",
+      "conversation_id": "2102894583730274327",
+      "topics": [
+        "BBC News",
+        "Entertainment",
+        "News",
+        "News outlets",
+        "Publisher & News Business",
+        "TV/Movies Related - Entertainment"
+      ],
+      "text": "@_ 3 month turn around. Albanese getting faster!",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 92,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 91,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102905370633290130": {
+      "id": "2102905370633290130",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:38:05Z",
+      "conversation_id": "2102864812191666502",
+      "topics": [],
+      "text": "@_ Well, it is Australia. Haiku could have probably got the job done.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 90,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 89,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102905791565165034": {
+      "id": "2102905791565165034",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:39:45Z",
+      "conversation_id": "2102863477152817413",
+      "topics": [],
+      "text": "@_ All caps, you even captured his eloquence.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.7,
+          "label": "backfill",
+          "public": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102906912744604044": {
+      "id": "2102906912744604044",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:44:12Z",
+      "conversation_id": "2102869029669290268",
+      "topics": [],
+      "text": "@_ Yeah, but with who they appoint to positions like eSafety Commissioner, are you surprised?",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 120,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 117,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102907303636951300": {
+      "id": "2102907303636951300",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:45:45Z",
+      "conversation_id": "2102867976232071453",
+      "topics": [
+        "2024 US Presidential Election",
+        "Politics",
+        "United States politics"
+      ],
+      "text": "@_ He just wanted something else to look at besides the latest polls... https://t.co/Hcg6BcaJFp",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.6,
+          "label": "backfill",
+          "public": {
+            "impressions": 26,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 26,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102909874900459850": {
+      "id": "2102909874900459850",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:55:59Z",
+      "conversation_id": "2102863476767297540",
+      "topics": [],
+      "text": "@_ If this is the start, I wonder what happens when someone gets all those MyGov Digital ID's...",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 541,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 520,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102910274810634512": {
+      "id": "2102910274810634512",
+      "kind": "reply",
+      "created_at": "2026-09-23T23:57:34Z",
+      "conversation_id": "2102866595269751002",
+      "topics": [],
+      "text": "@_ Ok,  who's taking bets that the MyGov digital ids are next...",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 216,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 216,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102911216683569451": {
+      "id": "2102911216683569451",
+      "kind": "reply",
+      "created_at": "2026-09-24T00:01:18Z",
+      "conversation_id": "2102858264115367961",
+      "topics": [
+        "Australia government institutions",
+        "Australia politics",
+        "Politics",
+        "Services Australia",
+        "Zerohedge"
+      ],
+      "text": "@_ Services Australia: cannot detect a bot for three months. Also Services Australia: \"Your call is important to us, you are 83rd in the queue.\"",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 125,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 124,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102912573259874319": {
+      "id": "2102912573259874319",
+      "kind": "reply",
+      "created_at": "2026-09-24T00:06:42Z",
+      "conversation_id": "2102887508795424816",
+      "topics": [],
+      "text": "@_ When Albanese saw the latest poll numbers. https://t.co/V9h9x12IZw",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102912922188132426": {
+      "id": "2102912922188132426",
+      "kind": "reply",
+      "created_at": "2026-09-24T00:08:05Z",
+      "conversation_id": "2102899838375629117",
+      "topics": [],
+      "text": "@_ Government and corporations not facing consequences. https://t.co/9AtkQLxHXe",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 73,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 71,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102913393174966753": {
+      "id": "2102913393174966753",
+      "kind": "reply",
+      "created_at": "2026-09-24T00:09:57Z",
+      "conversation_id": "2102880307213148172",
+      "topics": [],
+      "text": "@_ Charge away. But also explain why the files were sitting there like a shared drive from 2009.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 37,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 36,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102913786122563835": {
+      "id": "2102913786122563835",
+      "kind": "reply",
+      "created_at": "2026-09-24T00:11:31Z",
+      "conversation_id": "2102882900610052594",
+      "topics": [],
+      "text": "@_ Anyone gonna ask how 3 months later, they had not discovered the breach themselves...",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.1,
+          "label": "backfill",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102914155653341693": {
+      "id": "2102914155653341693",
+      "kind": "reply",
+      "created_at": "2026-09-24T00:12:59Z",
+      "conversation_id": "2102892901781172707",
+      "topics": [],
+      "text": "@_ With those recent @_  numbers, old mate just wanted something else to look at.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.1,
+          "label": "backfill",
+          "public": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 5,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102915213301555674": {
+      "id": "2102915213301555674",
+      "kind": "reply",
+      "created_at": "2026-09-24T00:17:11Z",
+      "conversation_id": "2102889026634039358",
+      "topics": [],
+      "text": "@_ Albanese gonna spin this to explain thats how they lost those fighter jet parts...",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.1,
+          "label": "backfill",
+          "public": {
+            "impressions": 250,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 246,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102916128947454147": {
+      "id": "2102916128947454147",
+      "kind": "reply",
+      "created_at": "2026-09-24T00:20:50Z",
+      "conversation_id": "2102893226072121394",
+      "topics": [],
+      "text": "@_ @_ Wait, you're telling me the same government that accidentally sent US fighter jet parts to Hong Kong got hacked... no way!",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 1.0,
+          "label": "backfill",
+          "public": {
+            "impressions": 10,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 9,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102918437060444581": {
+      "id": "2102918437060444581",
+      "kind": "original",
+      "created_at": "2026-09-24T00:30:00Z",
+      "conversation_id": "2102918437060444581",
+      "topics": [],
+      "text": "From Australia. Building a pipeline that turns ideas into finished video — script, voice, captions.\n\nIf you are making things with AI, I would love to connect.\n\nWhat is your current project? Drop it below. ↓",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 0.8,
+          "label": "backfill",
+          "public": {
+            "impressions": 2,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 2,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102925619831140646": {
+      "id": "2102925619831140646",
+      "kind": "reply",
+      "created_at": "2026-09-24T00:58:32Z",
+      "conversation_id": "2102868336040423443",
+      "topics": [
+        "Global security & terrorism",
+        "Political issues",
+        "Politics"
+      ],
+      "text": "@_ National security in general. How else do we accidentally send US jet parts to China.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 0.4,
+          "label": "backfill",
+          "public": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102926928747622773": {
+      "id": "2102926928747622773",
+      "kind": "reply",
+      "created_at": "2026-09-24T01:03:44Z",
+      "conversation_id": "2102858925477617779",
+      "topics": [
+        "Cybersecurity",
+        "Dell",
+        "Information security",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ Makes you wonder how secure that MyGov Digital ID actually is... 😬",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 0.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102927175980859846": {
+      "id": "2102927175980859846",
+      "kind": "reply",
+      "created_at": "2026-09-24T01:04:43Z",
+      "conversation_id": "2102871385085469146",
+      "topics": [],
+      "text": "@_ Digital ID not looking so hot now.",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 0.3,
+          "label": "backfill",
+          "public": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102928143749447858": {
+      "id": "2102928143749447858",
+      "kind": "original",
+      "created_at": "2026-09-24T01:08:34Z",
+      "conversation_id": "2102928143749447858",
+      "topics": [
+        "Artificial intelligence",
+        "Australia government institutions",
+        "Australia politics",
+        "Australian Government (AusGov)",
+        "OpenAI",
+        "Politics",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "Wait, you're telling me the same Australian government that accidentally sent US fighter jet parts to Hong Kong got hacked by OpenAI... no way!",
+      "reads": {
+        "backfill": {
+          "at": "2026-09-24T01:20:24Z",
+          "age_hours": 0.2,
+          "label": "backfill",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    }
+  }
+}

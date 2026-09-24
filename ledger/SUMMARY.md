@@ -2,14 +2,33 @@
 
 # Ledger summary
 
-Times are Australia/Brisbane. Snapshot is the valid 36–60 hour one, else the latest late one. A leading ≥ means X search returned fewer reply authors than the reply count, so the true number is higher.
+Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snapshot, else the latest late one. Organic, Non-organic and Visits come from the X API read at 36–60 hours, else the September backfill. Follows are new followers credited to the post or its conversation, a lower bound. A leading ≥ means X search returned fewer reply authors than the reply count.
 
-| Posted | Slug | Format | Lane | Experiment | Views | Bookmarks | Outside replies | Snapshot |
-|---|---|---|---|---|---:|---:|---:|---|
-| Sun 20 Sep 19:25 | home-wifi | settings | main | retro | 273 | 2 | 0 | late 81.8h |
-| Mon 21 Sep 16:48 | iphone-camera | settings | main | retro | 133 | 2 | 0 | late 60.4h |
-| Tue 22 Sep 09:05 | macbook-battery | settings | main | retro | 149 | 1 | 0 | valid 44.1h |
-| Tue 22 Sep 10:35 | connect-pin | other | other | retro | 849 | 0 | ≥8 | valid 42.6h |
-| Tue 22 Sep 15:45 | iphone-18-pro-aperture | comparison | main | retro | 464 | 0 | 0 | valid 37.4h |
-| Wed 23 Sep 14:16 | prompt-vs-finish | other | other | retro | – | – | – | pending |
-| Wed 23 Sep 22:31 | paid-to-free-tools | tool-swap | main | retro, non-organic | – | – | – | pending |
+| Posted | Slug | Format | Lane | Experiment | Views | Organic | Non-organic | Visits | Bookmarks | Outside replies | Follows | Snapshot |
+|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|
+| Sun 20 Sep 19:25 | home-wifi | settings | main | retro | 285 | 285 | 0% | 0 | 2 | 0 | 0 | late 87.9h |
+| Mon 21 Sep 16:48 | iphone-camera | settings | main | retro | 137 | 137 | 0% | 0 | 2 | 0 | 0 | late 66.5h |
+| Tue 22 Sep 09:05 | macbook-battery | settings | main | retro | 149 | 151 | 0% | 0 | 1 | 0 | 0 | valid 44.1h |
+| Tue 22 Sep 10:35 | connect-pin | other | other | retro | 849 | 856 | 0% | 20 | 0 | ≥8 | 0 | valid 42.6h |
+| Tue 22 Sep 15:45 | iphone-18-pro-aperture | comparison | main | retro | 464 | 509 | 0% | 0 | 0 | 0 | 0 | valid 37.4h |
+| Wed 23 Sep 13:17 | x-2102598207410950545 | other | other | retro | – | 217 | 0% | 0 | – | – | 0 | pending |
+| Wed 23 Sep 14:16 | prompt-vs-finish | other | other | retro | – | 54 | 0% | 0 | – | – | 0 | pending |
+| Wed 23 Sep 22:31 | paid-to-free-tools | tool-swap | main | retro, non-organic | – | 99 | 95% | 1 | – | – | 0 | pending |
+| Thu 24 Sep 08:37 | x-2102890124275228747 | other | other | retro | – | 15 | 0% | 0 | – | – | 0 | pending |
+| Thu 24 Sep 10:30 | x-2102918437060444581 | other | other | retro | – | 2 | 0% | 0 | – | – | 0 | pending |
+| Thu 24 Sep 11:08 | x-2102928143749447858 | other | other | retro | – | 4 | 0% | 0 | – | – | 0 | pending |
+
+## Account
+
+Followers: 36 on 2026-09-24. In the 7 days to then: 0 new, 0 lost; 0 of the new credited to a post or reply they engaged with (a lower bound).
+
+Follows per profile visit, items from those 7 days: 0 / 58.
+
+| Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 |
+|---|---:|---:|---:|---:|---:|
+| original | 9 | 2097 | 21 | 31 | 10.0 |
+| quote | 2 | 232 | 0 | 1 | 0.0 |
+| reply | 115 | 14220 | 33 | 60 | 2.3 |
+| thread card | 31 | 933 | 4 | 12 | 4.3 |
+
+Top topics by organic impressions (X's own labels, a proxy): Technology Business (2500), Technology (2472), Politics (1853), Apple (1522), Apple - iPhone (1053).

@@ -43,6 +43,40 @@
       "followers": 34,
       "raw_file": "ledger/raw/backfill-20260923T1910.json",
       "missing": []
+    },
+    {
+      "observed_at": "2026-09-24T01:20:24Z",
+      "age_hours": 12.8,
+      "kind": "early",
+      "source": "api",
+      "root": {
+        "views": 2105,
+        "likes": 2,
+        "reposts": 0,
+        "quotes": 0,
+        "replies": 2,
+        "bookmarks": 1
+      },
+      "cards": [
+        {
+          "id": "2102737717763150186",
+          "views": 12
+        }
+      ],
+      "outside_replies": 1,
+      "outside_repliers": [],
+      "repliers_complete": true,
+      "followers": 36,
+      "raw_file": "ledger/raw/api/backfill-20260924T0120.json",
+      "missing": [],
+      "organic": {
+        "impressions": 99,
+        "likes": 2,
+        "replies": 2,
+        "reposts": 0,
+        "profile_visits": 1,
+        "url_clicks": 0
+      }
     }
   ],
   "missed": false,

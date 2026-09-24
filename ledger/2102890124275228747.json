@@ -1,0 +1,51 @@
+{
+  "root_id": "2102890124275228747",
+  "slug": "x-2102890124275228747",
+  "format": "other",
+  "lane": "other",
+  "posted_at": "2026-09-23T22:37:30Z",
+  "retrospective": true,
+  "made_in_repo": false,
+  "experiment": null,
+  "arm": "none",
+  "hypothesis": null,
+  "cards": [],
+  "media": [],
+  "ai_media": false,
+  "production_minutes": null,
+  "edits": [],
+  "draft": null,
+  "snapshots": [
+    {
+      "observed_at": "2026-09-24T01:20:24Z",
+      "age_hours": 2.7,
+      "kind": "early",
+      "source": "api",
+      "root": {
+        "views": 15,
+        "likes": 0,
+        "reposts": 0,
+        "quotes": 0,
+        "replies": 0,
+        "bookmarks": 0
+      },
+      "cards": [],
+      "outside_replies": 0,
+      "outside_repliers": [],
+      "repliers_complete": true,
+      "followers": 36,
+      "raw_file": "ledger/raw/api/backfill-20260924T0120.json",
+      "missing": [],
+      "organic": {
+        "impressions": 15,
+        "likes": 0,
+        "replies": 0,
+        "reposts": 0,
+        "profile_visits": 0,
+        "url_clicks": 0
+      }
+    }
+  ],
+  "missed": false,
+  "auto": true
+}
