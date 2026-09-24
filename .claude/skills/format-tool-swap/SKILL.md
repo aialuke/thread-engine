@@ -100,7 +100,8 @@ Handles checked with `x_api.py user` on 24 Sep 2026:
 | `@use_bruno` | Bruno | blue | 23 Sep |
 | `@obsdmd` | Obsidian (not `@Obsidian`, a game studio) | blue | 16 Sep |
 | `@ollama` | ollama | business | 23 Sep |
-| `@Krita_Painting` | **doesn't exist.** Post 1 tagged it. Find Krita's real account before tagging Krita | – | – |
+| `@kritaartists` | Krita Artists, the community account that posts Krita releases (confirm it speaks for the project before tagging) | no | 16 Sep |
+| `@Krita_Painting` | **doesn't exist.** Post 1 tagged it | – | – |
 
 Re-check a handle in the post's own session; accounts change.
 

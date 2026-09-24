@@ -3,6 +3,7 @@
 # hypothesis, post_at, leads. /draft-thread reads them. /posted sets posted + root_id.
 # format: settings | comparison | tool-swap | single-tip | build-log | tool-verdict (missing = settings)
 # lane: main | other (see reference/audience.md)
+# category: tool-swap only; the PAID → FREE category word (.claude/skills/format-tool-swap/SKILL.md)
 
 topics:
   - slug: macbook-battery
@@ -49,6 +50,114 @@ topics:
   - slug: paid-to-free-tools
     status: shipped
     format: tool-swap
-    lane: main
+    lane: other
+    category: creator
     root_id: "2102737637346095128"
-    note: made outside the repo on 2026-09-23; best root so far. Backfilled in ledger/.
+    note: >-
+      PAID → FREE post 1, made in a Grok chat outside the repo on 2026-09-23. Boosted, 95% of
+      2,105 impressions; 99 organic, 1 visit, 0 follows. Not the best root: organically among the
+      weakest, and untested as a format. Lane other (as the ledger) until its Resolve row is
+      tested (shipped/paid-to-free-tools/CLAIMS.md). OBS and Krita are spent except as singles.
+
+  # PAID → FREE series (.claude/skills/format-tool-swap/SKILL.md). One parent every other day, in
+  # this order (operator, 24 Sep 2026). Draft rows came from the Grok session
+  # (reviews/paid-free-session-2026-09.md) and are candidates, not copy: every row is tested by the
+  # operator and sourced before it reaches a card. About 10 categories at one every other day runs
+  # to about late October; /results says when two remain. Roster: queue/paid-free-roster.md.
+
+  - slug: paid-free-developer
+    status: queued
+    format: tool-swap
+    lane: main
+    category: developer
+    note: >-
+      Session draft: Postman → Bruno (API collections as files in the repo); Navicat / DataGrip →
+      Beekeeper Studio (SQL client for Postgres, MySQL, SQLite); Ngrok → Cloudflare Tunnels (share
+      localhost on a real hostname). Fixes: one paid tool per row (Navicat or DataGrip, whichever
+      X talks about). Postman has a free plan: name the paid tier or cut. The ngrok row needs
+      rewriting or cutting: ngrok's free plan already has one permanent *.ngrok-free.app domain,
+      with a warning page, 20k requests and 1 GB a month (ngrok docs, 24 Sep); Cloudflare's version
+      needs your own domain on Cloudflare. Bruno's paid Git UI and extras go in REPLIES.md.
+      Shout-out: @use_bruno, without the session's "they still post the changelog".
+
+  - slug: paid-free-local-ai
+    status: queued
+    format: tool-swap
+    lane: main
+    category: local AI
+    note: >-
+      Session draft: "Paid chat apps" → Ollama + Open WebUI (models run on your machine, chat UI in
+      the browser); GitHub Copilot → Cline (agent in the editor, pointed at a local model). Fixes:
+      name the paid product (the roster has ChatGPT Plus and Claude Pro). The account's own pipeline
+      runs on paid Claude, Codex and Grok, so rows claim only jobs the operator ran locally.
+      Copilot has a free plan (2,000 completions and 50 chats a month), so name Copilot Pro or cut.
+      Cline for Continue is right: Cursor acquired Continue around 16 Jun 2026 and wound it down.
+      Shout-out candidate: @ollama.
+
+  - slug: paid-free-productivity
+    status: queued
+    format: tool-swap
+    lane: main
+    category: productivity
+    note: >-
+      Session draft: Notion → Obsidian (local markdown, graph and plugins on your machine);
+      Microsoft 365 → OnlyOffice (Word, Excel, PowerPoint files stay in shape); Trello → Focalboard.
+      Fixes: cut Focalboard, whose repo "is currently not maintained" (Mattermost stopped fixes on
+      15 Sep 2023); use Toggl Track → ActivityWatch from the roster, or two rows. Obsidian is
+      tested (the operator uses it). Notion and Trello have free plans. Test OnlyOffice's "files
+      stay in shape". Obsidian's paid Sync and Publish go in REPLIES.md. Shout-out: @obsdmd, not
+      @Obsidian (a game studio).
+
+  - slug: paid-free-privacy
+    status: queued
+    format: tool-swap
+    lane: main
+    category: privacy
+    note: >-
+      Session draft: 1Password / LastPass → Bitwarden (passwords in a vault you can self-host);
+      Router ads / paid DNS → AdGuard Home (block lists on your network); Paid VPN mesh →
+      Tailscale (devices on one tailnet). Fixes: 1Password only (LastPass isn't in the roster);
+      NextDNS for the DNS row; a named product for the mesh row, or cut it. KeePassXC and Pi-hole
+      are held for singles.
+
+  - slug: paid-free-storage
+    status: queued
+    format: tool-swap
+    lane: main
+    category: storage
+    note: Roster rows Syncthing and Nextcloud. Not drafted.
+
+  - slug: paid-free-diagram
+    status: queued
+    format: tool-swap
+    lane: main
+    category: diagram
+    note: Roster rows draw.io and Excalidraw. Not drafted.
+
+  - slug: paid-free-system
+    status: queued
+    format: tool-swap
+    lane: main
+    category: system
+    note: Roster rows Raycast (proprietary, freemium) and Rectangle. Not drafted; the session's order left this category out.
+
+  - slug: paid-free-self-hosting
+    status: queued
+    format: tool-swap
+    lane: main
+    category: self-hosting
+    note: Roster rows Coolify, Netdata and Caddy. Testing needs a server. Not drafted.
+
+  - slug: paid-free-finance
+    status: queued
+    format: tool-swap
+    lane: main
+    category: finance
+    note: Optional; drop if off-brand after two weeks of the series. Roster rows Actual Budget, Ghostfolio, Invoice Ninja.
+
+  - slug: paid-free-support
+    status: queued
+    format: tool-swap
+    lane: main
+    category: support
+    note: Optional, as finance. Roster rows PostHog (analytics, so revisit the category word), Chatwoot, Zammad.

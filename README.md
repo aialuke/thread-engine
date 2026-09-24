@@ -11,6 +11,17 @@ Makes @exitzerocode posts and learns which ones grow the account. You type slash
 5. **`/ready <slug>`** — Grok checks the draft and puts card 1 on your clipboard. Paste it into X as a new post. Say `next` for each following card and post it as a reply to the one before.
 6. **`/posted <link to the first post>`** — Grok records what actually went live and asks how long it took.
 
+### PAID → FREE posts
+
+The series has a few extra steps of yours (rules: `.claude/skills/format-tool-swap/SKILL.md`):
+
+- Draft it with `/draft-thread`, not in a Grok chat, so every row is checked and the loop measures it.
+- Before the cards are written, test each free tool on its row's task and save a screenshot to the draft's `images/` folder. A row you can't test is cut, and one screenshot goes on the post.
+- The shout-out to a maker is card 2: post it 10–20 minutes after card 1, not straight away. Type `/posted` once it's live.
+- `REPLIES.md` in the draft has points to make if people reply. Write your replies in your own words.
+- Pin the newest PAID → FREE post that's tested, sourced and not boosted. Post 1 (the boosted creator list) should be unpinned now.
+- At most two posts of your own a day, a few hours apart, and a PAID → FREE post every other day.
+
 Numbers are collected automatically by the daily job: every post, reply and quote at 36–60 hours and again at 26–29 days, plus your follower count. Boosted posts are spotted and kept out of comparisons. If the Mac was off, the next run catches up.
 
 ## Learning

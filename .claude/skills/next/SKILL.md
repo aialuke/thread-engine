@@ -30,11 +30,12 @@ The operator's main command, in Grok or Claude Code. Speak plainly. The operator
 Run `python3 scripts/loop.py next-slot`.
 
 - **explore, no open experiment:** propose the next experiment from this list, first one not yet run:
-  1. Standalone post (single-tip or tool-swap, root only) against the account's threads in the same lane. Cohort: main-lane threads with a valid or late snapshot.
+  1. Standalone post (single-tip or tool-swap, root only) against the account's threads in the same lane. Cohort: main-lane threads with a valid or late snapshot. A PAID → FREE post in this arm skips its shout-out, so it stays root-only.
   2. Short thread (3 cards) against the long threads already shipped (6 to 9 posts).
   3. Posting hour: US-overlap slots, 22:00–23:00 or 05:00–07:00 Australia/Brisbane from Tuesday night to Friday morning, against the account's usual daytime Brisbane posting. The US-overlap slots are a hypothesis from `reviews/reports/Driving verified home timeline impressions.md`, not a finding. US daylight saving ends on 1 Nov, which moves US mornings an hour later in Brisbane.
   4. Root length: under 280 characters against 500–600.
   5. Replies: five substantive replies in the lane on a posting day against none, measured by followers gained that week.
+  6. PAID → FREE category: one category against another (for example developer against creator), with the header, shape, slot and shout-out held fixed. Cohort: earlier organic PAID → FREE posts.
   State: the question, the treatment, what it is compared with, and the cohort, meaning earlier posts from `ledger/SUMMARY.md` in the same lane that match the comparison format, at least 3. When the operator says yes, write `loop/inbox/experiment.json` (`question`, `treatment`, `control`, `cohort` ids, `primary` "views", `effect` 1.5, `reference_facts` like ["A1","A5"]) and run `python3 scripts/loop.py open-experiment --json loop/inbox/experiment.json`.
 - **explore, experiment open:** the next post is the experiment's treatment.
 - **exploit:** the next post uses the best-known approach: follow any `adopted` lessons in `learnings.md`. If an experiment is open, mark the row `arm: control`.
@@ -43,8 +44,8 @@ Run `python3 scripts/loop.py next-slot`.
 
 1. Lane: read `reference/audience.md`. Say the `lane.share` in one line. While the operator trials formats, a share below 0.8 (12 of 15) is reported, not a reason to refuse an `other` post.
 2. Demand: run one or two searches for recent questions in the lane (for example `"how do I" free video editor lang:en -filter:replies`) with `python3 scripts/x_read.py search "<query>"`. It checks every post Grok returns against X and drops invented or misquoted ones; never cite a post it dropped, and don't use `x_keyword_search` directly, because it skips that check. Record each hit as a lead: post id, the query, and that the search returns at most 10. Leads are not proof of demand.
-3. Queue: consider `status: queued` rows in `queue/topics.yaml`.
-4. Timing: propose a posting time in Australia/Brisbane. Say how many hours since the last original; there is no fixed minimum. A stranger only sees a post after its first like, and the like-based pool stops re-indexing at 48 hours (`reference/x-algorithm.md` A6), so prefer a time when builder mutuals and US Premium users are awake: the US-overlap slots in experiment 3 until that experiment says otherwise.
+3. Queue: consider `status: queued` rows in `queue/topics.yaml`. PAID → FREE rows (`format: tool-swap`) go in the queue's order, one parent every other day: say when the last one went out. Its draft needs the operator's tests (`.claude/skills/format-tool-swap/SKILL.md` → Material), so ask whether they can test the tools today.
+4. Timing: propose a posting time in Australia/Brisbane. At most two originals a day, hours apart (operator, 24 Sep 2026): say how many originals went out today and how many hours since the last one. The operator should be there to reply in the first hour. A stranger only sees a post after its first like, and the like-based pool stops re-indexing at 48 hours (`reference/x-algorithm.md` A6), so prefer a time when builder mutuals and US Premium users are awake: the US-overlap slots in experiment 3 until that experiment says otherwise. The operator confirmed both slots work for them, first hour included.
 
 ## 5. Propose, then write the row
 

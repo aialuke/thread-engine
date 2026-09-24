@@ -13,4 +13,5 @@ Work to do later, chosen by the operator. Each item says why it matters, what "d
 
 - **Why:** a copy-link share is the heaviest default ranking weight (20, against 0.5 for a like; `reference/x-algorithm.md` A9), and DM shares weigh 5. Neither is visible to the loop: the API doesn't return them, and the analytics export's "Shares" column was 0 on every post from 18–24 Sep.
 - **Done when:** research across sources and examples says which kinds of tech and builder posts get sent privately, how to spot them from public signals (bookmarks, quotes, "sending this to…" replies), and turns that into a drafting rule or an experiment for `/next`.
+- **First test case:** the PAID → FREE series (`.claude/skills/format-tool-swap/SKILL.md`). A tested list of free tools is the most plausible "send this to a colleague" post the account makes; its bookmarks, quotes and "sending this to…" replies are the public signals to watch.
 - **Source:** the same report (lever 4).
