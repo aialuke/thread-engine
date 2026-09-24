@@ -45,7 +45,7 @@ Mock: https://claude.ai/artifact/8zaBcxWAknJaXWkReQQPqg (private until the opera
 All of part A (design flaws) and part B (accessibility) are accepted as a fix list. The iPhone mock is updated first (D31); the Mac mock follows when the Mac app is built.
 
 - **iPhone: done (25 Sep, mock version 18).** Fixes from parts A and B, plus D25 Capture, D26 editing, D27 Growth first, D28 Builders, D29 first hour, and D30 on-topic share. Canvas tweaks can show the unhappy paths: health `failed`, find `notfound`, gate `refused`. Other people's names are replaced with placeholders that can't be real X handles.
-- **Mac: not yet.** It still shows the 24 Sep design.
+- **Mac: done (25 Sep, mock version 19).** It's built from the same pieces as the iPhone, so the two can't drift apart. The Today headline is 38px on one line, running above both columns. Sources and the editor open as centred dialogs, Ask Cortex from another page opens a drawer on the right, and on the Cortex page the chat stays docked.
 
 ## For the loop, not the UI
 
