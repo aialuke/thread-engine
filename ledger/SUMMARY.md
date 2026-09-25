@@ -11,9 +11,9 @@ Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snap
 | Tue 22 Sep 09:05 | macbook-battery | settings | main | retro | 149 | 151 | 0% | 0 | 1 | 0 | 1 | valid 44.1h |
 | Tue 22 Sep 10:35 | connect-pin | other | other | retro | 849 | 856 | 0% | 20 | 0 | ≥8 | 13 | valid 42.6h |
 | Tue 22 Sep 15:45 | iphone-18-pro-aperture | comparison | main | retro | 464 | 509 | 0% | 0 | 0 | 0 | 0 | valid 37.4h |
-| Wed 23 Sep 13:17 | x-2102598207410950545 | other | other | retro | – | 217 | 0% | 0 | – | – | 0 | pending |
-| Wed 23 Sep 14:16 | prompt-vs-finish | other | main | retro | – | 54 | 0% | 0 | – | – | 0 | pending |
-| Wed 23 Sep 22:31 | paid-to-free-tools | tool-swap | other | retro, non-organic | – | 99 | 95% | 1 | – | – | 0 | pending |
+| Wed 23 Sep 13:17 | x-2102598207410950545 | other | other | retro | 234 | 234 | 0% | 0 | 0 | 0 | 0 | valid 54.7h |
+| Wed 23 Sep 14:16 | prompt-vs-finish | other | main | retro | 55 | 55 | 0% | 0 | 0 | 0 | 0 | valid 53.7h |
+| Wed 23 Sep 22:31 | paid-to-free-tools | tool-swap | other | retro, non-organic | 2523 | 158 | 93% | 1 | 1 | 1 | 0 | valid 45.5h |
 | Thu 24 Sep 08:37 | x-2102890124275228747 | other | other | retro | – | 15 | 0% | 0 | – | – | 0 | pending |
 | Thu 24 Sep 10:30 | x-2102918437060444581 | other | other | retro | – | 2 | 0% | 0 | – | – | – | pending |
 | Thu 24 Sep 11:08 | x-2102928143749447858 | other | other | retro | – | 4 | 0% | 0 | – | – | – | pending |
@@ -23,19 +23,21 @@ Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snap
 Needs 500 verified followers and 500,000 verified Home Timeline impressions on originals in 90 days (no replies, no boosted reach).
 
 - X's eligibility screen, read 2026-09-24: 26 verified followers, 337 qualified impressions.
-- Verified followers from the daily read: 27 of 500.
-- Organic impressions on originals and quotes, last 90 days: 2,329. This counts every viewer on every surface, so it is an upper bound; X counts only Premium viewers on the Home feed.
+- Verified followers from the daily read: 26 of 500.
+- Organic impressions on originals and quotes, last 90 days: 2,406. This counts every viewer on every surface, so it is an upper bound; X counts only Premium viewers on the Home feed.
 - Share that qualified at the last screen reading: 14% (the two readings may be from different days).
 
 ## Account
 
-Followers: 36 on 2026-09-24. This is the first count; follower changes and credit start from the next day's read.
+Followers: 38 on 2026-09-25. In the 7 days to then: 4 new, 2 lost; 1 of the new credited to a post or reply they engaged with (a lower bound).
+
+Follows per profile visit, items from those 7 days: 4 / 60.
 
 | Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 | New follows (X export) |
 |---|---:|---:|---:|---:|---:|---:|
-| original | 9 | 2097 | 21 | 31 | 10.0 | 13 |
-| quote | 2 | 232 | 0 | 1 | 0.0 | 0 |
-| reply | 115 | 14220 | 33 | 60 | 2.3 | 4 |
-| thread card | 31 | 933 | 4 | 12 | 4.3 | 2 |
+| original | 9 | 2157 | 21 | 31 | 9.7 | 13 |
+| quote | 2 | 249 | 0 | 1 | 0.0 | 0 |
+| reply | 115 | 19441 | 35 | 62 | 1.8 | 4 |
+| thread card | 31 | 948 | 4 | 12 | 4.2 | 2 |
 
-Top topics by organic impressions (X's own labels, a proxy): Technology Business (2500), Technology (2472), Politics (1853), Apple (1522), Apple - iPhone (1053).
+Top topics by organic impressions (X's own labels, a proxy): Technology Business (2573), Technology (2545), Politics (1853), Apple (1522), Apple - iPhone (1053).

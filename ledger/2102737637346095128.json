@@ -77,6 +77,40 @@
         "profile_visits": 1,
         "url_clicks": 0
       }
+    },
+    {
+      "observed_at": "2026-09-25T10:00:04Z",
+      "age_hours": 45.5,
+      "kind": "valid",
+      "source": "api",
+      "root": {
+        "views": 2523,
+        "likes": 2,
+        "reposts": 0,
+        "quotes": 0,
+        "replies": 2,
+        "bookmarks": 1
+      },
+      "cards": [
+        {
+          "id": "2102737717763150186",
+          "views": 26
+        }
+      ],
+      "outside_replies": 1,
+      "outside_repliers": [],
+      "repliers_complete": true,
+      "followers": 38,
+      "raw_file": "ledger/raw/api/run-20260925T1000.json",
+      "missing": [],
+      "organic": {
+        "impressions": 158,
+        "likes": 2,
+        "replies": 2,
+        "reposts": 0,
+        "profile_visits": 1,
+        "url_clicks": 0
+      }
     }
   ],
   "missed": false,

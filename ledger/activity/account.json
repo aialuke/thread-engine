@@ -6,6 +6,18 @@
       "followers": 36,
       "verified_followers": 27,
       "baseline": true
+    },
+    {
+      "date": "2026-09-25",
+      "at": "2026-09-25T10:00:04Z",
+      "followers": 38,
+      "verified_followers": 26,
+      "new": 4,
+      "lost": 2,
+      "attributed": {
+        "2103102565840027674": 1
+      },
+      "unattributed": 3
     }
   ],
   "eligibility": [
