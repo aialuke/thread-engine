@@ -1,0 +1,1483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Thread Engine on MacBook</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#17160F;background:#F3F1EA}
+a{color:var(--blue)}a:hover{color:var(--blue-deep)}
+button{font:inherit;color:inherit}
+input::placeholder{color:var(--faint)}
+.te-glow:focus-within{outline:2px solid var(--blue);outline-offset:3px}
+.te-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.te-swap{animation:te-swap .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes te-swap{from{transform:rotate(-90deg) scale(.6);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){.te-swap{animation:none}}
+.te-root{color-scheme:light;--amber-fill:#8A4B00;--on-amber:#FFFFFF;--hold-fill:#2340A8;--seg-sel:#7F7A6E;--paper:#F3F1EA;--card:#FFFFFF;--raised:#FBFAF6;--btn:#17160F;--on-btn:#F3F1EA;--ink:#17160F;--text2:#4A473F;--muted:#5B584F;--faint:#6E6A5F;--line:#DCD7CB;--line2:#ECE8DE;--axis:#C3BDAF;--dash:#CFC8B8;--blue:#2340A8;--blue-fill:#2340A8;--blue-deep:#172C78;--blue-soft:#E6EAF7;--blue-line:#BFC9EA;--track-blue:#E3E8F7;--amber:#8A4B00;--amber-soft:#F7E9CC;--amber-line:#C99A4B;--ok:#2F7A4F;--seg:#E7E3D8;--chip-bg:#FBF6FD;--chip-line:#E2D6EE;--on-fill:#FFFFFF;--chart-on:#3A5FD0;--chart-off:#15936A;--sheet-top:#FBF3FF;--shimmer-hi:#7A7466;--shimmer-hi-sheet:#6B6558;--sheet-mid:#F7F1F6;--glass:rgba(255,255,255,.82);--chip-glass:rgba(255,255,255,0.7);--scrim:rgba(23,22,15,0.38);}
+.te-root[data-theme="dark"]{color-scheme:dark;--amber-fill:#F2B866;--on-amber:#17160F;--hold-fill:#9DB3FF;--seg-sel:#77736A;--paper:#15140F;--card:#201F19;--raised:#1B1A15;--btn:#ECE8DE;--on-btn:#17160F;--ink:#EDEAE2;--text2:#C8C2B5;--muted:#A8A294;--faint:#99938A;--line:#36342C;--line2:#2B2A23;--axis:#4D4A41;--dash:#4D4A41;--blue:#9DB3FF;--blue-fill:#4E6FE6;--blue-deep:#D2DCFF;--blue-soft:#1F2849;--blue-line:#3B4B8A;--track-blue:#262F52;--amber:#F2B866;--amber-soft:#3A2B12;--amber-line:#8E6A2F;--ok:#53B882;--seg:#2B2A23;--chip-bg:#261E2C;--chip-line:#463852;--on-fill:#FFFFFF;--chart-on:#6A88EE;--chart-off:#1FAE7B;--sheet-top:#241B2E;--shimmer-hi:#FFFFFF;--shimmer-hi-sheet:#FFFFFF;--sheet-mid:#1C1920;--glass:rgba(38,34,46,.86);--chip-glass:rgba(255,255,255,0.08);--scrim:rgba(0,0,0,0.55);}
+@media (prefers-color-scheme: dark){.te-root[data-theme="system"]{color-scheme:dark;--amber-fill:#F2B866;--on-amber:#17160F;--hold-fill:#9DB3FF;--seg-sel:#77736A;--paper:#15140F;--card:#201F19;--raised:#1B1A15;--btn:#ECE8DE;--on-btn:#17160F;--ink:#EDEAE2;--text2:#C8C2B5;--muted:#A8A294;--faint:#99938A;--line:#36342C;--line2:#2B2A23;--axis:#4D4A41;--dash:#4D4A41;--blue:#9DB3FF;--blue-fill:#4E6FE6;--blue-deep:#D2DCFF;--blue-soft:#1F2849;--blue-line:#3B4B8A;--track-blue:#262F52;--amber:#F2B866;--amber-soft:#3A2B12;--amber-line:#8E6A2F;--ok:#53B882;--seg:#2B2A23;--chip-bg:#261E2C;--chip-line:#463852;--on-fill:#FFFFFF;--chart-on:#6A88EE;--chart-off:#1FAE7B;--sheet-top:#241B2E;--shimmer-hi:#FFFFFF;--shimmer-hi-sheet:#FFFFFF;--sheet-mid:#1C1920;--glass:rgba(38,34,46,.86);--chip-glass:rgba(255,255,255,0.08);--scrim:rgba(0,0,0,0.55);}}
+.te-glow{padding:2px;background:linear-gradient(90deg,#F79AD3,#B59CFF,#7FB8FF,#FFC58A,#F79AD3);background-size:300% 100%;animation:te-glow 6s linear 2;box-shadow:0 0 22px rgba(190,120,255,.45),0 0 44px rgba(255,150,200,.22)}
+@keyframes te-glow{to{background-position:300% 0}}
+.te-glass{background:var(--glass);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.te-sheet-in{animation:te-up .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes te-up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){.te-glow,.te-sheet-in{animation:none}}
+</style>
+</helmet>
+<div class="te-root" onKeyDown="{{rootKey}}" data-theme="{{themeAttr}}" style="width: 1440px; height: 900px; box-sizing: border-box; display: flex; background: var(--paper); color: var(--ink); overflow: hidden; position: relative">
+<svg width="0" height="0" aria-hidden="true" style="position: absolute"><defs><linearGradient id="te-orb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F28AD0"></stop><stop offset="0.5" stop-color="#9C8CFF"></stop><stop offset="1" stop-color="#FFB27A"></stop></linearGradient></defs></svg>
+<aside style="width: 248px; flex-shrink: 0; box-sizing: border-box; border-right: 1px solid var(--line); background: var(--raised); padding: 28px 16px 18px; display: flex; flex-direction: column; gap: 26px">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 0 12px"><span style="font-family: 'Instrument Serif', Georgia, serif; font-size: 26px; line-height: 1.1">Thread Engine</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)">@exitzerocode</span></div>
+<nav aria-label="Sections" inert="{{navInert}}" style="display: flex; flex-direction: column; gap: 4px">
+<button onClick="{{goToday}}" aria-current="{{tabTodayCurrent}}" aria-label="{{tabTodayLabel}}" style="position: relative; min-height: 44px; border: none; border-radius: 10px; background: {{navTodayBg}}; display: flex; align-items: center; gap: 12px; padding: 0 12px; cursor: pointer; font-size: 14.5px; font-weight: {{tabTodayWeight}}; text-align: left; color: var(--ink)"><span aria-hidden="true" style="position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: {{navTodayBar}}"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"></path></svg>Today</button>
+<button onClick="{{goPosts}}" aria-current="{{tabPostsCurrent}}" aria-label="{{tabPostsLabel}}" style="position: relative; min-height: 44px; border: none; border-radius: 10px; background: {{navPostsBg}}; display: flex; align-items: center; gap: 12px; padding: 0 12px; cursor: pointer; font-size: 14.5px; font-weight: {{tabPostsWeight}}; text-align: left; color: var(--ink)"><span aria-hidden="true" style="position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: {{navPostsBar}}"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="6" rx="1.5"></rect><rect x="4" y="14" width="16" height="6" rx="1.5"></rect></svg>Posts</button>
+<button onClick="{{goReplies}}" aria-current="{{tabRepliesCurrent}}" aria-label="{{tabRepliesLabel}}" style="position: relative; min-height: 44px; border: none; border-radius: 10px; background: {{navRepliesBg}}; display: flex; align-items: center; gap: 12px; padding: 0 12px; cursor: pointer; font-size: 14.5px; font-weight: {{tabRepliesWeight}}; text-align: left; color: var(--ink)"><span aria-hidden="true" style="position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: {{navRepliesBar}}"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a7 7 0 0 1-10.3 6.2L5 19.5l1.3-4.2A7 7 0 1 1 20 12z"></path></svg>Replies<sc-if value="{{hasWaiting}}" hint-placeholder-val="{{ true }}"><span aria-hidden="true" style="margin-left: auto; min-width: 22px; height: 22px; border-radius: 11px; background: var(--amber-fill); color: var(--on-amber); font-family: 'IBM Plex Mono', monospace; font-size: 12px; display: flex; align-items: center; justify-content: center; padding: 0 6px; box-sizing: border-box">{{waitingCount}}</span></sc-if></button>
+<button onClick="{{goResults}}" aria-current="{{tabResultsCurrent}}" aria-label="{{tabResultsLabel}}" style="position: relative; min-height: 44px; border: none; border-radius: 10px; background: {{navResultsBg}}; display: flex; align-items: center; gap: 12px; padding: 0 12px; cursor: pointer; font-size: 14.5px; font-weight: {{tabResultsWeight}}; text-align: left; color: var(--ink)"><span aria-hidden="true" style="position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: {{navResultsBar}}"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V5M19 20v-6"></path></svg>Results</button>
+<button onClick="{{goCortex}}" aria-current="{{tabCortexCurrent}}" aria-label="{{tabCortexLabel}}" style="position: relative; min-height: 44px; border: none; border-radius: 10px; background: {{navCortexBg}}; display: flex; align-items: center; gap: 12px; padding: 0 12px; cursor: pointer; font-size: 14.5px; font-weight: {{tabCortexWeight}}; text-align: left; color: var(--ink)"><span aria-hidden="true" style="position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: {{navCortexBar}}"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="7" r="2.2"></circle><circle cx="18" cy="6" r="2.2"></circle><circle cx="12" cy="17.5" r="2.2"></circle><path d="M8.2 6.8l7.6-.6M7.2 9l3.7 6.5M16.9 8l-3.8 7.5"></path></svg>Cortex<span aria-hidden="true" title="Ask Cortex from any page" style="margin-left: auto; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)">⌘K</span></button>
+</nav>
+<div style="margin-top: auto; display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card)">
+<div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text2)"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{healthDot}}"></span>{{sideHealth}}</div>
+<div style="display: flex; justify-content: space-between; font-size: 13px"><span>Followers</span><span style="font-family: 'IBM Plex Mono', monospace">36</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; justify-content: space-between; font-size: 13px"><span>Verified followers</span><span style="font-family: 'IBM Plex Mono', monospace">27 of 500</span></div><div style="height: 5px; border-radius: 3px; background: var(--track-blue); overflow: hidden"><div style="width: 5.4%; height: 100%; background: var(--chart-on)"></div></div></div>
+<div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px"><span>Export due</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text2)">Thu 1 Oct</span></div>
+</div>
+<div style="display: flex; align-items: center; gap: 6px">
+<button onClick="{{toggleSettings}}" aria-label="{{avatarLabel}}" aria-expanded="{{settingsOpen}}" style="flex-grow: 1; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 4px 10px; border: none; border-radius: 12px; background: {{profileBg}}; cursor: pointer; text-align: left">
+<span style="position: relative; width: 36px; height: 36px; border-radius: 50%; background: var(--btn); color: var(--on-btn); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; flex-shrink: 0">EZ<sc-if value="{{healthBad}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; border-radius: 50%; background: var(--amber-fill); box-shadow: 0 0 0 2px var(--raised)"></span></sc-if></span>
+<span style="display: flex; flex-direction: column"><span style="font-size: 14px; font-weight: 600">Exit Zero Code</span><span style="font-size: 12px; color: var(--muted)">Settings and health</span></span>
+</button>
+<button onClick="{{flipTheme}}" aria-label="{{flipLabel}}" title="{{flipLabel}}" style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: flex; align-items: center; justify-content: center; cursor: pointer">
+<sc-if value="{{showMoon}}" hint-placeholder-val="{{ true }}"><svg class="te-swap" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg></sc-if>
+<sc-if value="{{showSun}}" hint-placeholder-val="{{ false }}"><svg class="te-swap" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"></path></svg></sc-if>
+</button>
+</div>
+</aside>
+<main inert="{{mainInert}}" style="flex-grow: 1; overflow-y: auto; padding: 36px 44px 44px; box-sizing: border-box">
+<sc-if value="{{isHome}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted)">{{todayLabel}}</div>
+<h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 44px; line-height: 1.08; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{headline}}</h1>
+<div style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--muted); line-height: 1.4"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{healthDot}}; flex-shrink: 0"></span>{{healthLine}}</div>
+</div>
+<sc-if value="{{healthBad}}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45; display: flex; flex-direction: column; gap: 8px"><span>Last night’s daily check didn’t run, probably because the Mac was asleep. Numbers are from the night before.</span><button onClick="{{fixHealth}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; color: var(--amber); font-weight: 600">Run it now</button></div>
+</sc-if>
+<div style="display: grid; grid-template-columns: 440px minmax(0, 1fr); gap: 40px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 22px"><div style="display: flex; flex-direction: column; gap: 22px">
+
+
+
+<sc-if value="{{showFirstHour}}" hint-placeholder-val="{{ false }}">
+<section aria-label="First hour" style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; border-color: var(--blue-line); padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px"><h2 style="margin: 0; font-size: 15px; font-weight: 600; font-size: 17px">First hour</h2><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)">closes {{fhClose}}</span></div>
+<div style="font-size: 14.5px; line-height: 1.45">Posted {{foundAt}}. The first like came 3 minutes later, so strangers can start seeing it. <span style="font-size: 12px; font-weight: 600; color: var(--text2); background: var(--line2); padding: 4px 10px; border-radius: 999px; font-size: 12px">example</span></div>
+<div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line2); padding-top: 12px">
+<span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Answer now</span>
+<div style="font-size: 14px; line-height: 1.45">@builder.two asked whether Bruno handles GraphQL. <a href="https://x.com" target="_blank" rel="noopener" style="font-weight: 600">Answer on X ↗</a></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line2); padding-top: 12px">
+<span style="font-size: 14px">Roughly how long did this post take you?</span>
+<div role="radiogroup" aria-label="Time taken" style="display: flex; gap: 8px; flex-wrap: wrap">
+<sc-for list="{{minuteChips}}" as="mc" hint-placeholder-count="4"><button role="radio" aria-checked="{{mc.on}}" onClick="{{mc.pick}}" style="min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid {{mc.border}}; background: {{mc.bg}}; font-size: 14px; font-weight: {{mc.weight}}; cursor: pointer">{{mc.label}}</button></sc-for>
+</div>
+</div>
+<button onClick="{{closeFirstHour}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left">Close the first-hour card</button>
+</section>
+</sc-if>
+
+<section aria-label="Next post" style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; color: var(--muted)">{{cardEyebrow}}</span><span style="font-size: 18px; font-weight: 600; line-height: 1.25">PAID → FREE: developer tools</span></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 13px"><span style="font-weight: 500">{{whenLabel}}</span><span style="color: {{countdownColor}}">{{countdown}}</span></div>
+<ol aria-label="Where this post is" style="list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px">
+<sc-for list="{{steps}}" as="st" hint-placeholder-count="5">
+<li aria-current="{{st.current}}" style="display: flex; flex-direction: column; align-items: center; gap: 6px">
+<div style="width: 100%; height: 4px; border-radius: 2px; background: {{st.bar}}"></div>
+<div style="font-size: 12px; color: {{st.color}}; font-weight: {{st.weight}}; white-space: nowrap">{{st.mark}}{{st.label}}<span class="te-sr">{{st.state}}</span></div>
+</li>
+</sc-for>
+</ol>
+<sc-if value="{{thinkingReady}}" hint-placeholder-val="{{ false }}">
+<div style="border-top: 1px solid var(--line2); padding-top: 14px"><dc-import name="Thinking" cmd="ready" on-done="{{doneReady}}" hint-size="100%,110px"></dc-import></div>
+</sc-if>
+<sc-if value="{{showPrimary}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<button onClick="{{primaryAction}}" disabled="{{primaryDisabled}}" style="min-height: 52px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer; opacity: {{primaryOpacity}}">{{primaryLabel}}</button>
+<div style="font-size: 12.5px; color: var(--muted); line-height: 1.4; text-align: center">{{primaryHint}}</div>
+<sc-if value="{{showEarlyAnyway}}" hint-placeholder-val="{{ false }}"><button onClick="{{startEarly}}" disabled="{{busy}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; align-self: center; opacity: {{busyOpacity}}">Start posting early anyway</button></sc-if>
+</div>
+</sc-if>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Progress</h2>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 4px 16px">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line2)">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px"><span style="font-size: 14px">Verified followers</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500">27 <span style="color: var(--muted); font-weight: 400">of 500</span></span></div>
+<div style="height: 8px; border-radius: 4px; background: var(--track-blue); overflow: hidden"><div style="width: 5.4%; height: 100%; background: var(--chart-on)"></div></div>
+<span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">About 37 a week reaches X’s rewards bar in 90 days.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line2)">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px"><span style="font-size: 14px">Qualified impressions</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500">337 <span style="color: var(--muted); font-weight: 400">of 500,000</span></span></div>
+<div style="height: 8px; border-radius: 4px; background: var(--track-blue); overflow: hidden"><div style="width: 0.07%; min-width: 2px; height: 100%; background: var(--chart-on)"></div></div>
+<span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">Counted when a verified viewer scrolls past half of one of your original posts in their Home feed. Replies and boosted views don’t count. From X’s eligibility screen, last read 24 Sep.</span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line2)">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px">Followers</span><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">First daily count 24 Sep; the trend starts from there</span></div>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500">36</span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 0">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 14px">Analytics export</span><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">On a computer: X → Premium → Analytics → Content → Export. It’s the only record of which posts brought followers.</span></div>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; white-space: nowrap; color: var(--text2)">Thu 1 Oct</span>
+</div>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 15px; font-weight: 600">Replies</h2><button onClick="{{goReplies}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; font-size: 13.5px">All replies</button></div>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden">
+<sc-if value="{{hasWaiting}}" hint-placeholder-val="{{ true }}">
+<button onClick="{{goReplies}}" style="width: 100%; text-align: left; border: none; border-bottom: 1px solid var(--line2); background: var(--amber-soft); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; color: var(--amber)">
+<span style="font-size: 15px; font-weight: 600">{{waitingText}}</span>
+<sc-for list="{{waitingPreview}}" as="wp" hint-placeholder-count="2"><span style="font-size: 13px; color: var(--text2)">{{wp.handle}} · {{wp.where}}</span></sc-for>
+</button>
+</sc-if>
+<div style="padding: 10px 16px 4px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Worth joining</div>
+<sc-for list="{{replies}}" as="r" hint-placeholder-count="3">
+<button onClick="{{goReplies}}" style="width: 100%; text-align: left; border: none; border-bottom: 1px solid var(--line2); background: var(--card); padding: 12px 16px; display: flex; flex-direction: column; gap: 4px; cursor: pointer">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)">{{r.handle}} · found {{r.found}}</span>
+<span style="font-size: 14px; line-height: 1.35">{{r.short}}</span>
+</button>
+</sc-for>
+</div>
+</section>
+
+<section style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Capture</h2>
+<span style="font-size: 14px; color: var(--text2); line-height: 1.45">A screenshot, a screen recording or a thought from today’s build. Captures become build-log and tool-verdict posts.</span>
+<button onClick="{{goCapture}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; align-self: flex-start">Capture something</button>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{showPlanButton}}" hint-placeholder-val="{{ true }}">
+<button onClick="{{planNext}}" disabled="{{busy}}" style="min-height: 50px; border-radius: 12px; border: 1px solid var(--ink); background: transparent; font-size: 15px; font-weight: 600; cursor: pointer; opacity: {{busyOpacity}}">Plan the next post</button>
+</sc-if>
+<sc-if value="{{thinkingNext}}" hint-placeholder-val="{{ false }}">
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px"><dc-import name="Thinking" cmd="next" on-done="{{doneNext}}" hint-size="100%,150px"></dc-import></div>
+</sc-if>
+<sc-if value="{{proposalShown}}" hint-placeholder-val="{{ false }}">
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; border-color: var(--blue-line); padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 12px; color: var(--blue); font-weight: 600">Proposed</span><span style="font-size: 12px; font-weight: 600; color: var(--text2); background: var(--line2); padding: 4px 10px; border-radius: 999px">example</span></div>
+<div style="font-size: 17px; font-weight: 600">Build log: Claude, Codex and Grok reviewing the same plan</div>
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px">Tue 29 Sep · 22:00 · no experiment</div>
+<div style="font-size: 14px; color: var(--text2); line-height: 1.45">From your voice note and a reader’s question. First-hand material beats another list, and 22:00 is morning on the US east coast.</div>
+<button onClick="{{askAboutProposal}}" style="align-self: flex-start; display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px 0 10px; border-radius: 999px; border: 1px solid var(--chip-line); background: var(--chip-bg); font-size: 14px; font-weight: 500; cursor: pointer"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="10" fill="url(#te-orb)"></circle><path d="M8.3 9.5l7.2-1M8.2 10.5l3.1 5.2M15.7 9.6l-3.2 5.6" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round"></path><circle cx="8" cy="9.7" r="1.5" fill="#FFFFFF"></circle><circle cx="15.8" cy="8.6" r="1.5" fill="#FFFFFF"></circle><circle cx="12" cy="16.1" r="1.5" fill="#FFFFFF"></circle></svg>Ask Cortex about this</button>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<button onClick="{{acceptProposal}}" style="min-height: 52px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer; min-height: 48px; font-size: 15px">Accept</button>
+<button onClick="{{changeProposal}}" disabled="{{busy}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; opacity: {{busyOpacity}}">Pick another</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{proposalAccepted}}" hint-placeholder-val="{{ false }}">
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; display: flex; align-items: center; gap: 12px"><span style="color: var(--blue)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><div style="display: flex; flex-direction: column; gap: 2px"><span style="font-weight: 600; font-size: 14px">Planned: the build log</span><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">Tue 29 Sep · 22:00. It’s in Posts, ready to draft.</span></div></div>
+</sc-if>
+</section>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 18px">
+<sc-if value="{{isHomeCards}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 18px"><div style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h2 data-te-cards="1" tabindex="-1" style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 30px; scroll-margin-top: 24px">The cards · {{postTitle}}</h2>
+<sc-if value="{{stageApprove}}" hint-placeholder-val="{{ true }}"><span style="font-size: 12px; font-weight: 600; color: var(--amber); background: var(--amber-soft); padding: 4px 10px; border-radius: 999px; align-self: flex-start">Needs your approval</span></sc-if>
+<sc-if value="{{stageApprovedOnly}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 600; color: var(--blue); background: var(--blue-soft); padding: 4px 10px; border-radius: 999px; align-self: flex-start">Approved at {{approvedAt}}, as shown</span></sc-if>
+<sc-if value="{{stagePosted}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 600; color: var(--text2); background: var(--line2); padding: 4px 10px; border-radius: 999px; align-self: flex-start">Posted {{foundAt}}</span></sc-if>
+<sc-if value="{{editedAfter}}" hint-placeholder-val="{{ false }}"><div style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45">You changed a card after approving it, so approve again.</div></sc-if>
+<sc-if value="{{savedNote}}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size: 13.5px; color: var(--text2); background: var(--line2); border-radius: 14px; padding: 12px 14px; line-height: 1.45">Saved. Your edit is recorded as a preference, so the loop can learn from it.</div></sc-if>
+</div>
+
+<article aria-label="Card 1, as it will look on X" style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; gap: 10px; align-items: center">
+<div aria-hidden="true" style="width: 40px; height: 40px; border-radius: 50%; background: var(--btn); color: var(--on-btn); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 13px">EZ</div>
+<div style="display: flex; flex-direction: column"><span style="font-weight: 600; font-size: 15px">Exit Zero Code</span><span style="font-size: 13px; color: var(--muted)">@exitzerocode · {{whenCard}}</span></div>
+</div>
+<div style="display: flex; flex-direction: column; font-size: 15px; line-height: 1.4">
+<sc-for list="{{cardLines}}" as="cl" hint-placeholder-count="11">
+<div style="display: flex; flex-direction: column">
+<sc-if value="{{cl.foldBefore}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; gap: 8px; margin: 6px 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)"><span style="flex-grow: 1; border-top: 1px dashed var(--dash)"></span>Strangers stop here unless they tap Show more<span style="flex-grow: 1; border-top: 1px dashed var(--dash)"></span></div>
+</sc-if>
+<sc-if value="{{cl.isBlank}}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" style="height: 10px"></div></sc-if>
+<sc-if value="{{cl.isText}}" hint-placeholder-val="{{ true }}"><div style="opacity: {{cl.fade}}; white-space: pre-wrap">{{cl.text}}</div></sc-if>
+<sc-if value="{{cl.isSwap}}" hint-placeholder-val="{{ false }}"><button onClick="{{cl.open}}" style="text-align: left; opacity: {{cl.fade}}; background: {{cl.bg}}; border: none; border-radius: 6px; padding: 2px 4px; margin: 0 -4px; font-size: 15px; line-height: 1.4; cursor: pointer; text-decoration: underline; text-decoration-color: var(--dash); text-underline-offset: 3px">{{cl.text}}<span class="te-sr">, show the source</span></button></sc-if>
+</div>
+</sc-for>
+</div>
+<div style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{countColor}}; padding-top: 4px"><span>{{cardCount}} characters as X counts · your limit 600</span><span style="color: var(--muted)">Tap an underlined line for its source</span></div>
+</article>
+<button onClick="{{askAboutPost}}" style="align-self: flex-start; display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px 0 10px; border-radius: 999px; border: 1px solid var(--chip-line); background: var(--chip-bg); font-size: 14px; font-weight: 500; cursor: pointer"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="10" fill="url(#te-orb)"></circle><path d="M8.3 9.5l7.2-1M8.2 10.5l3.1 5.2M15.7 9.6l-3.2 5.6" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round"></path><circle cx="8" cy="9.7" r="1.5" fill="#FFFFFF"></circle><circle cx="15.8" cy="8.6" r="1.5" fill="#FFFFFF"></circle><circle cx="12" cy="16.1" r="1.5" fill="#FFFFFF"></circle></svg>Ask Cortex about this post</button>
+
+<section style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 12.5px; color: var(--muted); line-height: 1.4">Then, 10 to 20 minutes later, as a reply. Only people who open your post see this.</div>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 15px; line-height: 1.4"><span style="color: var(--blue)">@use_bruno</span> thanks for keeping API collections in plain files, and for shipping again this week.</div>
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)">95 characters as X counts · account checked 24 Sep</div>
+</div>
+</section>
+
+<sc-if value="{{stageApprove}}" hint-placeholder-val="{{ true }}">
+<section style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600; font-size: 16px">Approve both cards</h2>
+<div style="font-size: 14px; color: var(--text2); line-height: 1.45">Read them first. Change anything you want: edits before approving cost nothing, and they teach the loop what you prefer.</div>
+<button onClick="{{openEditor}}" disabled="{{editDisabled}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; opacity: {{editOpacity}}">Change something</button>
+<button onPointerDown="{{holdStart}}" onPointerUp="{{holdEnd}}" onPointerLeave="{{holdEnd}}" onPointerCancel="{{holdEnd}}" onLostPointerCapture="{{holdEnd}}" onBlur="{{holdEnd}}" onKeyDown="{{holdKeyDown}}" onKeyUp="{{holdKeyUp}}" aria-describedby="te-hold-help" style="position: relative; overflow: hidden; min-height: 54px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer; touch-action: none; user-select: none">
+<span style="position: absolute; left: 0; top: 0; bottom: 0; width: {{holdWidth}}; background: var(--hold-fill)"></span>
+<span style="position: relative; color: {{holdTextColor}}">{{holdLabel}}</span>
+</button>
+<span id="te-hold-help" style="font-size: 12.5px; color: var(--muted); line-height: 1.4">Press and hold for a second. With a keyboard, hold Space. Approving locks in the cards as shown; nothing is posted.</span>
+</section>
+</sc-if>
+<sc-if value="{{stageApprovedOnly}}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{isEarly}}" hint-placeholder-val="{{ true }}">
+<div style="font-size: 13.5px; color: var(--text2); background: var(--line2); border-radius: 14px; padding: 12px 14px; line-height: 1.45">{{earlyNote}}</div>
+<button onClick="{{startEarly}}" disabled="{{busy}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; opacity: {{busyOpacity}}">Start posting early anyway</button>
+</sc-if>
+<sc-if value="{{showStartHere}}" hint-placeholder-val="{{ false }}">
+<button onClick="{{startReady}}" disabled="{{busy}}" style="min-height: 52px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer; opacity: {{busyOpacity}}">Start posting</button>
+</sc-if>
+<sc-if value="{{showMoveHere}}" hint-placeholder-val="{{ false }}">
+<div style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45">The slot has passed. Your approval stays.</div>
+<button onClick="{{moveSlot}}" style="min-height: 52px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer">{{moveLabel}}</button>
+</sc-if>
+<button onClick="{{openEditor}}" disabled="{{editDisabled}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; opacity: {{editOpacity}}">Edit a card</button>
+</section>
+</sc-if>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{isHomeReady}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 16px"><div style="display: flex; flex-direction: column; gap: 16px">
+<h2 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 30px">Posting</h2>
+<sc-if value="{{readyRefused}}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45; display: flex; flex-direction: column; gap: 10px"><span style="font-weight: 600">The final check stopped this post.</span><sc-for list="{{refusedReasons}}" as="rr" hint-placeholder-count="1"><span>{{rr.t}}</span></sc-for><span>Change the card if it needs it, then read and approve again.</span><button onClick="{{reapprove}}" style="min-height: 52px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer; min-height: 48px; font-size: 15px">Read and approve again</button></div>
+</sc-if>
+<sc-if value="{{readyOk}}" hint-placeholder-val="{{ true }}">
+<div style="font-size: 14px; color: var(--text2); line-height: 1.45">The final checks passed. You press Post on X; nothing is posted for you.</div>
+<sc-if value="{{canBack}}" hint-placeholder-val="{{ true }}"><div style="display: flex; gap: 18px; flex-wrap: wrap"><button onClick="{{notNow}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; font-size: 13.5px">Not now</button><button onClick="{{withdraw}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; font-size: 13.5px">Withdraw approval</button></div></sc-if>
+<section aria-disabled="{{s1Off}}" style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; gap: 12px; align-items: center"><span style="width: 28px; height: 28px; border-radius: 50%; background: {{s1Badge}}; color: var(--on-btn); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px">1</span><h2 style="margin: 0; font-size: 15px; font-weight: 600; color: {{s1Head}}">Post the list</h2></div>
+<sc-if value="{{showCopy1}}" hint-placeholder-val="{{ true }}"><button onClick="{{copy1}}" style="min-height: 52px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer; min-height: 50px; font-size: 15px">Copy the post</button></sc-if>
+<sc-if value="{{copyFailed}}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45">Couldn’t copy it. Tap Copy again. Nothing old was left for you to paste by mistake.</div></sc-if>
+<sc-if value="{{copiedOk}}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size: 14px; color: var(--text2); line-height: 1.45">Copied. Check it starts “PAID → FREE / Finding free developer tools…” when you paste.</div></sc-if>
+<sc-if value="{{showCopyAgain}}" hint-placeholder-val="{{ false }}"><div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap"><button onClick="{{copy1}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer">Copy again</button><a href="https://x.com" target="_blank" rel="noopener" style="min-height: 44px; display: flex; align-items: center; font-size: 14px; font-weight: 600">Open X ↗</a></div></sc-if>
+<sc-if value="{{showPosted1}}" hint-placeholder-val="{{ false }}"><button onClick="{{postedIt}}" style="min-height: 52px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer; min-height: 50px; font-size: 15px">I’ve posted it</button></sc-if>
+<sc-if value="{{finding}}" hint-placeholder-val="{{ false }}"><dc-import name="Thinking" cmd="find" on-done="{{doneFind}}" hint-size="100%,90px"></dc-import></sc-if>
+<sc-if value="{{notFound}}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45; display: flex; flex-direction: column; gap: 8px"><span>Not on X yet. A new post can take a minute to show up.</span><div style="display: flex; gap: 10px; flex-wrap: wrap"><button onClick="{{postedIt}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer">Check again</button><button onClick="{{carryOn}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer">It’s up, carry on</button></div></div></sc-if>
+<sc-if value="{{posted1}}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size: 14px; color: var(--blue); font-weight: 600">{{foundText}}</div></sc-if>
+<sc-if value="{{foundDiff}}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45">It isn’t the same as the card you approved. Check it on X. If you changed it on purpose, the loop records the change as your edit.</div></sc-if>
+<sc-if value="{{foundTwice}}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45">Two posts on X match it. Delete the later one there; the loop counts the first.</div></sc-if>
+</section>
+<section aria-disabled="{{s2Off}}" style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; gap: 12px; align-items: center"><span style="width: 28px; height: 28px; border-radius: 50%; background: {{s2Badge}}; color: var(--on-btn); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px">2</span><h2 style="margin: 0; font-size: 15px; font-weight: 600; color: {{s2Head}}">Wait, and answer early replies</h2></div>
+<sc-if value="{{posted1}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 28px; font-weight: 500">{{waitText}}</span><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">until the shout-out window opens</span></div>
+<div style="height: 6px; border-radius: 3px; background: var(--line2); overflow: hidden"><div style="width: {{waitPct}}; height: 100%; background: var(--blue-fill)"></div></div>
+<div style="font-size: 13.5px; color: var(--text2); line-height: 1.45">Post the shout-out between {{winStart}} and {{winEnd}}. No replies yet; new ones show here.</div>
+<div style="display: flex; gap: 16px; flex-wrap: wrap"><button onClick="{{skipWait}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; font-size: 13px">Skip the wait (mock only)</button><button onClick="{{skipShout}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; font-size: 13px">Skip the shout-out</button></div>
+</sc-if>
+</section>
+<section aria-disabled="{{s3Off}}" style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; gap: 12px; align-items: center"><span style="width: 28px; height: 28px; border-radius: 50%; background: {{s3Badge}}; color: var(--on-btn); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px">3</span><h2 style="margin: 0; font-size: 15px; font-weight: 600; color: {{s3Head}}">Thank the maker</h2></div>
+<sc-if value="{{waitDone}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{nudgeSent}}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size: 13.5px; color: var(--text2)">Nudge sent at {{winStart}}: the window is open.</div></sc-if>
+<sc-if value="{{windowClosed}}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45">The window closed at {{winEnd}}. Post it now anyway, or skip it.</div></sc-if>
+<sc-if value="{{showCopy2}}" hint-placeholder-val="{{ true }}"><button onClick="{{copy2}}" style="min-height: 52px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer; min-height: 50px; font-size: 15px">Copy the shout-out</button></sc-if>
+<sc-if value="{{copy2Failed}}" hint-placeholder-val="{{ false }}"><div role="alert" style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45">Couldn’t copy the shout-out. Tap Copy the shout-out again. Nothing is recorded until it’s on X.</div><button onClick="{{skipShout}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; font-size: 13px">Skip the shout-out</button></sc-if>
+<sc-if value="{{copied2}}" hint-placeholder-val="{{ false }}"><div style="font-size: 14px; color: var(--text2)">Copied. Reply to your post with it.</div><a href="https://x.com/exitzerocode" target="_blank" rel="noopener" style="align-self: flex-start; min-height: 44px; display: flex; align-items: center; font-size: 14px; font-weight: 600">Open your post on X ↗</a><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">In the real app this opens the post itself.</span></sc-if>
+</sc-if>
+</section>
+<section aria-disabled="{{s4Off}}" style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; gap: 12px; align-items: center"><span style="width: 28px; height: 28px; border-radius: 50%; background: {{s4Badge}}; color: var(--on-btn); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px">4</span><h2 style="margin: 0; font-size: 15px; font-weight: 600; color: {{s4Head}}">Done</h2></div>
+<sc-if value="{{thinkingPosted}}" hint-placeholder-val="{{ false }}"><dc-import name="Thinking" cmd="{{recordCmd}}" on-done="{{doneRecord}}" hint-size="100%,110px"></dc-import>
+<button onClick="{{doneRecord}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; align-self: flex-start">Done</button><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">It records everything once it sees your shout-out. Tap Done if it doesn’t.</span></sc-if>
+</section>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{isPosts}}" hint-placeholder-val="{{ false }}">
+<div style="max-width: 820px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><span></span></div>
+<h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 36px; line-height: 1.05">Posts</h1>
+</div>
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Up next</h2>
+<button onClick="{{goPost}}" style="text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 6px; cursor: pointer">
+<span style="font-size: 16px; font-weight: 600">PAID → FREE: developer tools</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: var(--muted)">{{whenLabel}} · {{stageName}}</span>
+</button>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 15px; font-weight: 600">Also drafted</h2><span style="font-size: 12px; font-weight: 600; color: var(--text2); background: var(--line2); padding: 4px 10px; border-radius: 999px">example</span></div>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Tool verdict: one fix, three reviewers</span><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">From your voice note. This format opens on a hook you choose.</span></div>
+<sc-if value="{{hookNotSaved}}" hint-placeholder-val="{{ true }}"><button onClick="{{openHook}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; align-self: flex-start">Choose a hook</button></sc-if>
+<sc-if value="{{hookSaved}}" hint-placeholder-val="{{ false }}"><div style="display: flex; flex-direction: column; gap: 6px"><span style="font-size: 14px; line-height: 1.4">“{{hookChosen}}”</span><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">Hook chosen. Your pick is recorded as a preference.</span><button onClick="{{openHook}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; font-size: 13.5px">Change the hook</button></div></sc-if>
+</div>
+</section>
+<section style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">Capture</span><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">{{captureCount}} captures waiting to become posts</span></div>
+<button onClick="{{goCapture}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer">Open</button>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Queued</h2>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden">
+<sc-for list="{{queue}}" as="q" hint-placeholder-count="4">
+<div style="padding: 14px 16px; border-bottom: 1px solid var(--line2); display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 500">{{q.title}}</span><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">{{q.meta}}</span></div>
+<sc-if value="{{q.showDraft}}" hint-placeholder-val="{{ true }}"><button onClick="{{q.draft}}" disabled="{{busy}}" style="flex-shrink: 0; min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--ink); background: transparent; font-size: 14px; font-weight: 600; cursor: pointer; opacity: {{busyOpacity}}">Draft</button></sc-if>
+<sc-if value="{{q.isDrafted}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 600; color: var(--blue); background: var(--blue-soft); padding: 4px 10px; border-radius: 999px; flex-shrink: 0">Drafted · next in line</span></sc-if>
+</div>
+<sc-if value="{{q.isDrafting}}" hint-placeholder-val="{{ false }}"><dc-import name="Thinking" cmd="draft" fail="{{q.fail}}" fail-at="1" on-retry="{{q.retry}}" on-cancel="{{q.cancel}}" on-done="{{q.onDone}}" hint-size="100%,150px"></dc-import></sc-if>
+<sc-if value="{{q.factNote}}" hint-placeholder-val="{{ false }}"><div role="status" style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45">The fact-check couldn’t confirm one claim, so it’s left out of the cards. Its row in CLAIMS.md says why.</div></sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Posted</h2>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden">
+<sc-for list="{{postedList}}" as="p" hint-placeholder-count="11">
+<div style="padding: 12px 16px; border-bottom: 1px solid var(--line2); display: flex; flex-direction: column; gap: 2px">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span style="font-size: 14.5px; font-weight: 500">{{p.title}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); white-space: nowrap">{{p.whenShort}}</span></div>
+<span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">{{p.meta}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{isCapture}}" hint-placeholder-val="{{ false }}">
+<div style="max-width: 820px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<button onClick="{{goBackFromCapture}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; align-self: flex-start">‹ Back</button>
+<div style="display: flex; flex-direction: column; gap: 8px"><h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 36px; line-height: 1.05">Capture</h1><div style="font-size: 14px; color: var(--text2); line-height: 1.45">Keep what happens while you build. Your own screenshots, recordings and verdicts are what make a post first-hand.</div></div>
+<section style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div role="radiogroup" aria-label="Kind of capture" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{capKinds}}" as="ck" hint-placeholder-count="4"><button role="radio" aria-checked="{{ck.on}}" onClick="{{ck.pick}}" style="min-height: 48px; border-radius: 12px; border: 1px solid {{ck.border}}; background: {{ck.bg}}; font-size: 14px; font-weight: {{ck.weight}}; cursor: pointer">{{ck.label}}</button></sc-for>
+</div>
+<label for="te-cap" style="font-size: 13px; color: var(--text2)">What happened, in one line</label>
+<textarea id="te-cap" rows="3" value="{{capText}}" onChange="{{setCapText}}" placeholder="Codex and Claude disagreed on the fix; Grok broke the tie" style="border-radius: 12px; border: 1px solid var(--line); padding: 10px 12px; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; background: var(--raised); color: var(--ink); resize: vertical"></textarea>
+<button onClick="{{saveCapture}}" style="min-height: 52px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer; min-height: 48px; font-size: 15px">Save capture</button>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Captured</h2>
+<sc-for list="{{captures}}" as="cp" hint-placeholder-count="2">
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)"><span>{{cp.kind}}</span><span>{{cp.when}}</span></div>
+<div style="font-size: 15px; line-height: 1.4">{{cp.text}}</div>
+<sc-if value="{{cp.canTurn}}" hint-placeholder-val="{{ true }}"><button onClick="{{cp.turn}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; align-self: flex-start">Turn into a post</button></sc-if>
+<sc-if value="{{cp.turned}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 600; color: var(--blue); background: var(--blue-soft); padding: 4px 10px; border-radius: 999px; align-self: flex-start">Queued as a {{cp.format}}</span></sc-if>
+</div>
+</sc-for>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">From your readers</h2>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 15px; line-height: 1.4">A reader asked how Grok compares with Codex and Claude Code on big projects and tricky debugging.</div>
+<sc-if value="{{readerCanTurn}}" hint-placeholder-val="{{ true }}"><button onClick="{{turnReader}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; align-self: flex-start">Turn into a tool verdict</button></sc-if>
+<sc-if value="{{readerTurned}}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 600; color: var(--blue); background: var(--blue-soft); padding: 4px 10px; border-radius: 999px; align-self: flex-start">Queued as a tool verdict</span></sc-if>
+</div>
+</section>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{isReplies}}" hint-placeholder-val="{{ false }}">
+<div style="max-width: 880px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><span></span></div>
+<h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 36px; line-height: 1.05">Replies</h1>
+</div>
+<div style="font-size: 14px; color: var(--text2); line-height: 1.45">You write every reply. Nothing here is meant to be pasted. Names in this mock are placeholders.</div>
+<section style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 15px; font-weight: 600; font-size: 17px">Waiting for you</h2><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">replies to your posts</span></div>
+<sc-for list="{{waiting}}" as="wt" hint-placeholder-count="3">
+<sc-if value="{{wt.closed}}" hint-placeholder-val="{{ false }}"><div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px"><span style="font-size: 13.5px; color: var(--text2)"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px">{{wt.handle}}</span> · {{wt.status}}</span><button onClick="{{wt.undo}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; font-size: 13.5px">Undo</button></div></sc-if>
+<sc-if value="{{wt.open}}" hint-placeholder-val="{{ true }}">
+<article style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; border-color: var(--amber-line); padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--amber)"><span>{{wt.handle}} · {{wt.where}}</span><span style="white-space: nowrap; flex-shrink: 0">{{wt.age}}</span></div>
+<div style="font-size: 15px; line-height: 1.45">{{wt.said}}</div>
+<div style="background: var(--paper); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em">A point you could make</span><span style="font-size: 14px; line-height: 1.45">{{wt.point}}</span></div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+<a href="https://x.com" target="_blank" rel="noopener" style="min-height: 44px; display: flex; align-items: center; font-size: 14px; font-weight: 600; margin-right: 6px">Answer on X ↗</a>
+<button onClick="{{wt.answered}}" style="min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); font-size: 13.5px; font-weight: 600; cursor: pointer">Answered</button>
+<button onClick="{{wt.skip}}" style="min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); font-size: 13.5px; font-weight: 600; cursor: pointer">Not answering</button>
+</div>
+<button onClick="{{wt.ask}}" style="align-self: flex-start; display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px 0 10px; border-radius: 999px; border: 1px solid var(--chip-line); background: var(--chip-bg); font-size: 14px; font-weight: 500; cursor: pointer"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="10" fill="url(#te-orb)"></circle><path d="M8.3 9.5l7.2-1M8.2 10.5l3.1 5.2M15.7 9.6l-3.2 5.6" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round"></path><circle cx="8" cy="9.7" r="1.5" fill="#FFFFFF"></circle><circle cx="15.8" cy="8.6" r="1.5" fill="#FFFFFF"></circle><circle cx="12" cy="16.1" r="1.5" fill="#FFFFFF"></circle></svg>Ask Cortex about this reply</button>
+</article>
+</sc-if>
+</sc-for>
+<sc-if value="{{noWaiting}}" hint-placeholder-val="{{ false }}"><div style="font-size: 13.5px; color: var(--text2); background: var(--line2); border-radius: 14px; padding: 12px 14px; line-height: 1.45">Nobody’s waiting. You’re all caught up.</div></sc-if>
+<div style="border: 1px dashed var(--dash); border-radius: 14px; padding: 12px 14px; font-size: 13.5px; color: var(--text2); line-height: 1.45">Plus 37 greetings and connect requests this week. A like is enough; answering each one looks like spam to X. <span style="font-size: 12px; font-weight: 600; color: var(--text2); background: var(--line2); padding: 4px 10px; border-radius: 999px">example</span></div>
+</section>
+<section style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 15px; font-weight: 600; font-size: 17px">Builders</h2><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">people you’ve had a real exchange with</span></div>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 26px; font-weight: 600">2</span><span style="font-size: 13.5px; color: var(--text2); line-height: 1.45">mutuals on topic. When you and a builder follow each other, X ranks your posts higher for them: it weighs their chance of replying at 20 instead of 5 (A10).</span><span style="font-size: 12px; font-weight: 600; color: var(--text2); background: var(--line2); padding: 4px 10px; border-radius: 999px; align-self: flex-start">example</span></div>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden">
+<sc-for list="{{builders}}" as="b" hint-placeholder-count="4">
+<div style="padding: 12px 16px; border-bottom: 1px solid var(--line2); display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; justify-content: space-between; gap: 10px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500">{{b.handle}}</span><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">{{b.last}}</span></div>
+<span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">{{b.tags}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+<section style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 15px; font-weight: 600; font-size: 17px">Worth joining</h2><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">verified builders first</span></div>
+<sc-for list="{{replies}}" as="r" hint-placeholder-count="3">
+<article style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)"><span>{{r.handle}}</span><span>found {{r.found}} · {{r.kind}}</span></div>
+<div style="font-size: 15px; line-height: 1.4">{{r.what}}</div>
+<div style="background: var(--paper); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em">A point you could make</span><span style="font-size: 14px; line-height: 1.45">{{r.point}}</span></div>
+<a href="https://x.com" target="_blank" rel="noopener" style="align-self: flex-start; min-height: 44px; display: flex; align-items: center; font-size: 14px; font-weight: 500">Open on X ↗</a>
+</article>
+</sc-for>
+</section>
+<div style="font-size: 13.5px; color: var(--text2); background: var(--line2); border-radius: 14px; padding: 12px 14px; line-height: 1.45">Your busiest 24 hours (Wed to Thu) had 68 replies, and on 22 Sep one line went out 12 times. X’s reply scorer sees how many you sent in 24 hours (A12), and repeated lines can be flagged as spam (A13). Keep it to what you’d write by hand.</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{isResults}}" hint-placeholder-val="{{ false }}">
+<div style="max-width: 960px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted)">Results · week of 18–24 Sep</div></div>
+<h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 27px; line-height: 1.2"><span style="display: block">Every profile visit from an unboosted post came from one networking post.</span><span style="display: block; margin-top: 6px; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.4; color: var(--text2)">115 replies brought 14,220 views and 4 follows.</span></h1>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div role="tablist" aria-label="Results" onKeyDown="{{rtKey}}" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--seg); border-radius: 12px; padding: 3px; gap: 3px">
+<button role="tab" aria-selected="{{rtGrowth}}" aria-controls="te-rt-panel" tabindex="{{rtGrowthTi}}" onClick="{{rtGoGrowth}}" style="min-height: 44px; border: {{rtGrowthBorder}}; border-radius: 9px; background: {{rtGrowthBg}}; font-size: 14px; font-weight: {{rtGrowthWeight}}; cursor: pointer">Growth</button>
+<button role="tab" aria-selected="{{rtPosts}}" aria-controls="te-rt-panel" tabindex="{{rtPostsTi}}" onClick="{{rtGoPosts}}" style="min-height: 44px; border: {{rtPostsBorder}}; border-radius: 9px; background: {{rtPostsBg}}; font-size: 14px; font-weight: {{rtPostsWeight}}; cursor: pointer">Posts</button>
+<button role="tab" aria-selected="{{rtReplies}}" aria-controls="te-rt-panel" tabindex="{{rtRepliesTi}}" onClick="{{rtGoReplies}}" style="min-height: 44px; border: {{rtRepliesBorder}}; border-radius: 9px; background: {{rtRepliesBg}}; font-size: 14px; font-weight: {{rtRepliesWeight}}; cursor: pointer">Replies</button>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 10px">
+<div role="radiogroup" aria-label="Date range" style="display: flex; gap: 6px">
+<button role="radio" aria-checked="true" style="min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--ink); background: var(--btn); color: var(--on-btn); font-size: 13px; font-weight: 600; cursor: pointer">7 days</button>
+<button role="radio" aria-checked="false" disabled="{{ true }}" title="Data starts 20 Sep" style="min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--faint); font-size: 13px">30 days</button>
+<button role="radio" aria-checked="false" disabled="{{ true }}" title="Data starts 20 Sep" style="min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--faint); font-size: 13px">90 days</button>
+</div>
+<button onClick="{{toggleTable}}" style="min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--card); font-size: 13px; font-weight: 600; cursor: pointer">{{tableLabel}}</button>
+</div>
+<div style="font-size: 12.5px; color: var(--muted); line-height: 1.4">Data starts 20 Sep, so 30 and 90 days open up later.</div>
+</div>
+<div role="tabpanel" id="te-rt-panel" aria-label="{{rtPanelLabel}}" style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{kpis}}" as="k" hint-placeholder-count="4">
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: var(--muted)">{{k.label}}</span><span style="font-size: 24px; font-weight: 600; line-height: 1.15">{{k.value}}</span><span style="font-size: 12px; color: var(--muted); line-height: 1.35">{{k.sub}}</span></div>
+</sc-for>
+</div>
+
+<sc-if value="{{rtGrowth}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<section style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px"><h2 style="margin: 0; font-size: 15px; font-weight: 600">Where this week’s 19 follows came from</h2><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">from X’s export</span></div>
+<sc-if value="{{showChart}}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{followSrc}}" as="b" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 8px; align-items: center; min-height: 40px">
+<span style="font-size: 13px; line-height: 1.3">{{b.t}}</span>
+<span style="display: flex; align-items: center; gap: 6px; min-width: 0; border-left: 1px solid var(--axis); padding: 4px 0"><span style="height: 12px; width: {{b.pct}}; min-width: 2px; border-radius: 0 4px 4px 0; background: var(--chart-on); flex-shrink: 0"></span><span style="font-size: 12.5px; white-space: nowrap">{{b.label}}</span></span>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{showTable}}" hint-placeholder-val="{{ false }}"><table style="width: 100%; border-collapse: collapse; font-size: 13px"><thead><tr style="color: var(--muted)"><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: left">Source</th><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: right">Follows</th></tr></thead><tbody><sc-for list="{{followSrc}}" as="row" hint-placeholder-count="3"><tr style="border-top: 1px solid var(--line2)"><td style="padding: 6px 4px; text-align: left; font-variant-numeric: tabular-nums">{{row.t}}</td><td style="padding: 6px 4px; text-align: right; font-variant-numeric: tabular-nums">{{row.n}}</td></tr></sc-for></tbody></table></sc-if>
+</section>
+<section style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 15px; font-weight: 600">Followers over time</h2><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">daily count</span></div>
+<sc-if value="{{showChart}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; align-items: flex-end; gap: 10px; height: 110px; border-bottom: 1px solid var(--axis); padding-left: 8px"><div style="display: flex; flex-direction: column; align-items: center; gap: 4px"><span style="font-size: 12px; font-weight: 600">36</span><div style="width: 22px; height: 80px; background: var(--chart-on); border-radius: 4px 4px 0 0"></div></div><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4; padding-bottom: 8px">One daily count so far. A column is added each day from today.</span></div>
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)">Thu 24 Sep</div>
+</sc-if>
+<sc-if value="{{showTable}}" hint-placeholder-val="{{ false }}"><table style="width: 100%; border-collapse: collapse; font-size: 13px"><thead><tr style="color: var(--muted)"><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: left">Day</th><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: right">Followers</th></tr></thead><tbody><sc-for list="{{followerDays}}" as="row" hint-placeholder-count="3"><tr style="border-top: 1px solid var(--line2)"><td style="padding: 6px 4px; text-align: left; font-variant-numeric: tabular-nums">{{row.d}}</td><td style="padding: 6px 4px; text-align: right; font-variant-numeric: tabular-nums">{{row.n}}</td></tr></sc-for></tbody></table></sc-if>
+</section>
+</div>
+</sc-if>
+
+<sc-if value="{{rtPosts}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<section style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px"><h2 style="margin: 0; font-size: 15px; font-weight: 600">On topic, last 15 posts</h2><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">target 12</span></div>
+<sc-if value="{{showTable}}" hint-placeholder-val="{{ false }}"><table style="width: 100%; border-collapse: collapse; font-size: 13px"><thead><tr style="color: var(--muted)"><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: left">Post</th><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: left">On topic</th></tr></thead><tbody><sc-for list="{{shareRows}}" as="row" hint-placeholder-count="3"><tr style="border-top: 1px solid var(--line2)"><td style="padding: 6px 4px; text-align: left; font-variant-numeric: tabular-nums">{{row.n}}</td><td style="padding: 6px 4px; text-align: left; font-variant-numeric: tabular-nums">{{row.v}}</td></tr></sc-for></tbody></table></sc-if>
+<sc-if value="{{showChart}}" hint-placeholder-val="{{ true }}">
+<div aria-label="{{shareLabel}}" role="img" style="display: grid; grid-template-columns: repeat(15, minmax(0, 1fr)); gap: 4px">
+<sc-for list="{{shareSlots}}" as="sl" hint-placeholder-count="15"><div style="height: 22px; border-radius: 4px; background: {{sl.bg}}; border: {{sl.border}}; box-sizing: border-box"></div></sc-for>
+</div>
+<div style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--text2)"><span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 3px; background: var(--chart-on)"></span>On topic (5)</span><span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 3px; border: 1.5px solid var(--axis); box-sizing: border-box"></span>Off topic (6)</span><span style="display: flex; align-items: center; gap: 6px"><span style="width: 12px; height: 12px; border-radius: 3px; border: 1.5px dashed var(--dash); box-sizing: border-box"></span>Still to post (4)</span></div>
+</sc-if>
+<div style="font-size: 13px; color: var(--text2); line-height: 1.45">On topic: posts that fit your account’s promise, tech that’s useful to builders. The target is yours: X’s code tracks topic share over your last 15 posts (A8), and a penalty isn’t proven.</div>
+</section>
+<section style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px"><h2 style="margin: 0; font-size: 15px; font-weight: 600">Posts, by what they brought</h2><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">follows · visits · views</span></div>
+<sc-if value="{{showTable}}" hint-placeholder-val="{{ false }}"><table style="width: 100%; border-collapse: collapse; font-size: 13px"><thead><tr style="color: var(--muted)"><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: left">Post</th><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: right">Follows</th><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: right">Visits</th><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: right">Views</th><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: left">On topic</th></tr></thead><tbody><sc-for list="{{postRows}}" as="row" hint-placeholder-count="3"><tr style="border-top: 1px solid var(--line2)"><td style="padding: 6px 4px; text-align: left; font-variant-numeric: tabular-nums">{{row.t}}</td><td style="padding: 6px 4px; text-align: right; font-variant-numeric: tabular-nums">{{row.f}}</td><td style="padding: 6px 4px; text-align: right; font-variant-numeric: tabular-nums">{{row.v}}</td><td style="padding: 6px 4px; text-align: right; font-variant-numeric: tabular-nums">{{row.w}}</td><td style="padding: 6px 4px; text-align: left; font-variant-numeric: tabular-nums">{{row.topic}}</td></tr></sc-for></tbody></table></sc-if>
+<sc-if value="{{showChart}}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{rposts}}" as="rp" hint-placeholder-count="11">
+<div style="display: flex; flex-direction: column; padding: 8px 0; border-top: 1px solid var(--line2)">
+<div style="display: flex; justify-content: space-between; gap: 10px"><span style="font-size: 14px; font-weight: 500; line-height: 1.3">{{rp.title}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); white-space: nowrap">{{rp.when}}</span></div>
+<span style="font-size: 13px; color: var(--text2)">{{rp.label}}</span>
+</div>
+</sc-for>
+</sc-if>
+<div style="font-size: 12.5px; color: var(--muted); line-height: 1.4; padding-top: 6px">Charts come once there’s a month of data. The boosted post never counts as a win.</div>
+</section>
+</div>
+</sc-if>
+
+<sc-if value="{{rtReplies}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<section style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px"><h2 style="margin: 0; font-size: 15px; font-weight: 600">Replies that led somewhere</h2><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">profile visits · follows</span></div>
+<sc-if value="{{showChart}}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{rtopics}}" as="b" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 8px; align-items: center; min-height: 40px">
+<span style="font-size: 13px; line-height: 1.3">{{b.t}}</span>
+<span style="display: flex; align-items: center; gap: 6px; min-width: 0; border-left: 1px solid var(--axis); padding: 4px 0"><span style="height: 12px; width: {{b.pct}}; min-width: 2px; border-radius: 0 4px 4px 0; background: var(--chart-on); flex-shrink: 0"></span><span style="font-size: 12.5px; white-space: nowrap">{{b.label}}</span></span>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{showTable}}" hint-placeholder-val="{{ false }}"><table style="width: 100%; border-collapse: collapse; font-size: 13px"><thead><tr style="color: var(--muted)"><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: left">Topic</th><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: right">Visits</th><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: right">Follows</th><th scope="col" style="padding: 6px 4px; font-weight: 500; text-align: right">Views</th></tr></thead><tbody><sc-for list="{{rtopics}}" as="row" hint-placeholder-count="3"><tr style="border-top: 1px solid var(--line2)"><td style="padding: 6px 4px; text-align: left; font-variant-numeric: tabular-nums">{{row.t}}</td><td style="padding: 6px 4px; text-align: right; font-variant-numeric: tabular-nums">{{row.visits}}</td><td style="padding: 6px 4px; text-align: right; font-variant-numeric: tabular-nums">{{row.follows}}</td><td style="padding: 6px 4px; text-align: right; font-variant-numeric: tabular-nums">{{row.views}}</td></tr></sc-for></tbody></table></sc-if>
+</section>
+<div style="font-size: 13.5px; color: var(--text2); background: var(--line2); border-radius: 14px; padding: 12px 14px; line-height: 1.45">Reply views (14,220) don’t count toward X’s rewards; only your own posts do. Replies earn their keep through visits, follows and mutuals.</div>
+</div>
+</sc-if>
+</div>
+<button onClick="{{askAboutResults}}" style="align-self: flex-start; display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px 0 10px; border-radius: 999px; border: 1px solid var(--chip-line); background: var(--chip-bg); font-size: 14px; font-weight: 500; cursor: pointer"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="10" fill="url(#te-orb)"></circle><path d="M8.3 9.5l7.2-1M8.2 10.5l3.1 5.2M15.7 9.6l-3.2 5.6" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round"></path><circle cx="8" cy="9.7" r="1.5" fill="#FFFFFF"></circle><circle cx="15.8" cy="8.6" r="1.5" fill="#FFFFFF"></circle><circle cx="12" cy="16.1" r="1.5" fill="#FFFFFF"></circle></svg>Ask Cortex about these results</button>
+<sc-if value="{{showReviewButton}}" hint-placeholder-val="{{ true }}"><button onClick="{{writeReview}}" disabled="{{busy}}" style="min-height: 50px; border-radius: 12px; border: 1px solid var(--ink); background: transparent; font-size: 15px; font-weight: 600; cursor: pointer; opacity: {{busyOpacity}}">Write this week’s review</button></sc-if>
+<sc-if value="{{thinkingResults}}" hint-placeholder-val="{{ false }}"><div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px"><dc-import name="Thinking" cmd="results" ask="{{reviewAsk}}" ans-a="Use 24 Sep’s: 27 and 337" ans-b="Leave them out this week" on-done="{{doneReview}}" hint-size="100%,140px"></dc-import></div></sc-if>
+<sc-if value="{{reviewWritten}}" hint-placeholder-val="{{ false }}"><div role="status" style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 18px; display: flex; flex-direction: column; gap: 4px"><span style="font-weight: 600; font-size: 14px">Review written</span><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">The next one is due Thu 1 Oct, after your analytics export.</span></div></sc-if>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{isCortex}}" hint-placeholder-val="{{ false }}">
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 32px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 22px"><div style="display: flex; flex-direction: column; gap: 22px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted)">What your engine knows</div></div>
+<h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 36px; line-height: 1.05; font-size: 40px">Cortex</h1>
+<div style="font-size: 14px; color: var(--text2); line-height: 1.45">Set by you for now. Once experiments finish, it proposes changes and you decide.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{pipeline}}" as="pp" hint-placeholder-count="4"><div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; border-radius: 12px; padding: 10px 4px; display: flex; flex-direction: column; gap: 2px; align-items: center"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 500">{{pp.n}}</span><span style="font-size: 12px; color: var(--muted); text-align: center">{{pp.label}}</span></div></sc-for>
+</div>
+<div style="font-size: 12.5px; color: var(--muted); line-height: 1.4; text-align: center">Questions become experiments. Experiments become lessons. You apply a lesson to change a weight.</div>
+</div>
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Lessons</h2>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 15px; font-weight: 600">No lessons yet.</span><span style="font-size: 13.5px; color: var(--text2); line-height: 1.45">The first experiment can start around 8 Oct, once two weeks of organic numbers are in.</span></div>
+<div style="border: 1.5px dashed var(--dash); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--raised)">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em; color: var(--muted)">EXAMPLE OF A LESSON · NOT REAL DATA</span>
+<span style="font-size: 16px; font-weight: 600; line-height: 1.35">Three-card threads bring more people to your profile than long ones.</span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 500">24</span><div style="height: 6px; border-radius: 3px; background: var(--chart-on); width: 100%"></div><span style="font-size: 12.5px; color: var(--text2)">visits per 1,000 views, 3-card threads</span></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 500">11</span><div style="height: 6px; border-radius: 3px; background: var(--axis); width: 46%"></div><span style="font-size: 12.5px; color: var(--text2)">visits per 1,000 views, 7-card threads</span></div>
+</div>
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text2); line-height: 1.6">6 posts each · 20 Sep – 12 Oct<br>Bar set before the test: 1.5×. Result: 2.2×.<br>Proven 14 Oct</div>
+<div style="display: flex; gap: 10px; flex-wrap: wrap"><button disabled="{{ true }}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; opacity: 0.6">Apply to Post length</button><button disabled="{{ true }}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; opacity: 0.6">Undo</button></div>
+</div>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 15px; font-weight: 600">Weights</h2><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">the ones that matter most</span></div>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 2px 16px">
+<sc-for list="{{weights}}" as="w" hint-placeholder-count="5">
+<div style="padding: 12px 0; border-bottom: 1px solid var(--line2); display: flex; flex-direction: column; gap: 3px">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span style="font-size: 12.5px; color: var(--muted)">{{w.name}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); font-style: {{w.style}}; text-align: right">{{w.src}}</span></div>
+<span style="font-size: 14.5px; font-weight: 500; line-height: 1.35">{{w.value}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 15px; font-weight: 600">Guardrails</h2><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">never changed by Cortex or the loop</span></div>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{guardrails}}" as="g" hint-placeholder-count="6"><div style="display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 2px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg><span>{{g.text}}</span></div></sc-for>
+</div>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Experiments</h2>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px"><span style="font-size: 15px; font-weight: 600">None running</span><span style="font-size: 12px; font-weight: 600; color: var(--text2); background: var(--line2); padding: 4px 10px; border-radius: 999px">Paused until about 8 Oct</span></div>
+<span style="font-size: 13.5px; color: var(--text2); line-height: 1.45">Experiments need two weeks of organic numbers first. The daily read started on 24 Sep.</span>
+<div style="border-top: 1px solid var(--line2); padding-top: 12px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">Up next, in order</span>
+<sc-for list="{{nextExperiments}}" as="x" hint-placeholder-count="6">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; gap: 10px; font-size: 14px; line-height: 1.4"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); width: 14px; flex-shrink: 0; padding-top: 2px">{{x.n}}</span><span>{{x.text}}</span></div>
+<sc-if value="{{x.first}}" hint-placeholder-val="{{ false }}"><button onClick="{{queueFirst}}" disabled="{{queuedExp}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; align-self: flex-start; margin-left: 24px; min-height: 44px; font-size: 14px">{{queueLabel}}</button></sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Open questions</h2>
+<sc-for list="{{questions}}" as="oq" hint-placeholder-count="2"><div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 6px"><span style="font-size: 15px; font-weight: 600; line-height: 1.35">{{oq.t}}</span><span style="font-size: 13.5px; color: var(--text2); line-height: 1.45">{{oq.why}}</span></div></sc-for>
+</section>
+</div>
+</div>
+<aside aria-label="Ask Cortex" style="position: sticky; top: 0; height: 820px; box-sizing: border-box; border-radius: 24px; background: linear-gradient(180deg, var(--sheet-top) 0%, var(--sheet-mid) 45%, var(--paper) 100%); border: 1px solid var(--chip-line); display: flex; flex-direction: column; overflow: hidden">
+<div style="padding: 10px 18px 8px; display: flex; flex-direction: column; gap: 10px">
+
+<div style="display: flex; align-items: center; gap: 10px"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="10" fill="url(#te-orb)"></circle><path d="M8.3 9.5l7.2-1M8.2 10.5l3.1 5.2M15.7 9.6l-3.2 5.6" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round"></path><circle cx="8" cy="9.7" r="1.5" fill="#FFFFFF"></circle><circle cx="15.8" cy="8.6" r="1.5" fill="#FFFFFF"></circle><circle cx="12" cy="16.1" r="1.5" fill="#FFFFFF"></circle></svg><div style="display: flex; flex-direction: column; flex-grow: 1"><h2 style="margin: 0; font-size: 15px; font-weight: 600; font-size: 16px">Cortex</h2><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)">Claude</span></div></div>
+</div>
+<div style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; padding: 4px 18px 8px">
+<div role="log" aria-live="polite" aria-label="Conversation" style="display: flex; flex-direction: column; gap: 14px; --shimmer-hi: var(--shimmer-hi-sheet)">
+<sc-for list="{{chat}}" as="m" hint-placeholder-count="1">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-if value="{{m.isUser}}" hint-placeholder-val="{{ false }}"><div style="align-self: flex-end; max-width: 82%; background: var(--btn); color: var(--on-btn); border-radius: 18px 18px 4px 18px; padding: 10px 14px; font-size: 15px; line-height: 1.4">{{m.text}}</div></sc-if>
+<sc-if value="{{m.isBot}}" hint-placeholder-val="{{ true }}"><div style="display: flex; gap: 10px; align-items: flex-start"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="10" fill="url(#te-orb)"></circle><path d="M8.3 9.5l7.2-1M8.2 10.5l3.1 5.2M15.7 9.6l-3.2 5.6" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round"></path><circle cx="8" cy="9.7" r="1.5" fill="#FFFFFF"></circle><circle cx="15.8" cy="8.6" r="1.5" fill="#FFFFFF"></circle><circle cx="12" cy="16.1" r="1.5" fill="#FFFFFF"></circle></svg><div style="font-size: 15px; line-height: 1.5">{{m.text}}</div></div></sc-if>
+</div>
+</sc-for>
+<sc-if value="{{asking}}" hint-placeholder-val="{{ false }}"><dc-import name="Thinking" cmd="ask" on-done="{{doneAsk}}" hint-size="100%,110px"></dc-import></sc-if>
+</div>
+</div>
+<div style="padding: 8px 18px 26px; display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{hasContext}}" hint-placeholder-val="{{ false }}"><div style="align-self: flex-start; display: flex; align-items: center; gap: 4px; background: var(--card); border: 1px solid var(--chip-line); border-radius: 999px; padding: 0 0 0 12px; font-size: 13px; color: var(--text2)"><span>About: {{contextLabel}}</span><button onClick="{{clearContext}}" aria-label="Stop asking about this" style="width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div></sc-if>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 2px">
+<sc-for list="{{suggestions}}" as="sg" hint-placeholder-count="3"><button onClick="{{sg.ask}}" disabled="{{asking}}" style="flex-shrink: 0; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--chip-line); background: var(--chip-glass); font-size: 13.5px; cursor: pointer; text-align: left">{{sg.q}}</button></sc-for>
+</div>
+<div class="te-glow" style="border-radius: 999px"><div class="te-glass" style="min-height: 52px; border-radius: 999px; display: flex; align-items: center; gap: 10px; padding: 0 4px 0 16px"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="10" fill="url(#te-orb)"></circle><path d="M8.3 9.5l7.2-1M8.2 10.5l3.1 5.2M15.7 9.6l-3.2 5.6" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round"></path><circle cx="8" cy="9.7" r="1.5" fill="#FFFFFF"></circle><circle cx="15.8" cy="8.6" r="1.5" fill="#FFFFFF"></circle><circle cx="12" cy="16.1" r="1.5" fill="#FFFFFF"></circle></svg><input aria-label="Ask Cortex" enterkeyhint="send" value="{{typed}}" onChange="{{setTyped}}" onKeyDown="{{typedKey}}" placeholder="Ask Cortex…" style="flex-grow: 1; min-width: 0; height: 44px; border: none; background: transparent; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 16px; color: var(--ink)"><button onClick="{{sendTyped}}" aria-label="Send" style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; border: none; background: var(--btn); color: var(--on-btn); display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button></div></div>
+<div style="font-size: 12.5px; color: var(--muted); line-height: 1.4; text-align: center">Cortex answers and suggests. Every change is a button you press yourself.</div>
+</div>
+</aside>
+</div>
+</sc-if>
+</main>
+<sc-if value="{{hasSource}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center">
+<div onClick="{{closeSource}}" aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: var(--scrim); cursor: pointer"></div>
+<div role="dialog" aria-modal="true" aria-label="Source" onKeyDown="{{sheetKey}}" class="te-sheet-in" style="position: relative; width: 540px; max-height: 820px; overflow-y: auto; border-radius: 22px; background: var(--raised); display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(23, 22, 15, 0.25)">
+<div style="padding: 12px 22px 30px; display: flex; flex-direction: column; gap: 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.5">
+
+<div style="display: flex; justify-content: space-between; font-size: 12px; letter-spacing: 0.08em; color: var(--muted)"><span>SOURCE · SWAP {{src.n}} OF 3</span><span>CHECKED 24 SEP</span></div>
+<h2 style="margin: 0; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 18px; font-weight: 600">{{src.paid}} → {{src.free}}</h2>
+<div style="border-top: 1px dashed var(--dash)"></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; letter-spacing: 0.08em; color: var(--muted)">PAID SIDE</span><span>{{src.paidFact}}</span><span style="color: var(--blue)">{{src.paidSrc}}</span></div>
+<div style="border-top: 1px dashed var(--dash)"></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; letter-spacing: 0.08em; color: var(--muted)">FREE SIDE · THE VENDOR’S OWN WORDS</span><span>{{src.quote}}</span><span style="color: var(--blue)">{{src.freeSrc}}</span></div>
+<div style="border-top: 1px dashed var(--dash)"></div>
+<div style="display: flex; flex-direction: column; gap: 4px"><span style="font-size: 12px; letter-spacing: 0.08em; color: var(--muted)">IF SOMEONE PUSHES BACK</span><span>{{src.limit}}</span></div>
+<button onClick="{{closeSource}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'IBM Plex Sans', system-ui, sans-serif">Done</button>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{editorOpen}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center">
+<div onClick="{{closeEditor}}" aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: var(--scrim); cursor: pointer"></div>
+<div role="dialog" aria-modal="true" aria-label="Change something" onKeyDown="{{sheetKey}}" class="te-sheet-in" style="position: relative; width: 640px; max-height: 820px; overflow-y: auto; border-radius: 22px; background: var(--raised); display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(23, 22, 15, 0.25)">
+<div style="padding: 12px 20px 28px; display: flex; flex-direction: column; gap: 14px">
+
+<div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 15px; font-weight: 600; font-size: 17px">Change something</h2><button onClick="{{cancelEdit}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left">Cancel</button></div>
+<sc-if value="{{draftPending}}" hint-placeholder-val="{{ false }}"><div style="font-size: 13.5px; color: var(--text2); background: var(--line2); border-radius: 14px; padding: 12px 14px; line-height: 1.45; display: flex; justify-content: space-between; align-items: center; gap: 10px"><span>Your unsaved changes are still here.</span><button onClick="{{discardDraft}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; font-size: 13.5px">Discard them</button></div></sc-if>
+<sc-if value="{{editClearsApproval}}" hint-placeholder-val="{{ false }}"><div style="font-size: 14px; color: var(--amber); background: var(--amber-soft); border-radius: 14px; padding: 12px 14px; line-height: 1.45">Saving clears the approval. You’ll read and approve again.</div></sc-if>
+<label for="te-card" style="font-size: 13px; color: var(--text2)">Card 1</label>
+<textarea id="te-card" rows="12" value="{{draftText}}" onChange="{{setDraftText}}" style="border-radius: 12px; border: 1px solid var(--line); padding: 10px 12px; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; line-height: 1.4; background: var(--card); color: var(--ink); resize: vertical"></textarea>
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{draftCountColor}}">{{draftCount}} characters as X counts · your limit 600</div>
+<div style="font-size: 13.5px; color: var(--text2); background: var(--line2); border-radius: 14px; padding: 12px 14px; line-height: 1.45">This format has a fixed header, so there’s no hook to choose. Other formats offer two or three hooks here.</div>
+<label for="te-take" style="font-size: 13px; color: var(--text2)">Your take, in one line (optional, added under the list)</label>
+<input id="te-take" value="{{takeText}}" onChange="{{setTakeText}}" placeholder="I moved my own collections to Bruno last month" style="min-height: 46px; border-radius: 12px; border: 1px solid var(--line); padding: 0 12px; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; background: var(--card); color: var(--ink)">
+<div style="font-size: 12.5px; color: var(--muted); line-height: 1.4">Every claim still goes through the fact-check, and the final check still applies.</div>
+<button onClick="{{saveEdit}}" style="min-height: 52px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer">Save changes</button>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{hookOpen}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center">
+<div onClick="{{closeHook}}" aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: var(--scrim); cursor: pointer"></div>
+<div role="dialog" aria-modal="true" aria-label="Choose a hook" onKeyDown="{{sheetKey}}" class="te-sheet-in" style="position: relative; width: 560px; max-height: 820px; overflow-y: auto; border-radius: 22px; background: var(--raised); display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(23, 22, 15, 0.25)">
+<div style="padding: 12px 20px 28px; display: flex; flex-direction: column; gap: 14px">
+
+<div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 15px; font-weight: 600; font-size: 17px">Choose a hook</h2><button onClick="{{closeHook}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left">Cancel</button></div>
+<div style="font-size: 14px; color: var(--text2); line-height: 1.45">Strangers see the opening first. Pick the one that sounds like you; the rest of the card stays as drafted. <span style="font-size: 12px; font-weight: 600; color: var(--text2); background: var(--line2); padding: 4px 10px; border-radius: 999px">example</span></div>
+<div role="radiogroup" aria-label="Hooks" style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{hooks}}" as="hk" hint-placeholder-count="3"><button role="radio" aria-checked="{{hk.on}}" onClick="{{hk.pick}}" style="text-align: left; min-height: 56px; padding: 10px 14px; border-radius: 12px; border: 1.5px solid {{hk.border}}; background: {{hk.bg}}; cursor: pointer; display: flex; flex-direction: column; gap: 4px"><span style="font-size: 15px; line-height: 1.4">{{hk.text}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)">{{hk.count}} characters as X counts</span></button></sc-for>
+</div>
+<label for="te-hook-take" style="font-size: 13px; color: var(--text2)">Your take, in one line (optional)</label>
+<input id="te-hook-take" value="{{hookTake}}" onChange="{{setHookTake}}" placeholder="Two reviewers beat one, when they disagree for a reason" style="min-height: 46px; border-radius: 12px; border: 1px solid var(--line); padding: 0 12px; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 15px; background: var(--card); color: var(--ink)">
+<div style="font-size: 12.5px; color: var(--muted); line-height: 1.4">Your pick is recorded as a preference, so the loop can learn which openings you choose.</div>
+<button onClick="{{saveHook}}" style="min-height: 52px; border-radius: 12px; border: none; background: var(--btn); color: var(--on-btn); font-size: 16px; font-weight: 600; cursor: pointer">Use this hook</button>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{showDrawer}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; justify-content: flex-end">
+<div onClick="{{closeChat}}" aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: var(--scrim); cursor: pointer"></div>
+<div role="dialog" aria-modal="true" aria-label="Ask Cortex" onKeyDown="{{sheetKey}}" class="te-sheet-in" style="position: relative; width: 440px; height: 100%; background: linear-gradient(180deg, var(--sheet-top) 0%, var(--sheet-mid) 45%, var(--paper) 100%); display: flex; flex-direction: column; box-shadow: -12px 0 40px rgba(120, 60, 160, 0.16)">
+<div style="padding: 10px 18px 8px; display: flex; flex-direction: column; gap: 10px">
+
+<div style="display: flex; align-items: center; gap: 10px"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="10" fill="url(#te-orb)"></circle><path d="M8.3 9.5l7.2-1M8.2 10.5l3.1 5.2M15.7 9.6l-3.2 5.6" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round"></path><circle cx="8" cy="9.7" r="1.5" fill="#FFFFFF"></circle><circle cx="15.8" cy="8.6" r="1.5" fill="#FFFFFF"></circle><circle cx="12" cy="16.1" r="1.5" fill="#FFFFFF"></circle></svg><div style="display: flex; flex-direction: column; flex-grow: 1"><h2 style="margin: 0; font-size: 15px; font-weight: 600; font-size: 16px">Cortex</h2><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted)">Claude</span></div><button onClick="{{closeChat}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; font-size: 15px; font-weight: 600">Done</button></div>
+</div>
+<div style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column-reverse; padding: 4px 18px 8px">
+<div role="log" aria-live="polite" aria-label="Conversation" style="display: flex; flex-direction: column; gap: 14px; --shimmer-hi: var(--shimmer-hi-sheet)">
+<sc-for list="{{chat}}" as="m" hint-placeholder-count="1">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-if value="{{m.isUser}}" hint-placeholder-val="{{ false }}"><div style="align-self: flex-end; max-width: 82%; background: var(--btn); color: var(--on-btn); border-radius: 18px 18px 4px 18px; padding: 10px 14px; font-size: 15px; line-height: 1.4">{{m.text}}</div></sc-if>
+<sc-if value="{{m.isBot}}" hint-placeholder-val="{{ true }}"><div style="display: flex; gap: 10px; align-items: flex-start"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="10" fill="url(#te-orb)"></circle><path d="M8.3 9.5l7.2-1M8.2 10.5l3.1 5.2M15.7 9.6l-3.2 5.6" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round"></path><circle cx="8" cy="9.7" r="1.5" fill="#FFFFFF"></circle><circle cx="15.8" cy="8.6" r="1.5" fill="#FFFFFF"></circle><circle cx="12" cy="16.1" r="1.5" fill="#FFFFFF"></circle></svg><div style="font-size: 15px; line-height: 1.5">{{m.text}}</div></div></sc-if>
+</div>
+</sc-for>
+<sc-if value="{{asking}}" hint-placeholder-val="{{ false }}"><dc-import name="Thinking" cmd="ask" on-done="{{doneAsk}}" hint-size="100%,110px"></dc-import></sc-if>
+</div>
+</div>
+<div style="padding: 8px 18px 26px; display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{hasContext}}" hint-placeholder-val="{{ false }}"><div style="align-self: flex-start; display: flex; align-items: center; gap: 4px; background: var(--card); border: 1px solid var(--chip-line); border-radius: 999px; padding: 0 0 0 12px; font-size: 13px; color: var(--text2)"><span>About: {{contextLabel}}</span><button onClick="{{clearContext}}" aria-label="Stop asking about this" style="width: 44px; height: 44px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div></sc-if>
+<div style="display: flex; gap: 8px; flex-wrap: wrap; padding-bottom: 2px">
+<sc-for list="{{suggestions}}" as="sg" hint-placeholder-count="3"><button onClick="{{sg.ask}}" disabled="{{asking}}" style="flex-shrink: 0; min-height: 44px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--chip-line); background: var(--chip-glass); font-size: 13.5px; cursor: pointer; text-align: left">{{sg.q}}</button></sc-for>
+</div>
+<div class="te-glow" style="border-radius: 999px"><div class="te-glass" style="min-height: 52px; border-radius: 999px; display: flex; align-items: center; gap: 10px; padding: 0 4px 0 16px"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink: 0"><circle cx="12" cy="12" r="10" fill="url(#te-orb)"></circle><path d="M8.3 9.5l7.2-1M8.2 10.5l3.1 5.2M15.7 9.6l-3.2 5.6" stroke="#FFFFFF" stroke-width="1.3" stroke-linecap="round"></path><circle cx="8" cy="9.7" r="1.5" fill="#FFFFFF"></circle><circle cx="15.8" cy="8.6" r="1.5" fill="#FFFFFF"></circle><circle cx="12" cy="16.1" r="1.5" fill="#FFFFFF"></circle></svg><input aria-label="Ask Cortex" enterkeyhint="send" value="{{typed}}" onChange="{{setTyped}}" onKeyDown="{{typedKey}}" placeholder="Ask Cortex…" style="flex-grow: 1; min-width: 0; height: 44px; border: none; background: transparent; font-family: 'IBM Plex Sans', system-ui, sans-serif; font-size: 16px; color: var(--ink)"><button onClick="{{sendTyped}}" aria-label="Send" style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; border: none; background: var(--btn); color: var(--on-btn); display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"></path></svg></button></div></div>
+<div style="font-size: 12.5px; color: var(--muted); line-height: 1.4; text-align: center">Cortex answers and suggests. Every change is a button you press yourself.</div>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{settingsOpen}}" hint-placeholder-val="{{ false }}">
+<div onClick="{{closeSettings}}" aria-hidden="true" style="position: absolute; left: 0; top: 0; right: 0; bottom: 0"></div>
+<div role="dialog" aria-modal="true" aria-label="Settings and health" onKeyDown="{{sheetKey}}" class="te-sheet-in" style="position: absolute; left: 16px; bottom: 80px; width: 400px; max-height: 780px; overflow-y: auto; box-sizing: border-box; background: var(--raised); border: 1px solid var(--line); border-radius: 20px; display: flex; flex-direction: column; box-shadow: 0 18px 50px rgba(23, 22, 15, 0.18)">
+<div style="padding: 12px 20px 28px; display: flex; flex-direction: column; gap: 18px">
+
+<div style="display: flex; align-items: center; gap: 12px">
+<div aria-hidden="true" style="width: 52px; height: 52px; border-radius: 50%; background: var(--btn); color: var(--on-btn); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 15px">EZ</div>
+<div style="display: flex; flex-direction: column; flex-grow: 1"><h2 style="margin: 0; font-size: 15px; font-weight: 600; font-size: 17px">Exit Zero Code</h2><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: var(--muted)">@exitzerocode · 36 followers</span></div>
+
+<button onClick="{{closeSettings}}" style="min-height: 44px; border: none; background: none; padding: 0; color: var(--blue); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; font-size: 15px; font-weight: 600; padding: 0 4px">Done</button>
+</div>
+<sc-for list="{{settingsGroups}}" as="sgp" hint-placeholder-count="3">
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">{{sgp.title}}</h3>
+<div style="background: var(--card); border: 1px solid var(--line); border-radius: 18px; border-radius: 16px; padding: 0 14px">
+<sc-for list="{{sgp.rows}}" as="row" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line2)">
+<div style="display: flex; align-items: center; gap: 10px"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{row.dot}}; flex-shrink: 0"></span><div style="display: flex; flex-direction: column; gap: 1px"><span style="font-size: 14.5px">{{row.name}}</span><span style="font-size: 12.5px; color: var(--muted); line-height: 1.4">{{row.sub}}</span></div></div>
+<sc-if value="{{row.notToggle}}" hint-placeholder-val="{{ true }}"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; text-align: right">{{row.value}}</span></sc-if>
+<sc-if value="{{row.isToggle}}" hint-placeholder-val="{{ false }}"><button role="switch" aria-checked="{{row.on}}" aria-label="{{row.name}}" onClick="{{row.flip}}" style="flex-shrink: 0; position: relative; width: 48px; height: 30px; border-radius: 15px; border: none; background: {{row.track}}; cursor: pointer; padding: 0"><span aria-hidden="true" style="position: absolute; top: 2px; left: {{row.knob}}; width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25)"></span></button></sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h3 style="margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted)">Appearance</h3>
+<div role="radiogroup" aria-label="Appearance" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--seg); border-radius: 12px; padding: 3px; gap: 3px">
+<button role="radio" aria-checked="{{thIsLight}}" onClick="{{thIsLightGo}}" style="min-height: 44px; border: {{thIsLightBorder}}; border-radius: 9px; background: {{thIsLightBg}}; font-size: 13.5px; font-weight: {{thIsLightWeight}}; cursor: pointer">Light</button>
+<button role="radio" aria-checked="{{thIsDark}}" onClick="{{thIsDarkGo}}" style="min-height: 44px; border: {{thIsDarkBorder}}; border-radius: 9px; background: {{thIsDarkBg}}; font-size: 13.5px; font-weight: {{thIsDarkWeight}}; cursor: pointer">Dark</button>
+<button role="radio" aria-checked="{{thIsSystem}}" onClick="{{thIsSystemGo}}" style="min-height: 44px; border: {{thIsSystemBorder}}; border-radius: 9px; background: {{thIsSystemBg}}; font-size: 13.5px; font-weight: {{thIsSystemWeight}}; cursor: pointer">Match Mac</button>
+</div>
+</section>
+<sc-if value="{{healthBad}}" hint-placeholder-val="{{ false }}"><button onClick="{{fixHealth}}" style="min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); font-size: 15px; font-weight: 600; cursor: pointer">Run the daily check now</button></sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"health":{"editor":"enum","options":["ok","failed"],"default":"ok"},"find":{"editor":"enum","options":["found","notfound","differs","twice"],"default":"found"},"gate":{"editor":"enum","options":["ok","refused"],"default":"ok"},"draft":{"editor":"enum","options":["ok","factcheck","error"],"default":"ok"},"$preview":{"width":1440,"height":900}}'>
+const DEVICE = 'mac';
+const SWAPS = [
+  { paid: 'Postman Team', free: 'Bruno',
+    paidFact: 'Team is US$19 a user a month, billed yearly. Postman’s free plan is one user.', paidSrc: 'postman.com/pricing',
+    quote: '“Your collections are plain-text files in your repo.” “No account. No login.”', freeSrc: 'usebruno.com',
+    limit: 'The Git buttons inside Bruno are paid (Pro, US$6 a user a month). The files themselves work with any Git client.' },
+  { paid: 'Navicat Premium', free: 'Beekeeper Studio',
+    paidFact: 'Sold as a per-user licence. Navicat Premium Lite is the free edition.', paidSrc: 'navicat.com/store',
+    quote: '“100% free to use.” The community edition connects to PostgreSQL, MySQL, SQLite and more.', freeSrc: 'beekeeperstudio.io/pricing',
+    limit: 'Oracle, MongoDB and Snowflake need a paid tier.' },
+  { paid: 'ngrok Pay-as-you-go', free: 'Cloudflare Tunnel',
+    paidFact: 'Your own domain starts at Pay-as-you-go: US$20 a month plus usage.', paidSrc: 'ngrok.com/pricing',
+    quote: '“Available on all plans.” An outbound-only connection, with no open inbound ports.', freeSrc: 'developers.cloudflare.com/tunnel',
+    limit: 'You need a domain added to Cloudflare first. The tunnel itself is free.' }
+];
+const CARD1 = 'PAID → FREE\nFinding free developer tools that actually hold up.\n\nPostman Team → Bruno\n▷ API collections as plain-text files in your repo. No account.\n\nNavicat Premium → Beekeeper Studio\n▷ One SQL editor for Postgres, MySQL and SQLite.\n\nngrok Pay-as-you-go → Cloudflare Tunnel\n▷ Localhost on your own domain. No open ports.';
+const CARD2 = '@use_bruno thanks for keeping API collections in plain files, and for shipping again this week.';
+// Placeholder names: dots make them impossible X handles, so no real account is shown.
+const REPLIES = [
+  { handle: '@builder.one', found: '05:40', kind: 'builder, verified', short: 'Day 8: agents passing the same task back and forth burned a Codex reset in 12 hours.',
+    what: 'Build in public, day 8: their agents kept handing the same task to each other and burned through a Codex reset in 12 hours.',
+    point: 'Ask what the loop looked like, and say how you avoid it: one agent writes, the other two only review.' },
+  { handle: '@lab.notes', found: '05:40', kind: 'AI news', short: 'Released 30,000 logs from the OpenAI agent hack.',
+    what: 'Released more than 30,000 logs from the OpenAI agent hack, including attempts on other targets.',
+    point: 'The builder’s side of it: what you let your own agents touch, and what they can never write.' },
+  { handle: '@aus.indie', found: '05:40', kind: 'builder, not yet a mutual', short: 'Found NDIS provider sites leaking personal data and reported it.',
+    what: 'An Australian indie developer found NDIS provider websites leaking personal data, and reported it.',
+    point: 'Ask how long it took anyone to respond, and whether there was anywhere proper to report it.' }
+];
+const WAITING = [
+  { id: 'w1', handle: '@sec.minded', where: 'on your breach reply', age: '8 h', said: 'Says model tests alone miss the breach path: red-team what an agent can reach, what it can do, whether attempts show in the logs, and who responds.',
+    point: 'Agree, and add the part people skip: who actually picks up when an alert fires at 3 am.' },
+  { id: 'w2', handle: '@pixel.tools', where: 'on PAID → FREE: creator tools', age: '14 h', said: 'Suggests another browser photo editor for the Photoshop row: layers, masks, and it opens PSDs.',
+    point: 'Thank them, and say it gets checked on its own site before it’s ever listed.' },
+  { id: 'w3', handle: '@ship.daily', where: 'on your reply to a builder', age: '1 d', said: 'Asked what caught your eye about their project, and said they’d write up a proper explanation.',
+    point: 'Answer the question after a real look at the site. One specific thing beats “looks great”.' }
+];
+const BUILDERS = [
+  { handle: '@sec.minded', tags: 'verified · follows you · you follow · on topic', last: 'yesterday' },
+  { handle: '@ship.daily', tags: 'verified · follows you · you follow · on topic', last: '2 days ago' },
+  { handle: '@builder.one', tags: 'verified · you follow · not following you yet', last: '3 days ago' },
+  { handle: '@aus.indie', tags: 'follows you · you don’t follow yet', last: '4 days ago' }
+];
+const QUEUE = [
+  { id: 'local-ai', title: 'PAID → FREE: local AI', meta: 'Ollama, Cline' },
+  { id: 'productivity', title: 'PAID → FREE: productivity', meta: 'Obsidian, OnlyOffice' },
+  { id: 'privacy', title: 'PAID → FREE: privacy', meta: 'Bitwarden, AdGuard Home' },
+  { id: 'storage', title: 'PAID → FREE: storage', meta: 'Syncthing, Nextcloud' }
+];
+const RPOSTS = [
+  { when: 'Tue 22', title: 'Connect post (retired format)', lane: 'other', views: 856, visits: 20, follows: 13 },
+  { when: 'Sun 20', title: 'Home Wi-Fi', lane: 'main', views: 285, visits: 0, follows: 1 },
+  { when: 'Tue 22', title: 'MacBook battery', lane: 'main', views: 151, visits: 0, follows: 1 },
+  { when: 'Wed 23', title: 'PAID → FREE: creator tools (boosted)', lane: 'other', views: 99, visits: 1, follows: 0, boosted: true },
+  { when: 'Tue 22', title: 'iPhone 18 Pro vs 17 Pro', lane: 'main', views: 509, visits: 0, follows: 0 },
+  { when: 'Wed 23', title: 'Quote: RLHF', lane: 'other', views: 217, visits: 0, follows: 0 },
+  { when: 'Mon 21', title: 'iPhone camera', lane: 'main', views: 137, visits: 0, follows: 0 },
+  { when: 'Wed 23', title: 'Prompt vs finish', lane: 'main', views: 54, visits: 0, follows: 0 },
+  { when: 'Thu 24', title: 'Quote: Albanese', lane: 'other', views: 15, visits: 0, follows: 0 },
+  { when: 'Thu 24', title: 'OpenAI breach take', lane: 'other', views: 4, visits: 0, follows: 0 },
+  { when: 'Thu 24', title: 'Connect post 2 (retired format)', lane: 'other', views: 2, visits: 0, follows: 0 }
+];
+// Last 11 originals in posting order, for the on-topic share (5 on, 6 off).
+const SHARE = ['main', 'main', 'main', 'other', 'main', 'other', 'main', 'other', 'other', 'other', 'other'];
+const RTOPICS = [
+  { t: 'Australian government breach', visits: 15, follows: 1, views: 6680 },
+  { t: 'Networking and intros', visits: 10, follows: 3, views: 736 },
+  { t: 'Quick answers to question posts', visits: 7, follows: 0, views: 6102 },
+  { t: 'Builder conversations', visits: 1, follows: 0, views: 702 }
+];
+const FOLLOW_SRC = [{ t: 'Connect post', n: 13 }, { t: 'Replies', n: 4 }, { t: 'Thread cards', n: 2 }];
+const KPIS = {
+  growth: [
+    { label: 'Verified followers', value: '27', sub: 'of the 500 X’s rewards need' },
+    { label: 'New follows', value: '19', sub: 'this week, from X’s export' },
+    { label: 'Followers', value: '36', sub: 'first daily count, 24 Sep' },
+    { label: 'Follows per visit', value: '1 in 3', sub: '19 from 58 visits (posts 21 with the boosted one, thread cards 4, replies 33)' }
+  ],
+  posts: [
+    { label: 'New follows', value: '15', sub: 'posts 13, their thread cards 2' },
+    { label: 'Profile visits', value: '20', sub: 'boosted post left out' },
+    { label: 'Views', value: '2,230', sub: 'organic, boosted post left out' },
+    { label: 'Visits per 1,000 views', value: '9.0', sub: 'posts only' }
+  ],
+  replies: [
+    { label: 'Profile visits', value: '33', sub: 'from 115 replies' },
+    { label: 'New follows', value: '4', sub: 'from X’s export' },
+    { label: 'Mutuals on topic', value: '2', sub: 'example' },
+    { label: 'Replies', value: '115', sub: '21–24 Sep' }
+  ]
+};
+const WEIGHTS = [
+  { name: 'Opening', value: 'Settings posts: the result goes in the first sentence', src: 'Starting rule · format skills' },
+  { name: 'Daily limit', value: 'At most 2 originals, hours apart', src: 'Starting rule · format skills' },
+  { name: 'Series pace', value: 'PAID → FREE every other day', src: 'Starting rule · your plan, 24 Sep' },
+  { name: 'Posting slots', value: '22:00–23:00 or 05:00–07:00, Tue night to Fri morning', src: 'A guess; the US-overlap test checks it', guess: true },
+  { name: 'On topic means', value: 'Tech that’s useful to builders; tech broadly, for now', src: 'Yours to set, never the loop’s' }
+];
+const GUARDRAILS = [
+  'Only you approve a post.',
+  'Nothing is posted, scheduled or sent to X for you.',
+  'Every figure is sourced in the same session.',
+  'A fact-check that can’t confirm a claim leaves it out.',
+  'The final checks keep every refusal, including the 600-character cap on the first post of settings, single-tip, build-log, tool-verdict and PAID → FREE posts.',
+  'Lessons change things only when you apply them.'
+];
+const NEXT_EXPERIMENTS = [
+  'A single post against a thread',
+  'A 3-card thread against the long ones',
+  'US-overlap hours against daytime Brisbane',
+  'A first post under 280 characters against 500–600',
+  'Five replies on a posting day against none',
+  'One PAID → FREE category against another'
+];
+const QUESTIONS = [
+  { t: 'What in the exit-zero pipeline could become posts?', why: 'A video of the pipeline with your voice-over is the likeliest breakout. Waiting until the pipeline is ready.' },
+  { t: 'What makes a post worth sending to a colleague?', why: 'A copied link is X’s heaviest ranking signal (20, against 0.5 for a like, algorithm fact A9), and the loop can’t see it yet.' }
+];
+const PIPELINE = [{ n: '2', label: 'Open questions' }, { n: '0', label: 'Experiments' }, { n: '0', label: 'Lessons' }, { n: '5', label: 'Weights' }];
+const SUGGESTIONS = [
+  { q: 'Why cap the first post at 600?', a: 'Strangers only ever see your first post (algorithm facts A1 and A2), and the feed folds long posts behind “Show more”. 600 keeps a whole list in one post without burying it. The final checks hold every capped format to it, and a queued test compares under 280 with 500–600.' },
+  { q: 'What should we test first?', a: 'A single post against a thread is first in the queue: it needs no new format and you already have threads to compare with. It can start around 8 Oct. You can queue it under Experiments.' },
+  { q: 'Is the 22:00 slot working?', a: 'Too early to say. One post has gone out in that window, PAID → FREE #1, and it was boosted, so it doesn’t count. The queued US-overlap test checks it properly.' }
+];
+const SUGGESTIONS_POST = [
+  { q: 'Which swap is weakest?', a: 'The ngrok row. It sits past the point where the feed folds this post, and it needs a plan name (Pay-as-you-go) to be true. If you ever cut a row, cut that one. The Bruno row is the strongest, so it leads.' },
+  { q: 'Will this post count for rewards?', a: 'Only an unboosted original can count, and this is one. X also excludes posts made or posted by automated means and doesn’t define that, so your own edits and your take make it safer. The shout-out is a reply, so it never counts.' }
+];
+const SUGGESTIONS_RESULTS = [
+  { q: 'Why did the connect post bring the follows?', a: 'It asked builders to say hi, and 13 of the week’s 19 follows came from it. The voice rules allow a connect post at most once in 15 posts, and never a “drop a hi” instruction, which X’s rewards rules treat as soliciting engagement.' },
+  { q: 'What’s the one thing to change this week?', a: 'Fewer, better replies. 115 replies brought 4 follows. A handful of specific replies to verified builders is the better bet, and the queued five-replies test will check it properly.' }
+];
+const SUGGESTIONS_REPLY = [
+  { q: 'What’s a good angle here?', a: 'Pick one specific thing from your own build that the point connects to, and ask them one real question back. I won’t write the reply: X can tell when a reply is pasted, and your own words are what build a mutual.' },
+  { q: 'Is this worth answering?', a: 'Yes: they raised a real point on your post, and answering people who replied to you is how mutual follows start.' }
+];
+const FALLBACK = 'In the real app I’d answer from your posts, weights and the X ranking notes. This mock only knows the suggested questions.';
+const CHAT_SEED = [{ role: 'bot', text: 'I’m working from your 11 posts, 115 replies and the weights you’ve set. Nothing has been learned from an experiment yet. Ask me why the engine is set the way it is, or what to test next.' }];
+const SETTINGS = [
+  { title: 'Health', rows: [
+    { name: 'Daily check', sub: 'Runs at 20:00 on the Mac', value: 'Ran 20:00 last night', dot: 'var(--ok)' },
+    { name: 'Still too new to measure', sub: 'Read once they’re 36 hours old', value: '6 posts', dot: 'var(--line)' },
+    { name: 'X API', sub: 'Read-only keys in your Keychain', value: 'Last read worked', dot: 'var(--ok)' },
+    { name: 'X API spend', sub: 'Estimate this month, from the run log', value: 'about US$0.42', dot: 'var(--line)' },
+    { name: 'Ranking notes', sub: 'X’s published algorithm', value: 'Current · 24 Sep', dot: 'var(--ok)' }
+  ] },
+  { title: 'Notifications', rows: [
+    { name: 'Before a post', sub: 'A reminder 10 minutes before the planned time', toggle: 'remind' },
+    { name: 'Shout-out window', sub: 'A nudge when it opens, if you left the app', toggle: 'nudge' }
+  ] },
+  { title: 'Cortex', rows: [
+    { name: 'Model', sub: 'Who answers when you ask Cortex', value: 'Claude', dot: 'var(--line)' }
+  ] }
+];
+const HOOKS = [
+  'Codex and Claude disagreed on a fix. Grok broke the tie.',
+  'Three AI reviewers, one bug, two different fixes.',
+  'I asked three models to review one fix. They didn’t agree.'
+];
+const STEP_LABELS = ['Plan', 'Draft', 'Approve', 'Post', 'Measure'];
+const STAGE_NAMES = ['', 'Drafting', 'Needs your approval', 'Approved', 'Posting', 'Posted, measuring'];
+const TARGET = Date.parse('2026-09-25T06:00:00+10:00');
+const HOUR = 3600000, DAY = 86400000, BRIS = 10 * HOUR, WAIT_MS = 10 * 60000;
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DEFAULTS = { screen: 'today', prevScreen: 'today', stage: 2, hold: 0, source: null, thinking: null, proposal: null,
+  slotMs: TARGET, remind: false, nudge: false, refused: null,
+  copyState: 'none', finding: false, notFound: false, posted1: false, waitSkipped: false, copied2: false, copy2Failed: false,
+  foundAt: '', foundMs: 0, foundDiff: false, foundTwice: false,
+  drafting: null, drafted: {}, draftRetried: false, review: false, approvedAt: '', approvedText: '',
+  chatOpen: false, chat: CHAT_SEED, asking: null, typed: '',
+  queuedExp: false, context: null, settingsOpen: false, theme: null, rtab: 'growth', showTable: false,
+  editorOpen: false, draftText: '', takeText: '', draftPending: false, cardBase: CARD1, cardTake: '', editedAfter: false, savedNote: false,
+  firstHourClosed: false, minutes: null, dismissed: {}, capKind: 'Just a note', capText: '',
+  captures: [
+    { id: 'c1', kind: 'Voice note · 0:42', when: 'yesterday', text: 'Codex and Claude disagreed on the fix; Grok broke the tie.', example: true, format: 'tool verdict' },
+    { id: 'c2', kind: 'Screenshot', when: '2 days ago', text: 'The Bruno collection sitting in the repo as plain files.', example: true, format: 'build log' }
+  ], turned: {}, readerTurned: false, skipShout: false,
+  hookOpen: false, hookPick: 0, hookTake: '', hookSaved: false };
+
+// X's weighted length, as scripts/post_thread.py counts it: these code points 1, every other 2, a link 23.
+const URL_RE = /https?:\/\/\S+/gi;
+function xLength(text) {
+  const links = (text.match(URL_RE) || []).length;
+  let n = 0;
+  for (const ch of text.replace(URL_RE, '')) {
+    const c = ch.codePointAt(0);
+    n += (c <= 0x10FF || (c >= 0x2000 && c <= 0x200D) || (c >= 0x2010 && c <= 0x201F) || (c >= 0x2032 && c <= 0x2037)) ? 1 : 2;
+  }
+  return n + 23 * links;
+}
+// The gate's refusals for a PAID → FREE root (scripts/post_thread.py card_refusals and swap_root_refusals).
+const SWAP_WORDS = ['creator', 'productivity', 'developer', 'privacy', 'system', 'storage', 'diagram', 'finance', 'local AI', 'self-hosting', 'support'];
+const SWAP_STEM = new RegExp('^Finding free (?:' + SWAP_WORDS.join('|') + ') tools that actually hold up\\.$');
+const SOLICIT_RE = /\bdrop (?:a|an) (?:hi|hello|comment|reply|link|👋)|\bdrop (?:it|them|yours|your \w+) (?:below|here|in the comments)|\bfollow (?:me )?for (?:more|part)|\blike (?:and|&|\+) (?:repost|retweet|share|follow|comment)|\b(?:repost|retweet|bookmark) this\b|\bsave this (?:post|thread|tweet|for later|before)|\bcomment below\b|\breply with\b|\btag (?:a friend|someone|your)/i;
+const BANNED_RE = /game changer|most people don['’]?t know|wait for it|🚨|🔥|👇|juggernaut|neural graph|zero server dependenc(?:y|ies)|hollywood[- ]grade|drop-in replacement|let['’]?s grow together/i;
+const PART_RE = /^\s*(\d{1,2})\/(\d{1,2})\b|\b(\d{1,2})\/(\d{1,2})\s*$/m;
+function gateRefusals(text) {
+  if (!text.trim()) return ['Card 1 is empty.'];
+  const r = [];
+  const lines = text.split('\n');
+  const n = xLength(text);
+  if (n > 600) r.push('Card 1 is ' + n + ' characters as X counts. PAID → FREE caps the first post at 600.');
+  if (!(lines.length >= 2 && lines[0].trim() === 'PAID → FREE' && SWAP_STEM.test(lines[1].trim()))) r.push('Card 1 has to open with the PAID → FREE header and its “Finding free … tools that actually hold up.” line.');
+  const h = text.match(/(^|[^\w@])(@\w{1,15})/);
+  if (h) r.push(h[2] + ' is in card 1. Handles go in the shout-out only.');
+  const tag = text.match(/(^|[^\w&#])(#[A-Za-z]\w*)/);
+  if (tag) r.push('Hashtag ' + tag[2] + ' in card 1.');
+  const part = text.match(PART_RE);
+  if (part) { const a = +(part[1] || part[3]), b = +(part[2] || part[4]); if (a >= 1 && a <= b && b > 1) r.push('Thread counter ' + part[0].trim() + ' in card 1.'); }
+  if (/\bVERIFY\b/.test(text)) r.push('Card 1 still has a VERIFY mark.');
+  if (text.includes('💬')) r.push('💬 in card 1.');
+  if (/your thoughts/i.test(text)) r.push('Card 1 asks for “your thoughts”. Ask a real question instead.');
+  const so = text.match(SOLICIT_RE);
+  if (so) r.push('Card 1 asks for engagement (“' + so[0] + '”). Ask a real question instead.');
+  const b = text.match(BANNED_RE);
+  if (b) r.push('Banned phrase in card 1: “' + b[0] + '”.');
+  return r;
+}
+function fmtN(n) { return n.toLocaleString('en-AU'); }
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+// Brisbane is UTC+10 all year, so times are worked out directly.
+function hhmm(ms) { const d = new Date(ms + BRIS); return pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()); }
+function brisShort(ms) { const d = new Date(ms + BRIS); return WEEKDAYS[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()]; }
+function brisDay(ms) {
+  try { return new Date(ms).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'Australia/Brisbane' }); }
+  catch (e) { return ''; }
+}
+function brisMidnight(ms) { return Math.floor((ms + BRIS) / DAY) * DAY - BRIS; }
+function sameBrisDay(a, b) { return brisMidnight(a) === brisMidnight(b); }
+// The next 06:00 at least 30 minutes away.
+function nextSlot(now) { let t = brisMidnight(now) + 6 * HOUR; while (t <= now + 30 * 60000) t += DAY; return t; }
+// The first 20:00 daily check once the post is 36 hours old (scripts/snapshot.py, ops/launchd).
+function firstRead(posted) { const t = posted + 36 * HOUR; let r = brisMidnight(t) + 20 * HOUR; if (r < t) r += DAY; return r; }
+function dayOf(when) { return parseInt(when.split(' ')[1], 10) || 0; }
+function copyText(text, done) {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => done(true), () => done(false));
+      return;
+    }
+  } catch (e) {}
+  done(false);
+}
+
+class Component extends DCLogic {
+  componentDidMount() {
+    this.tick = setInterval(() => this.forceUpdate(), 1000);
+    this.onVis = () => { if (document.hidden) this.cancelHold(); };
+    document.addEventListener('visibilitychange', this.onVis);
+  }
+  componentWillUnmount() {
+    clearInterval(this.tick); clearInterval(this.holdTimer);
+    document.removeEventListener('visibilitychange', this.onVis);
+  }
+  st() { return Object.assign({}, DEFAULTS, this.state || {}); }
+  later(fn) { setTimeout(fn, 60); }
+  cancelHold() { if (!this.holdTimer) return; clearInterval(this.holdTimer); this.holdTimer = null; this.setState({ hold: 0 }); }
+  shown(sel) { return [...document.querySelectorAll(sel)].filter((e) => e.offsetParent !== null || getComputedStyle(e).position === 'fixed'); }
+  // Sheets: focus moves in on open and back to what opened them on close.
+  openSheet(patch, label, first) {
+    this.returnFocus = document.activeElement;
+    this.setState(patch);
+    this.later(() => {
+      const d = this.shown('.te-root [role=dialog][aria-label="' + label + '"]')[0];
+      if (!d) return;
+      const f = (first && d.querySelector(first)) || d.querySelector('textarea, input:not([type=hidden])') || d.querySelector('button:not([disabled]), a[href]');
+      if (f) f.focus();
+    });
+  }
+  restoreFocus() { const el = this.returnFocus; this.returnFocus = null; this.later(() => { if (el && el.isConnected) el.focus(); }); }
+  focusButton(texts) {
+    this.later(() => {
+      const bs = this.shown('.te-root main button, .te-root main a');
+      for (const t of texts) { const b = bs.find((x) => x.textContent.trim().startsWith(t)); if (b) { b.focus(); return; } }
+    });
+  }
+  finishAsk(cur) { const a = cur.asking || {}; return { asking: null, chat: cur.chat.concat([{ role: 'bot', text: a.a || FALLBACK }]) }; }
+  askCortex(context) {
+    this.returnFocus = document.activeElement;
+    // On the Mac's Cortex page the chat is already docked, so only the question's subject changes.
+    if (DEVICE === 'mac' && this.st().screen === 'cortex') this.setState({ context: context });
+    else this.setState({ chatOpen: true, context: context });
+    this.later(() => { const ins = this.shown('.te-root input[aria-label="Ask Cortex"]'); const i = ins[ins.length - 1]; if (i) i.focus(); });
+  }
+  closeEditorKeep() {
+    const s = this.st();
+    this.setState({ editorOpen: false, draftPending: s.draftText !== s.cardBase || s.takeText !== s.cardTake });
+    this.restoreFocus();
+  }
+  closeTop() {
+    const s = this.st();
+    if (s.hookOpen) { this.setState({ hookOpen: false }); this.restoreFocus(); return true; }
+    if (s.editorOpen) { this.closeEditorKeep(); return true; }
+    if (s.source !== null) { this.setState({ source: null }); this.restoreFocus(); return true; }
+    if (s.chatOpen && !(DEVICE === 'mac' && s.screen === 'cortex')) { this.setState(Object.assign({ chatOpen: false }, s.asking ? this.finishAsk(s) : {})); this.restoreFocus(); return true; }
+    if (s.settingsOpen) { this.setState({ settingsOpen: false }); this.restoreFocus(); return true; }
+    return false;
+  }
+  globalKey(e) {
+    if (e.key === 'Escape') { if (this.closeTop()) e.preventDefault(); return; }
+    if (DEVICE === 'mac' && (e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); this.askCortex(null); }
+  }
+
+  renderVals() {
+    const s = this.st();
+    const now = Date.now();
+    const go = (screen) => () => this.setState({ screen: screen, prevScreen: s.screen, source: null, chatOpen: false });
+    const busy = !!(s.thinking || s.drafting);
+    const cardText = s.cardBase + (s.cardTake ? '\n\n' + s.cardTake : '');
+
+    // --- time, relative to now and this post's slot
+    const slot = s.slotMs, slotEnd = slot + HOUR, slotHM = hhmm(slot);
+    const toGo = slot - now, late = now > slot, missed = now > slotEnd;
+    const dayWord = sameBrisDay(now, slot) ? 'Today' : (sameBrisDay(now + DAY, slot) ? 'Tomorrow' : brisShort(slot));
+    const whenShort = dayWord + ', ' + slotHM;
+    const next = nextSlot(now);
+    const nextLabel = (sameBrisDay(now, next) ? 'today' : sameBrisDay(now + DAY, next) ? 'tomorrow' : brisShort(next)) + ', ' + hhmm(next);
+    let countdown, countdownColor = 'var(--blue)';
+    if (!late) {
+      const h = Math.floor(toGo / HOUR), m = Math.floor((toGo % HOUR) / 60000);
+      countdown = h > 0 ? 'in ' + h + ' h ' + m + ' m' : 'in ' + m + ' min';
+    } else if (!missed) {
+      countdown = Math.floor((now - slot) / 60000) + ' min late, still inside the ' + hhmm(slot - HOUR) + '–' + hhmm(slotEnd) + ' slot';
+      countdownColor = 'var(--amber)';
+    } else {
+      countdown = 'missed the slot';
+      countdownColor = 'var(--amber)';
+    }
+    const isEarly = toGo > 30 * 60000;
+    const remindAt = hhmm(slot - 10 * 60000);
+    const moveSlot = () => this.setState({ slotMs: next });
+
+    const at = s.stage <= 3 ? s.stage : s.stage - 1;
+    const steps = STEP_LABELS.map((label, i) => {
+      const done = i < at, cur = i === at;
+      return { label: label, mark: done ? '✓ ' : '', state: done ? ', done' : cur ? ', current step' : ', to do',
+        current: cur ? 'step' : 'false', bar: done ? 'var(--ink)' : cur ? 'var(--blue)' : 'var(--line)',
+        color: done ? 'var(--ink)' : cur ? 'var(--blue)' : 'var(--muted)', weight: cur ? '600' : '400' };
+    });
+
+    // On the Mac the cards sit beside Today, so reading them means bringing them into view.
+    const focusCards = () => {
+      this.setState({ screen: 'today', prevScreen: s.screen, source: null });
+      this.later(() => { const el = document.querySelector('.te-root [data-te-cards]'); if (el) { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); el.focus({ preventScroll: true }); } });
+    };
+    const readCards = DEVICE === 'mac' ? focusCards : go('post');
+    const startReady = () => { if (this.st().thinking || this.st().drafting) return; this.setState({ screen: 'today', thinking: 'ready', refused: null }); };
+
+    let headline, primaryLabel, primaryHint, primaryAction, showEarlyAnyway = false, primaryDisabled = false;
+    if (s.stage === 2 && missed) {
+      headline = 'The ' + slotHM + ' slot has passed.';
+      primaryLabel = 'Read and approve'; primaryHint = 'Approving posts nothing. Then move it to ' + nextLabel + '.'; primaryAction = readCards;
+    } else if (s.stage === 2) {
+      headline = dayWord === 'Today' ? 'Today’s post needs your read.' : dayWord === 'Tomorrow' ? 'Tomorrow’s post needs your read.' : 'Your next post needs your read.';
+      primaryLabel = 'Read and approve'; primaryHint = 'Change anything first. Edits teach the loop what you prefer.'; primaryAction = readCards;
+    } else if (s.stage === 3 && missed) {
+      headline = 'The ' + slotHM + ' slot has passed.';
+      primaryLabel = 'Move it to ' + nextLabel; primaryHint = 'Your approval stays. Nothing is posted for you.'; primaryAction = moveSlot;
+    } else if (s.stage === 3 && isEarly) {
+      headline = 'Approved, and ready for ' + slotHM + ' ' + (dayWord === 'Today' ? 'today' : dayWord === 'Tomorrow' ? 'tomorrow' : 'on ' + dayWord) + '.';
+      primaryLabel = s.remind ? 'Reminder set for ' + remindAt : 'Remind me at ' + remindAt;
+      primaryHint = s.remind ? 'Tap to turn it off. Nothing is posted for you.' : 'A nudge 10 minutes before. Nothing is posted for you.';
+      primaryAction = () => this.setState({ remind: !s.remind });
+      showEarlyAnyway = true;
+    } else if (s.stage === 3) {
+      headline = late ? 'Time to post.' : 'Almost time to post.';
+      primaryLabel = 'Start posting'; primaryHint = 'Final checks first. You press Post on X.'; primaryAction = startReady; primaryDisabled = busy;
+    } else if (s.stage === 4) {
+      headline = 'You’re in the middle of posting.'; primaryLabel = 'Back to posting'; primaryHint = 'The shout-out is still to come.'; primaryAction = go('ready');
+    } else {
+      headline = 'Posted. Stay close for the first hour.'; primaryLabel = 'See results';
+      primaryHint = 'The first full read comes with the daily check on ' + brisShort(firstRead(s.foundMs || now)) + ' at 20:00.'; primaryAction = go('results');
+    }
+
+    // --- hold to approve (pointer and keyboard); any interruption cancels it
+    const approveNow = () => {
+      const cur = this.st();
+      this.setState({ hold: 0, stage: 3, approvedAt: hhmm(Date.now()), approvedText: cur.cardBase + (cur.cardTake ? '\n\n' + cur.cardTake : ''), editedAfter: false, savedNote: false });
+      this.focusButton(['Start posting', 'Move it to', 'Edit a card']);
+    };
+    const holdStart = () => {
+      if (this.holdTimer) return;
+      this.holdTimer = setInterval(() => {
+        const h = ((this.state && this.state.hold) || 0) + 4;
+        if (h >= 100) { clearInterval(this.holdTimer); this.holdTimer = null; approveNow(); }
+        else this.setState({ hold: h });
+      }, 40);
+    };
+    const holdEnd = () => this.cancelHold();
+
+    // --- card preview from the actual card text, with the fold computed
+    const lines = cardText.split('\n');
+    let run = 0, foldAt = -1;
+    lines.forEach((ln, i) => { run += xLength(ln) + (i ? 1 : 0); if (foldAt < 0 && run > 280) foldAt = i; });
+    const cardLines = lines.map((ln, i) => {
+      const swapIdx = SWAPS.findIndex((w) => ln.startsWith(w.paid + ' →'));
+      const after = foldAt >= 0 && i >= foldAt;
+      return { text: ln, isBlank: ln.trim() === '', isText: ln.trim() !== '' && swapIdx < 0, isSwap: swapIdx >= 0,
+        foldBefore: i === foldAt, fade: after ? '0.6' : '1', bg: s.source === swapIdx ? 'var(--blue-soft)' : 'transparent',
+        open: () => this.openSheet({ source: swapIdx }, 'Source') };
+    });
+    const cardCount = xLength(cardText);
+    const takeTrim = s.takeText.trim();
+    const draftCount = xLength(s.draftText + (takeTrim ? '\n\n' + takeTrim : ''));
+
+    // --- posting
+    const waitLeft = s.posted1 ? (s.waitSkipped ? 0 : Math.max(0, Math.ceil((s.foundMs + WAIT_MS - now) / 1000))) : WAIT_MS / 1000;
+    const s1Active = s.stage >= 4, s2Active = s.posted1, s3Active = s.posted1 && waitLeft === 0, s4Active = s.copied2 || s.skipShout;
+    const stepVals = (k, on) => { const o = {}; o[k + 'Off'] = on ? 'false' : 'true'; o[k + 'Badge'] = on ? 'var(--btn)' : 'var(--faint)'; o[k + 'Head'] = on ? 'var(--ink)' : 'var(--muted)'; return o; };
+    const mm = Math.floor(waitLeft / 60), ss = waitLeft % 60;
+    const base = s.foundMs || now;
+    const winStartMs = base + WAIT_MS, winEndMs = base + 2 * WAIT_MS, fhCloseMs = base + HOUR;
+    const backTo = (stage) => () => this.setState({ stage: stage, screen: DEVICE === 'mac' ? 'today' : 'post', copyState: 'none', finding: false, notFound: false,
+      approvedAt: stage === 2 ? '' : s.approvedAt, approvedText: stage === 2 ? '' : s.approvedText });
+
+    // --- replies
+    const waitingLeft = WAITING.filter((w) => !s.dismissed[w.id]);
+    const mark = (id, how) => () => { const cur = this.st(); const d = Object.assign({}, cur.dismissed); if (how) d[id] = how; else delete d[id]; this.setState({ dismissed: d }); };
+    const nWait = waitingLeft.length;
+
+    // --- chat
+    const askQ = (sg) => {
+      const cur = this.st();
+      if (cur.asking) return;
+      this.setState({ chat: cur.chat.concat([{ role: 'user', text: sg.q }]), asking: sg, typed: '' });
+    };
+    const ALL_Q = SUGGESTIONS.concat(SUGGESTIONS_POST, SUGGESTIONS_RESULTS, SUGGESTIONS_REPLY);
+    const sendText = (text) => { const q = (text || '').trim(); if (!q) return; askQ(ALL_Q.find((sg) => sg.q.toLowerCase() === q.toLowerCase()) || { q: q, a: FALLBACK }); };
+    const ctxSet = { post: SUGGESTIONS_POST, results: SUGGESTIONS_RESULTS, reply: SUGGESTIONS_REPLY, proposal: SUGGESTIONS };
+    const ctxLabel = { post: 'the next post', results: 'this week’s results', reply: 'a reply waiting for you', proposal: 'the proposed build log' };
+
+    // --- theme
+    const th = s.theme || this.props.theme || 'system';
+    let sysDark = false;
+    try { sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch (e) {}
+    const resolved = th === 'system' ? (sysDark ? 'dark' : 'light') : th;
+    const segOn = (on) => ({ bg: on ? 'var(--card)' : 'transparent', border: on ? '1px solid var(--seg-sel)' : '1px solid transparent', weight: on ? '600' : '500' });
+    const seg = (prefix, on, handler) => { const v = segOn(on); const o = {}; o[prefix] = on; o[prefix + 'Bg'] = v.bg; o[prefix + 'Border'] = v.border; o[prefix + 'Weight'] = v.weight; o[prefix + 'Ti'] = on ? '0' : '-1'; if (handler) o[prefix + 'Go'] = handler; return o; };
+    const healthBad = this.props.health === 'failed' && !s.healthFixed;
+
+    const rt = s.rtab;
+    const RT_ORDER = ['growth', 'posts', 'replies'];
+    const tabOn = (on) => (on ? 'var(--ink)' : 'var(--faint)');
+    const inToday = ['today', 'post', 'ready'].includes(s.screen);
+    const tabs = {};
+    [['Today', inToday], ['Posts', s.screen === 'posts' || s.screen === 'capture'], ['Replies', s.screen === 'replies'], ['Results', s.screen === 'results'], ['Cortex', s.screen === 'cortex']].forEach(([k, on]) => {
+      tabs['tab' + k] = tabOn(on); tabs['tab' + k + 'Weight'] = on ? '600' : '500'; tabs['tab' + k + 'Current'] = on ? 'page' : 'false';
+      tabs['tab' + k + 'Label'] = k === 'Replies' && nWait ? 'Replies, ' + nWait + ' waiting' : k;
+      tabs['nav' + k + 'Bg'] = on ? 'var(--line2)' : 'transparent'; tabs['nav' + k + 'Bar'] = on ? 'var(--ink)' : 'transparent';
+    });
+
+    const draftFail = this.props.draft === 'error' && !s.draftRetried ? 'Couldn’t reach postman.com/pricing. Nothing was written; try again in a minute.' : '';
+    const queue = QUEUE.map((q) => {
+      const isDrafting = s.drafting === q.id, isDrafted = !!s.drafted[q.id];
+      return Object.assign({}, q, { isDrafting: isDrafting, isDrafted: isDrafted, showDraft: !isDrafting && !isDrafted,
+        factNote: isDrafted && this.props.draft === 'factcheck',
+        fail: draftFail, retry: () => this.setState({ draftRetried: true }),
+        cancel: () => this.setState({ drafting: null }),
+        draft: () => { if (!this.st().thinking && !this.st().drafting) this.setState({ drafting: q.id }); },
+        onDone: () => { const cur = this.st(); const d = Object.assign({}, cur.drafted); d[q.id] = true; this.setState({ drafting: null, drafted: d }); } });
+    });
+
+    const src = SWAPS[s.source === null || s.source < 0 ? 0 : s.source];
+    const maxVisits = 15;
+    const rpostsSorted = RPOSTS.slice().sort((a, b) => b.follows - a.follows || b.visits - a.visits || b.views - a.views);
+    const plural = (n, one, many) => n + ' ' + (n === 1 ? one : many);
+    const inertOn = !!((DEVICE === 'mac' ? (s.chatOpen && s.screen !== 'cortex') : s.chatOpen) || s.settingsOpen || s.editorOpen || s.source !== null || s.hookOpen);
+
+    return Object.assign({
+      isHome: ['today', 'post', 'ready'].includes(s.screen), isHomeCards: ['today', 'post'].includes(s.screen), isHomeReady: s.screen === 'ready',
+      showDrawer: DEVICE === 'mac' && s.chatOpen && s.screen !== 'cortex',
+      toggleSettings: () => { if (s.settingsOpen) { this.setState({ settingsOpen: false }); this.restoreFocus(); } else this.openSheet({ settingsOpen: true }, 'Settings and health'); },
+      profileBg: s.settingsOpen ? 'var(--line2)' : 'transparent',
+      sideHealth: healthBad ? 'Daily check missed last night' : 'Daily check ran 20:00',
+      rootKey: (e) => this.globalKey(e),
+      themeAttr: th, mainInert: inertOn ? 'true' : null, navInert: inertOn ? 'true' : null,
+      showMoon: resolved === 'light', showSun: resolved === 'dark',
+      flipLabel: resolved === 'light' ? 'Switch to dark mode' : 'Switch to light mode',
+      flipTheme: () => this.setState({ theme: resolved === 'dark' ? 'light' : 'dark' }),
+
+      isToday: s.screen === 'today', isPost: s.screen === 'post', isReady: s.screen === 'ready', isPosts: s.screen === 'posts',
+      isCapture: s.screen === 'capture', isReplies: s.screen === 'replies', isResults: s.screen === 'results', isCortex: s.screen === 'cortex',
+      goToday: go('today'), goPost: readCards, goPosts: go('posts'), goReplies: go('replies'), goResults: go('results'), goCortex: () => this.setState({ screen: 'cortex', context: null }),
+      goCapture: go('capture'), goBackFromCapture: go(s.prevScreen === 'capture' ? 'today' : s.prevScreen),
+
+      avatarLabel: healthBad ? 'EZ, settings and health, something needs you' : 'EZ, settings and health',
+      healthBad: healthBad, healthDot: healthBad ? 'var(--amber-fill)' : 'var(--ok)',
+      healthLine: healthBad ? 'Last daily check: Wed 20:00' : 'Daily check ran 20:00 last night. 6 posts are still too new to measure.',
+      fixHealth: () => this.setState({ healthFixed: true, settingsOpen: false }),
+      todayLabel: brisDay(now) + ' · Brisbane',
+
+      headline: headline, cardEyebrow: s.stage >= 5 ? 'Just posted' : 'Next post',
+      whenLabel: s.stage >= 5 ? 'Posted ' + s.foundAt : whenShort, whenShort: whenShort, whenCard: s.stage >= 5 ? 'Posted ' + s.foundAt : whenShort,
+      countdown: s.stage >= 5 ? '' : countdown, countdownColor: countdownColor, steps: steps,
+      stageName: STAGE_NAMES[s.stage] || '', primaryLabel: primaryLabel, primaryHint: primaryHint, primaryAction: primaryAction,
+      primaryDisabled: primaryDisabled, primaryOpacity: primaryDisabled ? '0.45' : '1',
+      showEarlyAnyway: showEarlyAnyway, startEarly: startReady,
+      thinkingReady: s.thinking === 'ready', showPrimary: s.thinking !== 'ready',
+      // Posting goes ahead only if the post is still approved and the cards are the ones approved.
+      doneReady: () => {
+        const cur = this.st();
+        const text = cur.cardBase + (cur.cardTake ? '\n\n' + cur.cardTake : '');
+        if (cur.stage !== 3 || text !== cur.approvedText) { this.setState({ thinking: null }); return; }
+        const reasons = gateRefusals(text);
+        if (this.props.gate === 'refused') reasons.unshift('Card 1 changed after you approved it.');
+        this.setState({ thinking: null, screen: 'ready', stage: reasons.length ? 3 : 4, refused: reasons.length ? reasons : null });
+      },
+      busy: busy, busyOpacity: busy ? '0.45' : '1',
+
+      showFirstHour: s.stage >= 5 && !s.firstHourClosed && now < fhCloseMs, fhClose: hhmm(fhCloseMs), closeFirstHour: () => this.setState({ firstHourClosed: true }),
+      minuteChips: ['15 min', '30 min', '1 hour', 'Longer'].map((m) => ({ label: m, on: s.minutes === m, bg: s.minutes === m ? 'var(--blue-soft)' : 'var(--raised)',
+        border: s.minutes === m ? 'var(--blue)' : 'var(--line)', weight: s.minutes === m ? '600' : '500', pick: () => this.setState({ minutes: m }) })),
+
+      replies: REPLIES,
+      waiting: WAITING.map((w) => Object.assign({}, w, { open: !s.dismissed[w.id], closed: !!s.dismissed[w.id],
+        status: s.dismissed[w.id] === 'answered' ? 'Answered' : 'Not answering',
+        answered: mark(w.id, 'answered'), skip: mark(w.id, 'skipped'), undo: mark(w.id, null),
+        ask: () => this.askCortex('reply') })),
+      waitingPreview: waitingLeft.slice(0, 2), waitingCount: nWait, hasWaiting: nWait > 0, noWaiting: nWait === 0,
+      waitingText: nWait === 1 ? '1 person is waiting for your answer' : nWait + ' people are waiting for your answer',
+      builders: BUILDERS,
+
+      showPlanButton: s.thinking !== 'next' && !s.proposal, thinkingNext: s.thinking === 'next',
+      planNext: () => { if (!busy) this.setState({ thinking: 'next', proposal: null }); },
+      doneNext: () => this.setState({ thinking: null, proposal: 'shown' }),
+      proposalShown: s.proposal === 'shown', proposalAccepted: s.proposal === 'accepted',
+      acceptProposal: () => this.setState({ proposal: 'accepted' }),
+      changeProposal: () => { if (!this.st().thinking && !this.st().drafting) this.setState({ proposal: null, thinking: 'next' }); },
+      askAboutProposal: () => this.askCortex('proposal'),
+
+      postTitle: s.stage >= 5 ? 'Posted' : whenShort,
+      stageApprove: s.stage === 2, stageApprovedOnly: s.stage === 3, stagePosted: s.stage >= 5,
+      approvedAt: s.approvedAt, editedAfter: s.editedAfter && s.stage === 2, savedNote: s.savedNote,
+      isEarly: isEarly && !missed, showStartHere: !isEarly && !missed, showMoveHere: missed, moveSlot: moveSlot, moveLabel: 'Move it to ' + nextLabel,
+      earlyNote: 'Approved. It’s planned for ' + whenShort + '. Come back about 10 minutes before.' + (s.remind ? ' A reminder is set for ' + remindAt + '.' : ''),
+      startReady: startReady,
+      holdStart: holdStart, holdEnd: holdEnd,
+      holdKeyDown: (e) => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); holdStart(); } },
+      holdKeyUp: (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); holdEnd(); } },
+      holdWidth: s.hold + '%', holdLabel: s.hold > 0 ? 'Keep holding…' : 'Hold to approve', holdTextColor: 'var(--on-btn)',
+      cardLines: cardLines, cardCount: cardCount, countColor: cardCount > 600 ? 'var(--amber)' : 'var(--muted)',
+      askAboutPost: () => this.askCortex('post'),
+
+      editorOpen: s.editorOpen, editClearsApproval: s.stage === 3, editDisabled: s.thinking === 'ready', editOpacity: s.thinking === 'ready' ? '0.45' : '1',
+      openEditor: () => {
+        if (this.st().thinking === 'ready') return;
+        const patch = s.draftPending ? { editorOpen: true, source: null } : { editorOpen: true, source: null, draftText: s.cardBase, takeText: s.cardTake };
+        this.openSheet(patch, 'Change something');
+      },
+      closeEditor: () => this.closeEditorKeep(),
+      cancelEdit: () => { this.setState({ editorOpen: false, draftPending: false }); this.restoreFocus(); },
+      draftPending: s.draftPending && s.editorOpen,
+      discardDraft: () => this.setState({ draftText: s.cardBase, takeText: s.cardTake, draftPending: false }),
+      draftText: s.draftText, setDraftText: (e) => this.setState({ draftText: e.target.value }),
+      takeText: s.takeText, setTakeText: (e) => this.setState({ takeText: e.target.value }),
+      draftCount: draftCount, draftCountColor: draftCount > 600 ? 'var(--amber)' : 'var(--muted)',
+      saveEdit: () => {
+        const cur = this.st();
+        const take = cur.takeText.trim();
+        const text = cur.draftText + (take ? '\n\n' + take : '');
+        const changed = text !== cardText;
+        this.setState({ editorOpen: false, draftPending: false, cardBase: cur.draftText, cardTake: take,
+          stage: changed && cur.stage === 3 ? 2 : cur.stage, editedAfter: changed && cur.stage === 3, savedNote: changed,
+          approvedAt: changed && cur.stage === 3 ? '' : cur.approvedAt, approvedText: changed && cur.stage === 3 ? '' : cur.approvedText });
+        this.restoreFocus();
+      },
+
+      hasSource: s.source !== null && s.source >= 0, src: Object.assign({ n: (s.source || 0) + 1 }, src),
+      closeSource: () => { this.setState({ source: null }); this.restoreFocus(); },
+      sheetKey: (e) => { if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); this.closeTop(); } },
+
+      readyRefused: !!s.refused, readyOk: !s.refused, refusedReasons: (s.refused || []).map((t) => ({ t: t })),
+      reapprove: () => { this.setState({ stage: 2, refused: null, approvedAt: '', approvedText: '' }); readCards(); },
+      canBack: s.stage === 4 && !s.posted1 && !s.finding, notNow: backTo(3), withdraw: backTo(2),
+      showCopy1: s.copyState === 'none',
+      copy1: () => copyText(cardText, (ok) => { this.setState({ copyState: ok ? 'ok' : 'failed' }); this.focusButton(ok ? ['I’ve posted it', "I've posted it"] : ['Copy again']); }),
+      copyFailed: s.copyState === 'failed' && !s.posted1, copiedOk: s.copyState === 'ok' && !s.posted1,
+      showCopyAgain: s.copyState !== 'none' && !s.posted1,
+      showPosted1: s.copyState === 'ok' && !s.posted1 && !s.finding && !s.notFound,
+      postedIt: () => this.setState({ finding: true, notFound: false }),
+      finding: s.finding, notFound: s.notFound,
+      doneFind: () => {
+        const cur = this.st();
+        if (this.props.find === 'notfound' && !cur.foundOnce) { this.setState({ finding: false, notFound: true, foundOnce: true }); return; }
+        const t = Date.now();
+        this.setState({ finding: false, notFound: false, posted1: true, foundMs: t, foundAt: hhmm(t), foundDiff: this.props.find === 'differs', foundTwice: this.props.find === 'twice' });
+      },
+      carryOn: () => { const t = Date.now(); this.setState({ notFound: false, posted1: true, foundMs: t, foundAt: hhmm(t) }); },
+      foundAt: s.foundAt || hhmm(now),
+      posted1: s.posted1, foundText: 'Found it: posted ' + s.foundAt + '.' + (s.foundDiff ? '' : ' Matches your approved card.'),
+      foundDiff: s.posted1 && s.foundDiff, foundTwice: s.posted1 && s.foundTwice,
+      waitText: mm + ':' + (ss < 10 ? '0' : '') + ss, waitPct: ((WAIT_MS / 1000 - waitLeft) / (WAIT_MS / 1000) * 100).toFixed(1) + '%',
+      winStart: hhmm(winStartMs), winEnd: hhmm(winEndMs),
+      windowClosed: s3Active && now > winEndMs && !s.copied2 && !s.skipShout,
+      nudgeSent: s3Active && s.nudge && !s.copied2 && !s.skipShout,
+      skipWait: () => this.setState({ waitSkipped: true }),
+      skipShout: () => this.setState({ skipShout: true, thinking: 'posted' }),
+      waitDone: s3Active && !s.skipShout,
+      copy2: () => copyText(CARD2, (ok) => this.setState(ok ? { copied2: true, copy2Failed: false, thinking: 'posted' } : { copy2Failed: true })),
+      copied2: s.copied2, copy2Failed: s.copy2Failed && !s.copied2, showCopy2: !s.copied2,
+      thinkingPosted: s.thinking === 'posted', recordCmd: s.skipShout ? 'record' : 'posted',
+      doneRecord: () => this.setState({ thinking: null, stage: 5, screen: 'today' }),
+
+      queue: queue, captureCount: s.captures.filter((c) => !s.turned[c.id]).length,
+      postedList: RPOSTS.slice().sort((a, b) => dayOf(b.when) - dayOf(a.when)).map((p) => ({ title: p.title, whenShort: p.when,
+        meta: plural(p.follows, 'follow', 'follows') + ' · ' + plural(p.visits, 'visit', 'visits') + ' · ' + fmtN(p.views) + ' views' + (p.boosted ? ' · not counted' : '') })),
+
+      openHook: () => this.openSheet({ hookOpen: true }, 'Choose a hook', '[role=radio][aria-checked="true"]'),
+      closeHook: () => { this.setState({ hookOpen: false }); this.restoreFocus(); },
+      hookOpen: s.hookOpen, hookSaved: s.hookSaved, hookNotSaved: !s.hookSaved, hookChosen: HOOKS[s.hookPick],
+      hooks: HOOKS.map((h, i) => ({ text: h, n: i + 1, count: xLength(h), on: s.hookPick === i ? 'true' : 'false',
+        border: s.hookPick === i ? 'var(--blue)' : 'var(--line)', bg: s.hookPick === i ? 'var(--blue-soft)' : 'var(--card)', pick: () => this.setState({ hookPick: i }) })),
+      hookTake: s.hookTake, setHookTake: (e) => this.setState({ hookTake: e.target.value }),
+      saveHook: () => { this.setState({ hookOpen: false, hookSaved: true }); this.restoreFocus(); },
+
+      capKinds: ['Screenshot', 'Screen recording', 'Voice note', 'Just a note'].map((k) => Object.assign({ label: k }, (() => { const v = segOn(s.capKind === k); return { on: s.capKind === k, bg: v.bg === 'transparent' ? 'var(--raised)' : 'var(--blue-soft)', border: s.capKind === k ? 'var(--blue)' : 'var(--line)', weight: v.weight }; })(), { pick: () => this.setState({ capKind: k }) })),
+      capText: s.capText, setCapText: (e) => this.setState({ capText: e.target.value }),
+      saveCapture: () => { if (!s.capText.trim()) return; this.setState({ captures: [{ id: 'c' + (s.captures.length + 1) + '-' + Date.now(), kind: s.capKind, when: 'just now', text: s.capText.trim(), format: 'build log' }].concat(s.captures), capText: '' }); },
+      captures: s.captures.map((c) => ({ kind: c.kind + (c.example ? ' · example' : ''), when: c.when, text: c.text,
+        canTurn: !s.turned[c.id], turned: !!s.turned[c.id], format: c.format,
+        turn: () => { const t = Object.assign({}, this.st().turned); t[c.id] = true; this.setState({ turned: t }); } })),
+      readerCanTurn: !s.readerTurned, readerTurned: s.readerTurned, turnReader: () => this.setState({ readerTurned: true }),
+
+      rtGoGrowth: () => this.setState({ rtab: 'growth' }), rtGoPosts: () => this.setState({ rtab: 'posts' }), rtGoReplies: () => this.setState({ rtab: 'replies' }),
+      rtKey: (e) => {
+        const i = RT_ORDER.indexOf(rt);
+        const j = e.key === 'ArrowRight' ? (i + 1) % 3 : e.key === 'ArrowLeft' ? (i + 2) % 3 : e.key === 'Home' ? 0 : e.key === 'End' ? 2 : null;
+        if (j === null) return;
+        e.preventDefault(); this.setState({ rtab: RT_ORDER[j] });
+        this.later(() => { const t = this.shown('.te-root [role=tab]')[j]; if (t) t.focus(); });
+      },
+      rtPanelLabel: { growth: 'Growth', posts: 'Posts', replies: 'Replies' }[rt],
+      showTable: s.showTable, showChart: !s.showTable, tableLabel: s.showTable ? 'Show charts' : 'Show as table',
+      toggleTable: () => this.setState({ showTable: !s.showTable }), kpis: KPIS[rt],
+      followSrc: FOLLOW_SRC.map((f) => ({ t: f.t, n: f.n, pct: (f.n / 13 * 70).toFixed(1) + '%', label: String(f.n) })),
+      followerDays: [{ d: 'Thu 24 Sep', n: '36' }],
+      rposts: rpostsSorted.map((p) => ({ title: p.title, when: p.when, label: plural(p.follows, 'follow', 'follows') + ' · ' + plural(p.visits, 'visit', 'visits') + ' · ' + fmtN(p.views) + ' views' + (p.boosted ? ' · not counted' : '') })),
+      postRows: rpostsSorted.map((p) => ({ t: p.title, f: p.follows, v: p.visits, w: fmtN(p.views), topic: (p.lane === 'main' ? 'On' : 'Off') + (p.boosted ? ', boosted' : '') })),
+      shareSlots: Array.from({ length: 15 }, (_, i) => { const v = SHARE[i]; return { bg: v === 'main' ? 'var(--chart-on)' : 'transparent', border: v === 'main' ? 'none' : v === 'other' ? '1.5px solid var(--axis)' : '1.5px dashed var(--dash)' }; }),
+      shareRows: Array.from({ length: 15 }, (_, i) => ({ n: i + 1, v: SHARE[i] === 'main' ? 'On topic' : SHARE[i] === 'other' ? 'Off topic' : 'Still to post' })),
+      shareLabel: 'On topic: 5 of your last 11 posts, 4 still to post. Target 12 of 15.',
+      rtopics: RTOPICS.map((t) => ({ t: t.t, visits: t.visits, follows: t.follows, views: fmtN(t.views), pct: (t.visits / maxVisits * 48).toFixed(1) + '%',
+        label: plural(t.visits, 'visit', 'visits') + ' · ' + plural(t.follows, 'follow', 'follows') })),
+      askAboutResults: () => this.askCortex('results'),
+      showReviewButton: s.thinking !== 'results' && !s.review, thinkingResults: s.thinking === 'results',
+      writeReview: () => { if (!busy) this.setState({ thinking: 'results' }); }, doneReview: () => this.setState({ thinking: null, review: true }), reviewWritten: s.review,
+      reviewAsk: 'The review needs this week’s numbers from X’s eligibility screen.',
+
+      pipeline: PIPELINE, weights: WEIGHTS.map((w) => Object.assign({}, w, { style: w.guess ? 'italic' : 'normal' })),
+      guardrails: GUARDRAILS.map((g) => ({ text: g })), questions: QUESTIONS,
+      nextExperiments: NEXT_EXPERIMENTS.map((x, i) => ({ n: i + 1, text: x, first: i === 0 })),
+      queuedExp: s.queuedExp, queueFirst: () => this.setState({ queuedExp: true }), queueLabel: s.queuedExp ? 'Queued for about 8 Oct' : 'Queue for about 8 Oct',
+
+      showPill: DEVICE === 'phone' && s.screen === 'cortex' && !s.chatOpen, chatOpen: s.chatOpen,
+      openChat: () => this.askCortex(null),
+      closeChat: () => { const cur = this.st(); this.setState(Object.assign({ chatOpen: false }, cur.asking ? this.finishAsk(cur) : {})); this.restoreFocus(); },
+      chat: s.chat.map((m) => ({ text: m.text, isUser: m.role === 'user', isBot: m.role === 'bot' })),
+      asking: !!s.asking,
+      doneAsk: () => this.setState(this.finishAsk(this.st())),
+      suggestions: (ctxSet[s.context] || SUGGESTIONS).map((sg) => ({ q: sg.q, ask: () => askQ(sg) })),
+      hasContext: !!s.context, contextLabel: ctxLabel[s.context] || '', clearContext: () => this.setState({ context: null }),
+      typed: s.typed, setTyped: (e) => this.setState({ typed: e.target.value }), sendTyped: () => sendText(s.typed),
+      typedKey: (e) => { if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return; e.preventDefault(); sendText(e.target.value); },
+
+      settingsOpen: s.settingsOpen, openSettings: () => this.openSheet({ settingsOpen: true }, 'Settings and health'),
+      closeSettings: () => { this.setState({ settingsOpen: false }); this.restoreFocus(); },
+      settingsGroups: SETTINGS.map((g) => ({ title: g.title, rows: g.rows.map((r) => {
+        const t = r.toggle, on = t ? !!s[t] : false;
+        return Object.assign({}, r, { isToggle: !!t, notToggle: !t, on: on ? 'true' : 'false', value: t ? (on ? 'On' : 'Off') : r.value,
+          dot: t ? (on ? 'var(--ok)' : 'var(--line)') : r.dot, flip: () => { if (t) this.setState({ [t]: !this.st()[t] }); },
+          knob: on ? '20px' : '2px', track: on ? 'var(--blue-fill)' : 'var(--line)' });
+      }) }))
+    }, tabs, stepVals('s1', s1Active), stepVals('s2', s2Active), stepVals('s3', s3Active), stepVals('s4', s4Active),
+      seg('rtGrowth', rt === 'growth'), seg('rtPosts', rt === 'posts'), seg('rtReplies', rt === 'replies'),
+      seg('thIsLight', th === 'light', () => this.setState({ theme: 'light' })), seg('thIsDark', th === 'dark', () => this.setState({ theme: 'dark' })),
+      seg('thIsSystem', th === 'system', () => this.setState({ theme: 'system' })));
+  }
+}
+</script>
+</body>
+</html>

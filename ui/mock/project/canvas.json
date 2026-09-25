@@ -1,0 +1,98 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-09-24T08:22:31Z"
+  },
+  "title": "Thread Engine UI",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "iPhone",
+      "is_interactive": true,
+      "radius": 40
+    },
+    "Mac.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "MacBook",
+      "is_interactive": true,
+      "radius": 12
+    },
+    "PhoneDark.dc.html": {
+      "x": 0,
+      "y": 1320,
+      "w": 390,
+      "h": 844,
+      "title": "iPhone, dark",
+      "is_interactive": true,
+      "radius": 40
+    },
+    "MacDark.dc.html": {
+      "x": 470,
+      "y": 1320,
+      "w": 1440,
+      "h": 900,
+      "title": "MacBook, dark",
+      "is_interactive": true,
+      "radius": 12
+    },
+    "WorkingStates.dc.html": {
+      "x": 0,
+      "y": 2640,
+      "w": 1200,
+      "h": 1000,
+      "title": "Working states",
+      "is_interactive": true
+    },
+    "Thinking.dc.html": {
+      "x": 1280,
+      "y": 2640,
+      "w": 360,
+      "h": 150,
+      "title": "Working state (one component)",
+      "is_interactive": true
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Mac.dc.html",
+    "PhoneDark.dc.html",
+    "MacDark.dc.html",
+    "WorkingStates.dc.html",
+    "Thinking.dc.html"
+  ],
+  "notes": {
+    "title-screens": {
+      "x": 0,
+      "y": -300,
+      "text": "Thread Engine UI",
+      "kind": "title1",
+      "maxW": 1910
+    },
+    "title-dark": {
+      "x": 0,
+      "y": 1020,
+      "text": "Dark mode",
+      "kind": "title1",
+      "maxW": 1910
+    },
+    "title-working": {
+      "x": 0,
+      "y": 2340,
+      "text": "Working states",
+      "kind": "title1",
+      "maxW": 1640
+    }
+  },
+  "designSystems": []
+}

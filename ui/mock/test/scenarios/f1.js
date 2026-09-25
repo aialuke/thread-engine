@@ -1,0 +1,30 @@
+const out=[]; try {
+const setv=(el,v)=>{const d=Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el),'value');d.set.call(el,v);el.dispatchEvent(new Event('input',{bubbles:true}));};
+const nav=document.querySelector('.te-root nav');
+T.click('Preview'); await wait(300);
+const sw=T.find('Postman Team'); sw.focus(); sw.click(); await wait(300);
+out.push('#24 sheet: main inert='+T.main().getAttribute('inert')+' nav inert='+nav.getAttribute('inert')+' focus in dialog='+!!document.activeElement.closest('[role=dialog]'));
+document.activeElement.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true})); await wait(300);
+out.push('   Esc closes: '+(T.dialogs().length===0)+' focus back on swap: '+(document.activeElement.textContent.includes('Postman')));
+sw.click(); await wait(200); T.click('Change something'); await wait(300);
+out.push('   editor over source closes source: '+JSON.stringify(T.dialogs()));
+const ec=()=>{const d=[...T.root().querySelectorAll('[role=dialog]')].find(x=>x.getAttribute('aria-label')==='Change something'); return d?(d.innerText.match(/(\d+) characters as X counts/)||[])[1]:'none';};
+const ta=()=>T.root().querySelector('[role=dialog] textarea'), tk=()=>T.root().querySelector('[role=dialog] input');
+const base=ta().value; setv(ta(),'https://example.com/a/very/long/path/that/is/way/more/than/twenty-three'); await wait(150);
+out.push('#27 link counts 23: '+ec()); setv(ta(),base); await wait(100);
+setv(tk(),'Take one'); await wait(100); T.click('Save changes'); await wait(300);
+T.click('Change something'); await wait(300);
+out.push('#26 reopen: main has take='+ta().value.includes('Take one')+' take field='+JSON.stringify(tk().value));
+setv(tk(),'Take two'); await wait(100); T.click('Save changes'); await wait(300);
+const t=T.root().innerText; out.push('   card: one='+t.includes('Take one')+' two='+t.includes('Take two'));
+T.click('Change something'); await wait(300); setv(ta(), ta().value+'\nUNSAVED'); await wait(100);
+ta().dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true})); await wait(300);
+out.push('   Esc keeps draft: closed='+(T.dialogs().length===0)); T.click('Change something'); await wait(300);
+out.push('   reopen shows unsaved='+ta().value.includes('UNSAVED')+' note='+T.has(/unsaved changes are still here/));
+T.click('Cancel'); await wait(200); T.click('Change something'); await wait(300); out.push('   Cancel discards: '+!ta().value.includes('UNSAVED')); T.click('Cancel'); await wait(200);
+// M1 hold cancel paths
+let b=T.find('Hold to approve'); T.pe(b,'pointerdown'); await wait(300); T.pe(b,'pointercancel'); await wait(1400);
+out.push('#2 pointercancel approves? '+T.has(/Approved at/));
+b=T.find('Hold to approve'); b.focus(); b.dispatchEvent(new KeyboardEvent('keydown',{key:' ',bubbles:true})); await wait(200); b.blur(); await wait(1400);
+out.push('   blur approves? '+T.has(/Approved at/));
+} catch(e){ out.push('ERR '+e.message+' '+e.stack.split('\n')[1]); } return out.join('\n');

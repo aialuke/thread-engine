@@ -19,14 +19,16 @@ Thread Engine is a local "factory" for the @exitzerocode X account. It researche
 Each is a MUST with its source. `decisions.md` §Invariants has the full list.
 
 1. **MUST NOT post, schedule, or call any X write API.** The operator presses Post on X (AGENTS.md).
-2. **Only the operator approves.** Approval is the operator's own hold on the button (D13, D24) or the typed `/approve <slug>`. No model, script, scheduled job or agent may approve, press the button, or call what it calls (AGENTS.md; `ui-direction.md` build notes). The hooks enforce this today for the approval file; the build must extend it to the button.
+2. **Only the operator approves, and today only by typing.** `AGENTS.md:14` says only the operator's typed `/approve <slug>` creates `APPROVED`, and nothing may create, edit or delete it otherwise. D2, D13 and D24 want a hold button as well. **These conflict:** a button path needs the operator to change the approval contract first, backed by a design no agent can reach (the hook proves no human identity; an agent sending the same prompt, clicking the button or calling what it calls must all be impossible). Until then, only typed `/approve` is a legal approval. `build-questions.md` Q8 holds the options.
 3. **The gate stays.** `scripts/post_thread.py` refuses changed-after-approval cards and every rule listed in AGENTS.md. The UI shows the refusals; it never bypasses them.
 4. **Truth budget, fail closed.** Every figure is sourced this session; an unconfirmed claim stays out of the cards (`voice/exit-zero.md`).
 5. **Loop state changes only through `scripts/loop.py`**, never by hand, and lessons change rules only through `/apply` (AGENTS.md).
 6. **X keys never enter a session.** They stay in the Mac's Keychain, read only by `scripts/x_api.py`.
 7. **Other people's data stays private and local** (`loop/followers/`, `ledger/raw/api/`); the shared mock uses dotted placeholder handles.
 8. **The operator stays no-code,** in setup and maintenance too. Anything they'd have to do by hand must be a button or an agent's job.
-9. **Settled decisions:** hold to approve with no Touch ID or Face ID (D13, D24), and the Cortex chat stays (D31). Don't reopen them.
+9. **Settled decisions:** hold to approve with no Touch ID or Face ID (D13, D24), and the Cortex chat stays (D31). Don't reopen them. Biometric approval is out of scope.
+10. **One writer at a time across the whole Mac.** The UI's runner, the 20:00 launchd snapshot and interactive CLI sessions all run read-modify-write `loop.py` commands; atomic file writes don't prevent lost updates between processes. The build needs one cross-process lock or queue covering all three.
+11. **Accessibility of approval is not solved on the iPhone.** The operator's call (25 Sep) was that typed `/approve` stays the accessible route, but that only exists in a Mac CLI. A VoiceOver or Switch Control user on the phone has no route yet; any route must also satisfy rule 2.
 
 ## 4. How the pieces fit (macro to micro)
 
@@ -53,7 +55,7 @@ Five tabs on iPhone and a sidebar on Mac (D8): **Today** (the next post, progres
 - The mock is final after two full reviews. Every finding is fixed and re-tested (`ui-review-2026-09-25.md` §11).
 - **Live posting continues while the build happens:**
   - The PAID → FREE series runs one post every other day to about late October.
-  - The developer-tools post is drafted and waiting for approval.
+  - The developer-tools post is approved (its `APPROVED` file exists) and waiting to be posted; its queue row still says `drafted`.
   - Experiment rules are due about 8 Oct; experiments stay paused until then.
   - The daily snapshot's 26–29 day final read must work by 16 Oct.
   The build must not disrupt any of this.
@@ -64,3 +66,9 @@ Five tabs on iPhone and a sidebar on Mac (D8): **Today** (the next post, progres
 - **IDs:** `SCR-*` screens, `SHT-*` sheets, `NAV-*`, `MAC-*`, `CMP-*` components, `CTL-*` controls, `CMD-*` existing commands, `FN-*` UI-only functions, `DATA-*` data items, `MO-*` mock-only items, `C*` constraints, `Q*` open questions, `D*` decisions.
 - **Mock vs real:** "mock" is what version 22 does, and "real" is what the built app must do.
 - **Sources:** every claim cites a file (`path:line`) or "operator note". When this folder and the repo disagree, the repo wins; flag the difference.
+
+## 8. Kickoff for the build session
+
+The operator starts the build session with this prompt:
+
+> You're planning the build of the Thread Engine UI with me. Read `reviews/ui-build-handoff/README.md` first, then the files it lists, in this order: `decisions.md`, `build-questions.md`, `system-today.md`, `wiring.md`, `state-machine.md`, `data.md`, `screens.md`, `design-system.md`, `mock-only.md`. The mock is `ui/mock/` and https://claude.ai/artifact/8zaBcxWAknJaXWkReQQPqg. Don't recommend a build path yet. Grill me on the open questions in `build-questions.md`, one at a time, in its suggested order, and record each answer as a decision. Treat D13/D24 and D31 as closed. I don't code, so nothing in the plan may need me to run anything by hand. Posting continues during the build: don't disrupt it, and keep the 8 Oct and 16 Oct deadlines in view.

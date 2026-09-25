@@ -27,11 +27,12 @@ Everything below is faked in the mock (version 22) so it can be clicked through.
 
 | ID | Control | Real wiring |
 |---|---|---|
+| MO-7a | "Withdraw approval" clears the approval in memory | deleting `APPROVED` is forbidden (`AGENTS.md:14`); needs a contract change and an operator-only path, or the control goes |
 | MO-7 | Hold to approve sets `stage = 3` | creates `APPROVED` with the cards digest, and only from the operator's own press (D13, D24). The typed `/approve <slug>` stays as backup and as the accessible route |
 | MO-8 | Start posting runs a fake `ready` line; the mock mirrors the gate's refusals in JavaScript (`gateRefusals`) | runs `scripts/post_thread.py` and shows its refusals; the JS copy exists only so the mock can demonstrate them |
 | MO-9 | Copy uses `navigator.clipboard` on the device | the phone's own clipboard; `post_thread.py --copy N` uses `pbcopy`, which only reaches the Mac |
 | MO-10 | "I've posted it" / Check again / It's up | a read of the account's timeline, matched to the approved cards |
-| MO-11 | Copy the shout-out → "Watching for your shout-out" → recorded | detect the reply on X, then `/posted` records the post, the shout-out and time to first like |
+| MO-11 | Copy the shout-out → "Watching for your shout-out" → recorded | detecting the reply on X is new; `/posted` records the root, the thread's cards and `production_minutes`, not the shout-out or the first like. Both need new `loop.py`-owned data and commands (snapshots start at 36–60 h) |
 | MO-12 | Plan the next post → a fixed proposal (example tag) | `/next` |
 | MO-13 | Draft on a queue item | `/draft-thread <slug>` |
 | MO-14 | Write this week's review → needs-you question → "Review written" | `/results` (it asks for the eligibility numbers) |

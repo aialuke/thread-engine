@@ -16,11 +16,11 @@ One post at a time moves through five steps (D15: Plan → Draft → Approve →
 
 ### Guards (MUST keep in the real app)
 
-- **G-APPROVE:** approval stores the exact card text (`approvedText`). **Real:** this is the cards digest `scripts/post_thread.py` writes into `APPROVED` (`cards-sha256:`), and only the operator's own press may create it (D13, D24, AGENTS.md).
+- **G-APPROVE:** approval stores the exact card text (`approvedText`). **Real:** the `approve.py` hook writes `APPROVED` with `cards-sha256:` = `post_thread.cards_digest()`, a SHA-256 over every numbered card's filename and bytes in order (`scripts/post_thread.py:158-163`). Only the operator's typed `/approve` may create it (`AGENTS.md:14`); a button path needs a contract change (README rule 2).
 - **G-EDIT:** any saved change to the cards at stage 3 drops to stage 2 and clears the approval (`saveEdit`). Editing is disabled while the final checks run (`editDisabled` when `thinking === 'ready'`).
-- **G-READY:** `doneReady` moves to 4 only if the stage is still 3 **and** the text equals `approvedText` **and** there are no gate refusals. Otherwise it stays at 3 and shows the reasons (`refused`). **Real:** this is `scripts/post_thread.py` (exit 2 without approval; refusals listed on stdout).
+- **G-READY:** `doneReady` moves to 4 only if the stage is still 3 **and** the text equals `approvedText` **and** there are no gate refusals. Otherwise it stays at 3 and shows the reasons (`refused`). **Real:** this is `scripts/post_thread.py`: exit 2 prints `human gate` (no approval); exit 1 prints the `REFUSED:` lines on **stderr**, a stale digest first (`post_thread.py:404-410`); exit 0 writes `POST.txt`. Card edits never delete `APPROVED`; they make its digest stale.
 - **G-BUSY:** only one command runs at a time (`busy = thinking || drafting`). Plan, Draft, Write review, Start posting, Start early and Pick another are disabled while busy. **Real:** the Mac-side runner must serialise commands or reject a second one.
-- **G-BACK:** "Not now" and "Withdraw approval" exist only at stage 4 before the post is found (`canBack`).
+- **G-BACK:** "Not now" and "Withdraw approval" exist only at stage 4 before the post is found (`canBack`). **Real:** "Not now" is UI-only. "Withdraw approval" would delete `APPROVED`, which `AGENTS.md:14` forbids; it needs a contract change and an operator-only path, or it goes (editing a card already makes the approval stale).
 
 ## 2. Posting (stage 4) sub-steps (D17)
 
@@ -29,7 +29,7 @@ One post at a time moves through five steps (D15: Plan → Draft → Approve →
 | 1 Post | `copyState` none → ok / failed; `finding`; `notFound`; `posted1` | Copy the post → Copied / Couldn't copy (Copy again, Open X) → "I've posted it" (only after a successful copy) → finding (working line `find`) → Found / Not on X yet (Check again, It's up, carry on) | `doneFind` sets `posted1`, `foundMs`, `foundAt`; tweak `find` = `differs` or `twice` adds an amber warning |
 | 2 Wait | `waitLeft` = max(0, `foundMs` + 10 min − now), or 0 if `waitSkipped` | countdown, window "between HH:MM and HH:MM" | reaches 0 → step 3. **Real:** `foundMs` must be the post's `created_at` from X, not the time the app found it |
 | 3 Thank the maker | `copied2`, `copy2Failed`, `nudgeSent`, `windowClosed` | Copy the shout-out; failure card; "Nudge sent" if the Settings switch is on; "window closed" after +20 min | copy ok → `thinking = 'posted'` (watching for the shout-out) |
-| 4 Done | `thinking` `posted` or `record` | working line; Done button as fallback | `doneRecord` → stage 5, screen Today |
+| 4 Done | `thinking` `posted` or `record` | working line; Done button as fallback | `doneRecord` → stage 5, screen Today. **Real:** `/posted` records the root, the thread's cards and `production_minutes` only; shout-out status and time to first like need new `loop.py`-owned data and commands |
 
 "Skip the shout-out" sets `skipShout` and runs the shorter `record` steps. "Skip the wait (mock only)" is mock-only.
 
@@ -61,7 +61,7 @@ Per queue item: `showDraft` → Draft (disabled while busy) → `drafting = id` 
 | needs you | `ask` prop set, last step reached | amber "Needs you. <question>", two answers | an answer → `onA`/`onB`, then `onDone` |
 | static | `show` = `error` or `needs` (gallery) | that state immediately | – |
 
-Hosts: `next` (Today, Plan the next post), `draft` (Posts queue), `ready` (Today next-post card / Mac right column), `find`, `posted`, `record` (Posting), `ask` (chat), `results` (Results, with the needs-you question for the eligibility numbers). The mock advances every 1.5 s. **Real:** steps must come from the command's actual progress; a component that unmounts while a command runs must not lose it (the mock's `thinking` state survives navigation, so the line resumes on return).
+Hosts: `next` (Today, Plan the next post), `draft` (Posts queue), `ready` (Today next-post card / Mac right column), `find`, `posted`, `record` (Posting), `ask` (chat), `results` (Results, with the needs-you question for the eligibility numbers). The mock advances every 1.5 s. **Real:** steps must come from the command's actual progress; progress must live with the command runner, not the screen. In the mock, leaving the screen unmounts the line; `thinking` stays set (so every other command stays disabled), and coming back restarts the line from step 1 (screens.md G66).
 
 ## 6. Sheets, focus and keys
 

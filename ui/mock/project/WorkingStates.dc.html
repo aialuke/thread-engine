@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Working states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'IBM Plex Sans',system-ui,sans-serif;color:#17160F;background:#F3F1EA}
+.te-holddemo{animation:te-hold 3.2s ease-in-out infinite}
+@keyframes te-hold{0%,12%{width:0%}62%{width:100%}100%{width:100%}}
+@media (prefers-reduced-motion: reduce){.te-holddemo{animation:none;width:60%}}
+</style>
+</helmet>
+<div style="width: 1200px; height: 1000px; box-sizing: border-box; padding: 40px 44px; background: #F3F1EA; color: #17160F; display: flex; flex-direction: column; gap: 26px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<h1 style="margin: 0; font-family: 'Instrument Serif', Georgia, serif; font-weight: 400; font-size: 40px; line-height: 1.05">While a command is working</h1>
+<div style="font-size: 15px; color: #4A473F">The button becomes a live line. The icon moves with the kind of step, and the text names the real step. If a command fails or needs an answer, the line stops and says so in amber.</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px">
+<sc-for list="{{cmds}}" as="c" hint-placeholder-count="10">
+<section style="background: #FFFFFF; border: 1px solid #DCD7CB; border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 12px; min-height: 214px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 15px; font-weight: 600">{{c.label}}</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #5B584F">{{c.what}}</span></div>
+<dc-import name="Thinking" cmd="{{c.cmd}}" loop="{{ true }}" show="{{c.show}}" fail="{{c.fail}}" fail-at="1" ask="{{c.ask}}" ans-a="{{c.ansA}}" ans-b="{{c.ansB}}" hint-size="100%,150px"></dc-import>
+</section>
+</sc-for>
+<section style="background: #FFFFFF; border: 1px solid #DCD7CB; border-radius: 18px; padding: 18px; display: flex; flex-direction: column; gap: 12px; min-height: 214px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-size: 15px; font-weight: 600">Approve</span><span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #5B584F">yours, never automatic</span></div>
+<div style="font-size: 13.5px; color: #4A473F; line-height: 1.45">Approving is not a working state. You press and hold, so it can’t happen by a stray tap.</div>
+<div style="position: relative; overflow: hidden; height: 52px; border-radius: 12px; background: #17160F; color: #F3F1EA; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600">
+<span class="te-holddemo" style="position: absolute; left: 0; top: 0; bottom: 0; background: #2340A8"></span>
+<span style="position: relative">Hold to approve</span>
+</div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      cmds: [
+        { cmd: 'next', label: 'Plan the next post', what: '/next' },
+        { cmd: 'draft', label: 'Draft', what: '/draft-thread' },
+        { cmd: 'ready', label: 'Start posting', what: '/ready' },
+        { cmd: 'find', label: 'I’ve posted it', what: '/posted' },
+        { cmd: 'posted', label: 'Copy the shout-out', what: '/posted' },
+        { cmd: 'record', label: 'Skip the shout-out', what: '/posted' },
+        { cmd: 'ask', label: 'Ask Cortex', what: 'chat' },
+        { cmd: 'results', label: 'Write this week’s review', what: '/results' },
+        { cmd: 'draft', label: 'When a command fails', what: 'error', show: 'error', fail: 'Couldn’t reach postman.com/pricing. Nothing was written; try again in a minute.' },
+        { cmd: 'results', label: 'When it needs you', what: 'question', show: 'needs', ask: 'The review needs this week’s numbers from X’s eligibility screen.', ansA: 'Use 24 Sep’s', ansB: 'Leave them out' }
+      ].map((c) => Object.assign({ show: 'live', fail: '', ask: '', ansA: 'Yes', ansB: 'Not now' }, c))
+    };
+  }
+}
+</script>
+</body>
+</html>

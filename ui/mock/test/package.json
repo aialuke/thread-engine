@@ -1,0 +1,6 @@
+{
+  "name": "thread-engine-mock-tests",
+  "private": true,
+  "description": "Headless Chrome checks for the UI mock. Uses the system Chrome, so no browser download.",
+  "dependencies": { "playwright-core": "^1.63.0" }
+}
