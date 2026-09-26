@@ -6668,6 +6668,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 1
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 59.6,
+          "label": "valid",
+          "public": {
+            "impressions": 678,
+            "likes": 3,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 678,
+            "likes": 3,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -6711,6 +6732,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 3
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 59.5,
+          "label": "valid",
+          "public": {
+            "impressions": 2901,
+            "likes": 10,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 2901,
+            "likes": 10,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 3,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -6850,6 +6892,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 2
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 59.2,
+          "label": "valid",
+          "public": {
+            "impressions": 603,
+            "likes": 3,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 603,
+            "likes": 3,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 2,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -6898,6 +6961,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 1
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 59.1,
+          "label": "valid",
+          "public": {
+            "impressions": 211,
+            "likes": 3,
+            "replies": 0,
+            "reposts": 1,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 211,
+            "likes": 3,
+            "replies": 0,
+            "reposts": 1,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -6946,6 +7030,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 1
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 59.0,
+          "label": "valid",
+          "public": {
+            "impressions": 988,
+            "likes": 22,
+            "replies": 0,
+            "reposts": 1,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 988,
+            "likes": 22,
+            "replies": 0,
+            "reposts": 1,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -6989,6 +7094,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 1
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 59.0,
+          "label": "valid",
+          "public": {
+            "impressions": 180,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 180,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7032,6 +7158,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 58.7,
+          "label": "valid",
+          "public": {
+            "impressions": 910,
+            "likes": 3,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 910,
+            "likes": 3,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7079,6 +7226,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 58.5,
+          "label": "valid",
+          "public": {
+            "impressions": 695,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 695,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7122,6 +7290,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 1
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 58.4,
+          "label": "valid",
+          "public": {
+            "impressions": 14,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 14,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7172,6 +7361,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 58.4,
+          "label": "valid",
+          "public": {
+            "impressions": 185,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 185,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7215,6 +7425,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 58.4,
+          "label": "valid",
+          "public": {
+            "impressions": 605,
+            "likes": 5,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 605,
+            "likes": 5,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 2,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7258,6 +7489,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 58.3,
+          "label": "valid",
+          "public": {
+            "impressions": 28,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 28,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7301,6 +7553,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 58.3,
+          "label": "valid",
+          "public": {
+            "impressions": 182,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 182,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7348,6 +7621,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 58.2,
+          "label": "valid",
+          "public": {
+            "impressions": 66,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 66,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7391,6 +7685,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 1
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 58.1,
+          "label": "valid",
+          "public": {
+            "impressions": 1998,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 1998,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 2,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7434,6 +7749,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 58.0,
+          "label": "valid",
+          "public": {
+            "impressions": 535,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 535,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7483,6 +7819,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 58.0,
+          "label": "valid",
+          "public": {
+            "impressions": 408,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 408,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7526,6 +7883,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 57.9,
+          "label": "valid",
+          "public": {
+            "impressions": 8,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 8,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7569,6 +7947,27 @@
           "shares": 0,
           "new_follows": 1,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 57.9,
+          "label": "valid",
+          "public": {
+            "impressions": 365,
+            "likes": 9,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 365,
+            "likes": 9,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7612,6 +8011,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 57.8,
+          "label": "valid",
+          "public": {
+            "impressions": 109,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 109,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7655,6 +8075,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 57.8,
+          "label": "valid",
+          "public": {
+            "impressions": 10,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 10,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7698,6 +8139,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 57.8,
+          "label": "valid",
+          "public": {
+            "impressions": 18,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 18,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 2,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7741,6 +8203,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 57.7,
+          "label": "valid",
+          "public": {
+            "impressions": 849,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 849,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7784,6 +8267,27 @@
           "shares": 0,
           "new_follows": 0,
           "profile_visits": 0
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 57.7,
+          "label": "valid",
+          "public": {
+            "impressions": 25,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 25,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7809,6 +8313,27 @@
           },
           "organic": {
             "impressions": 2,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 57.5,
+          "label": "valid",
+          "public": {
+            "impressions": 26,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 26,
             "likes": 0,
             "replies": 0,
             "reposts": 0,
@@ -7845,6 +8370,27 @@
           "organic": {
             "impressions": 3,
             "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 57.0,
+          "label": "valid",
+          "public": {
+            "impressions": 20,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 20,
+            "likes": 1,
             "replies": 0,
             "reposts": 0,
             "profile_visits": 0,
@@ -7887,6 +8433,27 @@
             "profile_visits": 0,
             "url_clicks": 0
           }
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 56.9,
+          "label": "valid",
+          "public": {
+            "impressions": 71,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 71,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
         }
       }
     },
@@ -7913,6 +8480,27 @@
           "organic": {
             "impressions": 6,
             "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 56.9,
+          "label": "valid",
+          "public": {
+            "impressions": 15,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 15,
+            "likes": 1,
             "replies": 0,
             "reposts": 0,
             "profile_visits": 0,
@@ -7953,6 +8541,1340 @@
           "organic": {
             "impressions": 4,
             "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        },
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 56.9,
+          "label": "valid",
+          "public": {
+            "impressions": 54,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 1,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 54,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 1,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102949958760681962": {
+      "id": "2102949958760681962",
+      "kind": "reply",
+      "created_at": "2026-09-24T02:35:15Z",
+      "conversation_id": "2102933535883485620",
+      "topics": [],
+      "text": "@_ Based on the news today, he probably doesn't have it anymore.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 55.4,
+          "label": "valid",
+          "public": {
+            "impressions": 57,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 57,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102951088555163725": {
+      "id": "2102951088555163725",
+      "kind": "reply",
+      "created_at": "2026-09-24T02:39:45Z",
+      "conversation_id": "2102933535883485620",
+      "topics": [
+        "Artificial intelligence",
+        "Business & finance",
+        "Financial Services Business",
+        "Government",
+        "OpenAI",
+        "Sam Altman",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ https://t.co/ubtDLem27p",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 55.3,
+          "label": "valid",
+          "public": {
+            "impressions": 18,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 18,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102951672079348142": {
+      "id": "2102951672079348142",
+      "kind": "reply",
+      "created_at": "2026-09-24T02:42:04Z",
+      "conversation_id": "2102933535883485620",
+      "topics": [
+        "Anthony Albanese",
+        "Australian Federal Election 2022",
+        "Political figures",
+        "Politics"
+      ],
+      "text": "@_ https://t.co/02lbqjvqxz",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 55.3,
+          "label": "valid",
+          "public": {
+            "impressions": 13,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 13,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102951849926267294": {
+      "id": "2102951849926267294",
+      "kind": "reply",
+      "created_at": "2026-09-24T02:42:46Z",
+      "conversation_id": "2102933535883485620",
+      "topics": [],
+      "text": "@_ I am from Australia so I am probably seeing it everywhere on my feed. but a lot of sources verifying it.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 55.3,
+          "label": "valid",
+          "public": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102952158056579515": {
+      "id": "2102952158056579515",
+      "kind": "reply",
+      "created_at": "2026-09-24T02:44:00Z",
+      "conversation_id": "2102933535883485620",
+      "topics": [],
+      "text": "@_ Oh for sure but when you open pandoras box... 😬",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 55.3,
+          "label": "valid",
+          "public": {
+            "impressions": 10,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 10,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102952376265294313": {
+      "id": "2102952376265294313",
+      "kind": "reply",
+      "created_at": "2026-09-24T02:44:52Z",
+      "conversation_id": "2102933535883485620",
+      "topics": [],
+      "text": "@_ This is actual statement from the PM. https://t.co/a6EQagjP58",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 55.3,
+          "label": "valid",
+          "public": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102953235925660104": {
+      "id": "2102953235925660104",
+      "kind": "reply",
+      "created_at": "2026-09-24T02:48:17Z",
+      "conversation_id": "2102933535883485620",
+      "topics": [
+        "Artificial intelligence",
+        "OpenAI",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ Happy to share. One question I have, how did the government not identify the breach for 3 months and how do governments adopt/adapt AI to work with them for this.\n\nOnly came out because OpenAI admitted it, could you imagine how many others go undetected?",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 55.2,
+          "label": "valid",
+          "public": {
+            "impressions": 7,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 7,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102953568739418274": {
+      "id": "2102953568739418274",
+      "kind": "reply",
+      "created_at": "2026-09-24T02:49:36Z",
+      "conversation_id": "2102941213498511790",
+      "topics": [],
+      "text": "@_ Why would you not have ministers that know what they are talking about to address issues.  Just because he is the PM doesn't mean he needs to address it, and it's painful to watch.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 55.2,
+          "label": "valid",
+          "public": {
+            "impressions": 22,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 22,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102953657587343725": {
+      "id": "2102953657587343725",
+      "kind": "reply",
+      "created_at": "2026-09-24T02:49:57Z",
+      "conversation_id": "2102933535883485620",
+      "topics": [],
+      "text": "@_ From intrusion to disclosure. They never detected it.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 55.2,
+          "label": "valid",
+          "public": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102955853204869303": {
+      "id": "2102955853204869303",
+      "kind": "reply",
+      "created_at": "2026-09-24T02:58:41Z",
+      "conversation_id": "2102933535883485620",
+      "topics": [
+        "Sports & Fitness Business"
+      ],
+      "text": "@_ Working with AI, running red team exercises would be good to start identifying safety and security flaws as well as vectors of attack that leave them vulnerable.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 55.0,
+          "label": "valid",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102956222785966366": {
+      "id": "2102956222785966366",
+      "kind": "reply",
+      "created_at": "2026-09-24T03:00:09Z",
+      "conversation_id": "2102933535883485620",
+      "topics": [
+        "Australia government institutions",
+        "Australia politics",
+        "Australian Government (AusGov)",
+        "Politics"
+      ],
+      "text": "@_ Sounds like you have some introductions to start making for the Australian government. 😂",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 55.0,
+          "label": "valid",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102960365474906527": {
+      "id": "2102960365474906527",
+      "kind": "reply",
+      "created_at": "2026-09-24T03:16:36Z",
+      "conversation_id": "2102957329549529173",
+      "topics": [],
+      "text": "@_ that’s huge 🎉",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 54.7,
+          "label": "valid",
+          "public": {
+            "impressions": 67,
+            "likes": 3,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 67,
+            "likes": 3,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102963042359321041": {
+      "id": "2102963042359321041",
+      "kind": "reply",
+      "created_at": "2026-09-24T03:27:15Z",
+      "conversation_id": "2102939068040699930",
+      "topics": [],
+      "text": "@_ The slippery slope of communism.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 54.5,
+          "label": "valid",
+          "public": {
+            "impressions": 9,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 9,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102996753209495707": {
+      "id": "2102996753209495707",
+      "kind": "reply",
+      "created_at": "2026-09-24T05:41:12Z",
+      "conversation_id": "2102982557570884085",
+      "topics": [
+        "Grok Ai",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ @_ What did your loop look like? Something I use to avoid this is have a different model blind review the approach before proceeding so Claude plans, Codex or Grok do a blind adversarial review.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 52.3,
+          "label": "valid",
+          "public": {
+            "impressions": 26,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 26,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2102996940388729343": {
+      "id": "2102996940388729343",
+      "kind": "reply",
+      "created_at": "2026-09-24T05:41:57Z",
+      "conversation_id": "2102958488658104365",
+      "topics": [],
+      "text": "@_ Did they even get back to you?",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 52.3,
+          "label": "valid",
+          "public": {
+            "impressions": 722,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 722,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103003026365800566": {
+      "id": "2103003026365800566",
+      "kind": "reply",
+      "created_at": "2026-09-24T06:06:08Z",
+      "conversation_id": "2102972404645654850",
+      "topics": [],
+      "text": "@_ We need a counter for how many times he has lied. Hard to keep track.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 51.9,
+          "label": "valid",
+          "public": {
+            "impressions": 292,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 292,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103003604768747962": {
+      "id": "2103003604768747962",
+      "kind": "reply",
+      "created_at": "2026-09-24T06:08:25Z",
+      "conversation_id": "2102963913579237398",
+      "topics": [],
+      "text": "@_ Has your Agent or any memory files changed in that time? Something could be steering it down the wrong path.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 51.9,
+          "label": "valid",
+          "public": {
+            "impressions": 15,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 15,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103004001117901181": {
+      "id": "2103004001117901181",
+      "kind": "reply",
+      "created_at": "2026-09-24T06:10:00Z",
+      "conversation_id": "2102924343798050897",
+      "topics": [],
+      "text": "@_ Until they provide details on what the actual \"data\" was that was breached I would be very suss on the hype.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 51.8,
+          "label": "valid",
+          "public": {
+            "impressions": 40,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 40,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103004531080732886": {
+      "id": "2103004531080732886",
+      "kind": "reply",
+      "created_at": "2026-09-24T06:12:06Z",
+      "conversation_id": "2102973766665904504",
+      "topics": [],
+      "text": "@_ Genuinely curious to hear why.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 51.8,
+          "label": "valid",
+          "public": {
+            "impressions": 163,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 163,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103006795451302193": {
+      "id": "2103006795451302193",
+      "kind": "original",
+      "created_at": "2026-09-24T06:21:06Z",
+      "conversation_id": "2103006795451302193",
+      "topics": [
+        "Financial Services Business"
+      ],
+      "text": "Is everyone being a \"founder\" the new version of \"entrepreneur\"?",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 51.6,
+          "label": "valid",
+          "public": {
+            "impressions": 23,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 23,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103011288960139329": {
+      "id": "2103011288960139329",
+      "kind": "reply",
+      "created_at": "2026-09-24T06:38:58Z",
+      "conversation_id": "2102865450841625044",
+      "topics": [],
+      "text": "@_ Less trustworthy than banks?",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 51.4,
+          "label": "valid",
+          "public": {
+            "impressions": 9,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 9,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103036579522686982": {
+      "id": "2103036579522686982",
+      "kind": "reply",
+      "created_at": "2026-09-24T08:19:27Z",
+      "conversation_id": "2102760006131069067",
+      "topics": [],
+      "text": "@_ Memes. https://t.co/dEeVl3buvR",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 49.7,
+          "label": "valid",
+          "public": {
+            "impressions": 811,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 811,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103039317992149096": {
+      "id": "2103039317992149096",
+      "kind": "reply",
+      "created_at": "2026-09-24T08:30:20Z",
+      "conversation_id": "2103005167855837537",
+      "topics": [],
+      "text": "@_ The equivalent of  leaving the front door open and wondering how you were robbed.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 49.5,
+          "label": "valid",
+          "public": {
+            "impressions": 17,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 17,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103044546464718918": {
+      "id": "2103044546464718918",
+      "kind": "reply",
+      "created_at": "2026-09-24T08:51:07Z",
+      "conversation_id": "2102931179376930818",
+      "topics": [],
+      "text": "@_ @_ As they haven't given details on what the actual \"data\" was that was breached, an answer like that makes me suss that it's a panic story to justify more government control in the name of \"safety\".",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 49.1,
+          "label": "valid",
+          "public": {
+            "impressions": 6,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 6,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103048265721893004": {
+      "id": "2103048265721893004",
+      "kind": "reply",
+      "created_at": "2026-09-24T09:05:53Z",
+      "conversation_id": "2102886488405143576",
+      "topics": [
+        "Pauline Hanson"
+      ],
+      "text": "@_ It was aggregate data which has no personal identifiable information. Just generalised information such as averages and trends.\n\nThe same data has since been made public. So considering the hype you can expect they will spout more government control in the name of “safety”.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 48.9,
+          "label": "valid",
+          "public": {
+            "impressions": 436,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 436,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103049927580610841": {
+      "id": "2103049927580610841",
+      "kind": "reply",
+      "created_at": "2026-09-24T09:12:30Z",
+      "conversation_id": "2102964497208242564",
+      "topics": [],
+      "text": "@_ Aggregate data, so no personal identifiable information just averages and trends.\n\nThat data has since been made public. But you can expect they will spout more government control in the name of “safety”.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 48.8,
+          "label": "valid",
+          "public": {
+            "impressions": 122,
+            "likes": 3,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 122,
+            "likes": 3,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103050696463724622": {
+      "id": "2103050696463724622",
+      "kind": "reply",
+      "created_at": "2026-09-24T09:15:33Z",
+      "conversation_id": "2102873223973195890",
+      "topics": [],
+      "text": "@_ They were non-public at the time of the breach but they left out that they have since been made public.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 48.7,
+          "label": "valid",
+          "public": {
+            "impressions": 205,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 205,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103065550348058756": {
+      "id": "2103065550348058756",
+      "kind": "reply",
+      "created_at": "2026-09-24T10:14:34Z",
+      "conversation_id": "2103056815932203226",
+      "topics": [
+        "Artificial intelligence",
+        "Information security",
+        "OpenAI",
+        "Technology",
+        "Technology Business"
+      ],
+      "text": "@_ Exactly!\nIn the breach, OpenAI’s agent got aggregate stats  — averages and trends. No personal data.  That same data has since been made public.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 47.8,
+          "label": "valid",
+          "public": {
+            "impressions": 65,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 65,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103082125281116493": {
+      "id": "2103082125281116493",
+      "kind": "reply",
+      "created_at": "2026-09-24T11:20:26Z",
+      "conversation_id": "2103073902905991638",
+      "topics": [],
+      "text": "@_ AI can only build on what you can conceive and effectively communicate.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 46.7,
+          "label": "valid",
+          "public": {
+            "impressions": 33,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 33,
+            "likes": 2,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103085846174060577": {
+      "id": "2103085846174060577",
+      "kind": "reply",
+      "created_at": "2026-09-24T11:35:13Z",
+      "conversation_id": "2103030833204630011",
+      "topics": [],
+      "text": "@_ If they don't find you, find them and find a way to spark authentic interaction.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 46.4,
+          "label": "valid",
+          "public": {
+            "impressions": 41,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 41,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103092598059802891": {
+      "id": "2103092598059802891",
+      "kind": "reply",
+      "created_at": "2026-09-24T12:02:03Z",
+      "conversation_id": "2103030833204630011",
+      "topics": [],
+      "text": "@_ On X, I see what they are working on or up to and look for something that I am genuinely curious about.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 46.0,
+          "label": "valid",
+          "public": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 4,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103094305309311383": {
+      "id": "2103094305309311383",
+      "kind": "original",
+      "created_at": "2026-09-24T12:08:50Z",
+      "conversation_id": "2103094305309311383",
+      "topics": [],
+      "text": "My favourite agent prompt after any plan or file read:\n\n“Was there anything you overlooked?”\n\nEvery pass it surfaces things that would have cost hours later.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 45.9,
+          "label": "valid",
+          "public": {
+            "impressions": 16,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 16,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103097145780039869": {
+      "id": "2103097145780039869",
+      "kind": "reply",
+      "created_at": "2026-09-24T12:20:07Z",
+      "conversation_id": "2102987776127828092",
+      "topics": [],
+      "text": "@_ If you were using Claude Opus 5 before the recent update, it would try to run a commit after every single small change.\n\nSo somewhere between that and at the end is your balance 😂",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 45.7,
+          "label": "valid",
+          "public": {
+            "impressions": 66,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 66,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103097721301414173": {
+      "id": "2103097721301414173",
+      "kind": "reply",
+      "created_at": "2026-09-24T12:22:25Z",
+      "conversation_id": "2102782574204764599",
+      "topics": [],
+      "text": "Academic Writing. A General Essay Format Essay\n\nA general essay format is easy to adhere to if properly executed, while an advanced essay format is just as easy and expandable as per requirement.\n\nAdherence to an essay format is perhaps one of the essential elements of a well-written essay. In cases where no essay format is followed, it is a commonplace to expect a poor grade and an even poorer review. In order to keep things as simple as possible, most students choose to make use of a standard essay format.\n\nThe standard essay format is composed of three basic parts. The first part is the introduction that usually makes up about a paragraph or so. In this part, the reader is introduced to the subject of the essay and the thesis. The second part of the standard essay format is the body in which arguments are given in favour of or against the thesis. The essay format brings the essay to a close in which the final conclusion is given based on the discussion in the previous part of the format, namely the body.\n\nA more advanced essay format that is more or less a derivation of the standard essay format seeks to divide an essay into five parts. In this essay format, the first part remains the same as it is in the traditional essay format, the introduction. The second part of this essay format introduces the first argument and argues over the first argument. The second part of the essay format introduces the second argument, and the same process is repeated with the third party until the essay comes to a close in the fifth part, the conclusion. It is imperative to note that this essay format considers three arguments to be valid and sufficient for an adequate discussion to be carried out and can therefore be extended as per requirement.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 45.6,
+          "label": "valid",
+          "public": {
+            "impressions": 8,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 8,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103099307952099394": {
+      "id": "2103099307952099394",
+      "kind": "reply",
+      "created_at": "2026-09-24T12:28:43Z",
+      "conversation_id": "2103084425177358804",
+      "topics": [],
+      "text": "@_ How slop was it on a scale from 1 to Opus 5?",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 45.5,
+          "label": "valid",
+          "public": {
+            "impressions": 26,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 26,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103099846773375199": {
+      "id": "2103099846773375199",
+      "kind": "reply",
+      "created_at": "2026-09-24T12:30:51Z",
+      "conversation_id": "2103012556960870539",
+      "topics": [],
+      "text": "@_ Yeah, I run pretty fast and loose with letting the agent go wild.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 45.5,
+          "label": "valid",
+          "public": {
+            "impressions": 3,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 3,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103100321279168960": {
+      "id": "2103100321279168960",
+      "kind": "reply",
+      "created_at": "2026-09-24T12:32:44Z",
+      "conversation_id": "2102882494391718029",
+      "topics": [],
+      "text": "@_ If you use AI, you are still paying for something that with agree with everything you say 😂",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 45.5,
+          "label": "valid",
+          "public": {
+            "impressions": 13,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 13,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103102274176516567": {
+      "id": "2103102274176516567",
+      "kind": "reply",
+      "created_at": "2026-09-24T12:40:30Z",
+      "conversation_id": "2103009700241649873",
+      "topics": [],
+      "text": "@_ Back end. I find it easier to wire functions without having stray UI components that way.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 45.3,
+          "label": "valid",
+          "public": {
+            "impressions": 100,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 100,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103102565840027674": {
+      "id": "2103102565840027674",
+      "kind": "reply",
+      "created_at": "2026-09-24T12:41:40Z",
+      "conversation_id": "2103064052603949280",
+      "topics": [],
+      "text": "@_ It depends if building it is something that interests me. If not I would rather not spend hours of my time making it.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 45.3,
+          "label": "valid",
+          "public": {
+            "impressions": 11,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 11,
+            "likes": 1,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 1,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103103208583467277": {
+      "id": "2103103208583467277",
+      "kind": "reply",
+      "created_at": "2026-09-24T12:44:13Z",
+      "conversation_id": "2103019981172855263",
+      "topics": [],
+      "text": "@_ Not everyone will use it the way you envisioned they would.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 45.3,
+          "label": "valid",
+          "public": {
+            "impressions": 73,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 73,
+            "likes": 0,
+            "replies": 1,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2103212881525280913": {
+      "id": "2103212881525280913",
+      "kind": "original",
+      "created_at": "2026-09-24T20:00:01Z",
+      "conversation_id": "2103212881525280913",
+      "topics": [
+        "developers"
+      ],
+      "text": "PAID → FREE\nFinding free developer tools that actually hold up.\n\nPostman Team → Bruno\n▷ API collections as plain-text files in your repo. No account.\n\nNavicat Premium → Beekeeper Studio\n▷ One SQL editor for Postgres, MySQL and SQLite.\n\nngrok Pay-as-you-go → Cloudflare Tunnel\n▷ Localhost on your own domain. No open ports.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-26T10:00:04Z",
+          "age_hours": 38.0,
+          "label": "valid",
+          "public": {
+            "impressions": 135,
+            "likes": 1,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 135,
+            "likes": 1,
             "replies": 0,
             "reposts": 0,
             "profile_visits": 0,
