@@ -15,7 +15,7 @@ The operator's main command, in Grok or Claude Code. Speak plainly. The operator
 
 1. Run `python3 scripts/snapshot.py`. Run it every time: a repeat on the same day costs nothing and records nothing twice.
 2. Run `python3 scripts/loop.py status`.
-3. Read the last lines of `ledger/runs.log`. If the last run says `snapshot failed`, or the last `snapshot ok` is more than 30 hours old, say that first, in one sentence, with the likely cause: the Mac was off or locked, or the X API credits ran out.
+3. Read the last few lines of `ledger/runs.log`, not only the last: step 1's fresh run can hide an earlier failure. If any line since the previous `snapshot ok` before it says `snapshot failed stage=`, say that first, in one sentence: recording failed at that stage, which is not the Mac or the X API credits; if a later run says `snapshot ok`, that run filled in what was missed (`loop.py` skips snapshots it already has). If the last run says `snapshot failed error=`, or the last `snapshot ok` is more than 30 hours old, say that first, in one sentence, with the likely cause: the Mac was off or locked, or the X API credits ran out.
 4. Tell the operator in two or three lines what changed: new reads, follower change, anything marked non-organic, any experiment status change. Add one line from the "Original Content Rewards" block in `ledger/SUMMARY.md`: verified followers against 500, and the last reading of X's eligibility screen.
 
 ## 2. Weekly work, when `review.review_due` is true
@@ -25,7 +25,7 @@ The operator's main command, in Grok or Claude Code. Speak plainly. The operator
 
 ## 3. Pick the slot
 
-**Experiments are paused** until the loop has two weeks of organic X API data (`reference/x-api.md`). `open-experiment` refuses views, root replies, a cohort whose median is 0, and non-organic posts, so the list below cannot run yet. Until the pause is lifted, skip this section: propose the post with no experiment arm, and tell the operator in one line that experiments restart once the organic numbers are in. When they restart, every experiment scores **the root only** (the only post that counts toward X's rewards program), on its organic reach and engagement at the 36–60 hour read. `primary` is never views.
+**Experiments are paused** until the loop has two weeks of organic X API data (`reference/x-api.md`). `open-experiment` refuses views, root replies, a cohort whose median is 0, and non-organic posts, so the list below cannot run yet. Until the pause is lifted, skip this section: propose the post with no experiment arm, and tell the operator in one line that experiments restart once the organic numbers are in. When they restart, every experiment scores **the root only** (the only post that counts toward X's rewards program), on the one engagement metric named in the proposal (likes, reposts, quotes or bookmarks) at the 36–60 hour read; reach is reported but never scored. `primary` is never views.
 
 Run `python3 scripts/loop.py next-slot`.
 
@@ -36,7 +36,7 @@ Run `python3 scripts/loop.py next-slot`.
   4. Root length: under 280 characters against 500–600.
   5. Replies: five substantive replies in the lane on a posting day against none, measured by followers gained that week.
   6. PAID → FREE category: one category against another (for example developer against creator), with the header, shape, slot and shout-out held fixed. Cohort: earlier organic PAID → FREE posts.
-  State: the question, the treatment, what it is compared with, and the cohort, meaning earlier posts from `ledger/SUMMARY.md` in the same lane that match the comparison format, at least 3. When the operator says yes, write `loop/inbox/experiment.json` (`question`, `treatment`, `control`, `cohort` ids, `primary` "views", `effect` 1.5, `reference_facts` like ["A1","A5"]) and run `python3 scripts/loop.py open-experiment --json loop/inbox/experiment.json`.
+  State: the question, the treatment, what it is compared with, the cohort, meaning earlier posts from `ledger/SUMMARY.md` in the same lane that match the comparison format, at least 3, and the primary metric: one of likes, reposts, quotes or bookmarks, chosen for this experiment and named in the proposal for the operator's yes (`loop.py` refuses views and replies). When the operator says yes, write `loop/inbox/experiment.json` (`question`, `treatment`, `control`, `cohort` ids, `primary` the metric the operator said yes to, `effect` 1.5, `reference_facts` like ["A1","A5"]) and run `python3 scripts/loop.py open-experiment --json loop/inbox/experiment.json`.
 - **explore, experiment open:** the next post is the experiment's treatment.
 - **exploit:** the next post uses the best-known approach: follow any `adopted` lessons in `learnings.md`. If an experiment is open, mark the row `arm: control`.
 

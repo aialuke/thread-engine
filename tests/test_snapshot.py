@@ -146,6 +146,28 @@ class DailyRun(unittest.TestCase):
         self.assertNotIn("api", self.state())
         self.assertIn("snapshot failed", (self.root / "ledger" / "runs.log").read_text())
 
+    def test_failed_recording_logs_stage_and_does_not_commit(self) -> None:
+        real = snapshot.loop
+
+        def failing(*args: str) -> dict:
+            if args[0] == "record-snapshot":
+                raise RuntimeError("disk full")
+            return real(*args)
+
+        snapshot.loop = failing
+        self.addCleanup(setattr, snapshot, "loop", real)
+        code, out = self.run_once(FakeReader(FOLLOWERS, self.items, [MENTION]))
+        self.assertEqual(code, 1)
+        self.assertIn("partly written", out)
+        self.assertIn("Run /next", out)
+        runs = (self.root / "ledger" / "runs.log").read_text()
+        self.assertIn("snapshot failed stage=record", runs)
+        self.assertIn("disk full", runs)
+        self.assertNotIn("snapshot ok", runs)
+        commits = subprocess.run(["git", "log", "--oneline", "--all"], cwd=self.root,
+                                 capture_output=True, text=True).stdout
+        self.assertNotIn("snapshots", commits)
+
     def test_next_day_continues_from_cursor_and_credits_the_new_follower(self) -> None:
         self.run_once(FakeReader(FOLLOWERS, self.items, [MENTION]))
         later = NOW + timedelta(hours=24)

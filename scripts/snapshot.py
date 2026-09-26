@@ -197,19 +197,33 @@ def run(reader=None, now: datetime | None = None) -> int:
         print(f"The X read failed, so nothing was recorded and nothing moved on: {exc}. "
               "The next run picks the same posts up.")
         return 1
-    raw = ROOT / "ledger" / "raw" / "api" / f"run-{now.strftime('%Y%m%dT%H%M')}.json"
-    raw.parent.mkdir(parents=True, exist_ok=True)
-    raw.write_text(json.dumps({"fetched_at": x_api.iso(now), "followers": followers, "read48": items48,
-                               "final": final, "mentions": mentions}, indent=1, ensure_ascii=False) + "\n",
-                   encoding="utf-8")
-    windows = [("48h", items48, {"read48_until": x_api.iso(read_to)})]
-    if final_from < final_to:
-        windows.append(("final", final, {"final_until": x_api.iso(final_to)}))
-    lines = process(now, followers, windows, mentions, str(raw.relative_to(ROOT)))
-    usage = reader.usage()
-    log(f"{x_api.iso(now)} snapshot ok read48={len(items48)} final={len(final)} followers={len(followers)} "
-        f"api_items={usage['items_read']} cost_usd={usage['cost_usd']}")
-    loop("commit-data", "--message", f"snapshots {now.date().isoformat()}")
+    # Recording is not all-or-nothing: a failure here leaves earlier writes in place, so say so.
+    stage = "raw-file"
+    try:
+        raw = ROOT / "ledger" / "raw" / "api" / f"run-{now.strftime('%Y%m%dT%H%M')}.json"
+        raw.parent.mkdir(parents=True, exist_ok=True)
+        raw.write_text(json.dumps({"fetched_at": x_api.iso(now), "followers": followers, "read48": items48,
+                                   "final": final, "mentions": mentions}, indent=1, ensure_ascii=False) + "\n",
+                       encoding="utf-8")
+        windows = [("48h", items48, {"read48_until": x_api.iso(read_to)})]
+        if final_from < final_to:
+            windows.append(("final", final, {"final_until": x_api.iso(final_to)}))
+        stage = "record"
+        lines = process(now, followers, windows, mentions, str(raw.relative_to(ROOT)))
+        stage = "usage"
+        usage = reader.usage()
+        log(f"{x_api.iso(now)} snapshot ok read48={len(items48)} final={len(final)} followers={len(followers)} "
+            f"api_items={usage['items_read']} cost_usd={usage['cost_usd']}")
+        stage = "commit-data"
+        loop("commit-data", "--message", f"snapshots {now.date().isoformat()}")
+    except Exception as exc:
+        try:
+            log(f"{x_api.iso(now)} snapshot failed stage={stage} error={str(exc)[:160]!r}")
+        except OSError:
+            pass
+        print(f"The snapshot failed while at stage {stage}: {exc}. "
+              "Some records may be partly written. Run /next to see it.")
+        return 1
     lines.append(f"Estimated X API cost: ${usage['cost_usd']:.3f}.")
     print("\n".join(lines))
     return 0
