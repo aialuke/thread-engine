@@ -1,5 +1,7 @@
 # Thread Engine UI: build handoff
 
+> **26 Sep, D88:** Grok is dropped from the product, as X reader and as engine. Where these files mention Grok, they describe today's factory, not the product. Discovery uses X API recent search (`reviews/ui-direction.md` D88).
+
 **For:** the agent planning the build with the operator.
 **Pinned to:** mock version 22 (https://claude.ai/artifact/8zaBcxWAknJaXWkReQQPqg), source `ui/mock/`, decisions D1–D36 in `reviews/ui-direction.md`, reviews `reviews/ui-review-2026-09-24.md` and `reviews/ui-review-2026-09-25.md`. Written 25 Sep 2026.
 **Your job:** help the operator decide how to build this, by grilling them on the open questions in `build-questions.md`. This handoff doesn't recommend a build path; that's the operator's call.

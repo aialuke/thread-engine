@@ -91,7 +91,7 @@ These come from `AGENTS.md` §"What the loop may never change" plus the mechanis
 | Mac-side service running headless agents with the project's hooks; secure remote access; phone's own clipboard; "Mac unreachable" health state | The build. | `ui-review-2026-09-24.md` C.1 |
 | Live features (live replies, 10-min nudge, shout-out detection) need a poller and push; web push needs a home-screen app + permission on iPhone | The build. | `ui-review-2026-09-24.md` C.4 |
 | "Worth joining" results aren't stored (currently ephemeral `/next` chat output, up to ~$0.15/search) | The build. | `ui-review-2026-09-24.md` C.5 |
-| Health/spend tracking is incomplete (spend estimate omits `x_read`, CLI, Grok costs; "keys working" only checks existence) | The build. | `ui-review-2026-09-24.md` C.6 |
+| Health/spend tracking is incomplete (spend estimate omits `x_read`, CLI, Grok costs; "keys working" only checks existence) | The build. | `ui-review-2026-09-24.md` C.6 *(D88: no Grok in the product.)* |
 | Snapshot double-charge risk if a "Plan" button re-runs the snapshot across the UTC-day boundary (10:00 Brisbane) | The build. | `ui-review-2026-09-24.md` C.7 |
 | Weights exist only as prose in the format skills; a structured file is needed if the UI displays/edits them | The build. | `ui-review-2026-09-24.md` C.8 |
 | Working-state text must match real command timings (drafting takes minutes, not seconds; no fake steps) | The build. | `ui-review-2026-09-24.md` C.9 |
