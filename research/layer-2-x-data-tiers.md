@@ -11,6 +11,8 @@
 
 **Update 26 Sep (D88): Grok is dropped from the product.** The tiers are CSV only and CSV + X API. Discovery comes only from X API recent search. The Grok rows and options below are kept as the research record: L2-C6 is decided (X API search, with code-built queries from any remaining engine's phrases), L2-C7 loses option (b), and conflict K11 no longer applies. Evidence: `research/discovery-x-api-search-proposal.md`.
 
+**Update 26 Sep (D89–D104): layer 2 is decided.** Both tiers at launch, with Discovery if its stages pass (D89); each user brings their own X keys (D90); Premium is required (D95). Each choice in §5 and each conflict in §3 says which decision settled it.
+
 Anything not confirmed is marked **UNVERIFIED**. Codex gave a blind second read (§4); its accepted points are folded in.
 
 **Short names for sources.**
@@ -364,20 +366,20 @@ Listed as found, not worked around.
 
 | # | Decision | What strains it | Evidence |
 |---|---|---|---|
-| K1 | **D54** (guided in-app steps; its example is "getting X API keys from X's developer portal") | X warns that requiring end users to register apps "could result in enforcement actions against you, your applications, your customers, and/or the end users". D54's example is the pattern X names. | RU; `reviews/ui-direction.md:64` |
-| K2 | **D43 / D50** (a tier "that works from the analytics CSV export alone"; the CSV-only tier "matters as much" in a public v1) | If the export needs Premium, the CSV tier isn't open to non-Premium users, and no current official page settles it. (Codex reads this as an access limit rather than a conflict; kept, §4.) | §2.1; `reviews/ui-direction.md:53, 60` |
-| K3 | **D76** (aggregate learning data, "on, with the switch to disable" as the lean) | X's benchmarking clause may reach pooled engagement numbers (a legal reading). X says sign-in isn't consent. Under option A the vendor is a third party to each user's X data. | DP; DA III.A(d); `reviews/ui-direction.md:86` |
-| K4 | **D78 / D81** (post text into model prompts) | No X term covers inference; the third-party transfer ban is the nearest. D81's cloud option sends other people's replies, and xAI's terms send personal data to its zero-retention API only. | DA III.A(d); XAI-ENT §11.2; `reviews/ui-direction.md:88, 91` |
-| K5 | **D42** (other people's data in private local files) | Stored X content must be kept current, and removed promptly and within 24 hours of a request. A private file that's never refreshed breaks that. Under option B the vendor answers for every user's files, including machines that are off. | DP; DA IV.B; `reviews/ui-direction.md:52` |
-| K6 | **D12 / D28** (Waiting for you, Worth joining, Builders cards) | Other people's posts must follow X's display rules: avatar, name, linked handle, linked timestamp, the X logo, actions or "View on X", unaltered and current. The mock uses placeholders. Collapsing greetings to one line hides them rather than altering them; whether that's allowed: UNVERIFIED. | DR; DP; `reviews/ui-direction.md:22, 38` |
-| K7 | **D58** (no X writes, a safety promise for everyone) | Batch compliance, the tool for keeping stored content current, uses POST and PUT to X. | Batch compliance page; `reviews/ui-direction.md:68` |
-| K8 | **D16** (cards previewed in X's layout, in the app's own look) | "Don't … Use mock ups of posts that don't exist on the platform." Whether a draft preview counts: UNVERIFIED. The app's own look may already avoid it. | DR; `reviews/ui-direction.md:26` |
-| K9 | **D17** (the app finds the post; pasting the link was rejected) | On Basic the app can't find the post. The sketch's fallback is the rejected paste. | §2.3; `reviews/ui-direction.md:27, 120` |
-| K10 | **D29 / D12 badge** (first-hour likes and replies, the live waiting count) | These need Full and live polling, so they're empty on Basic. Timers, the pre-post reminder (D35) and the minutes question don't need X data. On Full, the UTC day turn (10:00 Brisbane) can double-charge. | §2.3; `reviews/ui-direction.md:22, 39, 45` |
+| K1 | **D54** (guided in-app steps; its example is "getting X API keys from X's developer portal") | X warns that requiring end users to register apps "could result in enforcement actions against you, your applications, your customers, and/or the end users". D54's example is the pattern X names. | RU; `reviews/ui-direction.md:64` *Accepted risk under D90 (own keys); X not asked, D94.* |
+| K2 | **D43 / D50** (a tier "that works from the analytics CSV export alone"; the CSV-only tier "matters as much" in a public v1) | If the export needs Premium, the CSV tier isn't open to non-Premium users, and no current official page settles it. (Codex reads this as an access limit rather than a conflict; kept, §4.) | §2.1; `reviews/ui-direction.md:53, 60` *Settled by decision in D95 (Premium required for everyone), not by an official page; narrows D50.* |
+| K3 | **D76** (aggregate learning data, "on, with the switch to disable" as the lean) | X's benchmarking clause may reach pooled engagement numbers (a legal reading). X says sign-in isn't consent. Under option A the vendor is a third party to each user's X data. | DP; DA III.A(d); `reviews/ui-direction.md:86` *Accepted risk under D103; D91 reopens D52.* |
+| K4 | **D78 / D81** (post text into model prompts) | No X term covers inference; the third-party transfer ban is the nearest. D81's cloud option sends other people's replies, and xAI's terms send personal data to its zero-retention API only. | DA III.A(d); XAI-ENT §11.2; `reviews/ui-direction.md:88, 91` *Deferred to layer 3 by D104.* |
+| K5 | **D42** (other people's data in private local files) | Stored X content must be kept current, and removed promptly and within 24 hours of a request. A private file that's never refreshed breaks that. Under option B the vendor answers for every user's files, including machines that are off. | DP; DA IV.B; `reviews/ui-direction.md:52` *Addressed by D101 (ids and numbers only, text fetched fresh, deleted after 30 days); residual risk accepted: unopened ids for up to 30 days, and requests while the machine is off.* |
+| K6 | **D12 / D28** (Waiting for you, Worth joining, Builders cards) | Other people's posts must follow X's display rules: avatar, name, linked handle, linked timestamp, the X logo, actions or "View on X", unaltered and current. The mock uses placeholders. Collapsing greetings to one line hides them rather than altering them; whether that's allowed: UNVERIFIED. | DR; DP; `reviews/ui-direction.md:22, 38` *Resolved by D102: X-compliant cards.* |
+| K7 | **D58** (no X writes, a safety promise for everyone) | Batch compliance, the tool for keeping stored content current, uses POST and PUT to X. | Batch compliance page; `reviews/ui-direction.md:68` *Resolved by D101: no batch compliance.* |
+| K8 | **D16** (cards previewed in X's layout, in the app's own look) | "Don't … Use mock ups of posts that don't exist on the platform." Whether a draft preview counts: UNVERIFIED. The app's own look may already avoid it. | DR; `reviews/ui-direction.md:26` *Addressed by D102 (a "Draft" label on previews); whether previews fall under the rule stays unverified, risk accepted.* |
+| K9 | **D17** (the app finds the post; pasting the link was rejected) | On Basic the app can't find the post. The sketch's fallback is the rejected paste. | §2.3; `reviews/ui-direction.md:27, 120` *Resolved by D97: the paste returns on CSV only.* |
+| K10 | **D29 / D12 badge** (first-hour likes and replies, the live waiting count) | These need Full and live polling, so they're empty on Basic. Timers, the pre-post reminder (D35) and the minutes question don't need X data. On Full, the UTC day turn (10:00 Brisbane) can double-charge. | §2.3; `reviews/ui-direction.md:22, 39, 45` *Resolved by D97.* |
 | K11 | **D60** (a model job reaches the web only through the backend's own fetch) | Grok's X search runs on xAI's side inside the model call. It can be restricted and observed, but its fetch doesn't pass through the backend. X API search, run by the backend, doesn't have this problem. | §2.4; `reviews/ui-direction.md:70` *Void under D88: no Grok.* |
-| K12 | **D68** (the daily check is all-or-nothing, written once) | Scheduled reads fail in new ways on a desktop: asleep, token expired, credits out. A weekly follower list (L2-C2) is a different cadence from the daily transaction. A missed 36–60 h read can't be retaken. | `reviews/ui-direction.md:78`; `scripts/snapshot.py:179-199`; `reference/x-api.md:18` |
-| K13 | **D79** (only originals are voice samples) | On Basic, the CSV has no post type, so originals can't be told reliably from replies. | §2.3; `reviews/ui-direction.md:89` |
-| K14 | **D82** (refuse a draft whose text repeats an earlier post) | "Earlier post" needs a history source. On Full the timeline helper stops at 29 days; on Basic it's the downloaded ranges. Without a decided first-run history, the check covers only what the app has seen. | `reviews/ui-direction.md:92`; `scripts/x_api.py:210-217` |
+| K12 | **D68** (the daily check is all-or-nothing, written once) | Scheduled reads fail in new ways on a desktop: asleep, token expired, credits out. A weekly follower list (L2-C2) is a different cadence from the daily transaction. A missed 36–60 h read can't be retaken. | `reviews/ui-direction.md:78`; `scripts/snapshot.py:179-199`; `reference/x-api.md:18` *Resolved by D98: catch up on wake.* |
+| K13 | **D79** (only originals are voice samples) | On Basic, the CSV has no post type, so originals can't be told reliably from replies. | §2.3; `reviews/ui-direction.md:89` *Resolved by D97: on CSV only nothing is preselected; the user ticks each original.* |
+| K14 | **D82** (refuse a draft whose text repeats an earlier post) | "Earlier post" needs a history source. On Full the timeline helper stops at 29 days; on Basic it's the downloaded ranges. Without a decided first-run history, the check covers only what the app has seen. | `reviews/ui-direction.md:92`; `scripts/x_api.py:210-217` *Resolved by D99: first-run history, and the check says how far back.* |
 
 **Notes, not conflicts** (moved here after Codex's read, §4):
 - **The D52 trust note** says users give the program "their X and model API keys" (`reviews/ui-direction.md:124`). Under option B there are OAuth tokens instead; they still need the secure store. A wording update.
@@ -435,6 +437,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
 ## 5. Choices for the operator
 
 **L2-C1. How does the product connect to each user's X account?**
+- **Decided 26 Sep (D90):** option (b), each user brings their own X developer keys and pays X directly. X's enforcement warning is accepted; X is not asked first (D94). D91 reopens D52 (paid, closed) in favour of weighing a free, open-source product.
 - **Options:**
   - (a) Option B only: one product app, "Connect X" with OAuth.
   - (b) Option A: each user brings their own developer keys.
@@ -450,6 +453,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
   - X's answer on the Enterprise threshold. X links an Enterprise interest form from PRICING; asking is outward-facing, so it's the operator's call.
 
 **L2-C2. How does Full track followers?**
+- **Decided 26 Sep (D92):** option (c), the count daily, the lists weekly, per-post follows from the CSV. Follow events researched at the build stage.
 - **Options:**
   - (a) The whole list daily, as today.
   - (b) The list weekly.
@@ -464,6 +468,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
 - **Depends on:** `verified_followers_count` being returned to pay-per-use apps (spec only, not live-tested); the build stack (D47), for (e).
 
 **L2-C3. Who pays for X reads under option B, and where is the budget enforced?**
+- **Decided 26 Sep (D93):** moot under D90 (the user pays); X's console cap is the only spending limit, and the per-run search cap stays.
 - **Options:**
   - (a) Built into the price, with a per-user monthly read budget shown in the app.
   - (b) A usage add-on the user pays.
@@ -477,6 +482,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
 - **Depends on:** build-stage pricing (D52), and how much vendor risk the operator accepts.
 
 **L2-C4. What is the Basic tier, given the export probably needs Premium?**
+- **Decided 26 Sep (D95):** Premium is required for everyone (the operator knows the export needs it). The export's range is unknown.
 - **Options:**
   - (a) Basic = CSV, stated as "needs X Premium".
   - (b) Basic plus a manual mode for non-Premium users, who type a few numbers per post.
@@ -489,6 +495,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
 - **Depends on:** that check, the export's date limit, and a new importer that can build history from the CSV alone (§2.3).
 
 **L2-C5. How are experiments scored on Basic?**
+- **Decided 26 Sep (D96):** option (a), a fixed post age from the downloads, cohorts kept apart.
 - **Options:**
   - (a) At a fixed post age from downloads, with new follows available as a primary.
   - (b) No experiments on Basic. Basic users still learn from their edits and voice picks (D26, D78); only experiment-based lessons are missing. No Full user's lessons carry over (D76).
@@ -514,6 +521,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
 - **Depends on:** confirming search bills per post returned (UNVERIFIED), and layer 3.
 
 **L2-C7. What does a user without Full get from Discovery?**
+- **Decided 26 Sep (D100):** option (a), Discovery needs the user's X connection.
 - **Updated 26 Sep (D88):** option (b) is gone with Grok. What remains: (a) nothing, or (c) the vendor runs X API search itself with its app-only token, at the vendor's cost (no check needed, since X API results are X's own data). Still open.
 - **Options:**
   - (a) Nothing.
@@ -527,6 +535,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
 - **Depends on:** L2-C1 and L2-C3.
 
 **L2-C8. What is stored, and how is it kept current?**
+- **Decided 26 Sep (D101):** option (a), with other people's ids and numbers deleted after 30 days and no batch compliance.
 - **Options:**
   - (a) Store the user's own posts in full, and other people's content as ids and numbers only. Fetch their text when shown. Run a regular compliance pass over stored ids.
   - (b) Store everything; refresh daily.
@@ -540,6 +549,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
 - **Depends on:** a design for machines that are off when a deletion request arrives, and whether compliance calls count as X writes under D58. Neither is solved here.
 
 **L2-C9. Can post text go into a cloud model's prompt?**
+- **Decided 26 Sep (D104):** deferred to layer 3, per engine.
 - **Note 26 Sep (D88):** the xAI terms part no longer applies; the question stays open for whichever engines remain (layer 3).
 - **Options:**
   - (a) Ask X in writing, and name the model processing in the use-case description (options A and B both have one).
@@ -553,6 +563,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
 - **Depends on:** layer 3's engine list. Any job that sends other people's posts or handles to xAI needs its zero-retention API (XAI-ENT §11.2).
 
 **L2-C10. How does D76's aggregate collection meet X's terms?**
+- **Decided 26 Sep (D103):** option (c), collected as D76 says; X's terms an accepted risk.
 - **Options:**
   - (a) Legal clearance first; collection off until cleared.
   - (b) Collect only relative outcomes (which format won within a user's own experiment, Weight values), never engagement counts.
@@ -565,6 +576,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
 - **Depends on:** the build-stage privacy research D76 already names.
 
 **L2-C11. How are other people's posts shown?**
+- **Decided 26 Sep (D102):** option (a), plus a "Draft" label on the user's own previews.
 - **Options:**
   - (a) A card that meets X's display rules: avatar, name, linked handle, linked timestamp, X logo, actions or "View on X", links and edits handled, text unaltered, fetched fresh.
   - (b) A one-line summary with "View on X" only.
@@ -577,6 +589,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
 - **Depends on:** the design review of D12 and D28, and the read cost of the extra fields.
 
 **L2-C12. What happens when a scheduled read can't run?** (the Mac asleep, sign-in expired, credits out, one read failing)
+- **Decided 26 Sep (D98):** option (a), with waking the machine researched at the build stage.
 - **Options:**
   - (a) Catch up on wake where possible. Mark a missed 36–60 h read as missed (it can't be retaken). Keep D68's all-or-nothing per run.
   - (b) Wake the machine for reads, where the operating system allows.
@@ -589,6 +602,7 @@ Codex (read-only, blind: given the document and the repo, not this session's rea
 - **Depends on:** the stack (D47, D49), and how weekly reads (L2-C2) fit D68's single daily write.
 
 **L2-C13. How much history does the app import at first run?** (for D82's duplicate check and D78's voice capture)
+- **Decided 26 Sep (D99):** option (a), about 800 posts as a target on a connection, every CSV range on CSV only.
 - **Options:**
   - (a) Full: the user's own recent timeline, say the last 200–800 posts. Basic: every CSV range the user can download.
   - (b) Only what the app sees from now on.
