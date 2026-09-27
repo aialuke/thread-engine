@@ -71,4 +71,18 @@ Does Jev, TypeSafe's typed-judgement model, earn a place as a cheap, repeatable 
 
 ## Results
 
-None yet.
+### Experiment 1, 27 Sep 2026: pass
+
+- **Run:** 30 made-up posts, served by pinned `jev-1.13.0`. 31 calls including the smoke test, $0.0012 in all, about 0.3 s a post.
+- **Bar:** `act` matched on 25 of 30 (the bar was 24), with AUC 0.97.
+- **Other dimensions:** real 93% exact, relevant 80%, type 80%, useful 60% (87% within one).
+- **Every `act` miss said yes when it should have said no.** None were missed genuine posts:
+  - Both video-game "free version" lookalikes (y04 at 0.87, y05 at 0.59). Jev called them squarely relevant (2) and `genuine` with 0.99 confidence on y04. This is the same trap the real pilot hit (`../discovery-x-api-search-proposal.md`), and the clearest weakness: a real ask outside the idea's domain reads as on-topic.
+  - Replies and advice for someone else's need (y06 at 0.78, y18 at 0.74). Relevance was right (1), but `act` still said yes.
+  - A "10 free alternatives" listicle (y10 at 0.52), borderline.
+- **Useful runs high:** it often scores 1–2 where the label is 0, including spam and promotion. Treat it as the weakest dimension.
+- **Type misses were mostly between neighbouring kinds of spam** (promotion, engagement-bait, product-marketing), which doesn't change `act`.
+
+**Hypothesis for experiment 2, found after seeing these results, so not evidence:** requiring Jev's `relevant` = 2 as well as `act` ≥ 0.5, combined in code, gives 28 of 30 here. The video-game pair still passes it. Test it on the real replay as a secondary rule, never as the pass measure.
+
+The rubric wording is unchanged. The one allowed revision is held back: the real fix for the video-game trap is probably the idea's own wording ("creator or developer **software**"), which is a Discovery change, not a Jev one.
