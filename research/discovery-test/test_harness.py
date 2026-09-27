@@ -1277,3 +1277,14 @@ class ReviewFixes(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ConsoleCurrency(Base):
+    def test_console_reading_records_its_currency_defaulting_to_aud(self) -> None:
+        h = self.make(Router())
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(harness.main(["console", "--before", "17.55"], harness=h), 0)
+            self.assertEqual(harness.main(["console", "--after", "7", "--currency", "USD"], harness=h), 0)
+        lines = self.store.budget.read_text().splitlines()
+        self.assertIn("before=17.55 currency=AUD", lines[-2])
+        self.assertIn("after=7.0 currency=USD", lines[-1])

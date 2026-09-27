@@ -5,7 +5,7 @@
     python3 research/discovery-test/harness.py pilot --dry-run
     python3 research/discovery-test/harness.py pilot next | all | <step> [--redo]
     python3 research/discovery-test/harness.py config --model <id> | --authors on|off | --best-arm <arm> | --pin-block <B|none>
-    python3 research/discovery-test/harness.py console --before|--after <USD>
+    python3 research/discovery-test/harness.py console --before|--after <amount> [--currency AUD]
     python3 research/discovery-test/harness.py stage1|stage2|stage3 --idea <key> [--source K|G|T|C]
     python3 research/discovery-test/harness.py reread [--block B]
     python3 research/discovery-test/harness.py corpus --stage N [--block B [--batch 50]]
@@ -2111,6 +2111,8 @@ def build_parser() -> argparse.ArgumentParser:
     group = sp.add_mutually_exclusive_group(required=True)
     group.add_argument("--before", type=float)
     group.add_argument("--after", type=float)
+    # The operator's X console shows AUD; the harness's own estimates are USD at X's listed prices (27 Sep)
+    sp.add_argument("--currency", default="AUD", choices=("AUD", "USD"))
     for n in (1, 2, 3):
         sp = sub.add_parser(f"stage{n}")
         sp.add_argument("--idea", required=True)
@@ -2186,8 +2188,9 @@ def main(argv: list[str] | None = None, harness: Harness | None = None) -> int:
             print(json.dumps(data["settings"], indent=1))
         elif args.command == "console":
             label = "before" if args.before is not None else "after"
-            store.log_budget(harness.clock(), "console", **{label: args.before if args.before is not None else args.after})
-            print(f"logged console {label}")
+            amount = args.before if args.before is not None else args.after
+            store.log_budget(harness.clock(), "console", **{label: amount, "currency": args.currency})
+            print(f"logged console {label} {amount} {args.currency}")
         elif args.command == "pilot":
             steps = [harness.next_step()] if args.step == "next" else (
                 [s for s in PILOT_ORDER if harness.step_state(s)["status"] != "done"] if args.step == "all" else [args.step])
