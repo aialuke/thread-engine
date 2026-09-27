@@ -11,6 +11,7 @@ import random
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -349,7 +350,8 @@ class ReviewFixTests(Base):
             raters.ingest("codex", "s", [out], CORPUS, QUESTIONS, self.private, corpus_path=final)
         with self.assertRaises(SystemExit):
             raters.compare(self.FINAL, self.private, {}, {}, None, ["codex"], resamples=10)
-        with self.assertRaises(SystemExit):
+        # brief takes its root from raters.PRIVATE; point it here, or it reads the real (frozen) thresholds.json
+        with mock.patch.object(raters, "PRIVATE", self.private), self.assertRaises(SystemExit):
             raters.main(["brief", "--set", self.FINAL, "--corpus", str(final), "--job", "demand"])
         self.assertFalse((self.private / "raters").exists())
 
