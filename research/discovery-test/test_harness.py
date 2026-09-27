@@ -677,7 +677,7 @@ class NewPullPrep(Base):
             self.assertIn("min_likes:10", old["k"][0])
             self.assertEqual(new["k"][0], old["k"][0].replace(" min_likes:10", ""))
             self.assertEqual((new["k"][1], new["text"], new["job"]), (old["k"][1], old["text"], old["job"]))
-        self.assertEqual((harness.X_CHECKPOINT, harness.PILOT_CEILING), (7.00, 2.50))
+        self.assertEqual((harness.X_CHECKPOINT, harness.PILOT_CEILING), (8.70, 2.50))
 
     def test_pinned_block_survives_a_gap_with_its_windows(self) -> None:
         seen = []
@@ -949,6 +949,102 @@ class NewPullPrep(Base):
         with self.assertRaisesRegex(harness.Stop, "B3"):
             harness.Harness._suffix(1, "../x")
 
+
+
+class B4Prep(Base):
+    """28 Sep: the B4 query-design pull (jev-test/README.md, Experiment 4)."""
+
+    def test_rewritten_cards_keep_the_idea_and_filters_and_fix_what_matched(self) -> None:
+        for key in ("wj-comedy-1", "wj-tech-2"):
+            old, new = harness.IDEAS[key], harness.IDEAS[key + "b"]
+            self.assertEqual((new["job"], new["niche"], new["text"]), (old["job"], old["niche"], old["text"]))
+            for q_old, q_new in zip(old["k"], new["k"]):
+                self.assertEqual(harness.MIN_REPLIES.findall(q_old), harness.MIN_REPLIES.findall(q_new))
+                self.assertEqual("min_likes:50" in q_old, "min_likes:50" in q_new)
+                self.assertIn("-is:reply", q_new)
+                harness.check_syntax(q_new, "api")
+        comedy = harness.IDEAS["wj-comedy-1b"]["k"]
+        self.assertNotIn("hot take", " ".join(comedy))
+        self.assertNotIn('"stand up"', " ".join(comedy))
+        self.assertIn("-@grok", harness.IDEAS["wj-tech-2b"]["k"][1])
+        self.assertIn('"AI model"', harness.IDEAS["wj-tech-2b"]["k"][0])
+
+    def test_no_links_source_sends_each_k_query_with_has_links_excluded(self) -> None:
+        seen = []
+        def search(q):
+            seen.append(q["query"])
+            return {"data": [post(str(8000 + len(seen)), "is there a free alternative")], "meta": {"result_count": 1}}
+        h = self.make(Router(_2_tweets_search_recent=search))
+        out = h.run_stage(2, "demand-tech-1", only="Knl-recency")
+        self.assertEqual(list(k for k in out if k.startswith("K")), ["Knl-recency"])
+        self.assertEqual(seen, [q + " -has:links" for q in harness.IDEAS["demand-tech-1"]["k"]])
+        self.assertEqual(harness.no_links(harness.IDEAS["tr-tech-1"]["spam"]), harness.IDEAS["tr-tech-1"]["spam"])
+        h.run_stage(2, "demand-tech-1", only="K-recency")
+        with redirect_stdout(io.StringIO()):
+            harness.main(["manifest", "--block", "B1"], harness=h)
+        with (self.root / "manifest-B1.csv").open(newline="") as fh:
+            rows = list(harness.csv.DictReader(fh))
+        self.assertEqual({(r["source"], r["variant"]) for r in rows},
+                         {("Knl-recency", "v1-no-links"), ("Knl-recency", "v2-no-links"),
+                          ("K-recency", "v1"), ("K-recency", "v2")})
+        with self.assertRaisesRegex(harness.Stop, "stage 1 ideas"):
+            h.run_stage(1, "demand-tech-1", only="Knl-recency")
+        self.assertNotIn("Knl-recency", h.run_stage(1, "wj-tech-2b", only="Knl-recency"))
+
+    def seed_replies(self, n: int, stage: int = 2) -> None:
+        seed_block(self.store, ("B4", NOW - timedelta(minutes=30)))
+        posts = [{**post(str(6000 + i), f"reply {i}"), "referenced_tweets": [{"type": "replied_to", "id": str(7000 + i)}]}
+                 for i in range(n)]
+        posts.append(post("6999", "an original post"))
+        seed_call(self.store, "x0001", NOW - timedelta(minutes=20), posts)
+        self.store.upsert_posts(NOW - timedelta(minutes=20), [
+            {"post_id": p["id"], "label": "x_api", "x": p,
+             "sighting": {"source": "K-recency", "stage": f"stage{stage}", "block": "B4", "call": "x0001"}} for p in posts])
+        key = {f"p{p['id']}": {"post_id": p["id"]} for p in posts}
+        (self.root / f"corpus-key-stage{stage}-B4.json").write_text(json.dumps(key))
+
+    def test_parents_fetch_the_first_by_hash_in_batches_and_record_missing(self) -> None:
+        sent = []
+        def lookup(q):
+            ids = q["ids"].split(",")
+            sent.append(ids)
+            return {"data": [post(i, f"parent {i}") for i in ids if int(i) % 5]}
+        h = self.make(Router(_2_tweets=lookup))
+        self.seed_replies(130)
+        out = h.parents("B4", cap=120)
+        self.assertEqual([len(b) for b in sent], [100, 20])
+        self.assertEqual((out["replies_in_corpora"], out["chosen"], out["fetched"] + out["not_found"]), (130, 120, 120))
+        rows = self.store.rows(self.root / "parents-B4.jsonl")
+        want = sorted((str(6000 + i) for i in range(130)), key=lambda p: harness.hashlib.sha256(p.encode()).hexdigest())[:120]
+        self.assertEqual(sorted(r["post_id"] for r in rows), sorted(want))
+        self.assertNotIn("6999", {r["post_id"] for r in rows})
+        gone = [r for r in rows if not r["found"]]
+        self.assertTrue(gone and all(r["parent_text"] is None and int(r["parent_id"]) % 5 == 0 for r in gone))
+        self.assertEqual({r["stage"] for r in rows}, {2})
+        again = h.parents("B4", cap=120)
+        self.assertEqual((again["already_done"], again["fetched"], len(sent)), (120, 0, 2))
+
+    def test_parents_recover_a_paid_call_before_paying_again(self) -> None:
+        h = self.make(Router(_2_tweets=lambda q: {"data": [post(i, f"parent {i}") for i in q["ids"].split(",")]}))
+        self.seed_replies(3)
+        h.parents("B4")
+        (self.root / "parents-B4.jsonl").unlink()
+        h.client.opener = Router()                                       # any new call would fail the test
+        out = h.parents("B4")
+        self.assertEqual((out["recovered"], out["fetched"]), (3, 0))
+        rows = self.store.rows(self.root / "parents-B4.jsonl")
+        self.assertTrue(all(r["found"] and r.get("recovered") for r in rows))
+
+    def test_parents_failed_batch_writes_nothing_and_needs_a_corpus(self) -> None:
+        h = self.make(Router(_2_tweets=400))
+        with self.assertRaisesRegex(harness.Stop, "no corpus"):
+            h.parents("B4")
+        self.seed_replies(2)
+        out = h.parents("B4")
+        self.assertEqual((out["failed_calls"][0]["http"], out["fetched"]), (400, 0))
+        self.assertFalse((self.root / "parents-B4.jsonl").exists())
+        args = harness.build_parser().parse_args(["parents", "--block", "B4", "--cap", "50"])
+        self.assertEqual((args.block, args.cap), ("B4", 50))
 
 def sha_text(text: str) -> str:
     return harness.hashlib.sha256(text.encode()).hexdigest()
@@ -1281,7 +1377,7 @@ class ReviewFixes(Base):
         self.assertEqual(harness.max_cost("posts", {**params, "expansions": "author_id"}, NOW), 10 * (harness.POST + harness.USER))
         self.assertEqual(harness.max_cost("counts", {"granularity": "day", "start_time": harness.iso(NOW - timedelta(days=6, hours=23)),
                                                      "end_time": harness.iso(NOW)}, NOW), harness.WORST["P3"])
-        self.store.append(self.store.requests, {"stage": "stage1", "estimated_cost": 6.90})
+        self.store.append(self.store.requests, {"stage": "stage1", "estimated_cost": round(harness.X_CHECKPOINT - 0.10, 2)})
         with self.assertRaisesRegex(harness.Stop, "X API checkpoint"):   # caller's reserve 0: the gate works out 0.15
             h.client.get("/2/tweets/search/recent", {**params, "expansions": "author_id"}, kind="posts", reserve=0.0,
                          stage="stage1", step="t")
@@ -1293,7 +1389,7 @@ class ReviewFixes(Base):
         many = [post(str(100 + n), "x") for n in range(10)]
         router = Router(_2_tweets=lambda q: {"data": many, "includes": {"tweets": many}}, _2_usage={"data": []})
         h = self.make(router)
-        self.store.append(self.store.requests, {"stage": "stage1", "estimated_cost": 6.94})
+        self.store.append(self.store.requests, {"stage": "stage1", "estimated_cost": round(harness.X_CHECKPOINT - 0.06, 2)})
         harness.lookup_ids(h.client, [p["id"] for p in many], False, stage="stage1", step="t")   # reserved 0.05, billed 0.10
         self.assertGreater(self.store.x_spent(), harness.X_CHECKPOINT)
         with self.assertRaisesRegex(harness.Stop, "X API checkpoint"):

@@ -144,6 +144,8 @@ see their answers and they will not see yours.
   conversation is live and worth joining.
 - `age_hours` (when present): how old the post was when collected. Use it only to judge whether
   the conversation is still worth joining.
+- `parent` (when present): the post that `text` replies to. Use it only to understand what the post is
+  answering; every question is still about `post` itself.
 
 Judge only from these fields. Do not search, open links, or look anything up.
 
@@ -660,7 +662,7 @@ def compare(set_name: str, private: Path, corpus_key: dict, idea_of: dict, opera
                          **curves},
     }
     block = jev.BLOCK_SET.match(set_name)
-    if block and block.group(3) == "final":
+    if block and block.group(3) == "final" and not block.group(4):
         frozen = jev.thresholds(private.parent / "thresholds.json")
         cut, rule = frozen["frozen_coverage_threshold"], frozen.get("frozen_coverage_rule", "p_good_0.5")
         if rule == "good_level":

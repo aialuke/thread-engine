@@ -63,7 +63,7 @@ BRISBANE = ZoneInfo("Australia/Brisbane")
 POST, USER = x_api.POST, x_api.USER
 
 PILOT_CEILING = 2.50        # X API, pilot only (HANDOFF decision 3)
-X_CHECKPOINT = 7.00         # X API, whole test: stop and report (operator, 27 Sep: was 6.00)
+X_CHECKPOINT = 8.70         # X API, whole test: stop and report (operator, 28 Sep for B4: was 7.00, before that 6.00)
 GROK_CHECKPOINT = 3.00      # Grok, whole test
 GROK_MAX_TURNS = 8          # --max-turns on every run
 GROK_MAX_POSTS = 30         # every prompt caps Grok at 3 searches × limit 10 (CAP below)
@@ -799,6 +799,19 @@ IDEAS = {
                     "k": ['(satire OR satirical OR comedian OR "stand up" OR standup) -is:retweet -is:reply lang:en min_replies:5',
                           '(joke OR bit OR "hot take") -is:retweet -is:reply lang:en min_replies:10 min_likes:50'],
                     "semantic": "a comedian or satirist's joke post that lots of people are riffing on in the replies"},
+    # 1b/2b: B4's rewritten cards (28 Sep; jev-test/README.md, Experiment 4). Same idea text, new queries;
+    # the originals stay as run. On B3, 7-8 of 10 per wj-comedy-1 query and 4-5 of 10 per wj-tech-2 query
+    # were outside the idea's domain ("stand up for", "a bit", car and fashion "new model", replies to @grok).
+    "wj-tech-2b": {"job": "worth-joining", "niche": "tech",
+                   "text": "discussion of an AI model or tool released in the last day",
+                   "k": ['("just released" OR "just dropped" OR "now available" OR "new model") ("AI model" OR LLM OR "open weights" OR "open source model" OR benchmark OR API) -is:retweet -is:reply lang:en',
+                         '(released OR launched OR announces OR announced) (GPT OR Claude OR Gemini OR Grok OR Llama OR Qwen OR DeepSeek) (model OR AI) -@grok -is:retweet -is:reply lang:en'],
+                   "semantic": "people discussing an AI model or AI tool that was released in the last day"},
+    "wj-comedy-1b": {"job": "worth-joining", "niche": "comedy",
+                     "text": "a satirist's or comedian's post with an active thread of people riffing",
+                     "k": ['("stand-up comedy" OR "standup comedy" OR "comedy special" OR "open mic" OR "tight five" OR comedian OR satire OR satirical) -is:retweet -is:reply lang:en min_replies:5',
+                           '(comedian OR comic OR "stand-up" OR standup OR satirist) (joke OR bit OR set OR crowd OR heckler OR special) -is:retweet -is:reply lang:en min_replies:10 min_likes:50'],
+                     "semantic": "a comedian or satirist's joke post that lots of people are riffing on in the replies"},
     "wj-comedy-2": {"job": "worth-joining", "niche": "comedy",
                     "text": "an absurd news story with people joking in the replies",
                     "k": ['("florida man" OR absurd OR "you can\'t make this up" OR "this is real") (news OR headline OR story) -is:retweet -is:reply lang:en min_replies:5',
@@ -844,6 +857,13 @@ API_ONLY = re.compile(r"\b(min_likes|min_reposts|is|has|lang):")   # min_replies
 WEB_ONLY = re.compile(r"\b(min_faves|min_retweets|filter|within_time|since|until):")
 MIN_REPLIES = re.compile(r"\bmin_replies:\d+")
 BLOCK_ID = re.compile(r"B\d+")
+NOLINKS_JOBS = ("demand", "tool-research")   # B4 arm 1: each K query again with -has:links (source Knl)
+PARENT_CAP = 120                             # B4 arm 3: replies whose parent post is fetched, first by sha256(id)
+
+
+def no_links(query: str) -> str:
+    """The -has:links variant of a K query (B4 arm 1): the same words, links excluded."""
+    return query if "-has:links" in query else f"{query} -has:links"
 
 
 def check_syntax(query: str, source: str) -> None:
@@ -1411,6 +1431,7 @@ class Harness:
         sources = [f"K-{s}" for s in K_SORTS[idea["job"]]] + ["G"] \
             + (["T"] if idea["job"] == "worth-joining" and idea["niche"] == "tech" else []) \
             + ([f"Kspam-{s}" for s in K_SORTS[idea["job"]]] if "spam" in idea else []) \
+            + ([f"Knl-{s}" for s in K_SORTS[idea["job"]]] if idea["job"] in NOLINKS_JOBS else []) \
             + (["C"] if idea["job"] == "tool-research" else [])
         seed = int(hashlib.sha256(f"{idea_key}|{block['id']}".encode()).hexdigest()[:8], 16)
         random.Random(seed).shuffle(sources)
@@ -1445,6 +1466,10 @@ class Harness:
     def _stage_Kspam(self, ctx, block, now, idea, window, sort="recency"):
         """The spam-control variant, run over the same window as K, scored with the union and reported apart."""
         return self._k_queries(ctx, now, [idea["spam"]], window, sort, source=f"Kspam-{sort}")
+
+    def _stage_Knl(self, ctx, block, now, idea, window, sort="recency"):
+        """B4 arm 1: every K query with -has:links, over the same window as K, reported as its own source."""
+        return self._k_queries(ctx, now, [no_links(q) for q in idea["k"]], window, sort, source=f"Knl-{sort}")
 
     def _sent(self, key: str) -> list[dict]:
         return self.step_state(key).get("sent", [])
@@ -1559,6 +1584,86 @@ class Harness:
             match = next((p for p in (data if isinstance(data, list) else [data] if data else []) if p.get("id") == row["post_id"]), None)
             return parse_stamp(call["time_utc"]), (match or {}).get("public_metrics") or json.loads(row["metrics"] or "{}")
         return parse_stamp(row["first_seen"]), json.loads(row["metrics"] or "{}")
+
+    def _replied_to(self, row: dict, calls: dict) -> str | None:
+        """The id of the post this one replies to, from the saved body of a call that returned it."""
+        for s in json.loads(row["sightings"]):
+            call = calls.get(s.get("call") or "") or {}
+            raw = self.store.root / call["raw_path"] if call.get("status") == 200 and call.get("raw_path") else None
+            if raw is None or not raw.exists():
+                continue
+            for p in json.loads(raw.read_bytes() or b"{}").get("data") or []:
+                if p.get("id") == row["post_id"]:
+                    return next((r.get("id") for r in p.get("referenced_tweets") or [] if r.get("type") == "replied_to"), None)
+        return None
+
+    def parents(self, block: str, cap: int = PARENT_CAP) -> dict:
+        """B4 arm 3: fetch the post each sampled reply answers, so raters can see it. The replies are those in
+        the block's corpora, the first `cap` by sha256(post id). private/parents-<block>.jsonl gets one row per
+        reply, written per batch; a rerun fetches only what isn't there, and a paid call is recovered from its
+        saved body before anything is paid again. A parent X doesn't return is recorded as not found."""
+        self._suffix(1, block)
+        stages = {}
+        for stage in (1, 2, 3):
+            path = self.store.root / f"corpus-key-stage{stage}-{block}.json"
+            if path.exists():
+                for v in json.loads(path.read_text(encoding="utf-8")).values():
+                    stages[v["post_id"]] = stage
+        if not stages:
+            raise Stop(f"no corpus for {block}: run corpus --stage N --block {block} first")
+        table, calls = self.store.load_posts(), self.store.call_rows()
+        replies = {pid: par for pid in stages if pid in table and (par := self._replied_to(table[pid], calls))}
+        chosen = sorted(replies, key=lambda pid: hashlib.sha256(pid.encode()).hexdigest())[:cap]
+        log = self.store.root / f"parents-{block}.jsonl"
+        done = {r["post_id"] for r in self.store.rows(log)}
+        step = f"parents:{block}"
+        paid = {pid: c for c in calls.values() if c.get("step") == step and c.get("status") == 200
+                for pid in str((c.get("params") or {}).get("ids", "")).split(",") if pid}
+        now = self.clock()
+        todo, recovered = [], 0
+        for pid in chosen:
+            if pid in done:
+                continue
+            call = paid.get(replies[pid])
+            if call is None:
+                todo.append(pid)
+                continue
+            raw = self.store.root / call["raw_path"]
+            body = json.loads(raw.read_bytes() or b"{}") if raw.exists() else {}
+            parent = {p.get("id"): p for p in body.get("data") or []}.get(replies[pid])
+            self.store.append(log, self._parent_row(pid, stages[pid], replies[pid], parent, call["call_id"],
+                                                    call.get("time_utc"), recovered=True))
+            recovered += 1
+        ctx_block = self.store.block(now)["id"]
+        used, failed, fetched, missing = [], [], 0, 0
+        parent_ids = list(dict.fromkeys(replies[pid] for pid in todo))
+        for n in range(0, len(parent_ids), 100):
+            batch = parent_ids[n:n + 100]
+            found, _, call = lookup_ids(self.client, batch, authors=False,
+                                        stage="parents", step=step, source="parents", block=ctx_block)
+            status = (self.client.last_row or {}).get("status")
+            if status != 200:
+                failed.append({"call": call, "http": status})
+                continue
+            used.append(call)
+            wanted = set(batch)
+            for pid in todo:
+                if replies[pid] in wanted:
+                    parent = found.get(replies[pid])
+                    self.store.append(log, self._parent_row(pid, stages[pid], replies[pid], parent, call, iso(now)))
+                    fetched += parent is not None
+                    missing += parent is None
+        out = {"block": block, "replies_in_corpora": len(replies), "chosen": len(chosen), "already_done": len(done),
+               "recovered": recovered, "fetched": fetched, "not_found": missing, "calls": used, "file": log.name}
+        if failed:
+            out["failed_calls"] = failed
+        return out
+
+    @staticmethod
+    def _parent_row(pid, stage, parent_id, parent, call, at, recovered=False) -> dict:
+        return {"post_id": pid, "stage": stage, "parent_id": parent_id, "found": parent is not None,
+                "parent_text": x_api.full_text(parent) if parent else None, "call": call, "at": at,
+                **({"recovered": True} if recovered else {})}
 
     def reread(self, min_hours: float = 5.5, block: str | None = None) -> dict:
         """Re-read Worth-joining posts about 6 hours after they were found: did the conversation grow?
@@ -1852,6 +1957,7 @@ class Harness:
             for n, q in enumerate(idea["k"]):
                 variants[(key, q)] = f"v{n + 1}"
                 variants.setdefault((key, " ".join(MIN_REPLIES.sub("", q).split())), f"v{n + 1}-no-min_replies")
+                variants.setdefault((key, no_links(q)), f"v{n + 1}-no-links")
             if "spam" in idea:
                 variants[(key, idea["spam"])] = "spam"
         cols = ("post_id", "stage", "idea", "source", "sort", "variant", "rank", "call", "result_count", "eligible")
@@ -2133,9 +2239,12 @@ def build_parser() -> argparse.ArgumentParser:
     for n in (1, 2, 3):
         sp = sub.add_parser(f"stage{n}")
         sp.add_argument("--idea", required=True)
-        sp.add_argument("--source", help="K, G, T, C or Kspam (all sorts), or one of K-recency, K-relevancy, Kspam-recency…")
+        sp.add_argument("--source", help="K, G, T, C, Kspam or Knl (all sorts), or one of K-recency, K-relevancy, Kspam-recency, Knl-recency…")
     sp = sub.add_parser("reread")
     sp.add_argument("--block", help="only posts with a stage1 sighting in this block (default: the pinned block)")
+    sp = sub.add_parser("parents")
+    sp.add_argument("--block", required=True)
+    sp.add_argument("--cap", type=int, default=PARENT_CAP)
     sp = sub.add_parser("reprocess")
     sp.add_argument("run_ids", nargs="+")
     sp = sub.add_parser("corpus")
@@ -2231,6 +2340,8 @@ def main(argv: list[str] | None = None, harness: Harness | None = None) -> int:
             out = harness.second_scores(stage, Path(args.file), block=args.block) if args.command == "second-scores" \
                 else harness.finalise_scores(stage, Path(args.adjudicated) if args.adjudicated else None, block=args.block)
             print(json.dumps(out, indent=1))
+        elif args.command == "parents":
+            print(json.dumps(harness.parents(args.block, args.cap), indent=1))
         elif args.command == "manifest":
             print(json.dumps(harness.manifest(args.block), indent=1))
         elif args.command == "recheck":

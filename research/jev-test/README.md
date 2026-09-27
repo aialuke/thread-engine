@@ -151,7 +151,7 @@ The steps below run in order. Every command has a test, and nothing reads from X
 **Same instrument as Experiment 3:**
 - The raters are Jev `jev-1.13.0`, Codex `gpt-5.6-sol`, Claude Opus 5.5 and Grok `grok-4.5`, plus the operator optionally.
 - They get the same `questions.json` (hashes unchanged, so the B3 freeze and its 0.8 cut-off still hold), the same `raters.py brief`, and the same validator.
-- "Good" is `p_good ≥ 0.5`, read by the Codex/Claude/Grok strict majority, except in arm 5.
+- "Good" is the current product rule, as the Codex/Claude/Grok strict majority read it, except in arm 5. See the amendment below.
 - `jev.py split` seals each stage as before. Both halves are rated, and they are reported pooled with each half alongside.
 
 **Arms (all K calls sort by recency, 10 posts, in one pinned block, B4):**
@@ -162,7 +162,7 @@ The steps below run in order. Every command has a test, and nothing reads from X
 | 2 | Worth-joining posts ≤1 h and ≤2 h old at read | The full 6 h read | The 4 current Worth-joining cards. Under recency, a 2 h window returns exactly the ≤2 h slice of the 6 h call, so this is a cut on the 6 h read at no cost. The relevancy-sort version (2 h against 6 h) is dropped to fit the budget (operator, 28 Sep) |
 | 3 | Replies rated with the post they reply to (`parent`) in the packet | The same replies rated without it | Up to 120 replies from all three stages, the first by `sha256(post id)`. The parents are fetched after the pull with one `GET /2/tweets` per 100 (`harness.py parents`), so the search calls stay identical |
 | 4 | New cards `wj-comedy-1b` and `wj-tech-2b` | `wj-comedy-1` and `wj-tech-2`, same window | The idea text is unchanged; only the queries change (below) |
-| 5 | Three-question rule: type `genuine` (most probable) AND `outside_domain` < 0.5 AND `reply_worthy` ≥ 0.5 | Current rule, `p_good ≥ 0.5` | Every B4 post, from the same answers; no new calls |
+| 5 | Three-question rule: type `genuine` (most probable) AND `outside_domain` < 0.5 AND `reply_worthy` ≥ 0.5 | Current rule: relevant 2, real 2, useful ≥ 1 (most probable levels) | Every B4 post, from the same answers; no new calls |
 
 `tr-comedy-1` (CapCut) stays out, as in B3 (Claude Code took its place).
 
@@ -190,6 +190,16 @@ The steps below run in order. Every command has a test, and nothing reads from X
 - **Side measure:** the frozen 0.8 cut-off on B4, a second out-of-sample read of B3's 92.6%.
 - **Arm 5 caveat:** for Tool research, "reply-worthy" fits badly, because that job looks for evidence, not leads. It is reported, flagged.
 - **Circularity:** B3 derived arms 3 and 5 from these raters' diagnostics. Only the operator's optional labels, on up to 40 posts where the two rules disagree, are independent of them.
+
+**Amendment, 28 Sep, before any B4 read.** `arms.py` was checked against B3 before the pull. Two things changed or were learnt.
+
+1. **"Good" was defined wrongly above.** It is now the current product rule by each question's most probable level (relevant 2, real 2, useful ≥ 1), with the panel as the LLM raters' strict majority. That is the panel `raters.py compare` uses, and the one every B3 lesson was counted with. The first wording, `p_good ≥ 0.5`, would have made 0 of B3's Worth-joining posts good.
+   - Jev is still read by its frozen rule, `p_good ≥ 0.5`, alongside.
+   - With this definition, `arms.py` gives B3's figures back: 89 of 364 good, 16% with a link against 29% without, and all 10 good Worth-joining posts under an hour old.
+2. **Two predictions aren't supported by B3 itself.** They stay as written, and B3's own figures are recorded here as the baseline:
+   - **Arm 5:** under the three-question rule, B3's LLM pairwise κ was 0.48, 0.61 and 0.63, against 0.51, 0.70 and 0.63 under the current rule. Jev agreed with the panel 64.6% of the time, against 78.0% (all posts). On Worth joining: κ 0.46–0.50 against 0.54–0.75, and Jev 61.1% against 62.5%. The rules disagreed on 31 posts, 29 of them genuine.
+   - **Arm 2:** a ≤2 h cut dropped 4.2% of B3's current-card Worth-joining posts and kept every good one. A ≤1 h cut dropped 22.2%, also keeping every good one.
+   - **Side measure:** B3 pooled at the 0.8 cut-off gave 57.7% decided at 94.3% agreement.
 
 **Money:**
 - **X API:** US$3.00 estimated. That is 48 search calls (US$2.40) and ≤120 parent posts (US$0.60).

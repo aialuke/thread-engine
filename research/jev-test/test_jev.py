@@ -598,3 +598,67 @@ class ReviewFixTests(Base):
         with self.assertRaises(jev.Stop):
             client.ask(state, q, jev.PINNED)
         self.assertEqual(opener.requests, [])
+
+
+class B4ParentTests(Base):
+    """28 Sep: B4 arm 3, replies rated again with the post they reply to (README.md, Experiment 4)."""
+
+    fixture = BlockSetTests.fixture
+
+    def sealed(self) -> Path:
+        discovery = Path(self.tmp.name) / "discovery"
+        self.fixture(discovery)
+        jev.split(1, "B3", self.store, discovery)
+        self.store.set_config(real_data=True)
+        thresholds = self.store.root.parent / "thresholds.json"
+        thresholds.write_text(json.dumps({"frozen": True, "frozen_coverage_threshold": 0.8,
+                                          "questions": {j: jev.questions_hash(jev.request_questions(j))
+                                                        for j in jev.load_questions()["useful"]}}), encoding="utf-8")
+        rows = [{"post_id": "2", "stage": 1, "found": True, "parent_text": "the parent of 2"},
+                {"post_id": "4", "stage": 1, "found": False, "parent_text": None},
+                {"post_id": "5", "stage": 1, "found": True, "parent_text": "the parent of 5"}]
+        (discovery / "parents-B3.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+        return discovery
+
+    def test_live_questions_still_hash_to_the_frozen_ones(self) -> None:
+        frozen = jev.thresholds()
+        spec = jev.load_questions()
+        self.assertTrue(frozen["frozen"])
+        self.assertEqual({job: jev.questions_hash(jev.request_questions(job, spec)) for job in spec["useful"]},
+                         frozen["questions"])
+
+    def test_parent_set_holds_only_found_parents_with_the_same_ids_and_is_written_once(self) -> None:
+        discovery = self.sealed()
+        halves = {h: {r["id"] for r in jev.Store.rows(self.store.root / "splits" / f"stage1-B3-{h}.jsonl")}
+                  for h in ("validation", "final")}
+        parented, not_found = set(), 0
+        for half in ("validation", "final"):
+            info = jev.parent_set(1, "B3", half, self.store, discovery)
+            not_found += info["parent_not_found"]
+            rows = jev.Store.rows(self.store.root / "splits" / f"stage1-B3-{half}-parent.jsonl")
+            self.assertTrue({r["id"] for r in rows} <= halves[half])
+            self.assertTrue(all(r["parent"].startswith("the parent of") for r in rows))
+            parented |= {r["id"] for r in rows}
+            with self.assertRaisesRegex(jev.Stop, "sealed"):
+                jev.parent_set(1, "B3", half, self.store, discovery)
+        self.assertEqual((parented, not_found), ({"n2", "n5"}, 1))            # n4's parent is gone
+        half = "validation" if "n2" in halves["validation"] else "final"
+        row = next(r for r in jev.load_set(f"stage1-B3-{half}-parent", self.store, discovery) if r["id"] == "n2")
+        self.assertEqual((row["job"], jev.state_of(row)["parent"]), ("worth-joining", "the parent of 2"))
+
+    def test_parent_names_follow_their_half_through_the_seal(self) -> None:
+        self.sealed()
+        self.assertEqual(jev.BLOCK_SET.match("stage2-B4-final-parent").groups(), ("2", "B4", "final", "-parent"))
+        self.assertIsNone(jev.BLOCK_SET.match("stage2-B4-parent"))
+        thresholds = self.store.root.parent / "thresholds.json"
+        thresholds.write_text(json.dumps({"frozen": False, "coverage_threshold": 0.8}), encoding="utf-8")
+        with self.assertRaisesRegex(jev.Stop, "sealed"):
+            jev.check_block("stage1-B3-final-parent", root=self.store.root)
+        with self.assertRaisesRegex(jev.Stop, "not sealed"):
+            jev.check_block("stage1-B9-validation-parent", root=self.store.root)
+        with self.assertRaisesRegex(jev.Stop, "missing"):
+            jev.parent_set(1, "B3", "validation", self.store, Path(self.tmp.name) / "nowhere")
+
+    def test_state_carries_the_parent_only_when_present(self) -> None:
+        self.assertEqual(jev.state_of({"idea": "i", "text": "t", "parent": "p"}), {"idea": "i", "post": "t", "parent": "p"})
+        self.assertNotIn("parent", jev.state_of({"idea": "i", "text": "t"}))

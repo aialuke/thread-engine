@@ -393,6 +393,21 @@ class ReviewFixTests(Base):
         self.assertEqual((pre["posts"], pre["of"], pre["share_pct"], pre["agreement_pct"]), (3, 7, 42.9, 100.0))
         self.assertIn("exploratory", report["jev_coverage"]["status"])
 
+    # B4 arm 3
+    def test_parent_set_is_briefed_and_never_reported_as_the_preregistered_result(self) -> None:
+        brief = raters.rater_brief("stage2-B4-validation-parent", QUESTIONS, "c.jsonl", "demand")
+        self.assertIn("`parent` (when present)", brief)
+        self.seal(freeze=True)
+        name = self.FINAL + "-parent"
+        ids = [f"p{n}" for n in range(4)]
+        truth = {i: n % 2 == 0 for n, i in enumerate(ids)}
+        for r in ("jev", "codex", "claude", "grok"):
+            self.write_rater(r, name, truth)
+        report = raters.compare(name, self.private, {i: {"post_id": i} for i in ids}, {i: "idea" for i in ids}, None,
+                                ["codex", "claude", "grok"], resamples=10)
+        self.assertNotIn("preregistered", report)
+        self.assertEqual(raters.bind(name, Path("x") / f"{name}.jsonl"), None)
+
     # 3
     def test_each_rule_has_its_own_confidence(self) -> None:
         a = {"relevant": {"probabilities": {"0": 0.25, "1": 0.35, "2": 0.40}},

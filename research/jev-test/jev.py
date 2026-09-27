@@ -8,6 +8,7 @@
     python3 research/jev-test/jev.py config --real-data on|off | --model <id>
     python3 research/jev-test/jev.py spend
     python3 research/jev-test/jev.py split --stage N --block B      (seal validation/final before scoring)
+    python3 research/jev-test/jev.py parent-set --stage N --block B --half H   (B4: replies with their parent post)
     python3 research/jev-test/jev.py run --set stage{N}-B{k}-validation [--replace]   (final only after freeze)
     python3 research/jev-test/jev.py repeat --set S [--posts 10 --times 3]   (fresh, uncached)
     python3 research/jev-test/jev.py rank --set S                   (one Choice per idea)
@@ -285,9 +286,10 @@ def job_of(set_name: str, row: dict) -> str:
 
 
 def state_of(row: dict) -> dict:
-    """The packet every rater sees: idea and post text, plus reply count and age for Worth-joining posts."""
+    """The packet every rater sees: idea and post text, plus reply count and age for Worth-joining posts,
+    and in a -parent set the text of the post it replies to."""
     state = {"idea": row["idea"], "post": row["text"]}
-    for field in ("replies", "age_hours"):
+    for field in ("replies", "age_hours", "parent"):
         if row.get(field) is not None:
             state[field] = row[field]
     return state
@@ -356,8 +358,10 @@ def answer_problems(answers: dict | None, questions: dict) -> list[str]:
 # ---------- sets ----------
 
 
-BLOCK_SET = re.compile(r"^stage([123])-(B\d+)-(validation|final)$")
-BLOCK_IN = re.compile(r"stage([123])-(B\d+)-(validation|final)$")      # a set name or a corpus file stem
+# A `-parent` set (B4 arm 3) holds a half's sampled replies again, each with the post it replies to; it is
+# sealed with its half, and a final one stays sealed until the freeze like the half itself.
+BLOCK_SET = re.compile(r"^stage([123])-(B\d+)-(validation|final)(-parent)?$")
+BLOCK_IN = re.compile(r"stage([123])-(B\d+)-(validation|final)(-parent)?$")      # a set name or a corpus file stem
 COVERAGE_RULES = ("p_good_0.5", "good_level")                           # the two curves raters.py compare reports
 
 
@@ -397,7 +401,7 @@ def check_block(set_name: str | None = None, corpus: Path | None = None, root: P
             if name.endswith("-final"):
                 raise Stop(f"{name!r} looks like a final set but isn't stage{{N}}-B{{k}}-final; refused")
             continue
-        stage, b, half = block.groups()
+        stage, b, half, _ = block.groups()
         _, manifest = split_files(stage, b, splits)
         if not manifest.exists():
             leftovers = split_leftovers(stage, b, splits)
@@ -568,6 +572,38 @@ def split(stage: int, block: str, store: Store, discovery: Path = DISCOVERY) -> 
     for path in texts:
         os.replace(path.with_name(path.name + ".tmp"), path)
     return info
+
+
+def parent_set(stage: int, block: str, half: str, store: Store, discovery: Path = DISCOVERY) -> dict:
+    """B4 arm 3: splits/stage{N}-{B}-{half}-parent.jsonl, the half's replies whose parent post was fetched
+    (harness.py parents), each row as it is in the half plus `parent`. Same ids, so every rater's answers with
+    and without the parent line up. Written once; a rerun is refused."""
+    name = f"stage{stage}-{block}-{half}"
+    check_block(name, root=store.root)
+    source = store.root / "splits" / f"{name}.jsonl"
+    out = store.root / "splits" / f"{name}-parent.jsonl"
+    if out.exists():
+        raise Stop(f"{out.name} already exists; it is sealed")
+    parents_path = discovery / f"parents-{block}.jsonl"
+    key_path = discovery / f"corpus-key-stage{stage}-{block}.json"
+    for path in (source, parents_path, key_path):
+        if not path.exists():
+            raise Stop(f"{path} is missing (split, then harness.py parents --block {block}, first)")
+    key = json.loads(key_path.read_text(encoding="utf-8"))
+    parents = {r["post_id"]: r for r in Store.rows(parents_path)}
+    rows, not_found = [], 0
+    for row in Store.rows(source):
+        got = parents.get(key[row["id"]]["post_id"])
+        if got is None:
+            continue
+        if not got.get("found") or not got.get("parent_text"):
+            not_found += 1
+            continue
+        rows.append({**row, "parent": got["parent_text"]})
+    tmp = out.with_name(out.name + ".tmp")
+    tmp.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+    os.replace(tmp, out)
+    return {"set": out.stem, "posts": len(rows), "of_half": len(Store.rows(source)), "parent_not_found": not_found}
 
 
 def repeat(set_name: str, client: Client, store: Store, model: str, n: int = 10, times: int = 3,
@@ -820,6 +856,10 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("split")
     p.add_argument("--stage", type=int, required=True, choices=(1, 2, 3))
     p.add_argument("--block", required=True)
+    p = sub.add_parser("parent-set")
+    p.add_argument("--stage", type=int, required=True, choices=(1, 2, 3))
+    p.add_argument("--block", required=True)
+    p.add_argument("--half", required=True, choices=("validation", "final"))
     p = sub.add_parser("freeze")
     p.add_argument("--note", required=True)
     p = sub.add_parser("config")
@@ -850,6 +890,8 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(compare_set(args.set_name, store), indent=1))
         elif args.command == "split":
             print(json.dumps(split(args.stage, args.block, store), indent=1))
+        elif args.command == "parent-set":
+            print(json.dumps(parent_set(args.stage, args.block, args.half, store), indent=1))
         elif args.command == "repeat":
             print(json.dumps(repeat(args.set_name, Client(store), store, store.config().get("model", PINNED),
                                     args.posts, args.times), indent=1))
