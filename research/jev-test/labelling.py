@@ -59,26 +59,42 @@ def good(r: dict | None) -> bool | None:
 # ---------- Grok ----------
 
 
+FATAL = ("missing", "duplicate", "rejected", "line ")   # harness.check_scores problems that write nothing
+
+
 def ingest_grok(set_name: str, envelope: Path, private: Path = PRIVATE, discovery: Path = DISCOVERY) -> dict:
-    """Parse Grok's JSON lines, validate them with the harness's own checker, save grok-scores-<set>.jsonl."""
+    """Parse Grok's JSON lines, validate them with the harness's own checker, save grok-scores-<set>.jsonl.
+    Fail-closed like raters.ingest: a line that isn't JSON, or any post missing, answered twice or rejected,
+    and nothing is written. An existing grok-scores file is never overwritten. An id the harness corrects by
+    its opening words, or an unknown type kept as other, is reported but not fatal."""
     import harness  # the Discovery harness's validator: id + echoed opening, 0-2 scores, known types
 
+    target = private / f"grok-scores-{set_name}.jsonl"
+    if target.exists():
+        raise SystemExit(f"{target.name} already exists; Grok's scores are never overwritten")
     text = json.loads(envelope.read_text(encoding="utf-8"))["text"]
-    parsed = []
-    for line in text.split("\n"):
+    parsed, problems = [], []
+    for n, line in enumerate(text.split("\n"), 1):
         # Grok can put a preamble sentence on the same line as the first answer
         start = line.find('{"id"')
         if start < 0:
             continue
         try:
             parsed.append(json.loads(line[start:].strip()))
-        except json.JSONDecodeError:
-            continue
+        except json.JSONDecodeError as exc:
+            problems.append(f"line {n}: not JSON ({exc.msg})")
     corpus = {c["id"]: c for c in rows(discovery / f"corpus-{set_name}.jsonl")}
-    kept, problems = harness.check_scores(corpus, parsed)
+    if not corpus:
+        raise SystemExit(f"no corpus for {set_name}")
+    kept, checked = harness.check_scores(corpus, parsed)
+    problems += checked
+    fatal = [p for p in problems if p.startswith(FATAL)]
+    if fatal:
+        raise SystemExit(f"grok {set_name}: nothing written, {len(fatal)} problem(s):\n" + "\n".join(fatal))
     private.mkdir(parents=True, exist_ok=True)
-    (private / f"grok-scores-{set_name}.jsonl").write_text(
-        "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in kept), encoding="utf-8")
+    tmp = target.with_name(target.name + ".tmp")
+    tmp.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in kept), encoding="utf-8")
+    tmp.replace(target)
     return {"set": set_name, "kept": len(kept), "of": len(corpus), "problems": problems}
 
 
@@ -107,10 +123,15 @@ def panel_typed(sets: list[str], private: Path = PRIVATE, raters_: tuple = ("cod
     Validation sets only: the final set stays unseen until the freeze."""
     import jev
     import raters
+    private = Path(private)
     out = []
     for s in sets:
         if s.endswith("-final"):
             raise SystemExit("the operator samples validation only; the final set stays sealed")
+        try:
+            jev.check_block(s, root=private)          # the shared seal: a split with no manifest isn't sealed
+        except jev.Stop as exc:
+            raise SystemExit(f"stopped: {exc}") from None
         corpus = rows(private / "splits" / f"{s}.jsonl")
         if not corpus:
             raise SystemExit(f"no split file for {s}: run jev.py split first")
@@ -138,7 +159,8 @@ def panel_summary(posts: list[dict]) -> dict:
 
 def choose(posts: list[dict], disputed_n: int = 40, random_n: int = 20, seed: int = SEED) -> list[dict]:
     """Disputed posts spread across (set, idea) groups in proportion, at least one per group that has
-    any; then a random sample of undisputed posts. Deterministic for a given seed."""
+    any; then a random sample of undisputed posts. Deterministic for a given seed. A quota never drops
+    below 1: with more groups than disputed slots, it stops and says so rather than drop a group."""
     rng = random.Random(seed)
     groups: dict[tuple, list[dict]] = defaultdict(list)
     for p in posts:
@@ -149,9 +171,12 @@ def choose(posts: list[dict], disputed_n: int = 40, random_n: int = 20, seed: in
     if total <= disputed_n:
         picked = [p for g in groups.values() for p in g]
     else:
+        if len(groups) > disputed_n:
+            raise SystemExit(f"{len(groups)} (set, idea) groups have disputed posts but --disputed is {disputed_n}; "
+                             f"every group gets at least one, so raise --disputed to {len(groups)} or more")
         quota = {k: max(1, round(disputed_n * len(g) / total)) for k, g in groups.items()}
-        while sum(quota.values()) > disputed_n:          # trim the largest quotas first
-            k = max(quota, key=lambda key: (quota[key], len(groups[key])))
+        while sum(quota.values()) > disputed_n:          # trim the largest quotas first, never below 1
+            k = max((key for key in quota if quota[key] > 1), key=lambda key: (quota[key], len(groups[key])))
             quota[k] -= 1
         while sum(quota.values()) < disputed_n:          # top up where there is room
             k = max((key for key in quota if quota[key] < len(groups[key])),

@@ -75,14 +75,14 @@ class PanelTests(Base):
         self.assertTrue(all(not p["disputed"] for p in a if p["why_chosen"].startswith("random")))
 
     def test_page_hides_votes_and_escapes_script(self) -> None:
-        sample = labelling.choose(labelling.panel(self.private, self.discovery), 6, 3)
+        sample = labelling.choose(labelling.panel(self.private, self.discovery), 9, 3)   # 9 disputed groups
         page = labelling.write_page(sample, self.private).read_text(encoding="utf-8")
         self.assertNotIn("t </script> x", page)
         self.assertIn("t <\\/script> x", page)
         self.assertNotIn('"votes"', page)
         self.assertNotIn("why_chosen", page)
         manifest = json.loads((self.private / f"label-sample-{labelling.sample_hash(sample)}.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(manifest["posts"]), 9)
+        self.assertEqual(len(manifest["posts"]), 12)
 
     def test_grok_preamble_on_first_line_is_parsed(self) -> None:
         s = "stagespam-tool"
@@ -96,7 +96,7 @@ class PanelTests(Base):
         self.assertEqual((result["kept"], result["problems"]), (2, []))
 
     def test_ingest_labels_checks_the_sample(self) -> None:
-        sample = labelling.choose(labelling.panel(self.private, self.discovery), 6, 3)
+        sample = labelling.choose(labelling.panel(self.private, self.discovery), 9, 3)
         labelling.write_page(sample, self.private)
         good_file = Path(self.tmp.name) / "labels.json"
         good_file.write_text(json.dumps({"sample": labelling.sample_hash(sample),
@@ -130,3 +130,70 @@ class NoOverwriteTests(Base):
     def test_operator_never_samples_the_final_set(self) -> None:
         with self.assertRaises(SystemExit):
             labelling.panel_typed(["stage1-B3-final"], self.private)
+
+
+class ReviewFixTests(Base):
+    """Regression tests for the 28 Sep review: fail-closed Grok ingest, quotas and the shared seal."""
+
+    CORPUS = [{"id": "a1", "idea": "i", "text": "First post text here"}, {"id": "b2", "idea": "i", "text": "Second post"}]
+
+    def envelope(self, lines: list[str]) -> Path:
+        path = Path(self.tmp.name) / "out.json"
+        path.write_text(json.dumps({"text": "\n".join(lines)}), encoding="utf-8")
+        return path
+
+    def grok_line(self, c: dict, **kw) -> str:
+        return json.dumps({"id": c["id"], "opening": c["text"][:30], "relevant": 2, "real": 2, "useful": 1,
+                           "act": True, "type": "genuine", "why": "w", **kw})
+
+    # 5
+    def test_grok_ingest_is_fail_closed(self) -> None:
+        s = "stagespam-tool"
+        self.write(self.discovery, f"corpus-{s}.jsonl", self.CORPUS)
+        target = self.private / f"grok-scores-{s}.jsonl"
+        cases = {"missing": [self.grok_line(self.CORPUS[0])],
+                 "duplicate": [self.grok_line(self.CORPUS[0]), self.grok_line(self.CORPUS[0]), self.grok_line(self.CORPUS[1])],
+                 "rejected": [self.grok_line(self.CORPUS[0], relevant=5), self.grok_line(self.CORPUS[1])],
+                 "not JSON": ['{"id": "a1", broken', self.grok_line(self.CORPUS[0]), self.grok_line(self.CORPUS[1])]}
+        for needle, lines in cases.items():
+            with self.assertRaises(SystemExit) as ctx:
+                labelling.ingest_grok(s, self.envelope(lines), self.private, self.discovery)
+            self.assertIn(needle, str(ctx.exception))
+            self.assertFalse(target.exists())
+
+    def test_grok_ingest_never_overwrites(self) -> None:
+        s = "stagespam-tool"
+        self.write(self.discovery, f"corpus-{s}.jsonl", self.CORPUS)
+        env = self.envelope([self.grok_line(c) for c in self.CORPUS])
+        self.assertEqual(labelling.ingest_grok(s, env, self.private, self.discovery)["kept"], 2)
+        before = (self.private / f"grok-scores-{s}.jsonl").read_text(encoding="utf-8")
+        with self.assertRaises(SystemExit):
+            labelling.ingest_grok(s, env, self.private, self.discovery)
+        self.assertEqual((self.private / f"grok-scores-{s}.jsonl").read_text(encoding="utf-8"), before)
+
+    # 7b
+    @staticmethod
+    def posts(sizes: list[int]) -> list[dict]:
+        return [{"id": f"g{g}-{n}", "set": "s", "idea": f"idea {g}", "disputed": True, "scorers": 3}
+                for g, size in enumerate(sizes) for n in range(size)]
+
+    def test_more_groups_than_disputed_slots_stops(self) -> None:
+        with self.assertRaises(SystemExit) as ctx:
+            labelling.choose(self.posts([2, 2, 2, 2, 2]), disputed_n=4, random_n=0)
+        self.assertIn("5 (set, idea) groups", str(ctx.exception))
+
+    def test_every_group_keeps_at_least_one(self) -> None:
+        picked = labelling.choose(self.posts([10, 1, 1, 1]), disputed_n=4, random_n=0)
+        self.assertEqual(len(picked), 4)
+        self.assertEqual({p["idea"] for p in picked}, {f"idea {g}" for g in range(4)})
+
+    # 1b / 7a: panel_typed goes through the shared seal
+    def test_panel_typed_refuses_an_unsealed_split(self) -> None:
+        splits = self.private / "splits"
+        splits.mkdir()
+        self.write(splits, "stage2-B3-validation.jsonl", [{"id": "x", "idea": "i", "text": "t"}])
+        with self.assertRaises(SystemExit) as ctx:
+            labelling.panel_typed(["stage2-B3-validation"], self.private)
+        self.assertIn("not sealed", str(ctx.exception))
+        (splits / "split-stage2-B3.json").write_text("{}", encoding="utf-8")
+        self.assertEqual(len(labelling.panel_typed(["stage2-B3-validation"], self.private)), 1)

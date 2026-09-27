@@ -23,11 +23,11 @@ Does Jev, TypeSafe's typed-judgement model, earn a place as a cheap, repeatable 
 | `… config --real-data on` | Run only after the operator says yes in chat. The date is recorded |
 | `… spend` | Spend so far against the $1 ceiling |
 | `… split --stage N --block B` | Seals a new block into validation and final before any scoring. It can't be redone |
-| `… run --set stage{N}-B{k}-validation` | Jev on a sealed block set. The `-final` sets are refused until `freeze` |
-| `… repeat --set S --posts 10 --times 3` | Fresh, uncached re-asks: does Jev answer the same way twice? |
+| `… run --set stage{N}-B{k}-validation` | Jev on a sealed block set. The `-final` sets are refused until `freeze`. A rerun rebuilds the answers from the cache, but never over answers to other questions (`--replace` keeps the old file as `.bak`) |
+| `… repeat --set S --posts 10 --times 3` | Fresh, uncached re-asks: does Jev answer the same way twice? Tries already in the file are skipped |
 | `… rank --set S` | One Choice per idea: which post would you most want to join? |
-| `… freeze --note "…"` | One-way. Records the frozen questions and cut-offs and unseals final |
-| `raters.py brief / ingest / compare` | The LLM raters' brief (same questions as Jev), fail-closed ingest of their answers, and the rater comparison |
+| `… freeze --note "…"` | One-way. Refused until `thresholds.json` has the `coverage_threshold` chosen on validation. Records it, its rule and the question hashes, and unseals final |
+| `raters.py brief / ingest / compare` | The LLM raters' brief (same questions as Jev), fail-closed ingest of their answers, and the rater comparison. `--corpus` must be the file for `--set`. Ingest never overwrites a rater's file (`--replace` keeps the old one as `.bak`) |
 | `labelling.py sample --sets …-validation` | The operator's labelling page for block sets (validation only). Pages and labels are never overwritten |
 
 - Every answer is cached in `private/cache/`, so a rerun or a re-analysis makes no new calls. An interrupted run resumes for free.
@@ -61,7 +61,7 @@ Does Jev, TypeSafe's typed-judgement model, earn a place as a cheap, repeatable 
 
 **Withdrawn (28 Sep): the `act` pass rule written on 27 Sep.** The harness copies every final `act` label from Codex's first score, and never compares or settles it (`../discovery-test/harness.py:1433`, `:1456`). Measuring Jev against it would measure agreement with Codex. `act` is reported only as a historical field.
 
-**What is reported instead** is rater agreement (see "How raters are compared" below), per set and per idea, with the operator's 60 labels as one rater. Everything is directional.
+**What is reported instead** is rater agreement, using the Experiment 3 measures below, per set and per idea, with the operator's 60 labels as one rater. Everything is directional.
 
 ## Experiment 3: the new pull (written before any read, 28 Sep 2026)
 
@@ -70,7 +70,9 @@ Does Jev, TypeSafe's typed-judgement model, earn a place as a cheap, repeatable 
 - `jev.py split` seals it before any rater sees it:
   - any post whose post or conversation is already in the 298 is dropped;
   - each remaining conversation goes to **validation** or **final** by `sha256` of its ID.
+- The split writes both halves and its manifest under temporary names and publishes them only when all three are written. A split with no manifest is not sealed: every reader refuses it and names the leftover files to remove.
 - The final set stays unreadable until `jev.py freeze` records that the questions and cut-offs are frozen. The operator samples validation only.
+- One guard (`jev.check_block`) is used by every reader of a block set: `jev.py run`, `repeat`, `rank`, `reworded` and `compare`, `raters.py brief`, `ingest` and `compare`, and `labelling.py sample`. It refuses a final set by its name or by its corpus file until the freeze, and after it whenever the questions for that stage's job no longer hash to the frozen ones.
 
 **Raters, all peers, with no answer key:**
 - Jev `jev-1.13.0`, pinned;
@@ -87,19 +89,28 @@ The operator's labels are one comparison among the others (operator, 27 Sep).
 - `p_good = P(relevant=2) × P(real=2) × P(useful≥1)`, good if it is 0.5 or more (`thresholds.json`);
 - the most-probable-level version is reported alongside.
 
+**One validator.** Jev's answers and the LLM raters' answers pass the same check (`jev.check_answer`): every question present, probabilities in [0, 1] (true and false are not probabilities), and each score or choice summing to 1 within 0.05, then renormalised. A row that fails is unavailable.
+
 **Measures, all directional:**
-1. **Pairwise agreement and kappa** for every pair of raters, with *n*, prevalence, and 90% intervals from resampling conversations. Reported per set and per idea.
+1. **Pairwise agreement and kappa** for every pair of raters, with *n*, prevalence, and 90% intervals from resampling conversations. Reported per set and per idea (per idea with the same prevalence and intervals).
+   - Kappa is undefined in a resample where both raters say the same thing on every post. Those draws are kept as their own outcome, not dropped: the interval is over the defined draws, the report gives the share undefined, and it marks the interval unstable when more than 10% of draws are undefined.
+   - A type counts as the panel's only with at least two votes and a strict majority.
 2. **Soft agreement:** each model's distance from the other models' average `p_good`, leaving itself out.
 3. **Self-agreement:** each LLM rater re-scores about 50 validation posts in a fresh session. That sets the ceiling for its pairwise figures.
-4. **Coverage against agreement** (headline): the share of posts Jev decides at or above each confidence level, and its agreement with the model panel's majority on those. This also tests TypeSafe's claim that "higher confidence means higher accuracy". The cut-off is chosen on validation and applied once to final.
+4. **Coverage against agreement** (headline): the share of posts Jev decides at or above each confidence level, and its agreement with the model panel's majority on those. This also tests TypeSafe's claim that "higher confidence means higher accuracy".
+   - Each rule has its own confidence. For `p_good ≥ 0.5` it is `max(p_good, 1 − p_good)`. For the most-probable-level rule it is the probability that its verdict is right: `p_good` when the verdict is good, `1 − p_good` when not. A post can be "good" by its most probable levels and still have a low `p_good` (relevant and real 0.25/0.35/0.40, useful 0.30/0.40/0.30 gives 0.112), so it doesn't count as a confident call.
+   - The cut-off (`coverage_threshold`, and `coverage_rule` for which curve) is chosen on validation. `freeze` refuses without it. On final, `raters.py compare` applies the frozen cut-off once and reports the share and agreement as `preregistered`, the result. The full curves on final are shown as exploratory.
 5. **Diagnostics** (never pass measures):
    - is the author answering someone else's need?
    - is the post outside the idea's domain?
    - is it reply-worthy? (compared with the operator's "reply")
-   - can it be judged from the text alone? (compared with the operator's "unsure")
+   - can it be judged from the text alone? (the AUC of `text_decidable` for posts the operator answered against the ones marked "unsure")
 6. **Ranking:** one Choice per Worth-joining idea, "which post would you most want to join?" (`jev.py rank`).
 7. **Jev repeatability:** about 10 posts × 3 fresh calls (`jev.py repeat`).
 8. **Unavailable answers** (a missing or out-of-range question) are counted separately and never treated as a no.
+9. **The operator's agreement, disputed and random apart.** With `--sample` (the label-sample sidecar the labels came from), every rater's and the panel's agreement with the operator is reported separately for the disputed posts and the random panel-agreed posts. Mixed together, the two samples would hide how each behaves.
+
+**Nothing is overwritten.** `raters.py ingest` refuses when the rater's file for that set exists (`--replace` first moves it to a timestamped `.bak`). `labelling.py ingest-grok` fails closed like it: any row missing, answered twice or rejected, and nothing is written, and an existing Grok file is never replaced.
 
 **Decision:** there's no pass or fail. The report states how much of the other models' scoring Jev could take over, and at what agreement. The operator decides whether it earns a place in build-phase query experiments. A weak result is reported as "not useful at this scale".
 

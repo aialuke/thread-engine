@@ -16,6 +16,7 @@ import urllib.error
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest import mock
 from urllib.parse import parse_qs, urlsplit
 
 HERE = Path(__file__).resolve().parent
@@ -517,7 +518,7 @@ class StagesAndScoring(Base):
         h = self.make(Router())
         texts = [f"post number {n} with enough words to be unique" for n in range(12)]
         self.write_corpus(h, texts)
-        first = [{"id": f"p{n}", "opening": texts[n][:30], "relevant": r, "real": 2, "useful": 1, "type": "genuine"}
+        first = [{"id": f"p{n}", "opening": texts[n][:30], "relevant": r, "real": 2, "useful": 1, "act": False, "type": "genuine"}
                  for n, r in enumerate([2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0])]
         path = self.root / "first.jsonl"
         path.write_text("".join(json.dumps(r) + "\n" for r in first))
@@ -527,7 +528,7 @@ class StagesAndScoring(Base):
         self.assertTrue({"p0", "p1", "p2"} <= second_ids)
         self.assertNotIn("relevant", h.store.rows(h.store.root / "second-stage2.jsonl")[0])   # blind to the first scores
         second = [{"id": i, "opening": texts[int(i[1:])][:30], "relevant": 0 if i == "p1" else
-                   [r for r in first if r["id"] == i][0]["relevant"], "real": 2, "useful": 1, "type": "genuine"} for i in second_ids]
+                   [r for r in first if r["id"] == i][0]["relevant"], "real": 2, "useful": 1, "act": False, "type": "genuine"} for i in second_ids]
         path2 = self.root / "second.jsonl"
         path2.write_text("".join(json.dumps(r) + "\n" for r in second))
         report = h.second_scores(2, path2)
@@ -611,13 +612,13 @@ class Pieces(unittest.TestCase):
         corpus = {"p61864d": {"id": "p61864d", "text": "@Alexfeinberg What do you use instead of Google maps?"},
                   "p5af09d": {"id": "p5af09d", "text": "Still have Apple devices and software for work"},
                   "p0000aa": {"id": "p0000aa", "text": "Totally unscored post"}}
-        rows = [{"id": "p61864f", "opening": "@Alexfeinberg What do you use i", "relevant": 1, "real": 2, "useful": 2},
-                {"id": "p5af09d", "opening": "Still have Apple devices and so", "relevant": 2, "real": 2, "useful": 2},
-                {"id": "p5af09d", "opening": "Still have Apple devices and so", "relevant": 0, "real": 0, "useful": 0},
-                {"id": "pzzzzzz", "opening": "nothing like any post at all xx", "relevant": 2, "real": 2, "useful": 2}]
+        rows = [{"id": "p61864f", "opening": "@Alexfeinberg What do you use i", "relevant": 1, "real": 2, "useful": 2, "act": True},
+                {"id": "p5af09d", "opening": "Still have Apple devices and so", "relevant": 2, "real": 2, "useful": 2, "act": True},
+                {"id": "p5af09d", "opening": "Still have Apple devices and so", "relevant": 0, "real": 0, "useful": 0, "act": False},
+                {"id": "pzzzzzz", "opening": "nothing like any post at all xx", "relevant": 2, "real": 2, "useful": 2, "act": True}]
         kept, problems = harness.check_scores(corpus, rows)
-        self.assertEqual([(r["id"], r.get("corrected_from")) for r in kept], [("p61864d", "p61864f"), ("p5af09d", None)])
-        self.assertTrue(any("corrected" in p for p in problems))
+        self.assertEqual([r["id"] for r in kept], ["p5af09d"])      # a wrong id is never corrected into the scores
+        self.assertIn("rejected p61864f: not a corpus id; its opening matches p61864d", problems)
         self.assertTrue(any("duplicate" in p for p in problems))
         self.assertTrue(any("rejected pzzzzzz" in p for p in problems))
         self.assertIn("missing score for p0000aa", problems)
@@ -756,8 +757,8 @@ class NewPullPrep(Base):
         return h
 
     def scores_for(self, corpus_file: str) -> list[dict]:
-        return [{"id": c["id"], "opening": c["text"][:30], "relevant": 2, "real": 2, "useful": 1, "type": "genuine"}
-                for c in self.store.rows(self.root / corpus_file)]
+        return [{"id": c["id"], "opening": c["text"][:30], "relevant": 2, "real": 2, "useful": 1, "act": True,
+                 "type": "genuine"} for c in self.store.rows(self.root / corpus_file)]
 
     def write(self, name: str, rows: list[dict]) -> Path:
         path = Path(self.tmp.name) / name
@@ -773,7 +774,7 @@ class NewPullPrep(Base):
         out = h.corpus(2, block="B2", batch=1)
         self.assertEqual((out["posts"], out["parts"]), (2, 2))
         self.assertIn("corpus-stage2-B2-part2.jsonl", out["written"])
-        self.assertIn("corpus-stage2-B2-part2.jsonl", (self.root / "corpus-brief-stage2-B2-part2.md").read_text())
+        self.assertIn("corpus-stage2-B2-part2.jsonl", (self.root / "corpus-brief-stage2-B2-part2-legacy.md").read_text())
         key = json.loads((self.root / "corpus-key-stage2-B2.json").read_text())
         self.assertEqual({k["post_id"] for k in key.values()}, {"8002", "8003"})
         row = next(k for k in key.values() if k["post_id"] == "8002")
@@ -828,7 +829,7 @@ class NewPullPrep(Base):
         h.corpus(1, block="B2")
         (line,) = self.store.rows(self.root / "corpus-stage1-B2.jsonl")
         self.assertEqual((line["replies"], line["age_hours"]), (4, 2.0))      # the call's copy, not the later 40
-        brief = (self.root / "corpus-brief-stage1-B2.md").read_text()
+        brief = (self.root / "corpus-brief-stage1-B2-legacy.md").read_text()
         self.assertNotIn("Judge from the text alone", brief)
         self.assertIn("replies and age_hours", brief)
         # other jobs' briefs unchanged, byte for byte
@@ -908,6 +909,311 @@ class NewPullPrep(Base):
 
 def sha_text(text: str) -> str:
     return harness.hashlib.sha256(text.encode()).hexdigest()
+
+
+class ReviewFixes(Base):
+    """28 Sep review: interrupted runs never pay twice or overwrite, score ingest fails closed, corpus sets
+    publish whole, and the budget gates can't be walked past."""
+
+    # 1. reread
+    def test_reread_saves_each_batch_so_a_resume_fetches_only_the_rest(self) -> None:
+        seen, stop = [], [True]
+        live = {}
+        def lookup(q):
+            ids = q["ids"].split(",")
+            seen.append(ids)
+            if len(seen) == 2 and stop[0]:
+                raise harness.Stop("simulated stop on the second batch")
+            return {"data": [live[i] for i in ids if i in live]}
+        h = self.make(Router(_2_tweets=lookup))
+        seed_block(self.store, ("B1", NOW - timedelta(hours=8)))
+        posts = [post(str(9000 + n), f"post {n}", 60 * 8) for n in range(120)]
+        seed_call(self.store, "x0001", NOW - timedelta(hours=7), posts)
+        live.update({p["id"]: p for p in posts})
+        self.store.upsert_posts(NOW - timedelta(hours=7), [
+            {"post_id": p["id"], "label": "x_api", "x": p,
+             "sighting": {"source": "K-recency", "stage": "stage1", "block": "B1", "call": "x0001"}} for p in posts])
+        with self.assertRaisesRegex(harness.Stop, "simulated"):
+            h.reread(block="B1")
+        first = set(seen[0])
+        self.assertEqual({pid for pid, r in self.store.load_posts().items() if r["reread"]}, first)
+        stop[0] = False
+        out = h.reread(block="B1")
+        self.assertEqual((out["due"], out["reread"]), (20, 20))
+        self.assertEqual(len(seen), 3)
+        self.assertEqual(set(seen[2]), {p["id"] for p in posts} - first)
+
+    # 2. recheck
+    def test_recheck_skips_a_rejected_batch_instead_of_marking_it_gone(self) -> None:
+        answer = [403]
+        h = self.make(Router(_2_tweets=lambda q: answer[0] if answer[0] != 200 else lookup_route({"5": post("5", "here")})(q)))
+        self.store.upsert_posts(NOW - timedelta(hours=30), [
+            {"post_id": "5", "label": "x_api", "x": post("5", "here"), "sighting": {"source": "K", "stage": "stage2"}},
+            {"post_id": "6", "label": "x_api", "x": post("6", "gone"), "sighting": {"source": "K", "stage": "stage2"}}])
+        out = h.recheck(24)
+        self.assertEqual((out["due"], out["gone"], out["failed_calls"][0]["http"]), (2, 0, 403))
+        self.assertFalse((self.root / "recheck.jsonl").exists())
+        answer[0] = 200
+        self.assertEqual(h.recheck(24), {"due": 2, "gone": 1})       # both still due, checked on a 200
+
+    # 3a. K query sent before processing
+    def test_k_query_logged_as_sent_before_processing_so_a_crash_never_resends(self) -> None:
+        seen = []
+        def search(q):
+            seen.append(q["query"])
+            return {"data": [post(str(6000 + len(seen)), "is there a free alternative")], "meta": {"result_count": 1}}
+        h = self.make(Router(_2_tweets_search_recent=search))
+        real, calls = h._note_posts, [0]
+        def crash_once(*a, **k):
+            calls[0] += 1
+            if calls[0] == 1:
+                raise RuntimeError("crash while processing posts")
+            return real(*a, **k)
+        h._note_posts = crash_once
+        with self.assertRaisesRegex(RuntimeError, "processing"):
+            h.run_stage(2, "demand-tech-1", only="K-recency")
+        h._note_posts = real
+        out = h.run_stage(2, "demand-tech-1", only="K-recency")
+        v1, v2 = harness.IDEAS["demand-tech-1"]["k"]
+        self.assertEqual(seen, [v1, v2])                                # v1 not sent again
+        self.assertEqual([(c["variant"], c.get("reused", False)) for c in out["K-recency"]["calls"]], [("v1", True), ("v2", False)])
+        self.assertIn("6001", self.store.load_posts())                  # v1's posts recovered from its raw body
+        self.assertTrue(all(s["noted"] for s in h._sent(f"S2:demand-tech-1:K-recency:B1")))
+
+    # 3b. raw bodies are exclusive
+    def test_raw_body_never_overwritten_when_the_log_lost_its_row(self) -> None:
+        h = self.make(Router(_2_usage={"data": []}))
+        (self.root / "raw" / "x0001.json").write_text("precious")       # a crash left the body, not the row
+        h.run_pilot_step("P0")
+        self.assertEqual((self.root / "raw" / "x0001.json").read_text(), "precious")
+        (row,) = self.store.rows(self.store.requests)
+        self.assertEqual((row["call_id"], row["raw_path"]), ("x0002", "raw/x0002.json"))
+        self.assertEqual(json.loads((self.root / "raw" / "x0002.json").read_text()), {"data": []})
+        self.assertEqual(self.store.next_id(self.store.requests, "x", self.root / "raw"), "x0003")
+
+    # 3c. Grok resume
+    def grok_ready(self, grok: FakeGrok) -> harness.Harness:
+        known = {"2103752357758787700": post("2103752357758787700", "Is there a free alternative to Premiere? Asking for a friend", 60)}
+        h = self.make(Router(_2_tweets=lookup_route(known)), grok)
+        data = self.store.progress()
+        data["settings"]["model"] = "grok-4.7"
+        self.store.save_progress(data)
+        return h
+
+    def test_grok_run_saved_before_a_crash_is_finished_from_its_output_not_paid_again(self) -> None:
+        grok = FakeGrok((0, ok_stream(), ""))                            # one reply: a second run would fail
+        h = self.grok_ready(grok)
+        with mock.patch.object(harness, "check_claims", side_effect=RuntimeError("crash while checking claims")):
+            with self.assertRaisesRegex(RuntimeError, "checking claims"):
+                h.run_pilot_step("P7-free")
+        self.assertEqual(self.store.rows(self.store.grok_log), [])
+        self.assertTrue((self.root / "grok" / "g0001.pending.json").exists())
+        result = h.run_pilot_step("P7-free")
+        self.assertEqual((result["status"], result["run"], len(grok.calls)), ("done", "g0001", 1))
+        (row,) = self.store.rows(self.store.grok_log)
+        self.assertTrue(row["resumed_from_saved_output"])
+        self.assertEqual(row["counts"]["labels"]["real"], 1)
+        self.assertFalse((self.root / "grok" / "g0001.pending.json").exists())
+        self.assertEqual(self.store.grok_spent(), 0.04)                 # billed once
+
+    def test_grok_run_logged_but_not_recorded_is_recorded_not_paid_again(self) -> None:
+        grok = FakeGrok((0, ok_stream(), ""))
+        h = self.grok_ready(grok)
+        real = h.record
+        def crash_on_done(name, status, attempt, todo=""):
+            if status == "done":
+                raise RuntimeError("crash before the step was recorded")
+            return real(name, status, attempt, todo)
+        h.record = crash_on_done
+        with self.assertRaisesRegex(RuntimeError, "recorded"):
+            h.run_pilot_step("P7-free")
+        h.record = real
+        self.assertEqual(h.step_state("P7-free")["status"], "pending")
+        result = h.run_pilot_step("P7-free")
+        self.assertEqual((result["status"], result["run"], len(grok.calls)), ("done", "g0001", 1))
+        self.assertEqual(len(self.store.rows(self.store.grok_log)), 1)
+
+    def test_saved_grok_output_with_no_record_stops_every_grok_step(self) -> None:
+        grok = FakeGrok((0, ok_stream(), ""))
+        h = self.grok_ready(grok)
+        (self.root / "grok" / "g0001.stdout").write_text(ok_stream())
+        with self.assertRaisesRegex(harness.Stop, r"g0001 was paid for.*move private/grok/g0001\.\* aside"):
+            h.run_pilot_step("P7-free")
+        self.assertEqual(grok.calls, [])
+
+    # 4. score ingest
+    TEXTS = ["Is there a free alternative to Premiere Pro for editing",
+             "Is there a free alternative to Photoshop these days",
+             "Completely different words about the weather today"]
+
+    def good_scores(self) -> list[dict]:
+        return [{"id": f"p{n}", "opening": t[:30], "relevant": 2, "real": 2, "useful": 1, "act": True, "type": "genuine"}
+                for n, t in enumerate(self.TEXTS)]
+
+    def refuses_on_both_paths(self, mutate, pattern: str) -> None:
+        for path in ("ingest", "second"):
+            with self.subTest(path=path, pattern=pattern):
+                self.root = Path(tempfile.mkdtemp(dir=self.tmp.name)) / "private"
+                h = self.make(Router())
+                h.store.write_atomic(self.root / "corpus-stage2.jsonl", "".join(
+                    json.dumps({"id": f"p{n}", "idea": "i", "text": t}) + "\n" for n, t in enumerate(self.TEXTS)))
+                bad = self.root.parent / "bad.jsonl"
+                bad.write_text("".join(json.dumps(r) + "\n" for r in mutate(self.good_scores())))
+                if path == "ingest":
+                    with self.assertRaisesRegex(harness.Stop, "wrote nothing.*" + pattern):
+                        h.ingest_scores(2, bad)
+                    written = ("scores-stage2.jsonl", "second-stage2.jsonl", "second-mode-stage2.json")
+                else:
+                    good = self.root.parent / "good.jsonl"
+                    good.write_text("".join(json.dumps(r) + "\n" for r in self.good_scores()))
+                    h.ingest_scores(2, good, second="all", seed=1)
+                    with self.assertRaisesRegex(harness.Stop, "wrote nothing.*" + pattern):
+                        h.second_scores(2, bad)
+                    written = ("second-scores-stage2.jsonl", "disagreements-stage2.jsonl")
+                self.assertFalse(any((self.root / n).exists() for n in written))
+
+    @staticmethod
+    def change(n: int, **fields):
+        def mutate(rows):
+            for k, v in fields.items():
+                if v is KeyError:
+                    rows[n].pop(k, None)
+                else:
+                    rows[n][k] = v
+            return rows
+        return mutate
+
+    def test_score_ingest_rejects_a_missing_or_empty_opening(self) -> None:
+        self.refuses_on_both_paths(self.change(0, opening=KeyError), "rejected p0: no opening words")
+        self.refuses_on_both_paths(self.change(0, opening="   "), "rejected p0: no opening words")
+
+    def test_score_ingest_needs_the_posts_own_opening_not_a_shared_prefix(self) -> None:
+        self.refuses_on_both_paths(self.change(0, opening="Is there a free"), "rejected p0: opening 'is there a free'")
+        self.refuses_on_both_paths(self.change(0, opening=self.TEXTS[2][:30]), "rejected p0: opening")
+        # the post's own first 20 characters, whitespace and case aside, are enough
+        rows = self.good_scores()
+        rows[0]["opening"] = "  IS THERE a   free alternative"
+        kept, problems = harness.check_scores({f"p{n}": {"text": t} for n, t in enumerate(self.TEXTS)}, rows)
+        self.assertEqual((len(kept), problems), (3, []))
+
+    def test_score_ingest_aborts_on_a_wrong_id_or_an_unknown_type(self) -> None:
+        self.refuses_on_both_paths(self.change(2, id="pwrong"), "rejected pwrong: not a corpus id; its opening matches p2")
+        self.refuses_on_both_paths(self.change(1, type="spam-ish"), "rejected p1: unknown type 'spam-ish'; types are genuine")
+
+    def test_score_ingest_rejects_booleans_as_scores_and_numbers_as_act(self) -> None:
+        self.assertTrue(True in (0, 1, 2))                               # why the check is by type
+        self.refuses_on_both_paths(self.change(0, relevant=True), "rejected p0: relevant, real and useful")
+        self.refuses_on_both_paths(self.change(1, useful=False), "rejected p1: relevant, real and useful")
+        self.refuses_on_both_paths(self.change(0, real=2.0), "rejected p0: relevant, real and useful")
+        self.refuses_on_both_paths(self.change(0, act=1), "rejected p0: act must be true or false, not 1")
+        self.refuses_on_both_paths(self.change(2, act=KeyError), "rejected p2: act must be true or false, not None")
+
+    def test_fail_closed_aborts_on_any_problem(self) -> None:
+        with self.assertRaisesRegex(harness.Stop, "w: wrote nothing; 1 problem"):
+            harness.Harness._fail_closed(["p1: something no prefix names"], "w")
+        harness.Harness._fail_closed([], "w")
+        self.refuses_on_both_paths(lambda rows: rows[:2], "missing score for p2")
+        self.refuses_on_both_paths(lambda rows: rows + rows[:1], "duplicate score for p0")
+
+    # 5 and 6. corpus
+    def one_post_store(self) -> harness.Harness:
+        h = self.make(Router())
+        self.store.upsert_posts(NOW, [{"post_id": "5", "label": "x_api", "x": post("5", "a live reply thread"),
+                                       "sighting": {"source": "K", "stage": "stage1", "idea": "wj-tech-1", "rank": 0}}])
+        return h
+
+    def corpus_files(self) -> list[str]:
+        return sorted(p.name for p in self.root.iterdir() if "corpus" in p.name)
+
+    def test_corpus_failure_while_writing_leaves_no_final_file(self) -> None:
+        h = self.one_post_store()
+        real, temps = Path.write_text, []
+        def flaky(path, *a, **k):
+            if path.name.startswith(".corpus"):
+                temps.append(path.name)
+                if len(temps) == 2:
+                    raise OSError("disk full after the first temp write")
+            return real(path, *a, **k)
+        with mock.patch.object(Path, "write_text", flaky):
+            with self.assertRaisesRegex(OSError, "disk full"):
+                h.corpus(1)
+        self.assertEqual(self.corpus_files(), [])                        # no final names, temps removed
+        self.assertEqual(h.corpus(1)["posts"], 1)                        # and the set can still be built
+
+    def test_corpus_crash_mid_rename_names_the_partial_set(self) -> None:
+        h = self.one_post_store()
+        real, moved = harness.os.replace, []
+        def flaky(src, dst):
+            if Path(dst).name.startswith("corpus"):
+                moved.append(Path(dst).name)
+                if len(moved) == 2:
+                    raise OSError("crash mid-rename")
+            return real(src, dst)
+        with mock.patch.object(harness.os, "replace", flaky):
+            with self.assertRaisesRegex(OSError, "mid-rename"):
+                h.corpus(1)
+        self.assertEqual(self.corpus_files(), ["corpus-key-stage1.json"])
+        with self.assertRaisesRegex(harness.Stop, r"partial corpus set for stage1.*corpus-key-stage1\.json. Remove"):
+            h.corpus(1)
+        (self.root / "corpus-key-stage1.json").unlink()
+        self.assertEqual(h.corpus(1)["posts"], 1)
+        with self.assertRaisesRegex(harness.Stop, "refusing to overwrite corpus-stage1.jsonl"):
+            h.corpus(1)
+
+    def test_corpus_brief_is_named_legacy_and_points_jev_raters_elsewhere(self) -> None:
+        h = self.one_post_store()
+        out = h.corpus(1)
+        self.assertEqual(out["brief"], "corpus-brief-stage1-legacy.md")
+        self.assertFalse((self.root / "corpus-brief-stage1.md").exists())
+        first = (self.root / out["brief"]).read_text().split("\n")[0]
+        self.assertIn("`research/jev-test/raters.py brief`", first)
+        self.assertIn("corpus-stage1.jsonl", (self.root / out["brief"]).read_text())
+
+    # 7. budget
+    def test_x_reserve_covers_every_slot_and_refuses_a_call_that_would_pass_the_checkpoint(self) -> None:
+        router = Router(_2_tweets_search_recent={"data": [], "meta": {}})
+        h = self.make(router)
+        params = {"query": "q", "max_results": "10"}
+        self.assertEqual(harness.max_cost("posts", params, NOW), 10 * harness.POST)
+        self.assertEqual(harness.max_cost("posts", {**params, "expansions": "author_id"}, NOW), 10 * (harness.POST + harness.USER))
+        self.assertEqual(harness.max_cost("counts", {"granularity": "day", "start_time": harness.iso(NOW - timedelta(days=6, hours=23)),
+                                                     "end_time": harness.iso(NOW)}, NOW), harness.WORST["P3"])
+        self.store.append(self.store.requests, {"stage": "stage1", "estimated_cost": 6.90})
+        with self.assertRaisesRegex(harness.Stop, "X API checkpoint"):   # caller's reserve 0: the gate works out 0.15
+            h.client.get("/2/tweets/search/recent", {**params, "expansions": "author_id"}, kind="posts", reserve=0.0,
+                         stage="stage1", step="t")
+        self.assertEqual(router.requests, [])
+        h.client.get("/2/tweets/search/recent", params, kind="posts", reserve=0.0, stage="stage1", step="t")
+        self.assertEqual(len(router.requests), 1)
+
+    def test_x_call_that_overshoots_blocks_the_next_even_a_free_one(self) -> None:
+        many = [post(str(100 + n), "x") for n in range(10)]
+        router = Router(_2_tweets=lambda q: {"data": many, "includes": {"tweets": many}}, _2_usage={"data": []})
+        h = self.make(router)
+        self.store.append(self.store.requests, {"stage": "stage1", "estimated_cost": 6.94})
+        harness.lookup_ids(h.client, [p["id"] for p in many], False, stage="stage1", step="t")   # reserved 0.05, billed 0.10
+        self.assertGreater(self.store.x_spent(), harness.X_CHECKPOINT)
+        with self.assertRaisesRegex(harness.Stop, "X API checkpoint"):
+            h.client.get("/2/usage/tweets", {"days": "7"}, kind="usage", reserve=0.0, stage="stage1", step="t2")
+        self.assertEqual(len(router.requests), 1)
+
+    def test_grok_reserve_is_the_worst_case_and_an_overshoot_blocks_the_next_run(self) -> None:
+        self.assertEqual(harness.GROK_RESERVE, 0.57)
+        self.assertGreater(harness.GROK_RESERVE, 0.3219)                 # the dearest run to 27 Sep
+        dear = stream({"type": "text", "data": '{"posts": []}'}, {"type": "end", "total_cost_usd": 0.70})
+        grok = FakeGrok((0, dear, ""))
+        h = self.grok_ready(grok)
+        self.store.append(self.store.grok_log, {"cost_usd": 2.50})       # 2.50 + 0.57 passes 3.00 (0.30 didn't)
+        with self.assertRaisesRegex(harness.Stop, "Grok checkpoint"):
+            h.run_pilot_step("P7-free")
+        self.assertEqual(grok.calls, [])
+        self.store.append(self.store.grok_log, {"cost_usd": -0.10})      # 2.40 + 0.57 fits
+        self.assertEqual(h.run_pilot_step("P7-free")["status"], "done")
+        self.assertAlmostEqual(self.store.grok_spent(), 3.10)
+        with self.assertRaisesRegex(harness.Stop, "Grok checkpoint"):
+            h.run_pilot_step("P7-steered")
+        self.assertEqual(len(grok.calls), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

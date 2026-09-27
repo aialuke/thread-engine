@@ -16,6 +16,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+import jev  # noqa: E402
 import raters  # noqa: E402
 
 QUESTIONS = {
@@ -310,3 +311,172 @@ class PaperMeasuresTests(unittest.TestCase):
         out = raters.coverage(p, binary, panel)
         self.assertEqual(out["curve"][0]["random_same_share_agreement_pct"], 50.0)
         self.assertEqual(out["confidence_auroc"]["auroc"], 1.0)   # confident posts agree, unsure ones don't
+
+
+class ReviewFixTests(Base):
+    """Regression tests for the 28 Sep review: seal and corpus binding, one validator, per-rule confidence,
+    no overwrites, undefined kappa draws, per-idea intervals, the operator splits and the type majority."""
+
+    FINAL = "stage2-B3-final"
+
+    def seal(self, freeze: bool = False) -> Path:
+        splits = self.private / "splits"
+        splits.mkdir(parents=True, exist_ok=True)
+        (splits / "split-stage2-B3.json").write_text("{}", encoding="utf-8")
+        for half in ("validation", "final"):
+            (splits / f"stage2-B3-{half}.jsonl").write_text(
+                "".join(json.dumps(c) + "\n" for c in CORPUS.values()), encoding="utf-8")
+        thresholds = self.root / "thresholds.json"
+        thresholds.write_text(json.dumps({"frozen": False, "coverage_threshold": 0.8}), encoding="utf-8")
+        if freeze:
+            jev.freeze("t", thresholds)
+        return splits
+
+    # 2
+    def test_one_validator_shared_with_jev(self) -> None:
+        self.assertIs(raters.check_answer, jev.check_answer)
+        _, problem = raters.check_answer("act", QUESTIONS["act"], {"noul": True})
+        self.assertIsNotNone(problem)
+
+    # 1b
+    def test_ingest_brief_and_compare_refuse_final_until_frozen(self) -> None:
+        splits = self.seal()
+        final = splits / f"{self.FINAL}.jsonl"
+        out = self.file("out.txt", line("a1") + "\n" + line("b2"))
+        with self.assertRaises(SystemExit):
+            raters.ingest("codex", self.FINAL, [out], CORPUS, QUESTIONS, self.private, corpus_path=final)
+        with self.assertRaises(SystemExit):                  # by corpus path, whatever the set is called
+            raters.ingest("codex", "s", [out], CORPUS, QUESTIONS, self.private, corpus_path=final)
+        with self.assertRaises(SystemExit):
+            raters.compare(self.FINAL, self.private, {}, {}, None, ["codex"], resamples=10)
+        with self.assertRaises(SystemExit):
+            raters.main(["brief", "--set", self.FINAL, "--corpus", str(final), "--job", "demand"])
+        self.assertFalse((self.private / "raters").exists())
+
+    # 1c
+    def test_corpus_is_bound_to_the_set(self) -> None:
+        splits = self.seal()
+        validation = splits / "stage2-B3-validation.jsonl"
+        raters.bind("stage2-B3-validation", validation, "demand")
+        with self.assertRaises(SystemExit):
+            raters.bind("stage1-B3-validation", validation)         # another stage
+        with self.assertRaises(SystemExit):
+            raters.bind("stage2-B4-validation", validation)         # another block
+        with self.assertRaises(SystemExit):
+            raters.bind("stage2-B3-validation", splits / "stage2-B3-other.jsonl")
+        with self.assertRaises(SystemExit):
+            raters.bind("stage2", validation)                       # a development set against a block file
+        with self.assertRaises(SystemExit):
+            raters.bind("stage2-B3-validation", validation, "tool")  # stage 2 is demand
+        with self.assertRaises(SystemExit):
+            raters.set_job("stage2-B3-validation", {"x": {"id": "x", "job": "tool"}})
+        out = self.file("out.txt", line("a1") + "\n" + line("b2"))
+        with self.assertRaises(SystemExit):
+            raters.ingest("codex", "stage1-B3-validation", [out], CORPUS, QUESTIONS, self.private, corpus_path=validation)
+
+    # 1d
+    def test_compare_on_final_reports_the_preregistered_cut_off(self) -> None:
+        self.seal(freeze=True)
+        ids = [f"p{n}" for n in range(8)]
+        truth = {i: n % 2 == 0 for n, i in enumerate(ids)}
+        self.write_rater("jev", self.FINAL, {**truth, "p7": None}, p=0.9)
+        for r in ("codex", "claude", "grok"):
+            self.write_rater(r, self.FINAL, truth)
+        key = {i: {"post_id": i, "conversation_id": f"c{n // 2}"} for n, i in enumerate(ids)}
+        report = raters.compare(self.FINAL, self.private, key, {i: "idea" for i in ids}, None,
+                                ["codex", "claude", "grok"], resamples=20)
+        pre = report["preregistered"]
+        # good posts: p_good 0.9 * 0.9 * 0.95 = 0.77 (under the 0.8 cut); not good: 1 - 0.043 = 0.96 (over it)
+        self.assertEqual((pre["coverage_threshold"], pre["rule"]), (0.8, "p_good_0.5"))
+        self.assertEqual((pre["posts"], pre["of"], pre["share_pct"], pre["agreement_pct"]), (3, 7, 42.9, 100.0))
+        self.assertIn("exploratory", report["jev_coverage"]["status"])
+
+    # 3
+    def test_each_rule_has_its_own_confidence(self) -> None:
+        a = {"relevant": {"probabilities": {"0": 0.25, "1": 0.35, "2": 0.40}},
+             "real": {"probabilities": {"0": 0.25, "1": 0.35, "2": 0.40}},
+             "useful": {"probabilities": {"0": 0.30, "1": 0.40, "2": 0.30}}}
+        self.assertTrue(raters.good_level(a))                       # every most probable level is good
+        pg = raters.p_good(a)
+        self.assertAlmostEqual(pg, 0.4 * 0.4 * 0.7)                 # 0.112, so p_good calls it not good
+        self.assertAlmostEqual(raters.confidence_p50(pg), 0.888)    # confident in "not good"
+        self.assertAlmostEqual(raters.confidence_good_level(a), 0.112)   # not confident in "good"
+        cov = raters.coverage({"x": pg}, {"x": True}, {"x": False}, confidence={"x": raters.confidence_good_level(a)})
+        self.assertEqual(cov["curve"][0]["posts"], 0)               # never counted as a confident good_level call
+        self.assertEqual(raters.coverage({"x": pg}, {"x": False}, {"x": False})["curve"][0]["posts"], 1)
+
+    # 4
+    def test_ingest_never_overwrites_and_replace_keeps_a_backup(self) -> None:
+        text = line("a1") + "\n" + line("b2")
+        run = lambda **kw: raters.ingest("codex", "s", [self.file("out.txt", text)], CORPUS, QUESTIONS,  # noqa: E731
+                                         self.private, **kw)
+        run()
+        with self.assertRaises(ValueError) as ctx:
+            run()
+        self.assertIn("already exists", str(ctx.exception))
+        result = run(replace=True)
+        self.assertIn(".bak", result["backup"])
+        self.assertEqual(len(list((self.private / "raters").glob("codex-s.jsonl.*.bak"))), 1)
+
+    # 6a
+    def test_undefined_kappa_draws_are_counted_and_flag_instability(self) -> None:
+        ids = [f"x{n}" for n in range(10)]
+        a = {i: True for i in ids}
+        b = dict(a)
+        a["x0"] = b["x0"] = False            # only one conversation varies: most draws have constant raters
+        stats = raters.pair_stats(a, b, lambda i: i, 5, 200)
+        self.assertGreater(stats["kappa_undefined_pct"], 10.0)
+        self.assertTrue(stats["kappa_ci90_unstable"])
+        stable = raters.bootstrap_detail(ids, lambda i: i, lambda s: raters.agree_pct([(a[i], b[i]) for i in s]), 50, 5)
+        self.assertEqual((stable["undefined_pct"], stable["unstable"]), (0.0, False))
+
+    # 6b, 6c, 6d
+    def compare_with_operator(self) -> dict:
+        ids = [f"p{n}" for n in range(8)]
+        truth = {i: n % 2 == 0 for n, i in enumerate(ids)}
+        self.write_rater("jev", "s", truth, p=0.9)
+        path = raters.rater_file(self.private, "jev", "s")
+        out = []
+        for r in raters.rows(path):
+            r["answers"]["text_decidable"] = {"noul": 0.1 if r["id"] == "p3" else 0.9}
+            out.append(r)
+        path.write_text("".join(json.dumps(r) + "\n" for r in out), encoding="utf-8")
+        for r in ("codex", "claude", "grok"):
+            self.write_rater(r, "s", truth)
+        operator = {"sample": "x", "labels": [
+            {"id": "p0", "label": "reply"}, {"id": "p1", "label": "no"}, {"id": "p2", "label": "post"},
+            {"id": "p3", "label": "unsure"}]}
+        sample = {"sample": "x", "posts": [{"id": "p0", "why_chosen": "disputed"}, {"id": "p1", "why_chosen": "disputed"},
+                                           {"id": "p2", "why_chosen": "random (panel agreed)"},
+                                           {"id": "p3", "why_chosen": "random (panel agreed)"}]}
+        key = {i: {"post_id": i, "conversation_id": f"c{n // 2}"} for n, i in enumerate(ids)}
+        return raters.compare("s", self.private, key, {i: "idea one" for i in ids}, operator,
+                              ["codex", "claude", "grok"], resamples=20, sample=sample)
+
+    def test_per_idea_has_intervals_and_prevalence(self) -> None:
+        row = self.compare_with_operator()["per_idea"][0]["jev_vs"]["codex"]
+        for k in ("n", "agreement_pct", "kappa", "yes_pct_jev", "yes_pct_other", "agreement_ci90", "kappa_ci90",
+                  "conversations"):
+            self.assertIn(k, row)
+
+    def test_text_decidable_against_operator_unsure(self) -> None:
+        auc = self.compare_with_operator()["operator"]["jev_text_decidable_auc"]
+        self.assertEqual((auc["auc"], auc["n_answered"], auc["n_unsure"]), (1.0, 3, 1))
+
+    def test_operator_agreement_split_by_why_chosen(self) -> None:
+        split = self.compare_with_operator()["operator"]["by_why_chosen"]
+        self.assertEqual((split["disputed"]["posts"], split["disputed"]["operator_answered"]), (2, 2))
+        self.assertEqual((split["random"]["posts"], split["random"]["operator_answered"]), (2, 1))  # unsure excluded
+        self.assertEqual(split["disputed"]["vs"]["jev"]["agreement_pct"], 100.0)
+        self.assertEqual(split["random"]["vs"]["panel"]["n"], 1)
+
+    def test_sample_sidecar_must_match_the_labels(self) -> None:
+        with self.assertRaises(SystemExit):
+            raters.compare("s", self.private, {}, {}, {"sample": "x", "labels": []}, ["codex"], resamples=5,
+                           sample={"sample": "y", "posts": []})
+
+    # 6e
+    def test_type_majority_needs_two_votes_and_a_strict_majority(self) -> None:
+        self.assertIsNone(raters.type_majority(["promotion"]))
+        self.assertIsNone(raters.type_majority(["promotion", "genuine"]))
+        self.assertEqual(raters.type_majority(["promotion", "promotion", "genuine"]), "promotion")

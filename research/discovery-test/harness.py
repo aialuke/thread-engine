@@ -65,12 +65,21 @@ POST, USER = x_api.POST, x_api.USER
 PILOT_CEILING = 2.50        # X API, pilot only (HANDOFF decision 3)
 X_CHECKPOINT = 7.00         # X API, whole test: stop and report (operator, 27 Sep: was 6.00)
 GROK_CHECKPOINT = 3.00      # Grok, whole test
-GROK_RESERVE = 0.30         # worst case one Grok run, reserved before it starts
-ARM_VERIFY_CAP = 30         # claimed ids checked per pilot arm (the prompt allows 3 searches × 10)
+GROK_MAX_TURNS = 8          # --max-turns on every run
+GROK_MAX_POSTS = 30         # every prompt caps Grok at 3 searches × limit 10 (CAP below)
+GROK_TURN_TOKENS = {"input": 20_000, "output": 2_000}   # assumed per-turn ceiling: the CLI can't cap tokens
+ARM_VERIFY_CAP = 30        # claimed ids checked per pilot arm (the prompt allows 3 searches × 10)
 PROBE_VERIFY_CAP = 10
 STAGE_VERIFY_CAP = 30
 BLOCK_HOURS = 2             # steps more than this apart run in a new time block
 GROK_TOKEN_USD = {"input": 2.00e-6, "cached": 0.50e-6, "output": 6.00e-6}   # grok-4.7 short context
+# Worst case one Grok run, reserved before it starts: every turn at the token ceiling, uncached, plus every
+# post the prompt allows fetched. 8 × (20k × $2/M + 2k × $6/M) + 30 × $0.005 = $0.566. The 22 runs to 27 Sep
+# cost at most $0.32 (budget.log), which beat the old $0.30 reserve. The token ceiling is an assumption, so the
+# gate also refuses every run once logged spend reaches the checkpoint (Store.check_grok_budget).
+GROK_RESERVE = round(GROK_MAX_TURNS * (GROK_TURN_TOKENS["input"] * GROK_TOKEN_USD["input"]
+                                       + GROK_TURN_TOKENS["output"] * GROK_TOKEN_USD["output"])
+                     + GROK_MAX_POSTS * x_api.POST, 2)
 # 26 Sep: the subscription pool ran out as "402 Payment Required: Grok Build usage balance exhausted"
 LIMIT_RE = re.compile(r"limit|quota|429|402|exceed|exhausted|payment required|balance|too many|usage cap", re.I)
 
@@ -194,18 +203,20 @@ class Store:
                      f"grok_spent={self.grok_spent():.4f} {event} {extra}".rstrip() + "\n")
 
     def check_x_budget(self, now: datetime, stage: str, reserve: float, what: str) -> None:
+        """A call's real cost is logged after it returns, so one call can end above a line; once spend has
+        reached a line, every later call is refused, whatever its reserve (a free usage call included)."""
         spent, pilot = self.x_spent(), self.x_spent("pilot")
-        if spent + reserve > X_CHECKPOINT + 1e-9:
+        if spent + reserve > X_CHECKPOINT + 1e-9 or spent >= X_CHECKPOINT - 1e-9:
             self.log_budget(now, "REFUSED", what=what, reserve=f"{reserve:.4f}", ceiling=X_CHECKPOINT)
             raise Stop(f"X API checkpoint: ${spent:.2f} spent + ${reserve:.2f} reserve passes ${X_CHECKPOINT:.2f}. "
                        "Report what's learned and ask the operator before going on.")
-        if stage == "pilot" and pilot + reserve > PILOT_CEILING + 1e-9:
+        if stage == "pilot" and (pilot + reserve > PILOT_CEILING + 1e-9 or pilot >= PILOT_CEILING - 1e-9):
             self.log_budget(now, "REFUSED", what=what, reserve=f"{reserve:.4f}", ceiling=PILOT_CEILING)
             raise Stop(f"Pilot ceiling: ${pilot:.2f} spent + ${reserve:.2f} reserve passes ${PILOT_CEILING:.2f}.")
 
     def check_grok_budget(self, now: datetime, what: str) -> None:
         spent = self.grok_spent()
-        if spent + GROK_RESERVE > GROK_CHECKPOINT + 1e-9:
+        if spent + GROK_RESERVE > GROK_CHECKPOINT + 1e-9 or spent >= GROK_CHECKPOINT - 1e-9:
             self.log_budget(now, "REFUSED", what=what, reserve=GROK_RESERVE, ceiling=GROK_CHECKPOINT)
             raise Stop(f"Grok checkpoint: ${spent:.2f} spent + ${GROK_RESERVE:.2f} reserve passes ${GROK_CHECKPOINT:.2f}.")
 
@@ -260,8 +271,16 @@ class Store:
     def call_rows(self) -> dict[str, dict]:
         return {r["call_id"]: r for r in self.rows(self.requests) if r.get("call_id")}
 
-    def next_id(self, path: Path, prefix: str) -> str:
-        return f"{prefix}{len(self.rows(path)) + 1:04d}"
+    def next_id(self, path: Path, prefix: str, folder: Path | None = None) -> str:
+        """Never an id already used: past the log's row count, the ids it names, and any file in `folder`
+        named <id>.* (a body written before a crash kept its row from the log)."""
+        pattern = re.compile(rf"{re.escape(prefix)}(\d+)(?:\.|$)")
+        rows = self.rows(path)
+        used = [len(rows)] + [int(m.group(1)) for r in rows for v in (r.get("call_id"), r.get("run_id"))
+                              if isinstance(v, str) and (m := pattern.fullmatch(v))]
+        if folder is not None and folder.exists():
+            used += [int(m.group(1)) for p in folder.iterdir() if (m := pattern.match(p.name))]
+        return f"{prefix}{max(used) + 1:04d}"
 
     # posts.csv
     POST_COLUMNS = ("post_id", "first_seen", "last_seen", "labels", "sightings", "created_at", "author_id",
@@ -361,8 +380,15 @@ class LoggedClient(x_api.Client):
 
     def _record(self, req, now: datetime, status, headers, raw: bytes, started: float) -> None:
         ctx = self.context
-        call_id = self.store.next_id(self.store.requests, "x")
-        (self.store.root / "raw" / f"{call_id}.json").write_bytes(raw)
+        raw_dir = self.store.root / "raw"
+        while True:   # exclusive: a body is never overwritten, even one whose log row a crash lost
+            call_id = self.store.next_id(self.store.requests, "x", raw_dir)
+            try:
+                with (raw_dir / f"{call_id}.json").open("xb") as fh:
+                    fh.write(raw)
+                break
+            except FileExistsError:
+                continue
         try:
             body = json.loads(raw or b"{}")
         except json.JSONDecodeError:
@@ -389,6 +415,7 @@ class LoggedClient(x_api.Client):
         """(log row, body). A rejected request (4xx) comes back as data, not an exception."""
         now = self.clock()
         guard_clock(now)
+        reserve = max(reserve, max_cost(kind, params, now))
         self.store.check_x_budget(now, ctx.get("stage", ""), reserve, f"{ctx.get('step')} {path}")
         self.context = {**ctx, "kind": kind, "params": params}
         self.last_row = None
@@ -419,6 +446,24 @@ def estimate_cost(kind: str, items: dict) -> tuple[float, str]:
         return round(items["data"] * POST, 4), "counts price unknown; provisional $0.005 per bucket (F4)"
     cost = items["data"] * POST + items["included_posts"] * POST + items["users"] * USER
     return round(cost, 4), "posts $0.005, users $0.010 (F1/F2 unverified)"
+
+
+def max_cost(kind: str, params: dict, now: datetime) -> float:
+    """The most estimate_cost can bill for this request: every slot the request allows filled.
+    Posts: max_results (or the ids sent), each with its author when author_id is expanded
+    (no call asks for referenced tweets, so included posts stay 0). Counts: one bucket per started unit.
+    LoggedClient.get reserves the larger of this and the caller's own figure."""
+    if kind == "usage":
+        return 0.0
+    if kind == "counts":
+        start = parse_stamp(params.get("start_time")) or now - timedelta(days=7)
+        end = parse_stamp(params.get("end_time")) or now
+        unit = {"day": 86400, "hour": 3600, "minute": 60}[params.get("granularity") or "hour"]
+        return round((-(-int((end - start).total_seconds()) // unit) + 1) * POST, 4)
+    ids = [i for i in str(params.get("ids") or "").split(",") if i]
+    slots = int(params.get("max_results") or 0) or len(ids) or 100   # unset: X's largest page
+    authors = "author_id" in str(params.get("expansions") or "")
+    return round(slots * (POST + (USER if authors else 0)), 4)
 
 
 def lookup_ids(client: LoggedClient, ids: list[str], authors: bool, **ctx) -> tuple[dict, dict, str]:
@@ -586,7 +631,7 @@ class GrokRunner:
             raise Stop(f"{cwd} is not empty; Grok must start in an empty folder")
         cmd = [str(self.binary), "-p", prompt, "--verbatim", "--output-format", "streaming-json",
                "--sandbox", "read-only", "--deny", "Bash", "--deny", "Edit", "--deny", "Write",
-               "-m", model, "--effort", effort, "--max-turns", "8"]
+               "-m", model, "--effort", effort, "--max-turns", str(GROK_MAX_TURNS)]
         env = {**os.environ, "GROK_MEMORY": "0"}
         started, timed_out = time.monotonic(), False
         try:
@@ -1175,14 +1220,51 @@ class Harness:
         self.store.upsert_posts(now, found)
 
     # --- Grok steps ---
+    def _unlogged_grok_run(self, step: str) -> dict | None:
+        """A Grok run saved to private/grok/ with no grok.jsonl row: it was paid for, then something crashed
+        before its row was written. Its pending record (step, window, run) lets this step finish it without a
+        new run. Saved output with no pending record can't be finished safely, so every Grok step stops."""
+        folder = self.store.root / "grok"
+        logged = {r.get("run_id") for r in self.store.rows(self.store.grok_log) if "saved" in r}
+        for out in sorted(folder.glob("g*.stdout")):
+            run_id = out.name.split(".")[0]
+            if run_id in logged:
+                continue
+            pending = folder / f"{run_id}.pending.json"
+            if not pending.exists():
+                raise Stop(f"Grok run {run_id} was paid for and its output saved (private/grok/{out.name}), but it has "
+                           "no grok.jsonl row and no pending record, so it can't be finished safely and `reprocess "
+                           f"{run_id}` can't read it. Read that output, then move private/grok/{run_id}.* aside "
+                           "before any new (paid) Grok run.")
+            record = json.loads(pending.read_text(encoding="utf-8"))
+            if record.get("step") != step:
+                continue   # another step's run: finished when that step runs
+            if hashlib.sha256(out.read_text(encoding="utf-8").encode()).hexdigest() != record["run"]["saved"]["stdout"]["sha256"]:
+                raise Stop(f"private/grok/{out.name} no longer matches its pending record; look before re-running {step}")
+            return record
+        return None
+
     def _grok_step(self, ctx, block, now, prompt, effort, cap, window, arm, extra=None,
                    verify_when_tool_output=True):
         settings = self.store.progress()["settings"]
         model = settings.get("model")
         if not model:
             raise Stop("no Grok model set: run `grok models` signed in, then `harness.py config --model <id>`")
-        run_id = self.store.next_id(self.store.grok_log, "g")
-        run = self.grok.run(run_id, prompt, model=model, effort=effort)
+        folder = self.store.root / "grok"
+        recorded = {a.get("run") for a in self.step_state(ctx["step"])["attempts"]}
+        orphan = next((r for r in reversed(self.store.rows(self.store.grok_log))
+                       if "saved" in r and r.get("step") == ctx["step"] and r["run_id"] not in recorded), None)
+        if orphan:   # logged, but the step never recorded it (a crash after the row): record it, don't pay again
+            return self._grok_result(orphan)
+        saved = self._unlogged_grok_run(ctx["step"])
+        if saved:   # a paid run whose checks crashed: finish it from its saved output, never pay again
+            run, window = saved["run"], saved["window"]
+            run_id = run["run_id"]
+        else:
+            run_id = self.store.next_id(self.store.grok_log, "g", folder)
+            run = self.grok.run(run_id, prompt, model=model, effort=effort)
+            self.store.write_atomic(folder / f"{run_id}.pending.json",
+                                    json.dumps({"step": ctx["step"], "window": window, "run": run}, ensure_ascii=False))
         slots, claims_from = run_claims(run)
         results, counts, verify_error = [], {}, None
         try:
@@ -1213,21 +1295,29 @@ class Harness:
                "claims": [{k: r.get(k) for k in ("slot", "id", "author", "created_at", "label", "in_window", "tool_index")}
                           | {"claimed_text": r.get("text"), "x_text": x_api.full_text(r["x"]) if r.get("x") else None}
                           for r in results],
-               "unsourced_flag": bool(slots) and counts.get("confirmed", 0) == 0}
+               "unsourced_flag": bool(slots) and counts.get("confirmed", 0) == 0,
+               **({"resumed_from_saved_output": True} if saved else {})}
         self.store.append(self.store.grok_log, row)
+        (folder / f"{run_id}.pending.json").unlink(missing_ok=True)
         self.store.log_budget(self.clock(), "grok", run=run_id, step=ctx["step"], cost=f"{cost:.4f}", note=cost_note.split(" (")[0])
-        status = run["status"] if run["status"] != "ok" else ("blocked-budget" if verify_error else "done")
+        return self._grok_result(row)
+
+    @staticmethod
+    def _grok_result(row: dict) -> dict:
+        """A Grok step's result, from its grok.jsonl row alone (so a logged run can be recorded again)."""
+        verify_error = row.get("verify_error")
+        status = row["status"] if row["status"] != "ok" else ("blocked-budget" if verify_error else "done")
         todo = ""
         if status == "blocked-grok-limit":
             todo = "Grok looks rate- or usage-limited; resume with `pilot next` once the limit resets"
         elif status == "blocked-grok-error":
-            todo = f"Grok failed; read private/{run['saved']['stderr']['path']} before retrying"
+            todo = f"Grok failed; read private/{row['saved']['stderr']['path']} before retrying"
         elif verify_error:
             todo = verify_error
-        return {"status": status, "run": run_id, "claims_from": claims_from, "counts": counts,
-                "tools": [t.get("observed_tool") or t.get("name") for t in stream["tools"]],
-                "args": [t.get("observed_args") for t in stream["tools"]],
-                "project_skills_loaded": stream["project_skills_loaded"], "cost_usd": cost, "todo": todo}
+        return {"status": status, "run": row["run_id"], "claims_from": row["claims_from"], "counts": row["counts"],
+                "tools": [t.get("observed_tool") or t.get("name") for t in row["tool_calls"]],
+                "args": [t.get("observed_args") for t in row["tool_calls"]],
+                "project_skills_loaded": row["project_skills_loaded"], "cost_usd": row["cost_usd"], "todo": todo}
 
     def _arm(self, name, ctx, block, now):
         arm, effort = PILOT_ARMS[name]
@@ -1356,6 +1446,13 @@ class Harness:
         data["steps"].setdefault(key, {"status": "pending", "attempts": []}).setdefault("sent", []).append(entry)
         self.store.save_progress(data)
 
+    def _mark_noted(self, key: str, call: str) -> None:
+        data = self.store.progress()
+        for entry in data["steps"][key].get("sent", []):
+            if entry.get("call") == call:
+                entry["noted"] = True
+        self.store.save_progress(data)
+
     def _k_queries(self, ctx, now, queries, window, sort, source):
         authors = bool(self.store.progress()["settings"].get("authors_on_checks"))
         key = ctx["step"]   # already per source and block: a re-run skips queries that returned 200 in this block
@@ -1364,7 +1461,12 @@ class Harness:
             variant = f"v{n + 1}"
             done = [s for s in self._sent(key) if s["variant"] == variant and s["query"] == query and s["http"] == 200]
             if done:
-                calls.append({**done[-1], "reused": True})
+                if done[-1].get("noted") is False:   # sent and paid, but its posts never reached posts.csv
+                    call = self.store.call_rows()[done[-1]["call"]]
+                    body = json.loads((self.store.root / call["raw_path"]).read_bytes() or b"{}")
+                    self._note_posts(now, call, body, ctx, source=source, window=window)
+                    self._mark_noted(key, done[-1]["call"])
+                calls.append({**done[-1], "noted": True, "reused": True})
                 continue
             check_syntax(query, "api")
             sent = query
@@ -1377,11 +1479,16 @@ class Harness:
                 sent = " ".join(MIN_REPLIES.sub("", query).split())
                 check_syntax(sent, "api")
                 row, body = self._search({**ctx, "source": source}, sent, window, authors=authors, sort=sort)
-            if row["status"] == 200:
-                self._note_posts(now, row, body, ctx, source=source, window=window)
+            # logged as sent before its posts are processed, so a crash there never resends (and re-bills) it
             entry = {"variant": variant, "query": query, "sent_query": sent, "call": row["call_id"],
                      "http": row["status"], "posts": row["items"]["data"]}
+            if row["status"] == 200:
+                entry["noted"] = False
             self._log_sent(key, entry)
+            if row["status"] == 200:
+                self._note_posts(now, row, body, ctx, source=source, window=window)
+                self._mark_noted(key, row["call_id"])
+                entry["noted"] = True
             calls.append(entry)
         return {"calls": calls, "sort": sort, "source": source, **({"notes": notes} if notes else {})}
 
@@ -1463,6 +1570,7 @@ class Harness:
                 failed.append({"call": call, "http": status})
                 continue
             used.append(call)
+            batch_updates = []
             for row, seen_at, before in batch:
                 if row["post_id"] not in sent:
                     continue
@@ -1470,10 +1578,12 @@ class Harness:
                 entry = {"at": iso(now), "call": call, "block": block,
                          "hours_later": round((now - seen_at).total_seconds() / 3600, 1),
                          "before": before, "after": (post or {}).get("public_metrics"), "gone": post is None}
-                updates.append({"post_id": row["post_id"], "reread": entry,
-                                "sighting": {"source": "reread", "stage": "reread", "call": call}})
+                batch_updates.append({"post_id": row["post_id"], "reread": entry,
+                                      "sighting": {"source": "reread", "stage": "reread", "call": call}})
                 self.store.append(self.store.root / "reread.jsonl", {"post_id": row["post_id"], **entry})
-        self.store.upsert_posts(now, updates)
+            # saved per batch: a stop in a later batch leaves these marked, so a resume doesn't pay for them again
+            self.store.upsert_posts(now, batch_updates)
+            updates += batch_updates
         out = {"due": len(due), "reread": len(updates), "gone": sum(1 for u in updates if u["reread"]["gone"]),
                "calls": used, "block": block}
         if failed:
@@ -1524,9 +1634,10 @@ class Harness:
             if sights and row["text"] and ok and any(l in ("x_api", "mentioned_exists") or l.startswith("real") for l in labels):
                 picked.append((row, sights))
         parts = -(-len(picked) // batch) if batch else 0
-        names = [f"corpus-{suffix}.jsonl", f"corpus-key-{suffix}.json", f"corpus-brief-{suffix}.md"]
+        names = [f"corpus-{suffix}.jsonl", f"corpus-key-{suffix}.json", f"corpus-brief-{suffix}-legacy.md"]
         names += [f"corpus-{suffix}-part{k}.jsonl" for k in range(1, parts + 1)]
-        names += [f"corpus-brief-{suffix}-part{k}.md" for k in range(1, parts + 1)]
+        names += [f"corpus-brief-{suffix}-part{k}-legacy.md" for k in range(1, parts + 1)]
+        self._no_partial_corpus(suffix)
         out, key_path, brief, *part_paths = self._fresh(*names)
         rng = random.Random(secrets.randbits(64))
         rng.shuffle(picked)
@@ -1548,22 +1659,53 @@ class Harness:
                            "idea_key": idea}
         job = "demand" if stage == "pilot" else STAGE_JOB[stage]
         dump = lambda rows: "".join(json.dumps(c, ensure_ascii=False) + "\n" for c in rows)
-        self.store.write_atomic(out, dump(corpus))
-        self.store.write_atomic(key_path, json.dumps(key, indent=1))
-        self.store.write_atomic(brief, scoring_brief(job, f"research/discovery-test/private/{out.name}"))
-        written = [p.name for p in (out, key_path, brief)]
+        legacy = lambda path: LEGACY_BRIEF_NOTE + scoring_brief(job, f"research/discovery-test/private/{path.name}")
+        files = {key_path: json.dumps(key, indent=1), brief: legacy(out)}
         for k in range(parts):
             part, part_brief = part_paths[k], part_paths[parts + k]
-            self.store.write_atomic(part, dump(corpus[k * batch:(k + 1) * batch]))
-            self.store.write_atomic(part_brief, scoring_brief(job, f"research/discovery-test/private/{part.name}"))
-            written += [part.name, part_brief.name]
+            files[part] = dump(corpus[k * batch:(k + 1) * batch])
+            files[part_brief] = legacy(part)
+        files[out] = dump(corpus)   # last: the corpus file itself marks a complete set
+        self._publish(files)
+        written = [p.name for p in (out, key_path, brief)]
+        written += [p.name for k in range(parts) for p in (part_paths[k], part_paths[parts + k])]
         return {"posts": len(corpus), "file": out.name, "brief": brief.name, "parts": parts, "written": written}
+
+    def _no_partial_corpus(self, suffix: str) -> None:
+        """A crash while a set was renamed into place leaves some of its files without the corpus file, which
+        is renamed last. The set can't be rebuilt over them, so say which to remove."""
+        if (self.store.root / f"corpus-{suffix}.jsonl").exists():
+            return
+        pattern = re.compile(rf"corpus-(key-{re.escape(suffix)}\.json|brief-{re.escape(suffix)}(-part\d+)?-legacy\.md"
+                             rf"|{re.escape(suffix)}-part\d+\.jsonl)")
+        left = sorted(p.name for p in self.store.root.iterdir() if pattern.fullmatch(p.name))
+        if left:
+            raise Stop(f"a partial corpus set for {suffix} is here from an interrupted run (no corpus-{suffix}.jsonl, "
+                       f"which is written last): {', '.join(left)}. Remove those files from private/, then run corpus again.")
+
+    def _publish(self, files: dict[Path, str]) -> None:
+        """Every file to a temp name first, then all renamed into place in order. A failure while writing leaves
+        no final-named file; the temps are removed."""
+        temps = {path: path.with_name(f".{path.name}.tmp") for path in files}
+        try:
+            for path, text in files.items():
+                temps[path].write_text(text, encoding="utf-8")
+        except BaseException:
+            for tmp in temps.values():
+                tmp.unlink(missing_ok=True)
+            raise
+        try:
+            for path in files:
+                os.replace(temps[path], path)
+        finally:
+            for tmp in temps.values():
+                tmp.unlink(missing_ok=True)
 
     @staticmethod
     def _fail_closed(problems: list[str], what: str) -> None:
-        bad = [p for p in problems if p.startswith(("rejected", "duplicate", "missing"))]
-        if bad:
-            raise Stop(f"{what}: wrote nothing; {len(bad)} problem(s): " + "; ".join(bad[:10]))
+        """Any problem at all stops the ingest before a file is written."""
+        if problems:
+            raise Stop(f"{what}: wrote nothing; {len(problems)} problem(s): " + "; ".join(problems[:10]))
 
     def ingest_scores(self, stage, paths, seed: int | None = None, block: str | None = None, second: str = "rule") -> dict:
         """Check Codex's scores against the corpus, then draw the second scorer's list. Fail-closed: nothing is
@@ -1698,18 +1840,28 @@ class Harness:
                and now - parse_stamp(row["first_seen"]) >= timedelta(hours=hours)]
         if not due:
             return {"due": 0}
-        results = []
+        results, failed = [], []
         for n in range(0, len(due), 100):
             batch = due[n:n + 100]
-            found, errors, call = lookup_ids(self.client, [r["post_id"] for r in batch], authors=False,
+            sent = [r["post_id"] for r in batch if r["post_id"].isdigit()]
+            found, errors, call = lookup_ids(self.client, sent, authors=False,
                                              stage="recheck", step="recheck", source="recheck", block=self.store.block(now)["id"])
+            status = (self.client.last_row or {}).get("status") if sent else None
+            if status != 200:   # as reread: a rejected batch says nothing about whether its posts are gone
+                failed.append({"call": call, "http": status})
+                continue
             for row in batch:
+                if row["post_id"] not in sent:
+                    continue
                 entry = {"post_id": row["post_id"], "at": iso(now), "call": call,
                          "hours_later": round((now - parse_stamp(row["first_seen"])).total_seconds() / 3600, 1),
                          "gone": row["post_id"] not in found, "x_error": errors.get(row["post_id"])}
                 self.store.append(self.store.root / "recheck.jsonl", entry)
                 results.append(entry)
-        return {"due": len(due), "gone": sum(1 for r in results if r["gone"])}
+        out = {"due": len(due), "gone": sum(1 for r in results if r["gone"])}
+        if failed:
+            out["failed_calls"] = failed
+        return out
 
     def reprocess(self, run_id: str) -> dict:
         """Re-read a saved Grok stdout and check ids the first pass missed. Appends a row; never re-runs Grok."""
@@ -1780,6 +1932,10 @@ USEFUL = {"demand": "a genuine need or a live reaction someone could usefully an
           "tool-research": "actually about the product (how people use, like or dislike it)"}
 
 
+LEGACY_BRIEF_NOTE = ("Legacy 0-2 brief, for Discovery's own scoring only. The Jev comparison raters use "
+                     "`research/jev-test/raters.py brief` instead.\n\n")
+
+
 def scoring_brief(job: str, corpus_path: str) -> str:
     """plan.md §Scoring, as a Codex brief. Blind: text and opaque ids only; each line echoes its opening words."""
     brief = f"""<task>Score every post in {corpus_path} and return one JSON line per post. Done when every id in the file has exactly one line.</task>
@@ -1810,36 +1966,48 @@ def _opening(text: str) -> str:
     return " ".join((text or "").split())[:30].casefold()
 
 
+OPENING_CHARS = 20   # of the normalised opening that must equal the post's own
+
+
 def check_scores(corpus: dict, rows: list[dict]) -> tuple[list[dict], list[str]]:
-    """Each score must name a corpus id once and echo that post's opening. A wrong id whose opening matches
-    exactly one post is corrected and flagged (26 Sep: Codex returned p61864f for p61864d)."""
+    """Each score must name a corpus id once and echo that post's own opening: its first 20 characters after
+    whitespace and case are normalised, all of them (a shorter echo only for a shorter post). Every problem is
+    fatal to the ingest (Harness._fail_closed). A wrong id is never corrected, even when its opening names one
+    post (26 Sep: Codex returned p61864f for p61864d); the problem says which post, for a fixed file."""
     by_opening: dict[str, list[str]] = {}
     for cid, c in corpus.items():
-        by_opening.setdefault(_opening(c["text"]), []).append(cid)
+        by_opening.setdefault(_opening(c["text"])[:OPENING_CHARS], []).append(cid)
     kept, problems, seen = [], [], set()
     for row in rows:
-        cid, opening = row.get("id"), _opening(row.get("opening", ""))
-        matches = [i for key, ids in by_opening.items() if opening and (key.startswith(opening[:20]) or opening.startswith(key[:20])) for i in ids]
-        if cid in corpus and (not opening or _opening(corpus[cid]["text"]).startswith(opening[:20]) or opening.startswith(_opening(corpus[cid]["text"])[:20])):
-            pass
-        elif len(matches) == 1:
-            problems.append(f"id {cid} corrected to {matches[0]} by its opening words")
-            row = {**row, "id": matches[0], "corrected_from": cid}
-            cid = matches[0]
-        else:
-            problems.append(f"rejected {cid}: id and opening words don't identify one post")
+        cid, raw = row.get("id"), row.get("opening")
+        opening = _opening(raw)[:OPENING_CHARS] if isinstance(raw, str) else ""
+        if not opening:
+            problems.append(f"rejected {cid}: no opening words")
+            continue
+        if cid not in corpus:
+            matches = by_opening.get(opening, [])
+            hint = f"; its opening matches {matches[0]}" if len(matches) == 1 else \
+                   f"; its opening matches {len(matches)} posts" if matches else "; its opening matches no post"
+            problems.append(f"rejected {cid}: not a corpus id{hint}")
+            continue
+        own = _opening(corpus[cid]["text"])[:OPENING_CHARS]
+        if opening != own:
+            problems.append(f"rejected {cid}: opening {opening!r} is not this post's own {own!r}")
             continue
         if cid in seen:
-            problems.append(f"duplicate score for {cid}; kept the first")
+            problems.append(f"duplicate score for {cid}")
             continue
-        if not all(row.get(k) in (0, 1, 2) for k in ("relevant", "real", "useful")):
-            problems.append(f"rejected {cid}: scores must be 0, 1 or 2")
+        if not all(type(row.get(k)) is int and row[k] in (0, 1, 2) for k in ("relevant", "real", "useful")):
+            problems.append(f"rejected {cid}: relevant, real and useful must each be the number 0, 1 or 2")
+            continue
+        if not isinstance(row.get("act"), bool):
+            problems.append(f"rejected {cid}: act must be true or false, not {row.get('act')!r}")
+            continue
+        if "type" in row and row["type"] not in SPAM_TYPES:
+            problems.append(f"rejected {cid}: unknown type {row['type']!r}; types are {', '.join(SPAM_TYPES)}")
             continue
         seen.add(cid)
-        if "type" in row and row["type"] not in SPAM_TYPES:
-            problems.append(f"{cid}: unknown type {row['type']!r}, kept as other")
-            row = {**row, "type": "other"}
-        kept.append({k: row.get(k) for k in ("id", "relevant", "real", "useful", "act", "type", "why", "corrected_from") if k in row})
+        kept.append({k: row.get(k) for k in ("id", "relevant", "real", "useful", "act", "type", "why") if k in row})
     problems += [f"missing score for {cid}" for cid in corpus if cid not in seen]
     return kept, problems
 
@@ -1860,7 +2028,8 @@ Raw data from the Discovery test. Other people's posts: never commit, never shar
 - budget.log: running spend and every refusal; the operator's console readings
 - progress.json: step ledger (done, blocked and why, pending), settings, time blocks
 - facts.md: F1–F11 and G1–G6 with the calls that answered them
-- stage-N.md: review note after each stage; corpus-*.jsonl / corpus-key-*.json: blind scoring input and its key
+- stage-N.md: review note after each stage; corpus-*.jsonl / corpus-key-*.json: blind scoring input and its key;
+  corpus-brief-*-legacy.md: the 0-2 brief for Discovery's own scoring (Jev raters use jev-test/raters.py brief)
 """
 
 FACTS_SEED = """# Facts (F1–F11, G1–G6)

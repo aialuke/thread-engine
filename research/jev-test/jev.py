@@ -8,10 +8,10 @@
     python3 research/jev-test/jev.py config --real-data on|off | --model <id>
     python3 research/jev-test/jev.py spend
     python3 research/jev-test/jev.py split --stage N --block B      (seal validation/final before scoring)
-    python3 research/jev-test/jev.py run --set stage{N}-B{k}-validation   (final only after freeze)
+    python3 research/jev-test/jev.py run --set stage{N}-B{k}-validation [--replace]   (final only after freeze)
     python3 research/jev-test/jev.py repeat --set S [--posts 10 --times 3]   (fresh, uncached)
     python3 research/jev-test/jev.py rank --set S                   (one Choice per idea)
-    python3 research/jev-test/jev.py freeze --note "..."            (one-way; unseals final)
+    python3 research/jev-test/jev.py freeze --note "..."            (one-way; needs the cut-off; unseals final)
 
 Asks Jev (TypeSafe's System One model) the Discovery scoring rubric, one request per post, and
 compares its answers with the labels the Discovery test already settled. The plan and the pass
@@ -138,8 +138,10 @@ class Store:
             fh.write(f"{now_iso()} spent={self.spent():.6f} {event} {extra}".rstrip() + "\n")
 
     def check_budget(self, reserve: float, what: str) -> None:
+        """Refuses when the reserve would pass the ceiling, and always once a call has already pushed the
+        spend over it (the real cost can exceed the reserve): nothing more goes out after an overshoot."""
         spent = self.spent()
-        if spent + reserve > CEILING + 1e-12:
+        if spent > CEILING + 1e-12 or spent + reserve > CEILING + 1e-12:
             self.log_budget("REFUSED", what=what, reserve=f"{reserve:.6f}", ceiling=CEILING)
             raise Stop(f"Jev spend ceiling: ${spent:.4f} spent + ${reserve:.4f} reserve passes ${CEILING:.2f}. "
                        "Report what's learned and ask the operator before going on.")
@@ -222,8 +224,9 @@ class Client:
         path = self.store.cache_path(key)
         if path.exists() and not fresh:
             return {**json.loads(path.read_text(encoding="utf-8"))["response"], "cached": True}
-        # reserve: about 3 characters a token, rounded up; the real cost is logged from usage after the call
-        reserve = (len(json.dumps(body, ensure_ascii=False)) // 3 + 1) * PRICE_PER_TOKEN
+        # reserve: 2 characters a token, rounded up (conservative; tokens usually run 3-4 characters). The real
+        # cost is logged from usage after the call; if it overshoots the ceiling, check_budget refuses every later call.
+        reserve = (len(json.dumps(body, ensure_ascii=False)) // 2 + 1) * PRICE_PER_TOKEN
         self.store.check_budget(reserve, label or key[:12])
         started = time.monotonic()
         try:
@@ -290,39 +293,129 @@ def state_of(row: dict) -> dict:
     return state
 
 
+# One validator for Jev and the peer raters (raters.py imports these), so every rater's answer passes
+# the same checks: booleans are not probabilities, and a score or choice must sum to 1 within SUM_TOLERANCE.
+SUM_TOLERANCE = 0.05
+
+
+def is_prob(p) -> bool:
+    return isinstance(p, (int, float)) and not isinstance(p, bool) and 0.0 <= p <= 1.0
+
+
+def options(question: dict) -> list[str]:
+    """The levels of a score ("0", "1", "2") or the options of a choice."""
+    criteria = question.get("criteria")
+    if question["type"] == "score":
+        return [str(n) for n in range(len(criteria) if isinstance(criteria, list) else 3)]
+    return list(criteria) if isinstance(criteria, dict) else list(criteria or [])
+
+
+def check_answer(qid: str, question: dict, answer) -> tuple[dict | None, str | None]:
+    """A cleaned answer (probabilities renormalised to sum to 1; a choice's pick recomputed), or a problem."""
+    if not isinstance(answer, dict):
+        return None, f"{qid}: missing"
+    if question["type"] == "noul":
+        p = answer.get("noul")
+        return ({"noul": float(p)}, None) if is_prob(p) else (None, f"{qid}: noul must be in [0, 1]")
+    probs = answer.get("probabilities")
+    want = options(question)
+    if not isinstance(probs, dict) or set(map(str, probs)) != set(want):
+        return None, f"{qid}: probabilities must cover exactly {want}"
+    if not all(is_prob(p) for p in probs.values()):
+        return None, f"{qid}: every probability must be in [0, 1]"
+    total = sum(probs.values())
+    if abs(total - 1.0) > SUM_TOLERANCE:
+        return None, f"{qid}: probabilities sum to {total:.3f}"
+    clean = {o: probs[o] / total for o in want}
+    out = {"probabilities": clean}
+    if question["type"] == "choice":
+        best = max(want, key=lambda o: (clean[o], -want.index(o)))
+        out.update(choice=best, confidence=clean[best])
+    return out, None
+
+
+def clean_answers(answers: dict | None, questions: dict) -> tuple[dict | None, list[str]]:
+    """(cleaned answers, problems). Any problem makes the whole row unavailable, never a no."""
+    if not isinstance(answers, dict):
+        return None, ["no answers"]
+    clean, problems = {}, []
+    for qid, question in questions.items():
+        got, problem = check_answer(qid, question, answers.get(qid))
+        if problem:
+            problems.append(problem)
+        else:
+            clean[qid] = {**answers[qid], **got}
+    return (None if problems else clean), problems
+
+
 def answer_problems(answers: dict | None, questions: dict) -> list[str]:
     """Every expected question present and in range; anything else makes the row unavailable, never a no."""
-    if not isinstance(answers, dict):
-        return ["no answers"]
-    problems = []
-    for qid, q in questions.items():
-        a = answers.get(qid)
-        if not isinstance(a, dict):
-            problems.append(f"{qid}: missing")
-            continue
-        if q["type"] == "noul":
-            p = a.get("noul")
-            if not isinstance(p, (int, float)) or not 0 <= p <= 1:
-                problems.append(f"{qid}: noul out of range")
-            continue
-        probs = a.get("probabilities")
-        want = {str(n) for n in range(len(q["criteria"]))} if q["type"] == "score" else set(q["criteria"])
-        if not isinstance(probs, dict) or set(probs) != want:
-            problems.append(f"{qid}: probabilities don't cover the {q['type']} options")
-        elif not all(isinstance(p, (int, float)) and 0 <= p <= 1 for p in probs.values()):
-            problems.append(f"{qid}: probability out of range")
-    return problems
+    return clean_answers(answers, questions)[1]
 
 
 # ---------- sets ----------
 
 
 BLOCK_SET = re.compile(r"^stage([123])-(B\d+)-(validation|final)$")
+BLOCK_IN = re.compile(r"stage([123])-(B\d+)-(validation|final)$")      # a set name or a corpus file stem
+COVERAGE_RULES = ("p_good_0.5", "good_level")                           # the two curves raters.py compare reports
 
 
 def thresholds(path: Path | None = None) -> dict:
     path = path or HERE / "thresholds.json"
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def split_files(stage, block: str, splits: Path) -> tuple[dict, Path]:
+    """({half: path}, manifest path) for one block's split."""
+    halves = {h: splits / f"stage{stage}-{block}-{h}.jsonl" for h in ("validation", "final")}
+    return halves, splits / f"split-stage{stage}-{block}.json"
+
+
+def split_leftovers(stage, block: str, splits: Path) -> list[Path]:
+    """Halves or temp files of a split that never wrote its manifest."""
+    halves, manifest = split_files(stage, block, splits)
+    paths = [*halves.values(), manifest]
+    return [p for p in [*paths, *(p.with_name(p.name + ".tmp") for p in paths)] if p.exists() and p != manifest]
+
+
+def check_block(set_name: str | None = None, corpus: Path | None = None, root: Path = PRIVATE,
+                spec: dict | None = None) -> None:
+    """The one seal every reader of block sets goes through (jev load_set, raters brief/ingest/compare,
+    labelling panel_typed). A block set, named or given as a corpus file, must have its split manifest (no
+    manifest means not sealed). A final set is refused until thresholds.json (next to root) is frozen with a
+    cut-off, and then whenever the questions its job would ask now hash differently from the frozen ones."""
+    targets = []
+    if set_name:
+        targets.append((set_name, root / "splits"))
+    if corpus is not None:
+        corpus = Path(corpus)
+        targets.append((corpus.stem, corpus.parent))
+    for name, splits in targets:
+        block = BLOCK_IN.search(name)
+        if not block:
+            if name.endswith("-final"):
+                raise Stop(f"{name!r} looks like a final set but isn't stage{{N}}-B{{k}}-final; refused")
+            continue
+        stage, b, half = block.groups()
+        _, manifest = split_files(stage, b, splits)
+        if not manifest.exists():
+            leftovers = split_leftovers(stage, b, splits)
+            detail = (" A partial split is there with no manifest; remove these files and split again: "
+                      + ", ".join(str(p) for p in leftovers)) if leftovers else ""
+            raise Stop(f"stage{stage}-{b} is not sealed: {manifest} is missing.{detail}")
+        if half != "final":
+            continue
+        frozen = thresholds(root.parent / "thresholds.json")
+        if not frozen.get("frozen"):
+            raise Stop("the final set stays sealed until thresholds.json is frozen (freeze --note ...)")
+        if frozen.get("frozen_coverage_threshold") is None:
+            raise Stop("thresholds.json is frozen without a cut-off; the final set stays sealed")
+        job = job_of(f"stage{stage}-{b}-{half}", {})
+        now = questions_hash(request_questions(job, spec or load_questions()))
+        if (frozen.get("questions") or {}).get(job) != now:
+            raise Stop(f"the {job} questions changed after the freeze ({now} now, "
+                       f"{(frozen.get('questions') or {}).get(job)} frozen); the final set stays sealed")
 
 
 def load_set(set_name: str, store: Store, discovery: Path = DISCOVERY) -> list[dict]:
@@ -337,8 +430,7 @@ def load_set(set_name: str, store: Store, discovery: Path = DISCOVERY) -> list[d
         raise Stop("Real Discovery posts stay off TypeSafe until the operator allows it "
                    "(config --real-data on, run only on the operator's say-so). Use --set synthetic.")
     if block:
-        if block.group(3) == "final" and not thresholds(store.root.parent / "thresholds.json").get("frozen"):
-            raise Stop("the final set stays sealed until thresholds.json is frozen (freeze --note ...)")
+        check_block(set_name, root=store.root)
         corpus = store.root / "splits" / f"{set_name}.jsonl"
         if not corpus.exists():
             raise Stop(f"{corpus} is missing: run split --stage {block.group(1)} --block {block.group(2)} first")
@@ -349,23 +441,41 @@ def load_set(set_name: str, store: Store, discovery: Path = DISCOVERY) -> list[d
     return [{**r, "job": job_of(set_name, r)} for r in Store.rows(corpus)]
 
 
+def backup(path: Path) -> Path:
+    """Move a file aside to <name>.<UTC time>.bak (never overwriting an earlier backup)."""
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    target, n = path.with_name(f"{path.name}.{stamp}.bak"), 1
+    while target.exists():
+        target, n = path.with_name(f"{path.name}.{stamp}-{n}.bak"), n + 1
+    os.replace(path, target)
+    return target
+
+
 def run_set(set_name: str, client: Client, store: Store, model: str, spec: dict | None = None,
-            discovery: Path = DISCOVERY, out: Callable[[str], None] = print) -> dict:
+            discovery: Path = DISCOVERY, out: Callable[[str], None] = print, replace: bool = False) -> dict:
+    """answers-{set}.jsonl is rebuilt from the cache on every run, so a rerun may rewrite it; but never over
+    answers asked with other questions: that needs a new set name, or replace=True (old file kept as .bak)."""
     rows = load_set(set_name, store, discovery)
     spec = spec or load_questions()
+    path = store.root / f"answers-{set_name}.jsonl"
+    want = {row["id"]: questions_hash(request_questions(row["job"], spec)) for row in rows}
+    changed = [r.get("id") for r in Store.rows(path) if r.get("questions") != want.get(r.get("id"))]
+    if changed and not replace:
+        raise Stop(f"{path.name} has {len(changed)} row(s) asked with other questions or not in this set "
+                   f"(first: {changed[0]}); run under a new set name, or --replace to keep the old file as .bak")
+    if changed:
+        backup(path)
     results, new, cached, unavailable = [], 0, 0, 0
     for row in rows:
         questions = request_questions(row["job"], spec)
         response = client.ask(state_of(row), questions, model, label=f"{set_name}:{row['id']}")
         cached, new = cached + response["cached"], new + (not response["cached"])
-        problems = answer_problems(response.get("answers"), questions)
+        clean, problems = clean_answers(response.get("answers"), questions)
         unavailable += bool(problems)
         results.append({"id": row["id"], "job": row["job"], "model": response.get("model"),
-                        "questions": questions_hash(questions),
-                        "answers": None if problems else response.get("answers"), "usage": response.get("usage"),
+                        "questions": questions_hash(questions), "answers": clean, "usage": response.get("usage"),
                         **({"unavailable": True, "reason": "; ".join(problems)} if problems else {})})
-    store.write_atomic(store.root / f"answers-{set_name}.jsonl",
-                       "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in results))
+    store.write_atomic(path, "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in results))
     models = sorted({r["model"] for r in results if r["model"]})
     summary = {"set": set_name, "posts": len(results), "new_calls": new, "cached": cached,
                "unavailable": unavailable, "models": models, "spent_usd": store.spent(), "ceiling_usd": CEILING}
@@ -404,10 +514,13 @@ def split(stage: int, block: str, store: Store, discovery: Path = DISCOVERY) -> 
     """Seal a new block into validation and final, before any scoring. Drops posts whose post or
     conversation is already in development (the 298 existing rows); reports author overlap."""
     out_dir = store.root / "splits"
-    names = {h: out_dir / f"stage{stage}-{block}-{h}.jsonl" for h in ("validation", "final")}
-    manifest = out_dir / f"split-stage{stage}-{block}.json"
-    if any(p.exists() for p in [*names.values(), manifest]):
+    names, manifest = split_files(stage, block, out_dir)
+    if manifest.exists():
         raise Stop(f"split for stage{stage}-{block} already exists; it is sealed")
+    leftovers = split_leftovers(stage, block, out_dir)
+    if leftovers:
+        raise Stop(f"a partial split for stage{stage}-{block} is here with no manifest, so it is not sealed. "
+                   "Remove these files, then split again: " + ", ".join(str(p) for p in leftovers))
     corpus_path = discovery / f"corpus-stage{stage}-{block}.jsonl"
     key_path = discovery / f"corpus-key-stage{stage}-{block}.json"
     if not corpus_path.exists() or not key_path.exists():
@@ -443,13 +556,17 @@ def split(stage: int, block: str, store: Store, discovery: Path = DISCOVERY) -> 
         g = group_of(k["post_id"], conv)
         halves[half_of(g)].append({**row, "group": g})
     out_dir.mkdir(parents=True, exist_ok=True)
-    for h, rows in halves.items():
-        store.write_atomic(names[h], "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
     info = {"stage": stage, "block": block, "created": now_iso(), "rule": "sha256(group) % 2: 0 validation, 1 final",
             "validation": len(halves["validation"]), "final": len(halves["final"]),
             "dropped": dict(dropped), "authors_also_in_development": authors_seen,
             "groups": {h: len({r["group"] for r in rows}) for h, rows in halves.items()}}
-    store.write_atomic(manifest, json.dumps(info, indent=1) + "\n")
+    # all three go to temp names first; published only once every one is written, the manifest last
+    texts = {**{names[h]: "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows) for h, rows in halves.items()},
+             manifest: json.dumps(info, indent=1) + "\n"}
+    for path, text in texts.items():
+        path.with_name(path.name + ".tmp").write_text(text, encoding="utf-8")
+    for path in texts:
+        os.replace(path.with_name(path.name + ".tmp"), path)
     return info
 
 
@@ -459,13 +576,24 @@ def repeat(set_name: str, client: Client, store: Store, model: str, n: int = 10,
     rows = sorted(load_set(set_name, store, discovery), key=lambda r: hashlib.sha256(r["id"].encode()).hexdigest())[:n]
     spec = spec or load_questions()
     out = store.root / f"repeats-{set_name}.jsonl"
+    done = {(r.get("id"), r.get("try")): r.get("questions") for r in Store.rows(out)}
+    skipped = 0
     for row in rows:
         questions = request_questions(row["job"], spec)
+        qhash = questions_hash(questions)
         for t in range(times):
+            if (row["id"], t) in done:
+                if done[(row["id"], t)] != qhash:
+                    raise Stop(f"{out.name} already has {row['id']} try {t} asked with other questions; "
+                               "use a new set name")
+                skipped += 1
+                continue
             response = client.ask(state_of(row), questions, model, label=f"repeat:{set_name}:{row['id']}:{t}", fresh=True)
-            store.append(out, {"id": row["id"], "try": t, "model": response.get("model"),
-                               "questions": questions_hash(questions), "answers": response.get("answers")})
-    return {"set": set_name, "posts": len(rows), "times": times, "file": out.name, "spent_usd": store.spent()}
+            clean, problems = clean_answers(response.get("answers"), questions)
+            store.append(out, {"id": row["id"], "try": t, "model": response.get("model"), "questions": qhash,
+                               "answers": clean, **({"unavailable": True, "reason": "; ".join(problems)} if problems else {})})
+    return {"set": set_name, "posts": len(rows), "times": times, "skipped_already_done": skipped,
+            "file": out.name, "spent_usd": store.spent()}
 
 
 def rank(set_name: str, client: Client, store: Store, model: str, discovery: Path = DISCOVERY) -> dict:
@@ -512,8 +640,8 @@ def reworded(set_name: str, client: Client, store: Store, model: str, n: int = 3
         swapped = {**base, **{k: v for k, v in alt["shared"].items() if k in base}}
         if "useful" in alt and row["job"] in alt["useful"]:
             swapped["useful"] = alt["useful"][row["job"]]
-        a = client.ask(state_of(row), base, model, label=f"reword-base:{set_name}:{row['id']}").get("answers")
-        b = client.ask(state_of(row), swapped, model, label=f"reword-alt:{set_name}:{row['id']}").get("answers")
+        a = clean_answers(client.ask(state_of(row), base, model, label=f"reword-base:{set_name}:{row['id']}").get("answers"), base)[0]
+        b = clean_answers(client.ask(state_of(row), swapped, model, label=f"reword-alt:{set_name}:{row['id']}").get("answers"), swapped)[0]
         good = [None if not x else all(level(x.get(k)) == v for k, v in (("relevant", 2), ("real", 2)))
                 and (level(x.get("useful")) or 0) >= 1 for x in (a, b)]
         if None not in good:
@@ -526,13 +654,22 @@ def reworded(set_name: str, client: Client, store: Store, model: str, n: int = 3
 
 
 def freeze(note: str, path: Path | None = None) -> dict:
-    """Record that the rubric and cut-offs are frozen: unseals the final sets. One-way."""
+    """Record that the rubric and cut-offs are frozen: unseals the final sets. One-way. Refused until
+    thresholds.json has the coverage cut-off chosen on validation; the cut-off and its rule are recorded
+    with the question hashes, and raters.py compare applies them once to final."""
     path = path or HERE / "thresholds.json"
     data = thresholds(path)
     if data.get("frozen"):
         raise Stop(f"already frozen on {data.get('frozen_at')}")
+    cut = data.get("coverage_threshold")
+    if isinstance(cut, bool) or not isinstance(cut, (int, float)) or not 0.5 <= cut <= 1:
+        raise Stop("set coverage_threshold in thresholds.json first: the confidence cut-off chosen on "
+                   "validation, between 0.5 and 1. The final set stays sealed until then")
+    rule = data.get("coverage_rule", "p_good_0.5")
+    if rule not in COVERAGE_RULES:
+        raise Stop(f"coverage_rule must be one of {', '.join(COVERAGE_RULES)}")
     spec = load_questions()
-    data.update(frozen=True, frozen_at=now_iso(), note=note,
+    data.update(frozen=True, frozen_at=now_iso(), note=note, frozen_coverage_threshold=cut, frozen_coverage_rule=rule,
                 questions={job: questions_hash(request_questions(job, spec)) for job in spec["useful"]})
     path.write_text(json.dumps(data, indent=1) + "\n", encoding="utf-8")
     return data
@@ -590,6 +727,7 @@ def jev_labels(answers: list[dict]) -> dict:
 
 
 def compare_set(set_name: str, store: Store, discovery: Path = DISCOVERY) -> dict:
+    check_block(set_name, root=store.root)
     answers = Store.rows(store.root / f"answers-{set_name}.jsonl")
     if not answers:
         raise Stop(f"no answers for {set_name}: run it first")
@@ -669,6 +807,9 @@ def main(argv: list[str] | None = None) -> int:
     for name in ("run", "compare", "rank"):
         p = sub.add_parser(name)
         p.add_argument("--set", required=True, dest="set_name")
+        if name == "run":
+            p.add_argument("--replace", action="store_true",
+                           help="rewrite answers asked with other questions (the old file is kept as .bak)")
     p = sub.add_parser("reworded")
     p.add_argument("--set", required=True, dest="set_name")
     p.add_argument("--posts", type=int, default=30)
@@ -704,7 +845,7 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "smoke":
             print(json.dumps(smoke(Client(store), store), indent=1))
         elif args.command == "run":
-            run_set(args.set_name, Client(store), store, store.config().get("model", PINNED))
+            run_set(args.set_name, Client(store), store, store.config().get("model", PINNED), replace=args.replace)
         elif args.command == "compare":
             print(json.dumps(compare_set(args.set_name, store), indent=1))
         elif args.command == "split":

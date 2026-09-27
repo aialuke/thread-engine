@@ -348,11 +348,17 @@ class BlockSetTests(Base):
         jev.split(1, "B3", self.store, discovery)
         self.store.set_config(real_data=True)
         thresholds = self.store.root.parent / "thresholds.json"
-        thresholds.write_text(json.dumps({"frozen": False}), encoding="utf-8")
+        thresholds.write_text(json.dumps({"frozen": False, "coverage_threshold": None}), encoding="utf-8")
         with self.assertRaises(jev.Stop):
             jev.load_set("stage1-B3-final", self.store, discovery)
         rows = jev.load_set("stage1-B3-validation", self.store, discovery)
         self.assertTrue(all(r["job"] == "worth-joining" for r in rows))
+        with self.assertRaises(jev.Stop) as ctx:               # no cut-off chosen on validation yet
+            jev.freeze("test", thresholds)
+        self.assertIn("coverage_threshold", str(ctx.exception))
+        with self.assertRaises(jev.Stop):
+            jev.load_set("stage1-B3-final", self.store, discovery)
+        thresholds.write_text(json.dumps({"frozen": False, "coverage_threshold": 0.8}), encoding="utf-8")
         jev.freeze("test", thresholds)
         jev.load_set("stage1-B3-final", self.store, discovery)
         with self.assertRaises(jev.Stop):
@@ -405,3 +411,190 @@ class PaperChecksTests(Base):
         finally:
             jev.load_set = original
         self.assertEqual((out["compared"], out["flips"]), (3, 1))
+
+
+class ReviewFixTests(Base):
+    """Regression tests for the 28 Sep review: the final-set seal, one validator, no overwrites, the split
+    publish, and the spend ceiling."""
+
+    fixture = BlockSetTests.fixture
+
+    def sealed(self, cut=0.8) -> tuple[Path, Path]:
+        discovery = Path(self.tmp.name) / "discovery"
+        self.fixture(discovery)
+        jev.split(1, "B3", self.store, discovery)
+        self.store.set_config(real_data=True)
+        thresholds = self.store.root.parent / "thresholds.json"
+        thresholds.write_text(json.dumps({"frozen": False, "coverage_threshold": cut}), encoding="utf-8")
+        return discovery, thresholds
+
+    # 1a
+    def test_freeze_refuses_without_cut_off_and_records_it(self) -> None:
+        _, thresholds = self.sealed(cut=None)
+        for bad in (None, True, 0.3, "0.8"):
+            thresholds.write_text(json.dumps({"frozen": False, "coverage_threshold": bad}), encoding="utf-8")
+            with self.assertRaises(jev.Stop):
+                jev.freeze("t", thresholds)
+            self.assertFalse(jev.thresholds(thresholds)["frozen"])
+        thresholds.write_text(json.dumps({"frozen": False, "coverage_threshold": 0.85}), encoding="utf-8")
+        data = jev.freeze("t", thresholds)
+        self.assertEqual((data["frozen_coverage_threshold"], data["frozen_coverage_rule"]), (0.85, "p_good_0.5"))
+        self.assertEqual(set(data["questions"]), set(jev.load_questions()["useful"]))
+
+    # 1b
+    def test_every_jev_reader_refuses_final_until_frozen(self) -> None:
+        discovery, _ = self.sealed()
+        client, opener = self.client()
+        calls = [lambda: jev.run_set("stage1-B3-final", client, self.store, jev.PINNED, discovery=discovery, out=lambda s: None),
+                 lambda: jev.repeat("stage1-B3-final", client, self.store, jev.PINNED, discovery=discovery),
+                 lambda: jev.rank("stage1-B3-final", client, self.store, jev.PINNED, discovery=discovery),
+                 lambda: jev.reworded("stage1-B3-final", client, self.store, jev.PINNED, discovery=discovery),
+                 lambda: jev.compare_set("stage1-B3-final", self.store, discovery=discovery)]
+        for call in calls:
+            with self.assertRaises(jev.Stop):
+                call()
+        self.assertEqual(opener.requests, [])
+
+    def test_final_refused_by_corpus_path_and_after_questions_change(self) -> None:
+        _, thresholds = self.sealed()
+        corpus = self.store.root / "splits" / "stage1-B3-final.jsonl"
+        with self.assertRaises(jev.Stop):
+            jev.check_block("anything", corpus, root=self.store.root)
+        with self.assertRaises(jev.Stop):
+            jev.check_block(None, Path(self.tmp.name) / "copy-stage1-B3-final.jsonl", root=self.store.root)
+        with self.assertRaises(jev.Stop):
+            jev.check_block("my-final", root=self.store.root)            # not a recognisable final set
+        jev.freeze("t", thresholds)
+        jev.check_block("stage1-B3-final", corpus, root=self.store.root)
+        data = jev.thresholds(thresholds)
+        data["questions"]["worth-joining"] = "000000000000"
+        thresholds.write_text(json.dumps(data), encoding="utf-8")
+        with self.assertRaises(jev.Stop) as ctx:
+            jev.check_block("stage1-B3-final", root=self.store.root)
+        self.assertIn("changed after the freeze", str(ctx.exception))
+
+    # 2
+    def test_answer_validation_rejects_booleans_and_bad_sums_and_renormalises(self) -> None:
+        qs = jev.request_questions("demand")
+        a = answer()["answers"]
+        for broken in ({**a, "act": {"noul": True}},
+                       {**a, "relevant": {"probabilities": {"0": False, "1": 0.2, "2": 0.8}}},
+                       {**a, "useful": {"probabilities": {"0": 0.5, "1": 0.5, "2": 0.5}}}):
+            self.assertTrue(jev.answer_problems(broken, qs))
+        clean, problems = jev.clean_answers({**a, "relevant": {"probabilities": {"0": 0.0, "1": 0.2, "2": 0.83}}}, qs)
+        self.assertEqual(problems, [])
+        self.assertAlmostEqual(sum(clean["relevant"]["probabilities"].values()), 1.0)
+
+    def test_run_set_marks_bad_rows_unavailable_and_stores_renormalised(self) -> None:
+        discovery = Path(self.tmp.name) / "discovery"
+        discovery.mkdir()
+        (discovery / "corpus-stagespam-demand.jsonl").write_text(
+            "".join(json.dumps({"id": i, "idea": "i", "text": i}) + "\n" for i in ("a", "b")), encoding="utf-8")
+        self.store.set_config(real_data=True)
+        off = answer()
+        off["answers"]["relevant"]["probabilities"] = {"0": 0.0, "1": 0.2, "2": 0.83}
+        bad = answer()
+        bad["answers"]["act"] = {"type": "noul", "noul": False}
+        client, _ = self.client(off, bad)
+        summary = jev.run_set("stagespam-demand", client, self.store, jev.PINNED, discovery=discovery, out=lambda s: None)
+        self.assertEqual(summary["unavailable"], 1)
+        saved = {r["id"]: r for r in self.store.rows(self.store.root / "answers-stagespam-demand.jsonl")}
+        self.assertAlmostEqual(sum(saved["a"]["answers"]["relevant"]["probabilities"].values()), 1.0)
+        self.assertIsNone(saved["b"]["answers"])
+        self.assertTrue(saved["b"]["unavailable"])
+
+    # 4
+    def test_run_set_refuses_to_overwrite_answers_to_other_questions(self) -> None:
+        discovery = Path(self.tmp.name) / "discovery"
+        discovery.mkdir()
+        (discovery / "corpus-stagespam-demand.jsonl").write_text(json.dumps({"id": "a", "idea": "i", "text": "t"}) + "\n",
+                                                                 encoding="utf-8")
+        self.store.set_config(real_data=True)
+        path = self.store.root / "answers-stagespam-demand.jsonl"
+        path.write_text(json.dumps({"id": "a", "questions": "oldhash00000", "answers": None}) + "\n", encoding="utf-8")
+        client, opener = self.client(answer())
+        with self.assertRaises(jev.Stop):
+            jev.run_set("stagespam-demand", client, self.store, jev.PINNED, discovery=discovery, out=lambda s: None)
+        self.assertEqual(opener.requests, [])
+        self.assertIn("oldhash00000", path.read_text(encoding="utf-8"))
+        jev.run_set("stagespam-demand", client, self.store, jev.PINNED, discovery=discovery, out=lambda s: None, replace=True)
+        self.assertEqual(len(list(self.store.root.glob("answers-stagespam-demand.jsonl.*.bak"))), 1)
+        self.assertNotIn("oldhash00000", path.read_text(encoding="utf-8"))
+
+    def test_repeat_skips_tries_already_done(self) -> None:
+        rows = [{"id": "r0", "idea": "i", "text": "t", "job": "demand"}]
+        original = jev.load_set
+        jev.load_set = lambda *a, **k: rows
+        try:
+            client, opener = self.client(answer(), answer(), answer())
+            jev.repeat("stage2-B3-validation", client, self.store, jev.PINNED, n=1, times=2)
+            out = jev.repeat("stage2-B3-validation", client, self.store, jev.PINNED, n=1, times=3)
+        finally:
+            jev.load_set = original
+        self.assertEqual(len(opener.requests), 3)
+        self.assertEqual(out["skipped_already_done"], 2)
+        saved = self.store.rows(self.store.root / "repeats-stage2-B3-validation.jsonl")
+        self.assertEqual(sorted((r["id"], r["try"]) for r in saved), [("r0", 0), ("r0", 1), ("r0", 2)])
+
+    # 7a
+    def test_split_leftovers_are_reported_and_unsealed(self) -> None:
+        discovery = Path(self.tmp.name) / "discovery"
+        self.fixture(discovery)
+        splits = self.store.root / "splits"
+        splits.mkdir(parents=True)
+        (splits / "stage1-B3-validation.jsonl").write_text("", encoding="utf-8")   # a half with no manifest
+        self.store.set_config(real_data=True)
+        with self.assertRaises(jev.Stop) as ctx:
+            jev.load_set("stage1-B3-validation", self.store, discovery)
+        self.assertIn("not sealed", str(ctx.exception))
+        self.assertIn("stage1-B3-validation.jsonl", str(ctx.exception))
+        with self.assertRaises(jev.Stop) as ctx:
+            jev.split(1, "B3", self.store, discovery)
+        self.assertIn("partial split", str(ctx.exception))
+        (splits / "stage1-B3-validation.jsonl").unlink()
+        jev.split(1, "B3", self.store, discovery)
+        self.assertEqual(sorted(p.name for p in splits.iterdir()),
+                         ["split-stage1-B3.json", "stage1-B3-final.jsonl", "stage1-B3-validation.jsonl"])
+
+    def test_split_publishes_nothing_if_a_write_fails(self) -> None:
+        discovery = Path(self.tmp.name) / "discovery"
+        self.fixture(discovery)
+        original, seen = jev.os.replace, []
+
+        def failing(src, dst):
+            if seen:
+                raise OSError("disk full")
+            seen.append(dst)
+            original(src, dst)
+
+        jev.os.replace = failing
+        try:
+            with self.assertRaises(OSError):
+                jev.split(1, "B3", self.store, discovery)
+        finally:
+            jev.os.replace = original
+        self.assertFalse((self.store.root / "splits" / "split-stage1-B3.json").exists())
+        with self.assertRaises(jev.Stop):                      # half-published: reported, never read
+            jev.check_block("stage1-B3-validation", root=self.store.root)
+
+    # 8
+    def test_overshoot_refuses_every_later_call(self) -> None:
+        self.store.append(self.store.calls, {"cost_usd": jev.CEILING - 0.001})
+        client, opener = self.client(answer(tokens=1_000_000), answer())
+        q = {"asks": {"type": "noul", "instructions": "q"}}
+        client.ask("s1", q, jev.PINNED)                       # reserve fits; the real cost ($0.042) overshoots
+        self.assertGreater(self.store.spent(), jev.CEILING)
+        with self.assertRaises(jev.Stop):
+            client.ask("s2", q, jev.PINNED)
+        self.assertEqual(len(opener.requests), 1)
+
+    def test_reserve_is_two_characters_a_token(self) -> None:
+        q = {"asks": {"type": "noul", "instructions": "q"}}
+        state = "x" * 200_000
+        chars = len(json.dumps({"state": state, "model": jev.PINNED, "questions": q}, ensure_ascii=False))
+        # room for a 3-characters-a-token reserve, not for a 2-characters-a-token one
+        self.store.append(self.store.calls, {"cost_usd": jev.CEILING - (chars // 3 + 1) * jev.PRICE_PER_TOKEN - 0.0001})
+        client, opener = self.client(answer())
+        with self.assertRaises(jev.Stop):
+            client.ask(state, q, jev.PINNED)
+        self.assertEqual(opener.requests, [])
