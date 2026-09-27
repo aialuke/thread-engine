@@ -13,7 +13,7 @@ useful-post rule: relevant 2, real 2, useful 1 or more (discovery-test/private/s
 sample of posts it agrees on, and writes private/label.html: a page that shows one post at a
 time, never the scorers' answers, and exports the operator's labels as JSON.
 
-Everything written stays in private/ (gitignored; other people's posts; delete by 24 Oct 2026).
+Everything written stays in private/ (gitignored; other people's posts; delete by 26 Mar 2027).
 """
 
 from __future__ import annotations

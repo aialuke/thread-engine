@@ -30,7 +30,7 @@ This plan feeds §5 of `research/discovery-x-api-search-proposal.md`. It was rev
 
   The bar is measured only once the held-out set has **at least 30 genuine posts** for that job. Below that, results are reported as directional and nothing ships.
 - **A person is the last filter.** An uncertain post passes through; it's never silently dropped.
-- **The product keeps rules, not posts.** The output is operators, field thresholds and phrase lists. Private data is deleted by 24 Oct 2026, and X's rules on deleted posts apply.
+- **The product keeps rules, not posts.** The output is operators, field thresholds and phrase lists. Private data is deleted by 26 Mar 2027 (180 days; operator, 27 Sep, replacing 24 Oct 2026), and X's rules on deleted posts apply.
 
 ## Steps
 

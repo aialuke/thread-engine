@@ -50,7 +50,7 @@ Everything a new session needs to run the Discovery test exactly as planned. Rea
 | `grok-learnings.md` | One-page summary: what we learned about Grok, and how this project constrains it. Read first. |
 | `private/grok-insights/` | Grok's own report (C01–C240) and its 26 Sep live semantic run (raw files are Grok's transcriptions; S2 was reconstructed from S1). Other people's posts: private. |
 | `review-grok-report-*.md` | Reviews of Grok's report: observed claims (mine), repo claims, docs claims, and Codex's blind read. Their accepted changes are in `plan.md`'s last section. |
-| `private/` | Gitignored. All raw data and logs go here. Delete by 24 Oct 2026. |
+| `private/` | Gitignored. All raw data and logs go here. Delete by 26 Mar 2027. |
 
 ## Operator decisions (26 Sep, binding for this test)
 

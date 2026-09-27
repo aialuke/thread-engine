@@ -25,7 +25,7 @@ Does Jev, TypeSafe's typed-judgement model, earn a place as a cheap, repeatable 
 
 - Every answer is cached in `private/cache/`, so a rerun or a re-analysis makes no new calls. An interrupted run resumes for free.
 - Calls, costs and refusals go to `private/calls.jsonl` and `private/budget.log`.
-- `private/` is gitignored. Answers about real posts are deleted with the Discovery private data by 24 Oct 2026.
+- `private/` is gitignored. Answers about real posts are deleted with the Discovery private data by 26 Mar 2027.
 - Tests: `python3 -m unittest discover -s research/jev-test`
 
 ## How the rubric maps

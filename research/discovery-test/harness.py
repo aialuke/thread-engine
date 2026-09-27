@@ -16,7 +16,7 @@ logging and a budget gate. Grok runs through the Grok Build CLI from an empty fo
 outside the repo, with memory off, and its whole output stream is kept.
 
 Everything written lands in private/ (gitignored, other people's posts; delete by
-24 Oct 2026). A run can stop at any step (budget, Grok's weekly limit, an error) and
+26 Mar 2027). A run can stop at any step (budget, Grok's weekly limit, an error) and
 resume later: progress.json records each step, and the logs are append-only.
 """
 
@@ -1621,7 +1621,7 @@ def check_scores(corpus: dict, rows: list[dict]) -> tuple[list[dict], list[str]]
 PRIVATE_README = """# private/ (gitignored)
 
 Raw data from the Discovery test. Other people's posts: never commit, never share outside this Mac
-(except the blind scoring corpus sent to Codex, operator decision 4). **Delete by 24 Oct 2026.**
+(except the blind scoring corpus sent to Codex, operator decision 4). **Delete by 26 Mar 2027.**
 
 - requests.jsonl: one row per X API HTTP call (status, headers, params, items, estimated cost)
 - raw/: every X API response body, by call id

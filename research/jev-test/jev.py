@@ -268,7 +268,7 @@ def load_set(set_name: str, store: Store, discovery: Path = DISCOVERY) -> list[d
                    "(config --real-data on, run only on the operator's say-so). Use --set synthetic.")
     corpus = discovery / f"corpus-{set_name}.jsonl"
     if not corpus.exists():
-        raise Stop(f"{corpus} is missing (Discovery private data is deleted by 24 Oct 2026)")
+        raise Stop(f"{corpus} is missing (Discovery private data is deleted by 26 Mar 2027)")
     return [{**r, "job": job_of(set_name, r)} for r in Store.rows(corpus)]
 
 
