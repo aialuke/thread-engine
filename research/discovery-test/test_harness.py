@@ -866,7 +866,7 @@ class NewPullPrep(Base):
         self.assertEqual(rows["9000"]["hours_later"], 7.0)
         self.assertEqual((rows["9000"]["gone"], rows["9001"]["gone"]), (False, True))
         self.assertEqual(rows["9000"]["after"], {"reply_count": 9})
-        self.assertEqual(h.reread(), {"due": 0, "block": "B1"})
+        self.assertEqual(h.reread(), {"due": 0, "block": "B1", "recovered": 0})
 
     def test_reread_failed_batch_marks_nothing_gone(self) -> None:
         h = self.make(Router(_2_tweets=400))
@@ -943,6 +943,55 @@ class ReviewFixes(Base):
         self.assertEqual(len(seen), 3)
         self.assertEqual(set(seen[2]), {p["id"] for p in posts} - first)
 
+    def _reread_fixture(self, seen):
+        live = {}
+        def lookup(q):
+            ids = q["ids"].split(",")
+            seen.append(ids)
+            return {"data": [live[i] for i in ids if i in live and i != "9003"]}      # 9003 is gone
+        h = self.make(Router(_2_tweets=lookup))
+        seed_block(self.store, ("B1", NOW - timedelta(hours=8)))
+        posts = [post(str(9000 + n), f"post {n}", 60 * 8) for n in range(10)]
+        seed_call(self.store, "x0001", NOW - timedelta(hours=7), posts)
+        live.update({p["id"]: p for p in posts})
+        self.store.upsert_posts(NOW - timedelta(hours=7), [
+            {"post_id": p["id"], "label": "x_api", "x": p,
+             "sighting": {"source": "K-recency", "stage": "stage1", "block": "B1", "call": "x0001"}} for p in posts])
+        return h
+
+    def test_reread_recovers_from_its_log_when_the_table_update_failed(self) -> None:
+        seen = []
+        h = self._reread_fixture(seen)
+        real = self.store.upsert_posts
+        def broken(now, updates):
+            raise OSError("disk full while saving posts.csv")
+        self.store.upsert_posts = broken
+        with self.assertRaises(OSError):
+            h.reread(block="B1")
+        self.store.upsert_posts = real
+        out = h.reread(block="B1")
+        self.assertEqual(len(seen), 1)                                   # paid once, never again
+        self.assertEqual((out["recovered"], out["due"]), (10, 0))
+        self.assertTrue(all(r["reread"] for r in self.store.load_posts().values()))
+
+    def test_reread_recovers_from_the_saved_body_when_nothing_was_logged(self) -> None:
+        seen = []
+        h = self._reread_fixture(seen)
+        real = self.store.append
+        def broken(path, row):
+            if path.name == "reread.jsonl":
+                raise OSError("crash before the first reread line")
+            return real(path, row)
+        self.store.append = broken
+        with self.assertRaises(OSError):
+            h.reread(block="B1")
+        self.store.append = real
+        out = h.reread(block="B1")
+        self.assertEqual(len(seen), 1)
+        self.assertEqual(out["recovered"], 10)
+        gone = {pid for pid, r in self.store.load_posts().items() if json.loads(r["reread"])["gone"]}
+        self.assertEqual(gone, {"9003"})
+
     # 2. recheck
     def test_recheck_skips_a_rejected_batch_instead_of_marking_it_gone(self) -> None:
         answer = [403]
@@ -1015,6 +1064,17 @@ class ReviewFixes(Base):
         self.assertEqual(row["counts"]["labels"]["real"], 1)
         self.assertFalse((self.root / "grok" / "g0001.pending.json").exists())
         self.assertEqual(self.store.grok_spent(), 0.04)                 # billed once
+
+    def test_an_unrecorded_grok_run_blocks_every_other_grok_step(self) -> None:
+        grok = FakeGrok((0, ok_stream(), ""), (0, ok_stream(), ""))
+        h = self.grok_ready(grok)
+        with mock.patch.object(harness, "check_claims", side_effect=RuntimeError("crash while checking claims")):
+            with self.assertRaisesRegex(RuntimeError, "checking claims"):
+                h.run_pilot_step("P7-free")
+        other = next(a for a in harness.PILOT_ARMS if a != "P7-free")
+        with self.assertRaisesRegex(harness.Stop, r"g0001 for step P7-free was paid for but isn't recorded"):
+            h.run_pilot_step(other)
+        self.assertEqual(len(grok.calls), 1)                             # no second paid run
 
     def test_grok_run_logged_but_not_recorded_is_recorded_not_paid_again(self) -> None:
         grok = FakeGrok((0, ok_stream(), ""))

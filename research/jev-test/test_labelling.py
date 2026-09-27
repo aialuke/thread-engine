@@ -197,3 +197,18 @@ class ReviewFixTests(Base):
         self.assertIn("not sealed", str(ctx.exception))
         (splits / "split-stage2-B3.json").write_text("{}", encoding="utf-8")
         self.assertEqual(len(labelling.panel_typed(["stage2-B3-validation"], self.private)), 1)
+
+
+class GrokKeyOrderTests(Base):
+    def test_reordered_duplicate_makes_grok_ingest_write_nothing(self) -> None:
+        s = "stagespam-tool"
+        corpus = [{"id": "a1", "idea": "i", "text": "First post text here"}]
+        self.write(self.discovery, f"corpus-{s}.jsonl", corpus)
+        good = {"id": "a1", "opening": "First post text here", "relevant": 2, "real": 2, "useful": 1,
+                "act": True, "type": "genuine", "why": "w"}
+        reordered = {k: good[k] for k in ("opening", "relevant", "id", "real", "useful", "act", "type", "why")}
+        envelope = Path(self.tmp.name) / "out.json"
+        envelope.write_text(json.dumps({"text": json.dumps(good) + "\n" + json.dumps(reordered)}), encoding="utf-8")
+        with self.assertRaises(SystemExit):
+            labelling.ingest_grok(s, envelope, self.private, self.discovery)
+        self.assertFalse((self.private / f"grok-scores-{s}.jsonl").exists())

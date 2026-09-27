@@ -73,16 +73,8 @@ def ingest_grok(set_name: str, envelope: Path, private: Path = PRIVATE, discover
     if target.exists():
         raise SystemExit(f"{target.name} already exists; Grok's scores are never overwritten")
     text = json.loads(envelope.read_text(encoding="utf-8"))["text"]
-    parsed, problems = [], []
-    for n, line in enumerate(text.split("\n"), 1):
-        # Grok can put a preamble sentence on the same line as the first answer
-        start = line.find('{"id"')
-        if start < 0:
-            continue
-        try:
-            parsed.append(json.loads(line[start:].strip()))
-        except json.JSONDecodeError as exc:
-            problems.append(f"line {n}: not JSON ({exc.msg})")
+    import raters  # one parser for every rater: key order doesn't matter, nothing answer-like is skipped
+    parsed, problems = raters.parse_lines(text)
     corpus = {c["id"]: c for c in rows(discovery / f"corpus-{set_name}.jsonl")}
     if not corpus:
         raise SystemExit(f"no corpus for {set_name}")

@@ -178,28 +178,46 @@ One JSON line per post, and nothing else: no preamble, no code fences, no commen
 # ---------- ingest ----------
 
 
-LINE_START = re.compile(r'\{\s*"id"')
+
+
+ANSWER_KEYS = ("id", "opening", "answers", "relevant", "real", "useful", "type", "act")
 
 
 def parse_lines(text: str) -> tuple[list[dict], list[str]]:
-    """JSON lines from a rater's output. A Grok envelope {"text": ...} is unwrapped; a preamble on
-    the same line as the first answer is skipped. Lines with no answer are ignored."""
+    """JSON objects from a rater's output, whatever their key order. A Grok envelope {"text": ...} is
+    unwrapped; a preamble before the object on the same line is skipped. An answer-like object with no
+    id, or answer-like text that isn't valid JSON, is a problem (never silently dropped)."""
     try:
         whole = json.loads(text)
         if isinstance(whole, dict) and isinstance(whole.get("text"), str):
             text = whole["text"]
     except json.JSONDecodeError:
         pass
+    decoder = json.JSONDecoder()
     parsed, problems = [], []
     for n, line in enumerate(text.split("\n"), 1):
-        match = LINE_START.search(line)
-        if not match:
+        brace = line.find("{")
+        if brace < 0:
             continue
-        chunk = line[match.start():].strip()
-        try:
-            parsed.append(json.JSONDecoder().raw_decode(chunk)[0])
-        except json.JSONDecodeError as exc:
-            problems.append(f"line {n}: not JSON ({exc.msg})")
+        obj = None
+        for i in (k for k, ch in enumerate(line) if ch == "{" and k >= brace):
+            try:
+                candidate = decoder.raw_decode(line[i:].strip())[0]
+            except json.JSONDecodeError:
+                continue
+            if isinstance(candidate, dict):
+                obj = candidate
+                break
+        answer_like = any(f'"{k}"' in line for k in ANSWER_KEYS)
+        if obj is None:
+            if answer_like:
+                problems.append(f"line {n}: not JSON")
+            continue
+        if "id" not in obj:
+            if answer_like:
+                problems.append(f"line {n}: answer with no id")
+            continue
+        parsed.append(obj)
     return parsed, problems
 
 

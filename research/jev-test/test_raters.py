@@ -480,3 +480,13 @@ class ReviewFixTests(Base):
         self.assertIsNone(raters.type_majority(["promotion"]))
         self.assertIsNone(raters.type_majority(["promotion", "genuine"]))
         self.assertEqual(raters.type_majority(["promotion", "promotion", "genuine"]), "promotion")
+
+
+class KeyOrderTests(unittest.TestCase):
+    """Re-review (57ab133..0505cb2): answers are found whatever their key order; nothing answer-like is skipped."""
+
+    def test_reordered_answer_is_parsed_and_an_id_less_answer_is_a_problem(self) -> None:
+        text = '{"opening": "x", "id": "a", "answers": {}}\n{"opening": "y", "answers": {}}\nnot json {"id": "b", oops\n```'
+        parsed, problems = raters.parse_lines(text)
+        self.assertEqual([p["id"] for p in parsed], ["a"])
+        self.assertEqual(len(problems), 2)

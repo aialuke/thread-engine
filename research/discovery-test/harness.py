@@ -1238,7 +1238,10 @@ class Harness:
                            "before any new (paid) Grok run.")
             record = json.loads(pending.read_text(encoding="utf-8"))
             if record.get("step") != step:
-                continue   # another step's run: finished when that step runs
+                # its cost isn't in grok.jsonl yet, so the budget can't see it: no new paid run until it is recorded
+                raise Stop(f"Grok run {run_id} for step {record.get('step')} was paid for but isn't recorded yet, so the "
+                           f"Grok budget can't count it. Run that step again first (it finishes {run_id} from the saved "
+                           "output, with no new run); no other Grok run starts until then.")
             if hashlib.sha256(out.read_text(encoding="utf-8").encode()).hexdigest() != record["run"]["saved"]["stdout"]["sha256"]:
                 raise Stop(f"private/grok/{out.name} no longer matches its pending record; look before re-running {step}")
             return record
@@ -1547,17 +1550,42 @@ class Harness:
         now = self.clock()
         block = block or self.store.progress()["settings"].get("pinned_block")
         calls = self.store.call_rows()
-        due = []
+        # A paid lookup is done even if posts.csv never heard of it: recover from reread.jsonl, then from any
+        # logged 200 reread call's saved body, before paying for anything (re-review of 0505cb2).
+        logged = {r["post_id"]: {k: v for k, v in r.items() if k != "post_id"}
+                  for r in self.store.rows(self.store.root / "reread.jsonl")}
+        paid = {pid: r for r in calls.values() if r.get("step") == "reread" and r.get("status") == 200
+                for pid in str((r.get("params") or {}).get("ids", "")).split(",") if pid}
+        due, recovered = [], []
         for row in self.store.load_posts().values():
             sight = next((s for s in json.loads(row["sightings"])
                           if s.get("stage") == "stage1" and (block is None or s.get("block") == block)), None)
             if row["reread"] or not row["created_at"] or sight is None:
                 continue
             seen_at, before = self._seen(row, sight, calls) if block else (parse_stamp(row["first_seen"]), json.loads(row["metrics"] or "{}"))
-            if now - seen_at >= timedelta(hours=min_hours):
-                due.append((row, seen_at, before))
+            pid = row["post_id"]
+            if pid in logged:
+                entry = {**logged[pid], "recovered": "reread.jsonl"}
+            elif pid in paid:
+                call = paid[pid]
+                raw = self.store.root / "raw" / f"{call['call_id']}.json"
+                body = json.loads(raw.read_bytes() or b"{}") if raw.exists() else {}
+                post = {p.get("id"): p for p in body.get("data") or []}.get(pid)
+                at = parse_stamp(call.get("time_utc")) or now
+                entry = {"at": iso(at), "call": call["call_id"], "block": block,
+                         "hours_later": round((at - seen_at).total_seconds() / 3600, 1), "before": before,
+                         "after": (post or {}).get("public_metrics"), "gone": post is None, "recovered": "raw"}
+                self.store.append(self.store.root / "reread.jsonl", {"post_id": pid, **entry})
+            else:
+                if now - seen_at >= timedelta(hours=min_hours):
+                    due.append((row, seen_at, before))
+                continue
+            recovered.append({"post_id": pid, "reread": entry,
+                              "sighting": {"source": "reread", "stage": "reread", "call": entry.get("call")}})
+        if recovered:
+            self.store.upsert_posts(now, recovered)
         if not due:
-            return {"due": 0, "block": block}
+            return {"due": 0, "block": block, "recovered": len(recovered)}
         ctx_block = self.store.block(now)["id"]
         updates, used, failed = [], [], []
         for n in range(0, len(due), 100):
@@ -1585,7 +1613,7 @@ class Harness:
             self.store.upsert_posts(now, batch_updates)
             updates += batch_updates
         out = {"due": len(due), "reread": len(updates), "gone": sum(1 for u in updates if u["reread"]["gone"]),
-               "calls": used, "block": block}
+               "calls": used, "block": block, "recovered": len(recovered)}
         if failed:
             out["failed_calls"] = failed
         return out
