@@ -123,6 +123,9 @@ def parse_stamp(value: str | None) -> datetime | None:
         return None
 
 
+RECENT_REACH = timedelta(days=7) - timedelta(minutes=2)   # recent search: start_time no earlier than 7 days ago
+
+
 def windows_at(now: datetime) -> dict:
     end = now.replace(microsecond=0) - timedelta(seconds=30)   # X wants end_time at least 10 s before the request
     return {job: {"start": iso(end - timedelta(hours=h)), "end": iso(end)} for job, h in WINDOW_HOURS.items()}
@@ -1047,8 +1050,11 @@ class Harness:
 
     # --- X API steps ---
     def _search(self, ctx, query, window, reserve_posts=10, authors=False, sort="recency", **extra):
+        # recent search refuses a start more than 7 days before the request, so a pinned 7-day window is
+        # clamped to what X accepts now; the start actually sent is in the request log (28 Sep, B3)
+        start = max(parse_stamp(window["start"]), self.clock().replace(microsecond=0) - RECENT_REACH)
         params = {"query": query, "max_results": "10", "tweet.fields": TWEET_FIELDS, "sort_order": sort,
-                  "start_time": window["start"], "end_time": window["end"], **extra}
+                  "start_time": iso(start), "end_time": window["end"], **extra}
         if authors:
             params |= {"expansions": "author_id", "user.fields": USER_FIELDS}
         reserve = reserve_posts * (POST + (USER if authors else 0))
@@ -1415,7 +1421,7 @@ class Harness:
         out = {"order": sources, "seed": seed, "window": window}
         for source in sources:
             key = f"{name}:{source}:{block['id']}"
-            if self.step_state(key)["status"] == "done":
+            if self.step_state(key)["status"] == "done" and not self._failed_variants(key):
                 out[source] = "done already in this block"
                 continue
             try:
@@ -1493,7 +1499,18 @@ class Harness:
                 self._mark_noted(key, row["call_id"])
                 entry["noted"] = True
             calls.append(entry)
-        return {"calls": calls, "sort": sort, "source": source, **({"notes": notes} if notes else {})}
+        out = {"calls": calls, "sort": sort, "source": source, **({"notes": notes} if notes else {})}
+        failed = self._failed_variants(key)
+        if failed:   # a refused query is not done: a re-run resends only these
+            out |= {"status": "failed-x", "todo": f"{', '.join(failed)} refused by X; read the error body, then re-run"}
+        return out
+
+    def _failed_variants(self, key: str) -> list[str]:
+        """Variants whose last sent call didn't return 200 (a min_replies 400 followed by its rerun counts as the rerun)."""
+        last = {}
+        for entry in self._sent(key):
+            last[entry["variant"]] = entry
+        return [v for v, e in sorted(last.items()) if e["http"] != 200]
 
     def _stage_G(self, ctx, block, now, idea, window):
         settings = self.store.progress()["settings"]

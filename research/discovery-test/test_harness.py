@@ -718,6 +718,49 @@ class NewPullPrep(Base):
         self.assertEqual([(c["variant"], c.get("reused", False)) for c in calls], [("v1", True), ("v2", False)])
         self.assertEqual(len([r for r in self.store.rows(self.store.requests) if r["status"] == 200]), 2)
 
+    def test_pinned_seven_day_window_is_clamped_to_what_x_accepts(self) -> None:
+        seen = []
+        def search(q):
+            seen.append(q["start_time"])
+            if harness.parse_stamp(q["start_time"]) < self.now - timedelta(days=7):
+                return 400
+            return {"data": [post("7101", "switched to DaVinci Resolve from Premiere")], "meta": {"result_count": 1}}
+        h = self.make(Router(_2_tweets_search_recent=search))
+        block = self.store.block(self.now)
+        with redirect_stdout(io.StringIO()):
+            harness.main(["config", "--pin-block", block["id"]], harness=h)
+        self.now += timedelta(minutes=5)                                # the B3 case: minutes after the block opened
+        out = h.run_stage(3, "tr-tech-1", only="K-recency")["K-recency"]
+        self.assertEqual(out.get("status", "done"), "done")
+        self.assertEqual([c["http"] for c in out["calls"]], [200, 200])
+        floor = harness.parse_stamp(block["windows"]["tool-research"]["start"])
+        self.assertTrue(all(harness.parse_stamp(s) > floor for s in seen))
+        self.assertTrue(all(harness.parse_stamp(s) >= self.now - timedelta(days=7) for s in seen))
+
+    def test_a_refused_query_is_not_done_and_a_rerun_resends_only_it(self) -> None:
+        seen, refuse = [], [True]
+        def search(q):
+            seen.append(q["query"])
+            if refuse[0] and q["query"] == harness.IDEAS["demand-tech-1"]["k"][1]:
+                return 400
+            return {"data": [post(str(7200 + len(seen)), "is there a free alternative")], "meta": {"result_count": 1}}
+        h = self.make(Router(_2_tweets_search_recent=search))
+        first = h.run_stage(2, "demand-tech-1", only="K-recency")["K-recency"]
+        self.assertEqual(first["status"], "failed-x")
+        self.assertIn("v2", first["todo"])
+        key = "S2:demand-tech-1:K-recency:B1"
+        self.assertEqual(h.step_state(key)["status"], "failed-x")
+        # a step recorded "done" by the old code with a refused call is re-run too
+        data = self.store.progress(); data["steps"][key]["status"] = "done"; self.store.save_progress(data)
+        refuse[0] = False
+        again = h.run_stage(2, "demand-tech-1", only="K-recency")["K-recency"]
+        self.assertEqual(again.get("status", "done"), "done")
+        v1, v2 = harness.IDEAS["demand-tech-1"]["k"]
+        self.assertEqual(seen, [v1, v2, v2])
+        self.assertEqual([(c["variant"], c.get("reused", False)) for c in again["calls"]], [("v1", True), ("v2", False)])
+        self.assertEqual(h.step_state(key)["status"], "done")
+        self.assertEqual(h.run_stage(2, "demand-tech-1", only="K-recency")["K-recency"], "done already in this block")
+
     def test_min_replies_rejected_reruns_without_it_and_keeps_both_rows(self) -> None:
         seen = []
         def search(q):
