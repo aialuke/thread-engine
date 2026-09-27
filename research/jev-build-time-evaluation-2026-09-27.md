@@ -201,3 +201,52 @@ Both readings now point the same way: X billed about half to three-fifths of wha
 - **The cut-off:** the 95% level set on validation did not hold on final. Any deployment would need a stricter cut-off, or re-checking per job.
 
 Directional only. The decision on whether Jev earns a place in build-phase query experiments is the operator's.
+
+## What we learnt for the product (from the B3 raters' answers)
+
+The experiment asked what Jev's decisions, and the LLM raters' answers alongside them, teach us about search and filtering. It did not ask whether to ship Jev. Every post's typed answers were joined back to the query, sort and rank that found it. "Good" means the Codex/Claude/Grok majority, not ground truth: 364 posts, one night, directional. The diagnostic figures are partly circular, because the same raters gave both the diagnostic and the verdict. The Jev-only gates are not.
+
+### X API search
+
+- **Most of what X returns isn't usable.** Only 24% of posts (89 of 364) were good. 55% were promotion, product marketing, engagement bait or off-topic. Filtering, not retrieval, is where the product's value is.
+- **Query wording matters far more than sort order or rank.**
+  - One Demand idea under two phrasings gave 20% good with 42% spam, against 33% good with 5% spam.
+  - Rank barely mattered: positions 0–2 were 24% good, 3–5 were 27%, 6–9 were 22%. Take all 10 results and filter, rather than trusting the top few.
+- **Keep several phrasings per idea.** Most good posts were found by only one query, so dropping a phrasing loses leads, not duplicates.
+- **Posts with a link are half as likely to be good** (16% against 29%). The spam-control query (`-has:links -giveaway …`) had the best Tool research yield (32–36%). Excluding links outright would have lost 20 of the 89 good posts, so treat a link as a ranking penalty, not a filter.
+- **Keep replies for Demand and Tool research.** In Tool research, replies were good 42% of the time against 24% for original posts. `-is:reply` belongs on Worth joining only.
+- **Worth joining is about freshness, not reply counts.** Every good Worth-joining post was under an hour old (10 of 51, against 0 of 21 older), and reply count predicted nothing (3–9 replies: 0 of 8). A shorter window is worth testing, and `min_replies:` floors look unhelpful. The samples are small.
+- **Some idea cards need rewriting.**
+  - 65% of `wj-comedy-1`'s results and 40% of `wj-tech-2`'s were outside the idea's domain.
+  - The healthiest cards were `demand-comedy-1b` (49% good) and `tr-tech-3`, Claude Code (43%).
+
+### Filtering
+
+- **Good is almost entirely genuine.** 53% of the posts the panel typed genuine were good, and about 0% of every other type (2 of 199). The first question for any filter is "is this a real person talking about this subject?"
+- **Jev's post type alone makes a strong first pass.** Dropping what Jev types as not genuine removes 35% of posts (126) and loses 5 of the 89 good ones.
+- **Outside the idea's domain rules a post out.** None of the 49 posts flagged that way were good; the video-game trap is real. Every card needs that check, in its wording or as a question.
+- **"Is this reply-worthy?" beats "is this useful?".** Reply-worthy posts were 61% good, the rest 4%. The graded "useful" (0–2) was the unstable question: it drove the rewording flips, and Jev scored it about half a level above the LLM raters.
+- **A post answering someone else's need is mostly not a lead** (8% good), but not never.
+- **Candidate product rule:** genuine AND in the idea's domain AND reply-worthy. Three concrete yes/no questions, combined in code.
+
+### Building the judging step, with any model
+
+- **Concrete yes/no questions are stable; graded ones drift.** Repeating a question changed 0 of 30 verdicts, while rewording the graded ones changed 7 of 30. Version every question's wording.
+- **Replies need their parent post.** Posts the raters marked "can't judge from the text" were disputed more often (33% against 20%). Fetch the post a reply answers (`referenced_tweets` expansion) and include it in the packet.
+- **Use confidence to route.** Higher confidence meant higher agreement (AUROC 0.75–0.83). Auto-accept the confident calls and queue the rest.
+- **Even strong models disagree on about 1 post in 5** (22% disputed). That disputed slice is the natural human-review queue.
+- **Set cut-offs per job and re-check them after any change.** 96% on validation became 93% on final.
+
+### Cost
+
+X billed about 55–60% of the harness estimate, in both the pilot and B3. Treat the estimate as a ceiling.
+
+### Tests for the next pull
+
+1. A `-has:links` query variant against the plain one, in the same window.
+2. Worth joining with a 1–2 hour window instead of 6.
+3. The parent post included in the packet for replies.
+4. Rewritten `wj-comedy-1` and `wj-tech-2` cards.
+5. The three-question rule against the current product rule.
+
+All five can be measured with the same raters and harness.
