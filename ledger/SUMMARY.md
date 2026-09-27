@@ -14,7 +14,7 @@ Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snap
 | Wed 23 Sep 13:17 | x-2102598207410950545 | other | other | retro | 234 | 234 | 0% | 0 | 0 | 0 | 0 | valid 54.7h |
 | Wed 23 Sep 14:16 | prompt-vs-finish | other | main | retro | 55 | 55 | 0% | 0 | 0 | 0 | 0 | valid 53.7h |
 | Wed 23 Sep 22:31 | paid-to-free-tools | tool-swap | other | retro, non-organic | 2523 | 158 | 93% | 1 | 1 | 1 | 0 | valid 45.5h |
-| Thu 24 Sep 08:37 | x-2102890124275228747 | other | other | retro | – | 15 | 0% | 0 | – | – | 0 | pending |
+| Thu 24 Sep 08:37 | x-2102890124275228747 | other | other | retro | – | 15 | 0% | 0 | – | – | 0 | missed |
 | Thu 24 Sep 10:30 | x-2102918437060444581 | other | other | retro | 26 | 26 | 0% | 0 | 0 | 0 | – | valid 57.5h |
 | Thu 24 Sep 11:08 | x-2102928143749447858 | other | other | retro | 54 | 54 | 0% | 0 | 0 | 0 | – | valid 56.9h |
 | Thu 24 Sep 16:21 | x-2103006795451302193 | other | other | retro | 23 | 23 | 0% | 0 | 0 | 0 | – | valid 51.6h |
@@ -26,21 +26,21 @@ Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snap
 Needs 500 verified followers and 500,000 verified Home Timeline impressions on originals in 90 days (no replies, no boosted reach).
 
 - X's eligibility screen, read 2026-09-24: 26 verified followers, 337 qualified impressions.
-- Verified followers from the daily read: 25 of 500.
+- Verified followers from the daily read: 23 of 500.
 - Organic impressions on originals and quotes, last 90 days: 2,654. This counts every viewer on every surface, so it is an upper bound; X counts only Premium viewers on the Home feed.
 - Share that qualified at the last screen reading: 12% (the two readings may be from different days).
 
 ## Account
 
-Followers: 37 on 2026-09-26. In the 7 days to then: 4 new, 3 lost; 1 of the new credited to a post or reply they engaged with (a lower bound).
+Followers: 36 on 2026-09-27. In the 7 days to then: 4 new, 4 lost; 1 of the new credited to a post or reply they engaged with (a lower bound).
 
 Follows per profile visit, items from those 7 days: 4 / 67.
 
 | Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 | New follows (X export) |
 |---|---:|---:|---:|---:|---:|---:|
-| original | 12 | 2405 | 21 | 34 | 8.7 | 13 |
+| original | 11 | 2120 | 21 | 33 | 9.9 | 13 |
 | quote | 2 | 249 | 0 | 1 | 0.0 | 0 |
 | reply | 153 | 29004 | 42 | 119 | 1.4 | 4 |
-| thread card | 31 | 948 | 4 | 12 | 4.2 | 2 |
+| thread card | 25 | 719 | 4 | 11 | 5.6 | 1 |
 
-Top topics by organic impressions (X's own labels, a proxy): Technology Business (2863), Technology (2835), Politics (2635), Apple (1522), Pauline Hanson (1424).
+Top topics by organic impressions (X's own labels, a proxy): Politics (2635), Technology Business (2529), Technology (2501), Apple (1522), Pauline Hanson (1424).
