@@ -171,3 +171,11 @@ The steps below run in order. Every command has a test, and nothing reads from X
 **Withdrawn hypothesis (27 Sep):** requiring Jev's `relevant` = 2 as well as `act` ≥ 0.5, combined in code, gives 28 of 30 here. The video-game pair still passes it. Test it on the real replay as a secondary rule, never as the pass measure.
 
 The rubric wording is unchanged. The one allowed revision is held back: the real fix for the video-game trap is probably the idea's own wording ("creator or developer **software**"), which is a Discovery change, not a Jev one.
+
+### Experiment 3, 28 Sep 2026: the B3 pull (directional)
+
+- **Pre-registered result:** at the frozen cut-off (0.8 on `max(p_good, 1 − p_good)`), Jev decides 108 of 186 final posts (58.1%) and agrees with the Codex/Claude/Grok majority on 92.6% (random, same share, about 80.6%). Validation gave 96.1%, so the 95% level the cut-off was chosen for didn't carry over.
+- **By job:** closest to the LLM raters on Tool research and Demand. Weakest on Worth joining, where the level rule overcalls and 5 of 10 reworded verdicts flipped.
+- **Stability:** 0 of 30 repeated calls changed a verdict. Confidence AUROC was 0.75–0.83. Every rater answered every post.
+- **Not included:** the operator's labels, by the operator's choice; they can be added to validation later. The Worth-joining re-read hadn't run yet.
+- **Full write-up and the AUD/USD correction:** [`../jev-build-time-evaluation-2026-09-27.md`](../jev-build-time-evaluation-2026-09-27.md#results-experiment-3-the-b3-pull-28-september-2026).
