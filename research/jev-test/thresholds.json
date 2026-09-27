@@ -1,9 +1,18 @@
 {
  "_note": "Frozen cut-offs for the Jev comparison, kept with questions.json (article 2). Set on validation only. `jev.py freeze` refuses while coverage_threshold is null; it records the date, the cut-off and its rule with the question hashes, and unseals the final sets. Never edit after freezing.",
- "frozen": false,
+ "frozen": true,
  "good_rule": "p_good = P(relevant=2) x P(real=2) x P(useful>=1); good if p_good >= 0.5. The most-probable-level rule is reported alongside.",
- "coverage_threshold": null,
- "coverage_threshold_note": "Chosen on validation from the coverage-against-agreement curve (a confidence between 0.5 and 1), then applied once to final by raters.py compare.",
+ "coverage_threshold": 0.8,
+ "coverage_threshold_note": "Chosen on validation from the coverage-against-agreement curve (a confidence between 0.5 and 1), then applied once to final by raters.py compare. 28 Sep 2026, B3 validation (178 posts, panel = strict majority of Codex, Claude, Grok): the widest coverage whose pooled agreement is at least 95%. At 0.8 Jev decides 57.3% (102/178) at 96.1% agreement (random same share 88.3%); 0.7 gives 73.6% at 92.3%. Per job at 0.8: Worth joining 91.7% (n=12), Demand 95.6% (n=45), Tool research 97.8% (n=45). Chosen without the operator's labels (operator, 28 Sep).",
  "coverage_rule": "p_good_0.5",
- "coverage_rule_note": "Which curve the cut-off applies to: p_good_0.5 (confidence max(p_good, 1 - p_good)) or good_level (confidence p_good when good, 1 - p_good when not)."
+ "coverage_rule_note": "Which curve the cut-off applies to: p_good_0.5 (confidence max(p_good, 1 - p_good)) or good_level (confidence p_good when good, 1 - p_good when not).",
+ "frozen_at": "2026-09-27T21:11:20Z",
+ "note": "B3 validation, 28 Sep 2026: coverage_threshold 0.8 on p_good_0.5, the widest coverage with pooled agreement >= 95% against the Codex/Claude/Grok majority (57.3% at 96.1%, random 88.3%). Chosen without operator labels, which may be added to validation later.",
+ "frozen_coverage_threshold": 0.8,
+ "frozen_coverage_rule": "p_good_0.5",
+ "questions": {
+  "demand": "4ddab2e629c1",
+  "tool": "de584c82ce01",
+  "worth-joining": "fa9062218dcb"
+ }
 }
