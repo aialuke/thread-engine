@@ -13,7 +13,7 @@ import sys
 import tempfile
 import unittest
 import urllib.error
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
@@ -229,7 +229,7 @@ class XLayer(Base):
             h.client.get("/2/tweets", {"ids": "1"}, kind="posts", reserve=0.05, stage="pilot", step="t")
         self.assertEqual(router.requests, [])
         self.assertIn("REFUSED", self.store.budget.read_text())
-        self.store.append(self.store.requests, {"stage": "stage1", "estimated_cost": 3.6})
+        self.store.append(self.store.requests, {"stage": "stage1", "estimated_cost": harness.X_CHECKPOINT - 2.46 - 0.005})
         with self.assertRaisesRegex(harness.Stop, "checkpoint"):
             h.client.get("/2/tweets", {"ids": "1"}, kind="posts", reserve=0.01, stage="stage2", step="t")
 
@@ -636,11 +636,278 @@ class Pieces(unittest.TestCase):
             h = harness.Harness(store, None, None, clock=lambda: NOW)
             h.corpus(1)
             line = json.loads((Path(tmp) / "corpus-stage1.jsonl").read_text().splitlines()[0])
-            self.assertEqual(set(line), {"id", "idea", "text"})
+            self.assertEqual(set(line), {"id", "idea", "text", "replies", "age_hours"})   # Stage 1 adds reply count and age
+            self.assertEqual((line["replies"], line["age_hours"]), (1, 0.5))
             self.assertNotEqual(line["id"], "5")
             key = json.loads((Path(tmp) / "corpus-key-stage1.json").read_text())
             self.assertEqual(key[line["id"]]["post_id"], "5")
 
+
+
+def seed_block(store, *blocks) -> None:
+    """blocks: (id, created datetime). Windows as the harness would have made them."""
+    data = store.progress()
+    for bid, at in blocks:
+        data["blocks"].append({"id": bid, "created": harness.iso(at), "last_used": harness.iso(at),
+                               "brisbane": "", "windows": harness.windows_at(at)})
+    store.save_progress(data)
+
+
+def seed_call(store, call_id, at, posts, **params) -> None:
+    store.append(store.requests, {"call_id": call_id, "time_utc": harness.iso(at), "status": 200, "estimated_cost": 0.0,
+                                  "params": params or None, "result_count": len(posts), "raw_path": f"raw/{call_id}.json"})
+    (store.root / "raw" / f"{call_id}.json").write_text(json.dumps({"data": posts, "meta": {"result_count": len(posts)}}))
+
+
+def sha(path: Path) -> str:
+    return harness.hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+class NewPullPrep(Base):
+    """27 Sep: a new X pull (Stage 1, Stage 3, a fresh Demand window) without risk to what's already scored."""
+
+    def test_idea_cards_and_checkpoint(self) -> None:
+        tr = harness.IDEAS["tr-tech-3"]
+        self.assertEqual((tr["job"], tr["niche"], tr["text"]), ("tool-research", "tech", "Claude Code (the AI coding agent)"))
+        self.assertEqual(tr["k"][0], '"Claude Code" -is:retweet lang:en')
+        self.assertIn("-course", tr["spam"])
+        for key in ("demand-comedy-1", "demand-comedy-2"):
+            old, new = harness.IDEAS[key], harness.IDEAS[key + "b"]
+            self.assertIn("min_likes:10", old["k"][0])
+            self.assertEqual(new["k"][0], old["k"][0].replace(" min_likes:10", ""))
+            self.assertEqual((new["k"][1], new["text"], new["job"]), (old["k"][1], old["text"], old["job"]))
+        self.assertEqual((harness.X_CHECKPOINT, harness.PILOT_CEILING), (7.00, 2.50))
+
+    def test_pinned_block_survives_a_gap_with_its_windows(self) -> None:
+        seen = []
+        h = self.make(Router(_2_tweets_search_recent=lambda q: (seen.append(q), {"data": [], "meta": {}})[1]))
+        first = self.store.block(self.now)
+        with redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            self.assertEqual(harness.main(["config", "--pin-block", "B1"], harness=h), 0)
+            self.assertEqual(harness.main(["config", "--pin-block", "B9"], harness=h), 2)
+        self.now = NOW + timedelta(hours=3)
+        again = self.store.block(self.now)
+        self.assertEqual((again["id"], again["windows"]), ("B1", first["windows"]))
+        self.assertEqual(again["last_used"], harness.iso(self.now))
+        with self.assertRaisesRegex(harness.Stop, "pinned"):
+            self.store.block(self.now, new=True)
+        h.run_stage(2, "demand-tech-1", only="K-recency")
+        self.assertEqual({r["block"] for r in self.store.rows(self.store.requests)}, {"B1"})
+        self.assertEqual({q["start_time"] for q in seen}, {first["windows"]["demand"]["start"]})
+        with redirect_stdout(io.StringIO()):
+            harness.main(["config", "--pin-block", "none"], harness=h)
+        self.now += timedelta(hours=3)                                  # unpinned: the 2-hour rule is back
+        self.assertEqual(self.store.block(self.now)["id"], "B2")
+
+    def test_a_stop_mid_source_resumes_without_resending_what_returned(self) -> None:
+        seen, stop = [], [True]
+        def search(q):
+            seen.append(q["query"])
+            if len(seen) == 2 and stop[0]:
+                raise harness.Stop("simulated stop on the second query")
+            return {"data": [post(str(5000 + len(seen)), "is there a free alternative")], "meta": {"result_count": 1}}
+        h = self.make(Router(_2_tweets_search_recent=search))
+        with self.assertRaisesRegex(harness.Stop, "simulated"):
+            h.run_stage(2, "demand-tech-1", only="K-recency")
+        stop[0] = False
+        out = h.run_stage(2, "demand-tech-1", only="K-recency")
+        v1, v2 = harness.IDEAS["demand-tech-1"]["k"]
+        self.assertEqual(seen, [v1, v2, v2])
+        calls = out["K-recency"]["calls"]
+        self.assertEqual([(c["variant"], c.get("reused", False)) for c in calls], [("v1", True), ("v2", False)])
+        self.assertEqual(len([r for r in self.store.rows(self.store.requests) if r["status"] == 200]), 2)
+
+    def test_min_replies_rejected_reruns_without_it_and_keeps_both_rows(self) -> None:
+        seen = []
+        def search(q):
+            seen.append(q["query"])
+            return 400 if "min_replies" in q["query"] else {"data": [post("7001", "a joke thread")], "meta": {"result_count": 1}}
+        h = self.make(Router(_2_tweets_search_recent=search))
+        out = h.run_stage(1, "wj-comedy-1", only="K")["K-recency"]
+        self.assertEqual([c["http"] for c in out["calls"]], [400, 200, 400, 200])
+        self.assertIn("min_replies rejected; reran without it", out["notes"])
+        self.assertNotIn("min_replies", seen[1])
+        self.assertIn("min_likes:50", seen[3])
+        self.assertNotIn("  ", seen[3])
+        self.assertEqual([r["status"] for r in self.store.rows(self.store.requests)], [400, 200, 400, 200])
+
+    def seeded(self):
+        """Stage 2 already scored (untouchable), plus new sightings in B2 for stages 1 and 2."""
+        h = self.make(Router())
+        seed_block(self.store, ("B1", NOW - timedelta(days=1)), ("B2", NOW - timedelta(hours=8)))
+        for name in ("corpus-stage2.jsonl", "scores-stage2.jsonl", "final-scores-stage2.jsonl",
+                     "second-stage2.jsonl", "second-scores-stage2.jsonl"):
+            (self.root / name).write_text(json.dumps({"id": "pold", "text": name}) + "\n")
+        seen_at = NOW - timedelta(hours=7)
+        old = {**post("8001", "old stage two post from block one", 60 * 26), "conversation_id": "8000"}
+        both = {**post("8002", "seen in both blocks under different ideas", 60 * 9), "conversation_id": "8002"}
+        new = {**post("8003", "a new demand post in block two", 60 * 8, author_id="99"), "conversation_id": "8003"}
+        wj = {**post("8004", "shipping my agent today, demo inside", 60 * 9), "conversation_id": "8004",
+              "public_metrics": {"reply_count": 4, "like_count": 2}}
+        seed_call(self.store, "x0001", seen_at, [wj])
+        self.store.upsert_posts(NOW - timedelta(days=1), [
+            {"post_id": "8001", "label": "x_api", "x": old, "sighting": {"source": "K-recency", "stage": "stage2", "idea": "demand-tech-1", "block": "B1", "eligible": True}},
+            {"post_id": "8002", "label": "x_api", "x": both, "sighting": {"source": "K-recency", "stage": "stage2", "idea": "demand-tech-1", "block": "B1", "eligible": True}}])
+        later = {**wj, "public_metrics": {"reply_count": 40}}          # a later fetch must not leak into the corpus
+        self.store.upsert_posts(seen_at, [
+            {"post_id": "8002", "label": "x_api", "x": both, "sighting": {"source": "K-relevancy", "stage": "stage2", "idea": "demand-tech-2", "block": "B2", "eligible": True}},
+            {"post_id": "8003", "label": "x_api", "x": new, "sighting": {"source": "K-recency", "stage": "stage2", "idea": "demand-tech-2", "block": "B2", "eligible": True}},
+            {"post_id": "8004", "label": "x_api", "x": later, "sighting": {"source": "K-recency", "stage": "stage1", "idea": "wj-tech-1", "block": "B2", "call": "x0001", "rank": 0, "eligible": True}}])
+        return h
+
+    def scores_for(self, corpus_file: str) -> list[dict]:
+        return [{"id": c["id"], "opening": c["text"][:30], "relevant": 2, "real": 2, "useful": 1, "type": "genuine"}
+                for c in self.store.rows(self.root / corpus_file)]
+
+    def write(self, name: str, rows: list[dict]) -> Path:
+        path = Path(self.tmp.name) / name
+        path.write_text("".join(json.dumps(r) + "\n" for r in rows))
+        return path
+
+    def test_block_commands_never_touch_stage_two_files(self) -> None:
+        h = self.seeded()
+        guarded = {n: sha(self.root / n) for n in ("corpus-stage2.jsonl", "scores-stage2.jsonl", "final-scores-stage2.jsonl",
+                                                    "second-stage2.jsonl", "second-scores-stage2.jsonl")}
+        with self.assertRaisesRegex(harness.Stop, "refusing to overwrite corpus-stage2.jsonl"):
+            h.corpus(2)
+        out = h.corpus(2, block="B2", batch=1)
+        self.assertEqual((out["posts"], out["parts"]), (2, 2))
+        self.assertIn("corpus-stage2-B2-part2.jsonl", out["written"])
+        self.assertIn("corpus-stage2-B2-part2.jsonl", (self.root / "corpus-brief-stage2-B2-part2.md").read_text())
+        key = json.loads((self.root / "corpus-key-stage2-B2.json").read_text())
+        self.assertEqual({k["post_id"] for k in key.values()}, {"8002", "8003"})
+        row = next(k for k in key.values() if k["post_id"] == "8002")
+        self.assertEqual((row["idea_key"], row["conversation_id"], row["author_id"]), ("demand-tech-2", "8002", "77"))
+        lines = self.store.rows(self.root / "corpus-stage2-B2.jsonl")
+        self.assertEqual({l["idea"] for l in lines}, {harness.IDEAS["demand-tech-2"]["text"]})
+        self.assertEqual(set(lines[0]), {"id", "idea", "text"})
+        with self.assertRaisesRegex(harness.Stop, "refusing"):
+            h.corpus(2, block="B2")
+
+        scores = self.scores_for("corpus-stage2-B2.jsonl")
+        part_a, part_b = self.write("a.jsonl", scores[:1]), self.write("b.jsonl", scores[1:])
+        with self.assertRaisesRegex(harness.Stop, "wrote nothing.*missing"):
+            h.ingest_scores(2, [part_a], block="B2")
+        self.assertFalse((self.root / "scores-stage2-B2.jsonl").exists())
+        dup = self.write("dup.jsonl", scores + scores[:1])
+        with self.assertRaisesRegex(harness.Stop, "duplicate"):
+            h.ingest_scores(2, [dup], block="B2")
+        with self.assertRaisesRegex(harness.Stop, "refusing to overwrite scores-stage2.jsonl"):
+            h.ingest_scores(2, [part_a, part_b])
+        out = h.ingest_scores(2, [part_a, part_b], block="B2", second="all", seed=1)
+        self.assertEqual(out["files"], ["scores-stage2-B2.jsonl", "second-stage2-B2.jsonl", "second-mode-stage2-B2.json"])
+        self.assertEqual(len(self.store.rows(self.root / "second-stage2-B2.jsonl")), 2)
+        self.assertEqual(h.second_mode(2, "B2"), "all")
+        with self.assertRaisesRegex(harness.Stop, "refusing"):
+            h.ingest_scores(2, [part_a, part_b], block="B2")
+
+        with self.assertRaisesRegex(harness.Stop, "wrote nothing"):
+            h.second_scores(2, part_a, block="B2")
+        self.assertFalse((self.root / "second-scores-stage2-B2.jsonl").exists())
+        h.second_scores(2, self.write("s.jsonl", scores), block="B2")
+        self.assertTrue((self.root / "disagreements-stage2-B2.jsonl").exists())
+        with self.assertRaisesRegex(harness.Stop, "refusing to overwrite final-scores-stage2.jsonl"):
+            h.finalise_scores(2)
+        self.assertEqual(h.finalise_scores(2, block="B2")["file"], "final-scores-stage2-B2.jsonl")
+        with self.assertRaisesRegex(harness.Stop, "refusing"):
+            h.finalise_scores(2, block="B2")
+        self.assertEqual({n: sha(self.root / n) for n in guarded}, guarded)
+
+    def test_second_mode_all_refuses_to_finalise_without_every_second_score(self) -> None:
+        h = self.seeded()
+        h.corpus(2, block="B2")
+        scores = self.scores_for("corpus-stage2-B2.jsonl")
+        h.ingest_scores(2, self.write("a.jsonl", scores), block="B2", second="all")
+        (self.root / "second-scores-stage2-B2.jsonl").write_text(json.dumps(scores[0]) + "\n")   # as if hand-trimmed
+        with self.assertRaisesRegex(harness.Stop, "no second score"):
+            h.finalise_scores(2, block="B2")
+        self.assertFalse((self.root / "final-scores-stage2-B2.jsonl").exists())
+
+    def test_stage_one_corpus_carries_replies_and_age_at_fetch(self) -> None:
+        h = self.seeded()
+        h.corpus(1, block="B2")
+        (line,) = self.store.rows(self.root / "corpus-stage1-B2.jsonl")
+        self.assertEqual((line["replies"], line["age_hours"]), (4, 2.0))      # the call's copy, not the later 40
+        brief = (self.root / "corpus-brief-stage1-B2.md").read_text()
+        self.assertNotIn("Judge from the text alone", brief)
+        self.assertIn("replies and age_hours", brief)
+        # other jobs' briefs unchanged, byte for byte
+        self.assertEqual(sha_text(harness.scoring_brief("demand", "x.jsonl")),
+                         "dea3f440fbedb063a579f88fa67315cf13b2a09ef117ff873bb2331fde4124c6")
+        self.assertEqual(sha_text(harness.scoring_brief("tool-research", "x.jsonl")),
+                         "a5f8555221eed2bdd70722a04b509c058816fc04bfa52a5a6f49c1b1ed7f4d28")
+
+    def test_reread_batches_by_100_and_marks_gone_only_when_sent_and_absent(self) -> None:
+        router_seen = []
+        live = {}
+        def lookup(q):
+            ids = q["ids"].split(",")
+            router_seen.append(ids)
+            return {"data": [live[i] for i in ids if i in live]}
+        h = self.make(Router(_2_tweets=lookup))
+        seed_block(self.store, ("B1", NOW - timedelta(hours=8)), ("B2", NOW - timedelta(hours=1)))
+        found_at = NOW - timedelta(hours=7)
+        posts = [post(str(9000 + n), f"post {n}", 60 * 8) for n in range(120)]
+        seed_call(self.store, "x0001", found_at, posts)
+        live.update({p["id"]: {**p, "public_metrics": {"reply_count": 9}} for p in posts if int(p["id"]) % 2 == 0})
+        self.store.upsert_posts(NOW - timedelta(hours=30), [   # first_seen long ago: hours must come from the block sighting
+            {"post_id": p["id"], "label": "x_api", "x": p,
+             "sighting": {"source": "K-recency", "stage": "stage1", "block": "B1", "call": "x0001"}} for p in posts])
+        other = post("9999", "found in B2 only", 60)
+        self.store.upsert_posts(NOW - timedelta(hours=30), [
+            {"post_id": "9999", "label": "x_api", "x": other, "sighting": {"source": "K-recency", "stage": "stage1", "block": "B2"}}])
+        self.store.pin_block("B1")
+        out = h.reread()
+        self.assertEqual([len(ids) for ids in router_seen], [100, 20])
+        self.assertEqual((out["due"], out["reread"], out["gone"], out["block"]), (120, 120, 60, "B1"))
+        rows = {r["post_id"]: r for r in self.store.rows(self.root / "reread.jsonl")}
+        self.assertNotIn("9999", rows)
+        self.assertEqual(rows["9000"]["hours_later"], 7.0)
+        self.assertEqual((rows["9000"]["gone"], rows["9001"]["gone"]), (False, True))
+        self.assertEqual(rows["9000"]["after"], {"reply_count": 9})
+        self.assertEqual(h.reread(), {"due": 0, "block": "B1"})
+
+    def test_reread_failed_batch_marks_nothing_gone(self) -> None:
+        h = self.make(Router(_2_tweets=400))
+        seed_block(self.store, ("B1", NOW - timedelta(hours=8)))
+        seed_call(self.store, "x0001", NOW - timedelta(hours=7), [])
+        self.store.upsert_posts(NOW - timedelta(hours=7), [
+            {"post_id": "9100", "label": "x_api", "x": post("9100", "a"), "sighting": {"stage": "stage1", "block": "B1", "call": "x0001"}}])
+        out = h.reread(block="B1")
+        self.assertEqual((out["reread"], out["failed_calls"][0]["http"]), (0, 400))
+        self.assertFalse((self.root / "reread.jsonl").exists())
+        self.assertEqual(self.store.load_posts()["9100"]["reread"], "")
+
+    def test_manifest_lists_every_sighting_in_the_block(self) -> None:
+        def search(q):
+            base = 7100 if q["sort_order"] == "recency" else 7200
+            return {"data": [post(str(base + n), "is there a free alternative", 30) for n in range(2)], "meta": {"result_count": 2}}
+        h = self.make(Router(_2_tweets_search_recent=search))
+        h.run_stage(2, "demand-tech-1", only="K")
+        with redirect_stdout(io.StringIO()):
+            self.assertEqual(harness.main(["manifest", "--block", "B1"], harness=h), 0)
+        with (self.root / "manifest-B1.csv").open(newline="") as fh:
+            rows = list(harness.csv.DictReader(fh))
+        self.assertEqual(list(rows[0]), ["post_id", "stage", "idea", "source", "sort", "variant", "rank", "call",
+                                         "result_count", "eligible"])
+        self.assertEqual(len(rows), 8)                                 # 2 sorts × 2 queries × 2 posts (sightings, not posts)
+        self.assertEqual({(r["sort"], r["variant"]) for r in rows},
+                         {("recency", "v1"), ("recency", "v2"), ("relevancy", "v1"), ("relevancy", "v2")})
+        self.assertEqual({r["result_count"] for r in rows}, {"2"})
+        self.assertEqual({r["rank"] for r in rows}, {"0", "1"})
+        self.assertEqual({r["eligible"] for r in rows}, {"True"})
+
+    def test_cli_parses_the_new_options(self) -> None:
+        args = harness.build_parser().parse_args(["ingest-scores", "--stage", "1", "--block", "B3", "--second", "all", "a", "b"])
+        self.assertEqual((args.files, args.block, args.second), (["a", "b"], "B3", "all"))
+        args = harness.build_parser().parse_args(["corpus", "--stage", "3", "--block", "B3", "--batch", "50"])
+        self.assertEqual((args.block, args.batch), ("B3", 50))
+        with self.assertRaisesRegex(harness.Stop, "B3"):
+            harness.Harness._suffix(1, "../x")
+
+
+def sha_text(text: str) -> str:
+    return harness.hashlib.sha256(text.encode()).hexdigest()
 
 if __name__ == "__main__":
     unittest.main()

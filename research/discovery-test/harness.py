@@ -4,11 +4,14 @@
     python3 research/discovery-test/harness.py status
     python3 research/discovery-test/harness.py pilot --dry-run
     python3 research/discovery-test/harness.py pilot next | all | <step> [--redo]
-    python3 research/discovery-test/harness.py config --model <id> | --authors on|off | --best-arm <arm>
+    python3 research/discovery-test/harness.py config --model <id> | --authors on|off | --best-arm <arm> | --pin-block <B|none>
     python3 research/discovery-test/harness.py console --before|--after <USD>
     python3 research/discovery-test/harness.py stage1|stage2|stage3 --idea <key> [--source K|G|T|C]
-    python3 research/discovery-test/harness.py reread
-    python3 research/discovery-test/harness.py corpus --stage N
+    python3 research/discovery-test/harness.py reread [--block B]
+    python3 research/discovery-test/harness.py corpus --stage N [--block B [--batch 50]]
+    python3 research/discovery-test/harness.py ingest-scores --stage N [--block B] [--second all] <file> [<file>…]
+    python3 research/discovery-test/harness.py second-scores|finalise-scores --stage N [--block B] …
+    python3 research/discovery-test/harness.py manifest --block B
 
 The plan is plan.md in this folder. X API calls go through scripts/x_api.py's Client
 (Keychain signing, GET only, read-only access check); this file only wraps it with
@@ -60,7 +63,7 @@ BRISBANE = ZoneInfo("Australia/Brisbane")
 POST, USER = x_api.POST, x_api.USER
 
 PILOT_CEILING = 2.50        # X API, pilot only (HANDOFF decision 3)
-X_CHECKPOINT = 6.00         # X API, whole test: stop and report
+X_CHECKPOINT = 7.00         # X API, whole test: stop and report (operator, 27 Sep: was 6.00)
 GROK_CHECKPOINT = 3.00      # Grok, whole test
 GROK_RESERVE = 0.30         # worst case one Grok run, reserved before it starts
 ARM_VERIFY_CAP = 30         # claimed ids checked per pilot arm (the prompt allows 3 searches × 10)
@@ -217,8 +220,19 @@ class Store:
 
     def block(self, now: datetime, new: bool = False) -> dict:
         """The current time block: shared windows for every step run within BLOCK_HOURS of its start.
-        new=True starts a fresh block (a stage must not reuse the pilot's windows)."""
+        new=True starts a fresh block (a stage must not reuse the pilot's windows).
+        A pinned block (config --pin-block) is returned with its original windows, however long ago it was used."""
         data = self.progress()
+        pinned = data["settings"].get("pinned_block")
+        if pinned:
+            if new:
+                raise Stop(f"block {pinned} is pinned; `config --pin-block none` before starting a new block")
+            block = next((b for b in data["blocks"] if b["id"] == pinned), None)
+            if block is None:
+                raise Stop(f"pinned block {pinned} is not in progress.json")
+            block["last_used"] = iso(now)
+            self.save_progress(data)
+            return block
         if data["blocks"] and not new:
             last = data["blocks"][-1]
             if now - parse_stamp(last["last_used"]) <= timedelta(hours=BLOCK_HOURS):
@@ -230,6 +244,21 @@ class Store:
         data["blocks"].append(block)
         self.save_progress(data)
         return block
+
+    def pin_block(self, block_id: str) -> str | None:
+        """Pin a block by id, or clear the pin with 'none'."""
+        data = self.progress()
+        if block_id.lower() == "none":
+            data["settings"].pop("pinned_block", None)
+        elif not any(b["id"] == block_id for b in data["blocks"]):
+            raise Stop(f"no block {block_id}; blocks are {', '.join(b['id'] for b in data['blocks']) or 'none yet'}")
+        else:
+            data["settings"]["pinned_block"] = block_id
+        self.save_progress(data)
+        return data["settings"].get("pinned_block")
+
+    def call_rows(self) -> dict[str, dict]:
+        return {r["call_id"]: r for r in self.rows(self.requests) if r.get("call_id")}
 
     def next_id(self, path: Path, prefix: str) -> str:
         return f"{prefix}{len(self.rows(path)) + 1:04d}"
@@ -687,11 +716,22 @@ IDEAS = {
                         "k": ['("is anyone else" OR "am I the only one" OR "why is everyone") -is:retweet lang:en min_likes:10',
                               '("everyone is talking about" OR "the discourse" OR "trending because") -is:retweet lang:en'],
                         "semantic": "people reacting to or complaining about something everyone is talking about today"},
+    # 1b/2b: first query without min_likes:10 (27 Sep); the originals stay as run
+    "demand-comedy-1b": {"job": "demand", "niche": "comedy",
+                         "text": "what people are collectively reacting to or annoyed by today",
+                         "k": ['("is anyone else" OR "am I the only one" OR "why is everyone") -is:retweet lang:en',
+                               '("everyone is talking about" OR "the discourse" OR "trending because") -is:retweet lang:en'],
+                         "semantic": "people reacting to or complaining about something everyone is talking about today"},
     "demand-comedy-2": {"job": "demand", "niche": "comedy",
                         "text": "running jokes or memes forming around a current event",
                         "k": ['(meme OR memes OR "the jokes") (today OR "this week" OR "right now") -is:retweet lang:en min_likes:10',
                               '("the timeline is" OR "twitter is" OR "X is") (jokes OR memes OR unhinged) -is:retweet lang:en'],
                         "semantic": "people making the same running joke or meme about something that just happened"},
+    "demand-comedy-2b": {"job": "demand", "niche": "comedy",
+                         "text": "running jokes or memes forming around a current event",
+                         "k": ['(meme OR memes OR "the jokes") (today OR "this week" OR "right now") -is:retweet lang:en',
+                               '("the timeline is" OR "twitter is" OR "X is") (jokes OR memes OR unhinged) -is:retweet lang:en'],
+                         "semantic": "people making the same running joke or meme about something that just happened"},
     "wj-tech-1": {"job": "worth-joining", "niche": "tech",
                   "text": "builders sharing progress on an AI app or tool",
                   "k": ['("just shipped" OR "just launched" OR "working on" OR "build in public" OR buildinpublic) (AI OR agent OR LLM) -is:retweet -is:reply lang:en',
@@ -728,6 +768,12 @@ IDEAS = {
                         '("Cursor IDE" OR "cursor.com" OR @cursor_ai) -is:retweet lang:en'],
                   "spam": 'Cursor (IDE OR editor) -is:retweet -is:nullcast -has:links -giveaway -discount lang:en',
                   "semantic": "what developers like or dislike about the Cursor AI code editor"},
+    "tr-tech-3": {"job": "tool-research", "niche": "tech",
+                  "text": "Claude Code (the AI coding agent)",
+                  "k": ['"Claude Code" -is:retweet lang:en',
+                        '"Claude Code" (love OR hate OR "switched to" OR vs OR "compared to" OR annoying OR "rate limit" OR pricing) -is:retweet lang:en'],
+                  "spam": '"Claude Code" -is:retweet -is:nullcast -has:links -giveaway -discount -course lang:en',
+                  "semantic": "developers talking about what they like or dislike about using Claude Code"},
     "tr-comedy-1": {"job": "tool-research", "niche": "comedy",
                     "text": "CapCut among meme and video creators",
                     "k": ['CapCut (meme OR memes OR edit OR edits OR template) -is:retweet lang:en',
@@ -748,6 +794,8 @@ SPAM_TYPES = ("genuine", "account-selling", "promotion", "engagement-bait", "pro
 
 API_ONLY = re.compile(r"\b(min_likes|min_reposts|is|has|lang):")   # min_replies: is valid in both
 WEB_ONLY = re.compile(r"\b(min_faves|min_retweets|filter|within_time|since|until):")
+MIN_REPLIES = re.compile(r"\bmin_replies:\d+")
+BLOCK_ID = re.compile(r"B\d+")
 
 
 def check_syntax(query: str, source: str) -> None:
@@ -1299,16 +1347,43 @@ class Harness:
         """The spam-control variant, run over the same window as K, scored with the union and reported apart."""
         return self._k_queries(ctx, now, [idea["spam"]], window, sort, source=f"Kspam-{sort}")
 
+    def _sent(self, key: str) -> list[dict]:
+        return self.step_state(key).get("sent", [])
+
+    def _log_sent(self, key: str, entry: dict) -> None:
+        """Each query's call, saved as it happens, so a Stop mid-source doesn't lose which queries already returned."""
+        data = self.store.progress()
+        data["steps"].setdefault(key, {"status": "pending", "attempts": []}).setdefault("sent", []).append(entry)
+        self.store.save_progress(data)
+
     def _k_queries(self, ctx, now, queries, window, sort, source):
         authors = bool(self.store.progress()["settings"].get("authors_on_checks"))
-        calls = []
+        key = ctx["step"]   # already per source and block: a re-run skips queries that returned 200 in this block
+        calls, notes = [], []
         for n, query in enumerate(queries):
+            variant = f"v{n + 1}"
+            done = [s for s in self._sent(key) if s["variant"] == variant and s["query"] == query and s["http"] == 200]
+            if done:
+                calls.append({**done[-1], "reused": True})
+                continue
             check_syntax(query, "api")
-            row, body = self._search({**ctx, "source": source}, query, window, authors=authors, sort=sort)
+            sent = query
+            row, body = self._search({**ctx, "source": source}, sent, window, authors=authors, sort=sort)
+            if row["status"] == 400 and "min_replies:" in query:
+                entry = {"variant": variant, "query": query, "sent_query": sent, "call": row["call_id"], "http": 400, "posts": 0}
+                self._log_sent(key, entry)
+                calls.append(entry)
+                notes.append("min_replies rejected; reran without it")
+                sent = " ".join(MIN_REPLIES.sub("", query).split())
+                check_syntax(sent, "api")
+                row, body = self._search({**ctx, "source": source}, sent, window, authors=authors, sort=sort)
             if row["status"] == 200:
                 self._note_posts(now, row, body, ctx, source=source, window=window)
-            calls.append({"variant": f"v{n + 1}", "call": row["call_id"], "http": row["status"], "posts": row["items"]["data"]})
-        return {"calls": calls, "sort": sort, "source": source}
+            entry = {"variant": variant, "query": query, "sent_query": sent, "call": row["call_id"],
+                     "http": row["status"], "posts": row["items"]["data"]}
+            self._log_sent(key, entry)
+            calls.append(entry)
+        return {"calls": calls, "sort": sort, "source": source, **({"notes": notes} if notes else {})}
 
     def _stage_G(self, ctx, block, now, idea, window):
         settings = self.store.progress()["settings"]
@@ -1346,89 +1421,195 @@ class Harness:
                           "total": (body.get("meta") or {}).get("total_tweet_count")})
         return {"calls": calls, "note": "how much talk; never ranked on useful posts"}
 
-    def reread(self, min_hours: float = 5.5) -> dict:
-        """Re-read Worth-joining posts about 6 hours after they were found: did the conversation grow?"""
-        now = self.clock()
-        table = self.store.load_posts()
-        due = [row for row in table.values() if not row["reread"] and row["created_at"]
-               and any(s.get("stage") == "stage1" for s in json.loads(row["sightings"]))
-               and now - parse_stamp(row["first_seen"]) >= timedelta(hours=min_hours)]
-        if not due:
-            return {"due": 0}
-        found, _, call = lookup_ids(self.client, [r["post_id"] for r in due], authors=False,
-                                    stage="reread", step="reread", source="reread", block=self.store.block(now)["id"])
-        updates = []
-        for row in due:
-            post = found.get(row["post_id"])
-            before = json.loads(row["metrics"] or "{}")
-            after = (post or {}).get("public_metrics")
-            entry = {"at": iso(now), "call": call, "hours_later": round((now - parse_stamp(row["first_seen"])).total_seconds() / 3600, 1),
-                     "before": before, "after": after, "gone": post is None}
-            updates.append({"post_id": row["post_id"], "reread": entry,
-                            "sighting": {"source": "reread", "stage": "reread", "call": call}})
-            self.store.append(self.store.root / "reread.jsonl", {"post_id": row["post_id"], **entry})
-        self.store.upsert_posts(now, updates)
-        return {"due": len(due), "call": call}
+    def _seen(self, row: dict, sighting: dict | None, calls: dict) -> tuple[datetime, dict]:
+        """(when, public_metrics) for one sighting: its call's time and that call's copy of the post.
+        Falls back to the row's first_seen and stored metrics when the call isn't logged."""
+        call = calls.get((sighting or {}).get("call") or "")
+        if call:
+            raw = self.store.root / (call.get("raw_path") or f"raw/{call['call_id']}.json")
+            body = json.loads(raw.read_bytes() or b"{}") if raw.exists() else {}
+            data = body.get("data")
+            match = next((p for p in (data if isinstance(data, list) else [data] if data else []) if p.get("id") == row["post_id"]), None)
+            return parse_stamp(call["time_utc"]), (match or {}).get("public_metrics") or json.loads(row["metrics"] or "{}")
+        return parse_stamp(row["first_seen"]), json.loads(row["metrics"] or "{}")
 
-    def corpus(self, stage: int | str) -> dict:
+    def reread(self, min_hours: float = 5.5, block: str | None = None) -> dict:
+        """Re-read Worth-joining posts about 6 hours after they were found: did the conversation grow?
+        With a block (given, or pinned), only posts with a stage1 sighting in it, timed from that sighting.
+        Batches of 100; a post is gone only when its id was sent and the batch's answer lacks it."""
+        now = self.clock()
+        block = block or self.store.progress()["settings"].get("pinned_block")
+        calls = self.store.call_rows()
+        due = []
+        for row in self.store.load_posts().values():
+            sight = next((s for s in json.loads(row["sightings"])
+                          if s.get("stage") == "stage1" and (block is None or s.get("block") == block)), None)
+            if row["reread"] or not row["created_at"] or sight is None:
+                continue
+            seen_at, before = self._seen(row, sight, calls) if block else (parse_stamp(row["first_seen"]), json.loads(row["metrics"] or "{}"))
+            if now - seen_at >= timedelta(hours=min_hours):
+                due.append((row, seen_at, before))
+        if not due:
+            return {"due": 0, "block": block}
+        ctx_block = self.store.block(now)["id"]
+        updates, used, failed = [], [], []
+        for n in range(0, len(due), 100):
+            batch = due[n:n + 100]
+            sent = [r["post_id"] for r, _, _ in batch if r["post_id"].isdigit()]
+            found, _, call = lookup_ids(self.client, sent, authors=False,
+                                        stage="reread", step="reread", source="reread", block=ctx_block)
+            status = (self.client.last_row or {}).get("status")
+            if status != 200:
+                failed.append({"call": call, "http": status})
+                continue
+            used.append(call)
+            for row, seen_at, before in batch:
+                if row["post_id"] not in sent:
+                    continue
+                post = found.get(row["post_id"])
+                entry = {"at": iso(now), "call": call, "block": block,
+                         "hours_later": round((now - seen_at).total_seconds() / 3600, 1),
+                         "before": before, "after": (post or {}).get("public_metrics"), "gone": post is None}
+                updates.append({"post_id": row["post_id"], "reread": entry,
+                                "sighting": {"source": "reread", "stage": "reread", "call": call}})
+                self.store.append(self.store.root / "reread.jsonl", {"post_id": row["post_id"], **entry})
+        self.store.upsert_posts(now, updates)
+        out = {"due": len(due), "reread": len(updates), "gone": sum(1 for u in updates if u["reread"]["gone"]),
+               "calls": used, "block": block}
+        if failed:
+            out["failed_calls"] = failed
+        return out
+
+    # --- blind scoring files: block-named when a block is given; nothing existing is ever overwritten ---
+    @staticmethod
+    def _suffix(stage, block: str | None) -> str:
+        if block is not None and not BLOCK_ID.fullmatch(block):
+            raise Stop(f"block ids look like B3, not {block!r}")
+        return f"stage{stage}-{block}" if block else f"stage{stage}"
+
+    def _fresh(self, *names: str) -> list[Path]:
+        paths = [self.store.root / n for n in names]
+        taken = [p.name for p in paths if p.exists()]
+        if taken:
+            raise Stop(f"refusing to overwrite {', '.join(taken)}; move it aside deliberately if it should be redone")
+        return paths
+
+    def _need(self, name: str) -> Path:
+        path = self.store.root / name
+        if not path.exists():
+            raise Stop(f"{name} doesn't exist")
+        return path
+
+    def corpus(self, stage: int | str, block: str | None = None, batch: int | None = None) -> dict:
         """Blind scoring corpus: X's own text only, opaque ids, shuffled. Source, query, rank, time withheld.
         stage "pilot" takes the latest attempt of each P7 arm. Only eligible posts (English, not a retweet,
-        inside the window) that exist on X go in."""
+        inside the window) that exist on X go in. With a block, only that block's sightings of the stage.
+        Stage 1 lines also carry the reply count and age (hours) when the post was found."""
+        suffix = self._suffix(stage, block)
+        if block and not any(b["id"] == block for b in self.store.progress()["blocks"]):
+            raise Stop(f"no block {block} in progress.json")
+        if batch and not block:
+            raise Stop("--batch needs --block")
         table = self.store.load_posts()
         if stage == "pilot":
             runs = {self.step_state(s)["attempts"][-1].get("run") for s in PILOT_ARMS if self.step_state(s)["attempts"]}
-            pick = lambda s: s.get("run") in runs
+            pick = lambda s: s.get("run") in runs and (block is None or s.get("block") == block)
         else:
-            pick = lambda s: s.get("stage") == f"stage{stage}"
-        rows = []
+            pick = lambda s: s.get("stage") == f"stage{stage}" and (block is None or s.get("block") == block)
+        picked = []
         for row in table.values():
             sights = [s for s in json.loads(row["sightings"]) if pick(s)]
             labels = json.loads(row["labels"])
             ok = any(s.get("eligible", s.get("in_window", True)) not in (False, None) for s in sights)
             if sights and row["text"] and ok and any(l in ("x_api", "mentioned_exists") or l.startswith("real") for l in labels):
-                rows.append(row)
+                picked.append((row, sights))
+        parts = -(-len(picked) // batch) if batch else 0
+        names = [f"corpus-{suffix}.jsonl", f"corpus-key-{suffix}.json", f"corpus-brief-{suffix}.md"]
+        names += [f"corpus-{suffix}-part{k}.jsonl" for k in range(1, parts + 1)]
+        names += [f"corpus-brief-{suffix}-part{k}.md" for k in range(1, parts + 1)]
+        out, key_path, brief, *part_paths = self._fresh(*names)
         rng = random.Random(secrets.randbits(64))
-        rng.shuffle(rows)
+        rng.shuffle(picked)
+        calls = self.store.call_rows() if stage == 1 else {}
         corpus, key = [], {}
-        for row in rows:
+        for row, sights in picked:
             opaque = f"p{secrets.token_hex(4)}"
-            idea = next((s["idea"] for s in json.loads(row["sightings"]) if s.get("idea") in IDEAS), None)
-            corpus.append({"id": opaque, "idea": IDEAS[idea]["text"] if idea else None, "text": row["text"]})
-            key[opaque] = {"post_id": row["post_id"], "sha256": hashlib.sha256(row["text"].encode()).hexdigest()}
-        out = self.store.root / f"corpus-stage{stage}.jsonl"
-        self.store.write_atomic(out, "".join(json.dumps(c, ensure_ascii=False) + "\n" for c in corpus))
-        self.store.write_atomic(self.store.root / f"corpus-key-stage{stage}.json", json.dumps(key, indent=1))
-        brief = self.store.root / f"corpus-brief-stage{stage}.md"
+            sight = next((s for s in sights if s.get("idea") in IDEAS), None)
+            idea = sight["idea"] if sight else None
+            line = {"id": opaque, "idea": IDEAS[idea]["text"] if idea else None, "text": row["text"]}
+            if stage == 1:
+                seen_at, metrics = self._seen(row, sight, calls)
+                created = parse_stamp(row["created_at"])
+                line["replies"] = metrics.get("reply_count")
+                line["age_hours"] = round((seen_at - created).total_seconds() / 3600, 1) if created else None
+            corpus.append(line)
+            key[opaque] = {"post_id": row["post_id"], "sha256": hashlib.sha256(row["text"].encode()).hexdigest(),
+                           "conversation_id": row["conversation_id"] or None, "author_id": row["author_id"] or None,
+                           "idea_key": idea}
         job = "demand" if stage == "pilot" else STAGE_JOB[stage]
+        dump = lambda rows: "".join(json.dumps(c, ensure_ascii=False) + "\n" for c in rows)
+        self.store.write_atomic(out, dump(corpus))
+        self.store.write_atomic(key_path, json.dumps(key, indent=1))
         self.store.write_atomic(brief, scoring_brief(job, f"research/discovery-test/private/{out.name}"))
-        return {"posts": len(corpus), "file": str(out.relative_to(self.store.root)),
-                "brief": str(brief.relative_to(self.store.root))}
+        written = [p.name for p in (out, key_path, brief)]
+        for k in range(parts):
+            part, part_brief = part_paths[k], part_paths[parts + k]
+            self.store.write_atomic(part, dump(corpus[k * batch:(k + 1) * batch]))
+            self.store.write_atomic(part_brief, scoring_brief(job, f"research/discovery-test/private/{part.name}"))
+            written += [part.name, part_brief.name]
+        return {"posts": len(corpus), "file": out.name, "brief": brief.name, "parts": parts, "written": written}
 
-    def ingest_scores(self, stage: int, path: Path, seed: int | None = None) -> dict:
-        """Check Codex's scores against the corpus (every id once, opening words match), then draw my 20% re-score."""
-        corpus = {c["id"]: c for c in self.store.rows(self.store.root / f"corpus-stage{stage}.jsonl")}
-        scores, problems = check_scores(corpus, self.store.rows(path))
-        out = self.store.root / f"scores-stage{stage}.jsonl"
-        self.store.write_atomic(out, "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in scores))
-        # Second scorer (Codex review, High 4): every positive and every unclear post, plus 20% of the rest.
-        must = sorted(r["id"] for r in scores if (r["relevant"] == 2 and r["real"] == 2) or 1 in (r["relevant"], r["real"]))
-        rest = sorted(r["id"] for r in scores if r["id"] not in must)
+    @staticmethod
+    def _fail_closed(problems: list[str], what: str) -> None:
+        bad = [p for p in problems if p.startswith(("rejected", "duplicate", "missing"))]
+        if bad:
+            raise Stop(f"{what}: wrote nothing; {len(bad)} problem(s): " + "; ".join(bad[:10]))
+
+    def ingest_scores(self, stage, paths, seed: int | None = None, block: str | None = None, second: str = "rule") -> dict:
+        """Check Codex's scores against the corpus, then draw the second scorer's list. Fail-closed: nothing is
+        written unless every corpus id is scored exactly once and no row was rejected. Several files are merged."""
+        suffix = self._suffix(stage, block)
+        paths = [paths] if isinstance(paths, (str, Path)) else list(paths)
+        corpus = {c["id"]: c for c in self.store.rows(self._need(f"corpus-{suffix}.jsonl"))}
+        out, second_path, mode_path = self._fresh(f"scores-{suffix}.jsonl", f"second-{suffix}.jsonl",
+                                                  f"second-mode-{suffix}.json")
+        rows = [r for p in paths for r in self.store.rows(Path(p))]
+        scores, problems = check_scores(corpus, rows)
+        self._fail_closed(problems, "ingest-scores")
         rng = random.Random(seed if seed is not None else secrets.randbits(32))
-        sample = must + (rng.sample(rest, max(1, round(len(rest) * 0.2))) if rest else [])
+        if second == "all":
+            must = sorted(r["id"] for r in scores)
+            sample = list(must)
+        else:
+            # Second scorer (Codex review, High 4): every positive and every unclear post, plus 20% of the rest.
+            must = sorted(r["id"] for r in scores if (r["relevant"] == 2 and r["real"] == 2) or 1 in (r["relevant"], r["real"]))
+            rest = sorted(r["id"] for r in scores if r["id"] not in must)
+            sample = must + (rng.sample(rest, max(1, round(len(rest) * 0.2))) if rest else [])
         rng.shuffle(sample)
-        second = self.store.root / f"second-stage{stage}.jsonl"
-        self.store.write_atomic(second, "".join(json.dumps({"id": i, "idea": corpus[i].get("idea"), "text": corpus[i]["text"]},
-                                                           ensure_ascii=False) + "\n" for i in sample))
-        return {"scored": len(scores), "of": len(corpus), "problems": problems,
-                "second_score": {"positives_and_unclear": len(must), "random_rest": len(sample) - len(must)},
-                "files": [out.name, second.name]}
+        self.store.write_atomic(out, "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in scores))
+        self.store.write_atomic(second_path, "".join(json.dumps({"id": i, "idea": corpus[i].get("idea"), "text": corpus[i]["text"]},
+                                                                ensure_ascii=False) + "\n" for i in sample))
+        self.store.write_atomic(mode_path, json.dumps({"mode": second, "ids": len(sample), "of": len(corpus),
+                                                       "inputs": [str(p) for p in paths]}, indent=1) + "\n")
+        return {"scored": len(scores), "of": len(corpus), "problems": problems, "second_mode": second,
+                "second_score": {"positives_and_unclear" if second == "rule" else "all": len(must),
+                                 "random_rest": len(sample) - len(must)},
+                "files": [out.name, second_path.name, mode_path.name]}
 
-    def second_scores(self, stage, path: Path) -> dict:
-        """Compare the second scorer with the first: agreement and confusion per axis; list disagreements."""
-        corpus = {c["id"]: c for c in self.store.rows(self.store.root / f"corpus-stage{stage}.jsonl")}
-        first = {r["id"]: r for r in self.store.rows(self.store.root / f"scores-stage{stage}.jsonl")}
-        wanted = {r["id"] for r in self.store.rows(self.store.root / f"second-stage{stage}.jsonl")}
+    def second_mode(self, stage, block: str | None = None) -> str:
+        path = self.store.root / f"second-mode-{self._suffix(stage, block)}.json"
+        return json.loads(path.read_text(encoding="utf-8"))["mode"] if path.exists() else "rule"
+
+    def second_scores(self, stage, path: Path, block: str | None = None) -> dict:
+        """Compare the second scorer with the first: agreement and confusion per axis; list disagreements.
+        Fail-closed: every id on the second list scored exactly once, no row rejected."""
+        suffix = self._suffix(stage, block)
+        corpus = {c["id"]: c for c in self.store.rows(self._need(f"corpus-{suffix}.jsonl"))}
+        first = {r["id"]: r for r in self.store.rows(self._need(f"scores-{suffix}.jsonl"))}
+        wanted = {r["id"] for r in self.store.rows(self._need(f"second-{suffix}.jsonl"))}
+        out, dis_path = self._fresh(f"second-scores-{suffix}.jsonl", f"disagreements-{suffix}.jsonl")
         second, problems = check_scores({i: corpus[i] for i in wanted}, self.store.rows(path))
+        self._fail_closed(problems, "second-scores")
         report, disagree = {}, []
         for axis in ("relevant", "real", "useful", "type"):
             pairs = [(first[r["id"]].get(axis), r.get(axis)) for r in second if axis in r]
@@ -1441,16 +1622,22 @@ class Harness:
             diff = {k: [f.get(k), r.get(k)] for k in ("relevant", "real", "useful", "type") if k in r and f.get(k) != r.get(k)}
             if diff:
                 disagree.append({"id": r["id"], "text": corpus[r["id"]]["text"], "diff": diff})
-        self.store.write_atomic(self.store.root / f"second-scores-stage{stage}.jsonl",
-                                "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in second))
-        self.store.write_atomic(self.store.root / f"disagreements-stage{stage}.jsonl",
-                                "".join(json.dumps(d, ensure_ascii=False) + "\n" for d in disagree))
-        return {"second_scored": len(second), "problems": problems, "agreement": report, "disagreements": len(disagree)}
+        self.store.write_atomic(out, "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in second))
+        self.store.write_atomic(dis_path, "".join(json.dumps(d, ensure_ascii=False) + "\n" for d in disagree))
+        return {"second_scored": len(second), "problems": problems, "agreement": report, "disagreements": len(disagree),
+                "files": [out.name, dis_path.name]}
 
-    def finalise_scores(self, stage, adjudicated: Path | None = None) -> dict:
-        """Final labels: first and second agree, or an adjudication settles it. Refuses while any stays open."""
-        first = {r["id"]: r for r in self.store.rows(self.store.root / f"scores-stage{stage}.jsonl")}
-        second = {r["id"]: r for r in self.store.rows(self.store.root / f"second-scores-stage{stage}.jsonl")}
+    def finalise_scores(self, stage, adjudicated: Path | None = None, block: str | None = None) -> dict:
+        """Final labels: first and second agree, or an adjudication settles it. Refuses while any stays open,
+        and under second mode "all" while any post lacks a second score."""
+        suffix = self._suffix(stage, block)
+        first = {r["id"]: r for r in self.store.rows(self._need(f"scores-{suffix}.jsonl"))}
+        second = {r["id"]: r for r in self.store.rows(self.store.root / f"second-scores-{suffix}.jsonl")}
+        (out,) = self._fresh(f"final-scores-{suffix}.jsonl")
+        if self.second_mode(stage, block) == "all":
+            lacking = sorted(set(first) - set(second))
+            if lacking:
+                raise Stop(f"second mode is all: {len(lacking)} posts have no second score: {', '.join(lacking[:10])}")
         settled = {r["id"]: r for r in self.store.rows(adjudicated)} if adjudicated else {}
         final, open_ids = [], []
         for pid, f in first.items():
@@ -1464,9 +1651,43 @@ class Harness:
                 open_ids.append(pid)
         if open_ids:
             raise Stop(f"{len(open_ids)} disagreements still need adjudication: {', '.join(open_ids[:10])}")
-        self.store.write_atomic(self.store.root / f"final-scores-stage{stage}.jsonl",
-                                "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in final))
-        return {"final": len(final), "adjudicated": sum(1 for r in final if r["source_of_label"] == "adjudicated")}
+        self.store.write_atomic(out, "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in final))
+        return {"final": len(final), "adjudicated": sum(1 for r in final if r["source_of_label"] == "adjudicated"),
+                "file": out.name}
+
+    def manifest(self, block: str) -> dict:
+        """private/manifest-<block>.csv: one row per sighting in the block, with where it came from.
+        Derived from the logs only, so it is rewritten on each run."""
+        self._suffix(1, block)
+        calls = self.store.call_rows()
+        variants = {}
+        for key, idea in IDEAS.items():
+            for n, q in enumerate(idea["k"]):
+                variants[(key, q)] = f"v{n + 1}"
+                variants.setdefault((key, " ".join(MIN_REPLIES.sub("", q).split())), f"v{n + 1}-no-min_replies")
+            if "spam" in idea:
+                variants[(key, idea["spam"])] = "spam"
+        cols = ("post_id", "stage", "idea", "source", "sort", "variant", "rank", "call", "result_count", "eligible")
+        rows = []
+        for post in self.store.load_posts().values():
+            for s in json.loads(post["sightings"]):
+                if s.get("block") != block:
+                    continue
+                call = calls.get(s.get("call") or "") or {}
+                params = call.get("params") or {}
+                source = s.get("source") or ""
+                sort = params.get("sort_order") or (source.partition("-")[2] if source.startswith("K") else "")
+                variant = variants.get((s.get("idea"), params.get("query")), "") if params.get("query") else ""
+                rows.append({"post_id": post["post_id"], "stage": s.get("stage"), "idea": s.get("idea"), "source": source,
+                             "sort": sort, "variant": variant, "rank": s.get("rank"), "call": s.get("call"),
+                             "result_count": call.get("result_count"), "eligible": s.get("eligible")})
+        buf = io.StringIO()
+        writer = csv.DictWriter(buf, fieldnames=cols)
+        writer.writeheader()
+        writer.writerows(rows)
+        path = self.store.root / f"manifest-{block}.csv"
+        self.store.write_atomic(path, buf.getvalue())
+        return {"rows": len(rows), "file": path.name}
 
     def recheck(self, hours: float = 24) -> dict:
         """Is each collected post still on X a day later? Recorded as its own signal ('gone', reason unknown),
@@ -1561,7 +1782,7 @@ USEFUL = {"demand": "a genuine need or a live reaction someone could usefully an
 
 def scoring_brief(job: str, corpus_path: str) -> str:
     """plan.md §Scoring, as a Codex brief. Blind: text and opaque ids only; each line echoes its opening words."""
-    return f"""<task>Score every post in {corpus_path} and return one JSON line per post. Done when every id in the file has exactly one line.</task>
+    brief = f"""<task>Score every post in {corpus_path} and return one JSON line per post. Done when every id in the file has exactly one line.</task>
 <context>
 Each line of the file is {{"id", "idea", "text"}}: an X post's text exactly as X returned it, and the idea it was searched for. Read only that file.
 Score each post 0-2 on three axes, against its idea:
@@ -1576,6 +1797,13 @@ For comedy or satire ideas, "useful" judges whether it is a live conversation a 
 Output: only JSON lines, {{"id": "...", "opening": "<the first 30 characters of the post text, copied exactly>", "relevant": n, "real": n, "useful": n, "act": true|false, "type": "...", "why": "<=12 words"}}, nothing else.
 <default_follow_through_policy/>
 """
+    if job == "worth-joining":   # Stage 1 lines carry the reply count and age at the time the post was found
+        brief = brief.replace('Each line of the file is {"id", "idea", "text"}',
+                              'Each line of the file is {"id", "idea", "text", "replies", "age_hours"}')
+        brief = brief.replace("Judge from the text alone.",
+                              "Judge from the text plus the replies and age_hours fields (the post's reply count and its age "
+                              "in hours when it was found).")
+    return brief
 
 
 def _opening(text: str) -> str:
@@ -1681,6 +1909,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--best-effort", choices=("low", "medium", "high"))
     sp.add_argument("--refreeze", action="store_true")
     sp.add_argument("--new-block", action="store_true", help="start a fresh time block, with windows ending now")
+    sp.add_argument("--pin-block", help="reuse this block (its windows) whatever the gap; 'none' clears the pin")
     sp = sub.add_parser("console")
     group = sp.add_mutually_exclusive_group(required=True)
     group.add_argument("--before", type=float)
@@ -1689,22 +1918,32 @@ def build_parser() -> argparse.ArgumentParser:
         sp = sub.add_parser(f"stage{n}")
         sp.add_argument("--idea", required=True)
         sp.add_argument("--source", help="K, G, T, C or Kspam (all sorts), or one of K-recency, K-relevancy, Kspam-recency…")
-    sub.add_parser("reread")
+    sp = sub.add_parser("reread")
+    sp.add_argument("--block", help="only posts with a stage1 sighting in this block (default: the pinned block)")
     sp = sub.add_parser("reprocess")
     sp.add_argument("run_ids", nargs="+")
     sp = sub.add_parser("corpus")
     sp.add_argument("--stage", required=True, choices=("1", "2", "3", "pilot"))
+    sp.add_argument("--block")
+    sp.add_argument("--batch", type=int, help="also write part files of this many posts (needs --block)")
     sp = sub.add_parser("second-scores")
     sp.add_argument("--stage", required=True, choices=("1", "2", "3", "pilot"))
+    sp.add_argument("--block")
     sp.add_argument("file")
     sp = sub.add_parser("finalise-scores")
     sp.add_argument("--stage", required=True, choices=("1", "2", "3", "pilot"))
+    sp.add_argument("--block")
     sp.add_argument("--adjudicated")
+    sp = sub.add_parser("manifest")
+    sp.add_argument("--block", required=True)
     sp = sub.add_parser("recheck")
     sp.add_argument("--hours", type=float, default=24)
     sp = sub.add_parser("ingest-scores")
     sp.add_argument("--stage", required=True, choices=("1", "2", "3", "pilot"))
-    sp.add_argument("file")
+    sp.add_argument("--block")
+    sp.add_argument("--second", choices=("rule", "all"), default="rule",
+                    help="rule: positives, unclear and 20%% of the rest; all: every post")
+    sp.add_argument("files", nargs="+")
     return parser
 
 
@@ -1740,6 +1979,9 @@ def main(argv: list[str] | None = None, harness: Harness | None = None) -> int:
             if args.refreeze:
                 data["settings"]["frozen_hash"] = frozen_hash()
             store.save_progress(data)
+            if args.pin_block:
+                store.pin_block(args.pin_block)
+                data = store.progress()
             if args.new_block:
                 block = store.block(harness.clock(), new=True)
                 print(json.dumps({"new_block": block["id"], "windows": block["windows"]}, indent=1))
@@ -1766,18 +2008,23 @@ def main(argv: list[str] | None = None, harness: Harness | None = None) -> int:
             for run_id in args.run_ids:
                 print(json.dumps(harness.reprocess(run_id), indent=1))
         elif args.command == "reread":
-            print(json.dumps(harness.reread(), indent=1))
+            print(json.dumps(harness.reread(block=args.block), indent=1))
         elif args.command in ("second-scores", "finalise-scores"):
             stage = int(args.stage) if args.stage.isdigit() else args.stage
-            out = harness.second_scores(stage, Path(args.file)) if args.command == "second-scores" \
-                else harness.finalise_scores(stage, Path(args.adjudicated) if args.adjudicated else None)
+            out = harness.second_scores(stage, Path(args.file), block=args.block) if args.command == "second-scores" \
+                else harness.finalise_scores(stage, Path(args.adjudicated) if args.adjudicated else None, block=args.block)
             print(json.dumps(out, indent=1))
+        elif args.command == "manifest":
+            print(json.dumps(harness.manifest(args.block), indent=1))
         elif args.command == "recheck":
             print(json.dumps(harness.recheck(args.hours), indent=1))
         elif args.command == "ingest-scores":
-            print(json.dumps(harness.ingest_scores(int(args.stage) if args.stage.isdigit() else args.stage, Path(args.file)), indent=1))
+            stage = int(args.stage) if args.stage.isdigit() else args.stage
+            print(json.dumps(harness.ingest_scores(stage, [Path(f) for f in args.files], block=args.block,
+                                                   second=args.second), indent=1))
         elif args.command == "corpus":
-            print(json.dumps(harness.corpus(int(args.stage) if args.stage.isdigit() else args.stage), indent=1))
+            stage = int(args.stage) if args.stage.isdigit() else args.stage
+            print(json.dumps(harness.corpus(stage, block=args.block, batch=args.batch), indent=1))
     except Stop as exc:
         print(f"STOPPED: {exc}", file=sys.stderr)
         return 2

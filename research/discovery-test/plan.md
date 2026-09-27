@@ -130,3 +130,13 @@ Sources: `private/grok-insights/` (Grok's report C01–C240 and its runs), `revi
 6. **Scoring corpus is separate from raw:** Codex gets text with opaque ids (the operator chose raw text, so no stripping beyond leaving out the profile and media blocks the rendering adds); the raw stays private and hashed.
 7. **Verify the ~60 ids from Grok's 26 Sep live run on the X API in the pilot** (about $0.30 plus authors): the first real invented-rate figure for semantic search.
 8. **A fourth prompt arm, G-self:** Grok's own recommended prompts from its report (section 7), adjusted to set limit 10 and dates.
+
+## Harness changes for the next X pull (27 Sep)
+
+- **X API checkpoint raised to $7.00** of estimated spend (operator, 27 Sep; was $6). The pilot ceiling stays $2.50.
+- New idea cards, added without editing any old one: `tr-tech-3` (Claude Code, Tool research), and `demand-comedy-1b` / `demand-comedy-2b` (the comedy Demand ideas with `min_likes:10` taken off the first query). They change the frozen hash, so stages refuse until `config --refreeze`.
+- `config --pin-block <B>` keeps one block's windows for a pull that spans more than 2 hours; `config --pin-block none` clears it.
+- A K source that stops part-way resumes without resending queries that already returned 200 in that block. A K query whose `min_replies:` is rejected (HTTP 400) is rerun once without it, and the step notes it.
+- Scoring files for a new block are block-named (`corpus-stage{N}-{B}.jsonl` and so on), and no scoring command overwrites an existing file. `ingest-scores` and `second-scores` write nothing unless every id is scored exactly once. `--second all` sends every post to the second scorer.
+- Stage 1 corpus lines carry `replies` and `age_hours` when the post was found, and the Stage 1 brief says to use them.
+- `reread` works in batches of 100 and marks a post gone only when its id was sent and X's answer lacked it. `manifest --block B` lists every sighting in a block with its source, sort, query variant, rank and call.
