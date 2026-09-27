@@ -10,7 +10,7 @@ The panel is three blind scorers of the same Discovery brief: Codex (first score
 score, a subset), Grok (all posts, scored for this test). Each scorer's verdict is Discovery's
 useful-post rule: relevant 2, real 2, useful 1 or more (discovery-test/private/stage-2.md).
 `sample` picks the posts the panel disagrees on, spread across sets and ideas, plus a random
-sample of posts it agrees on, and writes private/label.html: a page that shows one post at a
+sample of posts it agrees on, and writes private/label-{sample}.html: a page that shows one post at a
 time, never the scorers' answers, and exports the operator's labels as JSON.
 
 Everything written stays in private/ (gitignored; other people's posts; delete by 26 Mar 2027).
@@ -38,6 +38,7 @@ SEED = 27
 QUESTIONS = {
     "demand": "Would you want this surfaced for this idea: something to post about, or a conversation to reply to?",
     "tool": "Would you want this surfaced: does it show how people use, like or dislike the product, or is it a conversation to reply to?",
+    "worth-joining": "Would you want this surfaced for this idea: a live conversation to reply to, or something to post about?",
 }
 ANSWERS = ("post", "reply", "no", "unsure")      # post and reply both count as yes
 
@@ -97,6 +98,28 @@ def panel(private: Path = PRIVATE, discovery: Path = DISCOVERY) -> list[dict]:
             cast = [v for v in votes.values() if v is not None]
             out.append({"id": c["id"], "set": s, "idea": c["idea"], "text": c["text"],
                         "job": "tool" if s in TOOL_SETS else "demand", "votes": votes,
+                        "scorers": len(cast), "disputed": len(set(cast)) > 1})
+    return out
+
+
+def panel_typed(sets: list[str], private: Path = PRIVATE, raters_: tuple = ("codex", "claude", "grok")) -> list[dict]:
+    """The same panel for block sets, from the raters' typed answers (raters/{rater}-{set}.jsonl).
+    Validation sets only: the final set stays unseen until the freeze."""
+    import jev
+    import raters
+    out = []
+    for s in sets:
+        if s.endswith("-final"):
+            raise SystemExit("the operator samples validation only; the final set stays sealed")
+        corpus = rows(private / "splits" / f"{s}.jsonl")
+        if not corpus:
+            raise SystemExit(f"no split file for {s}: run jev.py split first")
+        answers = {name: {r["id"]: r for r in rows(private / "raters" / f"{name}-{s}.jsonl")} for name in raters_}
+        for c in corpus:
+            votes = {name: raters.good_level((a.get(c["id"]) or {}).get("answers")) for name, a in answers.items()}
+            cast = [v for v in votes.values() if v is not None]
+            out.append({"id": c["id"], "set": s, "idea": c["idea"], "text": c["text"], "job": jev.job_of(s, c),
+                        "replies": c.get("replies"), "age_hours": c.get("age_hours"), "votes": votes,
                         "scorers": len(cast), "disputed": len(set(cast)) > 1})
     return out
 
@@ -181,6 +204,7 @@ nav{display:flex;justify-content:space-between;align-items:center;margin-top:16p
 <div class="card">
 <p class="idea">Search idea</p><p class="ideatext" id="idea"></p>
 <div class="post" id="post"></div>
+<p class="muted" id="meta"></p>
 <p class="q" id="q"></p>
 <div class="btns">
 <button data-v="post" class="yes">Yes, to post about<kbd>P</kbd></button>
@@ -206,6 +230,7 @@ function save() { try { localStorage.setItem(KEY, JSON.stringify(labels)); $("sa
 function render() {
   const p = DATA.posts[i], l = labels[p.id] || {};
   $("idea").textContent = p.idea; $("post").textContent = p.text; $("q").textContent = p.question;
+  $("meta").textContent = (p.replies == null) ? "" : "When found: " + p.replies + " replies, " + p.age_hours + " hours old";
   $("why").value = l.why || "";
   document.querySelectorAll("[data-v]").forEach(b => { b.classList.toggle("sel", b.dataset.v === l.label); });
   const n = Object.values(labels).filter(x => x.label).length;
@@ -243,25 +268,35 @@ render();
 def write_page(sample: list[dict], private: Path = PRIVATE) -> Path:
     h = sample_hash(sample)
     data = {"sample": h, "posts": [{"id": p["id"], "idea": p["idea"], "text": p["text"],
-                                    "question": QUESTIONS[p["job"]]} for p in sample]}
+                                    "question": QUESTIONS[p["job"]], "replies": p.get("replies"),
+                                    "age_hours": p.get("age_hours")} for p in sample]}
     # </ inside post text must not close the script tag
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
-    page = private / "label.html"
+    page, sidecar = private / f"label-{h}.html", private / f"label-sample-{h}.json"
+    if page.exists() or sidecar.exists():
+        raise SystemExit(f"sample {h} already has a page; labels already given are never overwritten")
     page.write_text(PAGE.replace("__DATA__", blob), encoding="utf-8")
     manifest = {"sample": h, "seed": SEED, "created": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                 "rule": "good = relevant 2, real 2, useful >= 1; disputed = the scorers who scored it disagree",
                 "posts": [{k: p[k] for k in ("id", "set", "idea", "job", "votes", "why_chosen")} for p in sample]}
-    (private / "label-sample.json").write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    sidecar.write_text(json.dumps(manifest, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     return page
 
 
 def ingest_labels(path: Path, private: Path = PRIVATE) -> dict:
     data = json.loads(path.expanduser().read_text(encoding="utf-8"))
-    manifest = json.loads((private / "label-sample.json").read_text(encoding="utf-8"))
-    if data.get("sample") != manifest["sample"]:
-        raise SystemExit(f"labels are for sample {data.get('sample')}, the current sample is {manifest['sample']}")
+    h = data.get("sample")
+    sidecar = private / f"label-sample-{h}.json"
+    if not sidecar.exists():                      # the first sample (27 Sep) used unsuffixed names
+        sidecar = private / "label-sample.json"
+    manifest = json.loads(sidecar.read_text(encoding="utf-8")) if sidecar.exists() else {}
+    if manifest.get("sample") != h:
+        raise SystemExit(f"no sample {h} here; labels are only accepted for a sample this tool wrote")
+    target = private / ("operator-labels.json" if sidecar.name == "label-sample.json" else f"operator-labels-{h}.json")
+    if target.exists():
+        raise SystemExit(f"{target.name} already exists; labels already given are never overwritten")
     answered = [x for x in data["labels"] if x.get("label")]
-    (private / "operator-labels.json").write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    target.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     counts = defaultdict(int)
     for x in answered:
         counts[x["label"]] += 1
@@ -276,6 +311,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--file", required=True)
     sub.add_parser("panel")
     p = sub.add_parser("sample")
+    p.add_argument("--sets", nargs="+", help="block validation sets (stage{N}-B{k}-validation); default: the 298-post sets")
     p.add_argument("--disputed", type=int, default=40)
     p.add_argument("--random", type=int, default=20, dest="random_n")
     p = sub.add_parser("ingest-labels")
@@ -286,7 +322,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "panel":
         print(json.dumps(panel_summary(panel()), indent=1))
     elif args.command == "sample":
-        sample = choose(panel(), args.disputed, args.random_n)
+        sample = choose(panel_typed(args.sets) if args.sets else panel(), args.disputed, args.random_n)
         page = write_page(sample)
         kinds = defaultdict(int)
         for s in sample:

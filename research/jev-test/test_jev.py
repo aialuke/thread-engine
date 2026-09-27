@@ -21,6 +21,7 @@ sys.path.insert(0, str(HERE))
 import jev  # noqa: E402
 
 KEY = "TS-SECRET-VALUE"
+TYPE_PROBS = {t: (0.9 if t == "genuine" else 0.1 / 6) for t in jev.load_questions()["shared"]["type"]["criteria"]}
 
 
 def answer(model: str = jev.PINNED, tokens: int = 400) -> dict:
@@ -29,8 +30,9 @@ def answer(model: str = jev.PINNED, tokens: int = 400) -> dict:
                         "relevant": {"type": "score", "score": 1.8, "probabilities": {"0": 0.0, "1": 0.2, "2": 0.8}},
                         "real": {"type": "score", "score": 2.0, "probabilities": {"0": 0.0, "1": 0.0, "2": 1.0}},
                         "useful": {"type": "score", "score": 1.0, "probabilities": {"0": 0.1, "1": 0.8, "2": 0.1}},
-                        "type": {"type": "choice", "choice": "genuine", "confidence": 0.9},
-                        "act": {"type": "noul", "noul": 0.7}}}
+                        "type": {"type": "choice", "choice": "genuine", "confidence": 0.9, "probabilities": TYPE_PROBS},
+                        "act": {"type": "noul", "noul": 0.7},
+                        **{d: {"type": "noul", "noul": 0.2} for d in jev.load_questions().get("diagnostics", {})}}}
 
 
 class FakeResponse:
@@ -284,3 +286,122 @@ class CompareTests(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class BlockSetTests(Base):
+    """Job map, the Worth-joining packet, unavailable answers, the sealed split and the final lock."""
+
+    def test_job_map(self) -> None:
+        self.assertEqual(jev.job_of("stage1-B3-validation", {}), "worth-joining")
+        self.assertEqual(jev.job_of("stage3-B3-final", {}), "tool")
+        self.assertEqual(jev.job_of("stagespam-tool", {}), "tool")
+        self.assertEqual(jev.job_of("stage2-B3-validation", {}), "demand")
+        self.assertEqual(jev.job_of("stagespam-demand", {}), "demand")
+        self.assertIn("worth-joining", jev.load_questions()["useful"])
+
+    def test_state_carries_replies_and_age_only_when_present(self) -> None:
+        self.assertEqual(jev.state_of({"idea": "i", "text": "t"}), {"idea": "i", "post": "t"})
+        self.assertEqual(jev.state_of({"idea": "i", "text": "t", "replies": 4, "age_hours": 1.5}),
+                         {"idea": "i", "post": "t", "replies": 4, "age_hours": 1.5})
+
+    def test_main_questions_unchanged_and_diagnostics_added(self) -> None:
+        spec = jev.load_questions()
+        main = jev.questions_for("demand", spec)
+        asked = jev.request_questions("demand", spec)
+        self.assertEqual({k: asked[k] for k in main}, main)
+        self.assertEqual(set(asked) - set(main), set(spec["diagnostics"]))
+
+    def test_incomplete_answer_is_unavailable_never_no(self) -> None:
+        qs = jev.request_questions("demand")
+        self.assertEqual(jev.answer_problems(answer()["answers"], qs), [])
+        broken = {k: v for k, v in answer()["answers"].items() if k != "useful"}
+        self.assertTrue(any("useful" in p for p in jev.answer_problems(broken, qs)))
+        self.assertEqual(jev.answer_problems(None, qs), ["no answers"])
+
+    def fixture(self, discovery: Path) -> None:
+        discovery.mkdir()
+        (discovery / "posts.csv").write_text(
+            "post_id,conversation_id,author_id\n1,c1,a1\n2,c2,a2\n3,c1,a3\n4,c4,a1\n5,,a5\n6,c6,a6\n", encoding="utf-8")
+        (discovery / "corpus-key-stage2.json").write_text(json.dumps({"x": {"post_id": "1"}}), encoding="utf-8")
+        rows = [{"id": f"n{i}", "idea": "i", "text": f"t{i}"} for i in (2, 3, 4, 5, 6)]
+        (discovery / "corpus-stage1-B3.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+        (discovery / "corpus-key-stage1-B3.json").write_text(json.dumps({f"n{i}": {"post_id": str(i)} for i in (2, 3, 4, 5, 6)}),
+                                                             encoding="utf-8")
+
+    def test_split_seals_development_conversations_and_refuses_to_redo(self) -> None:
+        discovery = Path(self.tmp.name) / "discovery"
+        self.fixture(discovery)
+        info = jev.split(1, "B3", self.store, discovery)
+        self.assertEqual(info["dropped"], {"conversation already in development": 1})   # post 3 shares c1 with dev post 1
+        self.assertEqual(info["validation"] + info["final"], 4)
+        self.assertEqual(info["authors_also_in_development"], 1)                        # post 4's author a1
+        again = [json.loads(line) for h in ("validation", "final")
+                 for line in (self.store.root / "splits" / f"stage1-B3-{h}.jsonl").read_text().splitlines()]
+        self.assertEqual({r["id"] for r in again}, {"n2", "n4", "n5", "n6"})
+        self.assertEqual(jev.half_of("c:c2"), jev.half_of("c:c2"))
+        with self.assertRaises(jev.Stop):
+            jev.split(1, "B3", self.store, discovery)
+
+    def test_final_set_sealed_until_freeze(self) -> None:
+        discovery = Path(self.tmp.name) / "discovery"
+        self.fixture(discovery)
+        jev.split(1, "B3", self.store, discovery)
+        self.store.set_config(real_data=True)
+        thresholds = self.store.root.parent / "thresholds.json"
+        thresholds.write_text(json.dumps({"frozen": False}), encoding="utf-8")
+        with self.assertRaises(jev.Stop):
+            jev.load_set("stage1-B3-final", self.store, discovery)
+        rows = jev.load_set("stage1-B3-validation", self.store, discovery)
+        self.assertTrue(all(r["job"] == "worth-joining" for r in rows))
+        jev.freeze("test", thresholds)
+        jev.load_set("stage1-B3-final", self.store, discovery)
+        with self.assertRaises(jev.Stop):
+            jev.freeze("again", thresholds)
+
+    def test_fresh_ask_skips_the_cache_both_ways(self) -> None:
+        client, opener = self.client(answer(), answer(), answer())
+        q = {"asks": {"type": "noul", "instructions": "q"}}
+        client.ask("s", q, jev.PINNED)
+        client.ask("s", q, jev.PINNED, fresh=True)
+        self.assertEqual(len(opener.requests), 2)
+        self.assertTrue(client.ask("s", q, jev.PINNED)["cached"])
+
+
+class PaperChecksTests(Base):
+    """Ranking in both orders and the rewording check (Li et al., JEV-as-a-Judge)."""
+
+    def rows(self) -> list[dict]:
+        return [{"id": f"r{i}", "idea": "i", "text": f"t{i}", "job": "worth-joining", "replies": i, "age_hours": 1.0}
+                for i in range(3)]
+
+    def test_rank_asks_both_orders_and_averages(self) -> None:
+        first = {"model": jev.PINNED, "usage": {"input_tokens": 10},
+                 "answers": {"best": {"type": "choice", "probabilities": {"r0": 0.6, "r1": 0.3, "r2": 0.1}}}}
+        second = {"model": jev.PINNED, "usage": {"input_tokens": 10},
+                  "answers": {"best": {"type": "choice", "probabilities": {"r0": 0.2, "r1": 0.7, "r2": 0.1}}}}
+        client, opener = self.client(first, second)
+        original = jev.load_set
+        jev.load_set = lambda *a, **k: self.rows()
+        try:
+            jev.rank("stage1-B3-validation", client, self.store, jev.PINNED)
+        finally:
+            jev.load_set = original
+        self.assertEqual(len(opener.requests), 2)
+        order = [[c["id"] for c in json.loads(r.data)["state"]["candidates"]] for r, _ in opener.requests]
+        self.assertEqual(order[0], list(reversed(order[1])))
+        result = json.loads((self.store.root / "ranks-stage1-B3-validation.json").read_text())["i"]
+        self.assertEqual(result["probabilities"]["r1"], 0.5)
+        self.assertFalse(result["orders_agree_on_best"])
+
+    def test_reworded_counts_flips(self) -> None:
+        good = answer()
+        bad = json.loads(json.dumps(answer()))
+        bad["answers"]["real"]["probabilities"] = {"0": 0.9, "1": 0.1, "2": 0.0}
+        client, _ = self.client(good, bad, good, good, good, good)
+        original = jev.load_set
+        jev.load_set = lambda *a, **k: [{**r, "job": "demand"} for r in self.rows()]
+        try:
+            out = jev.reworded("stage2-B3-validation", client, self.store, jev.PINNED, n=3)
+        finally:
+            jev.load_set = original
+        self.assertEqual((out["compared"], out["flips"]), (3, 1))

@@ -7,6 +7,11 @@
     python3 research/jev-test/jev.py compare --set <name>
     python3 research/jev-test/jev.py config --real-data on|off | --model <id>
     python3 research/jev-test/jev.py spend
+    python3 research/jev-test/jev.py split --stage N --block B      (seal validation/final before scoring)
+    python3 research/jev-test/jev.py run --set stage{N}-B{k}-validation   (final only after freeze)
+    python3 research/jev-test/jev.py repeat --set S [--posts 10 --times 3]   (fresh, uncached)
+    python3 research/jev-test/jev.py rank --set S                   (one Choice per idea)
+    python3 research/jev-test/jev.py freeze --note "..."            (one-way; unseals final)
 
 Asks Jev (TypeSafe's System One model) the Discovery scoring rubric, one request per post, and
 compares its answers with the labels the Discovery test already settled. The plan and the pass
@@ -22,10 +27,12 @@ hard spend ceiling. Real Discovery posts are refused until the operator allows t
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import os
 import random
+import re
 import subprocess
 import sys
 import time
@@ -207,12 +214,13 @@ class Client:
                 self.sleep(retry_delay(attempt, None))
         raise JevError("unreachable")
 
-    def ask(self, state, questions: dict, model: str, label: str = "") -> dict:
-        """One request. Returns {"model", "answers", "usage", "cached"}; a cache hit makes no call."""
+    def ask(self, state, questions: dict, model: str, label: str = "", fresh: bool = False) -> dict:
+        """One request. Returns {"model", "answers", "usage", "cached"}; a cache hit makes no call.
+        fresh=True skips the cache both ways (repeatability checks) but is still logged and priced."""
         body = {"state": state, "model": model, "questions": questions}
         key = cache_key(body)
         path = self.store.cache_path(key)
-        if path.exists():
+        if path.exists() and not fresh:
             return {**json.loads(path.read_text(encoding="utf-8"))["response"], "cached": True}
         # reserve: about 3 characters a token, rounded up; the real cost is logged from usage after the call
         reserve = (len(json.dumps(body, ensure_ascii=False)) // 3 + 1) * PRICE_PER_TOKEN
@@ -226,7 +234,8 @@ class Client:
         elapsed = round(time.monotonic() - started, 3)
         usage = response.get("usage") or {}
         cost = round((usage.get("input_tokens") or 0) * PRICE_PER_TOKEN, 8)
-        self.store.write_atomic(path, json.dumps({"request": body, "response": response}, ensure_ascii=False) + "\n")
+        if not fresh:
+            self.store.write_atomic(path, json.dumps({"request": body, "response": response}, ensure_ascii=False) + "\n")
         self.store.append(self.store.calls, {
             "at": now_iso(), "label": label, "cache_key": key, "model_requested": model,
             "model": response.get("model"), "input_tokens": usage.get("input_tokens"),
@@ -250,25 +259,93 @@ def questions_for(job: str, spec: dict | None = None) -> dict:
     return {**spec["shared"], "useful": spec["useful"][job]}
 
 
+def request_questions(job: str, spec: dict | None = None) -> dict:
+    """What a Jev request asks: the rubric plus the diagnostics (judged independently, never a pass measure)."""
+    spec = spec or load_questions()
+    return {**questions_for(job, spec), **spec.get("diagnostics", {})}
+
+
+def questions_hash(questions: dict) -> str:
+    """The version of a question set; every answer records it."""
+    return hashlib.sha256(json.dumps(questions, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()[:12]
+
+
 def job_of(set_name: str, row: dict) -> str:
-    return row.get("job") or ("tool" if set_name in TOOL_SETS else "demand")
+    """stage1 -> worth-joining; stage3 and stagespam-tool -> tool; everything else -> demand."""
+    if row.get("job"):
+        return row["job"]
+    if set_name in TOOL_SETS or set_name.startswith("stage3-"):
+        return "tool"
+    if set_name.startswith("stage1-"):
+        return "worth-joining"
+    return "demand"
+
+
+def state_of(row: dict) -> dict:
+    """The packet every rater sees: idea and post text, plus reply count and age for Worth-joining posts."""
+    state = {"idea": row["idea"], "post": row["text"]}
+    for field in ("replies", "age_hours"):
+        if row.get(field) is not None:
+            state[field] = row[field]
+    return state
+
+
+def answer_problems(answers: dict | None, questions: dict) -> list[str]:
+    """Every expected question present and in range; anything else makes the row unavailable, never a no."""
+    if not isinstance(answers, dict):
+        return ["no answers"]
+    problems = []
+    for qid, q in questions.items():
+        a = answers.get(qid)
+        if not isinstance(a, dict):
+            problems.append(f"{qid}: missing")
+            continue
+        if q["type"] == "noul":
+            p = a.get("noul")
+            if not isinstance(p, (int, float)) or not 0 <= p <= 1:
+                problems.append(f"{qid}: noul out of range")
+            continue
+        probs = a.get("probabilities")
+        want = {str(n) for n in range(len(q["criteria"]))} if q["type"] == "score" else set(q["criteria"])
+        if not isinstance(probs, dict) or set(probs) != want:
+            problems.append(f"{qid}: probabilities don't cover the {q['type']} options")
+        elif not all(isinstance(p, (int, float)) and 0 <= p <= 1 for p in probs.values()):
+            problems.append(f"{qid}: probability out of range")
+    return problems
 
 
 # ---------- sets ----------
 
 
+BLOCK_SET = re.compile(r"^stage([123])-(B\d+)-(validation|final)$")
+
+
+def thresholds(path: Path | None = None) -> dict:
+    path = path or HERE / "thresholds.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
 def load_set(set_name: str, store: Store, discovery: Path = DISCOVERY) -> list[dict]:
-    """[{id, idea, text, job, label?}]. Real sets need the operator's go-ahead in private/config.json."""
+    """[{id, idea, text, job, label?}]. Real sets need the operator's go-ahead in private/config.json.
+    Block sets (stage{N}-B{k}-validation|final) come from private/splits/; final needs frozen thresholds."""
     if set_name == "synthetic":
         return [{**r, "label": r.get("label")} for r in Store.rows(HERE / "synthetic.jsonl")]
-    if set_name not in REAL_SETS:
-        raise Stop(f"unknown set {set_name!r}: synthetic or one of {', '.join(REAL_SETS)}")
+    block = BLOCK_SET.match(set_name)
+    if set_name not in REAL_SETS and not block:
+        raise Stop(f"unknown set {set_name!r}: synthetic, one of {', '.join(REAL_SETS)}, or stage{{N}}-B{{k}}-validation|final")
     if not store.config().get("real_data"):
         raise Stop("Real Discovery posts stay off TypeSafe until the operator allows it "
                    "(config --real-data on, run only on the operator's say-so). Use --set synthetic.")
-    corpus = discovery / f"corpus-{set_name}.jsonl"
-    if not corpus.exists():
-        raise Stop(f"{corpus} is missing (Discovery private data is deleted by 26 Mar 2027)")
+    if block:
+        if block.group(3) == "final" and not thresholds(store.root.parent / "thresholds.json").get("frozen"):
+            raise Stop("the final set stays sealed until thresholds.json is frozen (freeze --note ...)")
+        corpus = store.root / "splits" / f"{set_name}.jsonl"
+        if not corpus.exists():
+            raise Stop(f"{corpus} is missing: run split --stage {block.group(1)} --block {block.group(2)} first")
+    else:
+        corpus = discovery / f"corpus-{set_name}.jsonl"
+        if not corpus.exists():
+            raise Stop(f"{corpus} is missing (Discovery private data is deleted by 26 Mar 2027)")
     return [{**r, "job": job_of(set_name, r)} for r in Store.rows(corpus)]
 
 
@@ -276,22 +353,189 @@ def run_set(set_name: str, client: Client, store: Store, model: str, spec: dict 
             discovery: Path = DISCOVERY, out: Callable[[str], None] = print) -> dict:
     rows = load_set(set_name, store, discovery)
     spec = spec or load_questions()
-    results, new, cached = [], 0, 0
+    results, new, cached, unavailable = [], 0, 0, 0
     for row in rows:
-        state = {"idea": row["idea"], "post": row["text"]}
-        response = client.ask(state, questions_for(row["job"], spec), model, label=f"{set_name}:{row['id']}")
+        questions = request_questions(row["job"], spec)
+        response = client.ask(state_of(row), questions, model, label=f"{set_name}:{row['id']}")
         cached, new = cached + response["cached"], new + (not response["cached"])
+        problems = answer_problems(response.get("answers"), questions)
+        unavailable += bool(problems)
         results.append({"id": row["id"], "job": row["job"], "model": response.get("model"),
-                        "answers": response.get("answers"), "usage": response.get("usage")})
+                        "questions": questions_hash(questions),
+                        "answers": None if problems else response.get("answers"), "usage": response.get("usage"),
+                        **({"unavailable": True, "reason": "; ".join(problems)} if problems else {})})
     store.write_atomic(store.root / f"answers-{set_name}.jsonl",
                        "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in results))
     models = sorted({r["model"] for r in results if r["model"]})
     summary = {"set": set_name, "posts": len(results), "new_calls": new, "cached": cached,
-               "models": models, "spent_usd": store.spent(), "ceiling_usd": CEILING}
+               "unavailable": unavailable, "models": models, "spent_usd": store.spent(), "ceiling_usd": CEILING}
     if any(m != model for m in models) and model != FALLBACK:
         summary["warning"] = f"asked for {model}, served {', '.join(models)}"
     out(json.dumps(summary, indent=1))
     return summary
+
+
+# ---------- split, repeat, rank, freeze ----------
+
+
+DEV_KEYS = ("stage2", "stagespam-demand", "stagespam-tool")
+
+
+def posts_table(discovery: Path = DISCOVERY) -> dict:
+    """post_id -> {conversation_id, author_id} from the harness's post table."""
+    path = discovery / "posts.csv"
+    if not path.exists():
+        return {}
+    with path.open(newline="", encoding="utf-8") as fh:
+        return {r["post_id"]: {"conversation_id": r.get("conversation_id") or "", "author_id": r.get("author_id") or ""}
+                for r in csv.DictReader(fh)}
+
+
+def group_of(post_id: str, conversation_id: str | None) -> str:
+    """Posts in one conversation stay together; a post with no conversation id is its own group."""
+    return f"c:{conversation_id}" if conversation_id else f"p:{post_id}"
+
+
+def half_of(group: str) -> str:
+    return "validation" if int(hashlib.sha256(group.encode("utf-8")).hexdigest()[:8], 16) % 2 == 0 else "final"
+
+
+def split(stage: int, block: str, store: Store, discovery: Path = DISCOVERY) -> dict:
+    """Seal a new block into validation and final, before any scoring. Drops posts whose post or
+    conversation is already in development (the 298 existing rows); reports author overlap."""
+    out_dir = store.root / "splits"
+    names = {h: out_dir / f"stage{stage}-{block}-{h}.jsonl" for h in ("validation", "final")}
+    manifest = out_dir / f"split-stage{stage}-{block}.json"
+    if any(p.exists() for p in [*names.values(), manifest]):
+        raise Stop(f"split for stage{stage}-{block} already exists; it is sealed")
+    corpus_path = discovery / f"corpus-stage{stage}-{block}.jsonl"
+    key_path = discovery / f"corpus-key-stage{stage}-{block}.json"
+    if not corpus_path.exists() or not key_path.exists():
+        raise Stop(f"build the block corpus first (harness corpus --stage {stage} --block {block})")
+    table = posts_table(discovery)
+    dev_posts, dev_convs, dev_authors = set(), set(), set()
+    for name in DEV_KEYS:
+        path = discovery / f"corpus-key-{name}.json"
+        if path.exists():
+            for v in json.loads(path.read_text(encoding="utf-8")).values():
+                meta = table.get(v["post_id"], {})
+                dev_posts.add(v["post_id"])
+                if meta.get("conversation_id"):
+                    dev_convs.add(meta["conversation_id"])
+                if meta.get("author_id"):
+                    dev_authors.add(meta["author_id"])
+    key = json.loads(key_path.read_text(encoding="utf-8"))
+    halves: dict[str, list] = {"validation": [], "final": []}
+    dropped = Counter()
+    authors_seen = 0
+    for row in Store.rows(corpus_path):
+        k = key[row["id"]]
+        meta = table.get(k["post_id"], {})
+        conv = k.get("conversation_id") or meta.get("conversation_id") or ""
+        author = k.get("author_id") or meta.get("author_id") or ""
+        if k["post_id"] in dev_posts:
+            dropped["post already in development"] += 1
+            continue
+        if conv and conv in dev_convs:
+            dropped["conversation already in development"] += 1
+            continue
+        authors_seen += bool(author and author in dev_authors)
+        g = group_of(k["post_id"], conv)
+        halves[half_of(g)].append({**row, "group": g})
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for h, rows in halves.items():
+        store.write_atomic(names[h], "".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows))
+    info = {"stage": stage, "block": block, "created": now_iso(), "rule": "sha256(group) % 2: 0 validation, 1 final",
+            "validation": len(halves["validation"]), "final": len(halves["final"]),
+            "dropped": dict(dropped), "authors_also_in_development": authors_seen,
+            "groups": {h: len({r["group"] for r in rows}) for h, rows in halves.items()}}
+    store.write_atomic(manifest, json.dumps(info, indent=1) + "\n")
+    return info
+
+
+def repeat(set_name: str, client: Client, store: Store, model: str, n: int = 10, times: int = 3,
+           spec: dict | None = None, discovery: Path = DISCOVERY) -> dict:
+    """Fresh (uncached) re-asks of a fixed subset: does Jev give the same answers twice?"""
+    rows = sorted(load_set(set_name, store, discovery), key=lambda r: hashlib.sha256(r["id"].encode()).hexdigest())[:n]
+    spec = spec or load_questions()
+    out = store.root / f"repeats-{set_name}.jsonl"
+    for row in rows:
+        questions = request_questions(row["job"], spec)
+        for t in range(times):
+            response = client.ask(state_of(row), questions, model, label=f"repeat:{set_name}:{row['id']}:{t}", fresh=True)
+            store.append(out, {"id": row["id"], "try": t, "model": response.get("model"),
+                               "questions": questions_hash(questions), "answers": response.get("answers")})
+    return {"set": set_name, "posts": len(rows), "times": times, "file": out.name, "spent_usd": store.spent()}
+
+
+def rank(set_name: str, client: Client, store: Store, model: str, discovery: Path = DISCOVERY) -> dict:
+    """One Choice per idea over its posts: which would you most want to join? (Worth-joining sets, 2-255 posts.)"""
+    rows = load_set(set_name, store, discovery)
+    by_idea: dict[str, list] = {}
+    for r in rows:
+        by_idea.setdefault(r["idea"], []).append(r)
+    results = {}
+    for idea, posts in sorted(by_idea.items()):
+        if not 2 <= len(posts) <= 255:
+            results[idea] = {"skipped": f"{len(posts)} posts"}
+            continue
+        # Asked in both candidate orders and averaged: order changed 3-11% of Jev's picks (Li et al.).
+        runs = []
+        for order in (posts, list(reversed(posts))):
+            # a list, not a dict: the cache key sorts dict keys, which would make both orders one request
+            state = {"idea": idea, "candidates": [{"id": p["id"], **{k: v for k, v in state_of(p).items() if k != "idea"}}
+                                                  for p in order]}
+            question = {"best": {"type": "choice",
+                                 "instructions": "Which post in `candidates` would you most want to join with a specific or witty reply, for `idea`?",
+                                 "criteria": {p["id"]: None for p in order}}}
+            response = client.ask(state, question, model, label=f"rank:{set_name}:{idea[:30]}")
+            runs.append(((response.get("answers") or {}).get("best") or {}).get("probabilities") or {})
+        ids = [p["id"] for p in posts]
+        averaged = {i: round(sum(r.get(i, 0.0) for r in runs) / len(runs), 4) for i in ids}
+        top = sorted(ids, key=lambda i: -averaged[i])
+        results[idea] = {"probabilities": averaged, "top3": top[:3],
+                         "orders_agree_on_best": len({max(r, key=r.get) for r in runs if r}) == 1}
+    store.write_atomic(store.root / f"ranks-{set_name}.json", json.dumps(results, indent=1, ensure_ascii=False) + "\n")
+    return {"set": set_name, "ideas": len(results), "spent_usd": store.spent()}
+
+
+def reworded(set_name: str, client: Client, store: Store, model: str, n: int = 30,
+             spec: dict | None = None, alt_path: Path | None = None, discovery: Path = DISCOVERY) -> dict:
+    """Rewording check: a second wording of relevant, real and useful (questions-reworded.json) on a fixed
+    subset. Reworded rubrics moved Jev more than repeats did (Li et al.), so report how often good flips."""
+    spec = spec or load_questions()
+    alt = json.loads((alt_path or HERE / "questions-reworded.json").read_text(encoding="utf-8"))
+    rows = sorted(load_set(set_name, store, discovery), key=lambda r: hashlib.sha256(r["id"].encode()).hexdigest())[:n]
+    flips, compared, out = 0, 0, []
+    for row in rows:
+        base = questions_for(row["job"], spec)
+        swapped = {**base, **{k: v for k, v in alt["shared"].items() if k in base}}
+        if "useful" in alt and row["job"] in alt["useful"]:
+            swapped["useful"] = alt["useful"][row["job"]]
+        a = client.ask(state_of(row), base, model, label=f"reword-base:{set_name}:{row['id']}").get("answers")
+        b = client.ask(state_of(row), swapped, model, label=f"reword-alt:{set_name}:{row['id']}").get("answers")
+        good = [None if not x else all(level(x.get(k)) == v for k, v in (("relevant", 2), ("real", 2)))
+                and (level(x.get("useful")) or 0) >= 1 for x in (a, b)]
+        if None not in good:
+            compared += 1
+            flips += good[0] != good[1]
+        out.append({"id": row["id"], "good_base": good[0], "good_reworded": good[1]})
+    store.write_atomic(store.root / f"reworded-{set_name}.jsonl", "".join(json.dumps(r) + "\n" for r in out))
+    return {"set": set_name, "posts": len(rows), "compared": compared, "flips": flips,
+            "flip_pct": round(100 * flips / compared, 1) if compared else None, "spent_usd": store.spent()}
+
+
+def freeze(note: str, path: Path | None = None) -> dict:
+    """Record that the rubric and cut-offs are frozen: unseals the final sets. One-way."""
+    path = path or HERE / "thresholds.json"
+    data = thresholds(path)
+    if data.get("frozen"):
+        raise Stop(f"already frozen on {data.get('frozen_at')}")
+    spec = load_questions()
+    data.update(frozen=True, frozen_at=now_iso(), note=note,
+                questions={job: questions_hash(request_questions(job, spec)) for job in spec["useful"]})
+    path.write_text(json.dumps(data, indent=1) + "\n", encoding="utf-8")
+    return data
 
 
 # ---------- compare ----------
@@ -422,9 +666,21 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("keys")
     sub.add_parser("smoke")
     sub.add_parser("spend")
-    for name in ("run", "compare"):
+    for name in ("run", "compare", "rank"):
         p = sub.add_parser(name)
         p.add_argument("--set", required=True, dest="set_name")
+    p = sub.add_parser("reworded")
+    p.add_argument("--set", required=True, dest="set_name")
+    p.add_argument("--posts", type=int, default=30)
+    p = sub.add_parser("repeat")
+    p.add_argument("--set", required=True, dest="set_name")
+    p.add_argument("--posts", type=int, default=10)
+    p.add_argument("--times", type=int, default=3)
+    p = sub.add_parser("split")
+    p.add_argument("--stage", type=int, required=True, choices=(1, 2, 3))
+    p.add_argument("--block", required=True)
+    p = sub.add_parser("freeze")
+    p.add_argument("--note", required=True)
     p = sub.add_parser("config")
     p.add_argument("--real-data", choices=("on", "off"))
     p.add_argument("--model")
@@ -451,6 +707,17 @@ def main(argv: list[str] | None = None) -> int:
             run_set(args.set_name, Client(store), store, store.config().get("model", PINNED))
         elif args.command == "compare":
             print(json.dumps(compare_set(args.set_name, store), indent=1))
+        elif args.command == "split":
+            print(json.dumps(split(args.stage, args.block, store), indent=1))
+        elif args.command == "repeat":
+            print(json.dumps(repeat(args.set_name, Client(store), store, store.config().get("model", PINNED),
+                                    args.posts, args.times), indent=1))
+        elif args.command == "reworded":
+            print(json.dumps(reworded(args.set_name, Client(store), store, store.config().get("model", PINNED), args.posts), indent=1))
+        elif args.command == "rank":
+            print(json.dumps(rank(args.set_name, Client(store), store, store.config().get("model", PINNED)), indent=1))
+        elif args.command == "freeze":
+            print(json.dumps(freeze(args.note), indent=1))
     except (Stop, JevError) as exc:
         print(f"stopped: {exc}", file=sys.stderr)
         return 2

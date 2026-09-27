@@ -1,0 +1,7 @@
+{
+ "_note": "Frozen cut-offs for the Jev comparison, kept with questions.json (article 2). Set on validation only; `jev.py freeze` records the date and question hashes and unseals the final sets. Never edit after freezing.",
+ "frozen": false,
+ "good_rule": "p_good = P(relevant=2) x P(real=2) x P(useful>=1); good if p_good >= 0.5. The most-probable-level rule is reported alongside.",
+ "coverage_threshold": null,
+ "coverage_threshold_note": "Chosen on validation from the coverage-against-agreement curve, then applied once to final."
+}

@@ -81,7 +81,7 @@ class PanelTests(Base):
         self.assertIn("t <\\/script> x", page)
         self.assertNotIn('"votes"', page)
         self.assertNotIn("why_chosen", page)
-        manifest = json.loads((self.private / "label-sample.json").read_text(encoding="utf-8"))
+        manifest = json.loads((self.private / f"label-sample-{labelling.sample_hash(sample)}.json").read_text(encoding="utf-8"))
         self.assertEqual(len(manifest["posts"]), 9)
 
     def test_grok_preamble_on_first_line_is_parsed(self) -> None:
@@ -109,3 +109,24 @@ class PanelTests(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NoOverwriteTests(Base):
+    def test_page_and_labels_are_never_overwritten(self) -> None:
+        posts = [{"id": f"p{i}", "set": "s", "idea": "i", "text": "t", "job": "worth-joining", "votes": {},
+                  "why_chosen": "disputed", "replies": 3, "age_hours": 2.5} for i in range(3)]
+        page = labelling.write_page(posts, self.private).read_text(encoding="utf-8")
+        self.assertIn('"replies": 3', page)
+        self.assertIn(labelling.QUESTIONS["worth-joining"], page)
+        with self.assertRaises(SystemExit):
+            labelling.write_page(posts, self.private)
+        labels = Path(self.tmp.name) / "labels.json"
+        labels.write_text(json.dumps({"sample": labelling.sample_hash(posts),
+                                      "labels": [{"id": "p0", "label": "reply", "why": ""}]}), encoding="utf-8")
+        self.assertEqual(labelling.ingest_labels(labels, self.private)["answered"], 1)
+        with self.assertRaises(SystemExit):
+            labelling.ingest_labels(labels, self.private)
+
+    def test_operator_never_samples_the_final_set(self) -> None:
+        with self.assertRaises(SystemExit):
+            labelling.panel_typed(["stage1-B3-final"], self.private)
