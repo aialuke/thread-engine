@@ -144,6 +144,73 @@ The steps below run in order. Every command has a test, and nothing reads from X
 6. **Compare:** `raters.py compare` on validation. Choose the cut-off, then `jev.py freeze --note …`.
 7. **Final, once:** Jev and the LLM raters on the final sets, `raters.py compare`, and the write-up. The write-up is committed as totals, with no post text.
 
+## Experiment 4: the B4 pull, a query-design test (written before any read, 28 Sep 2026)
+
+**Question:** do the five product lessons from B3 ([`../jev-build-time-evaluation-2026-09-27.md`](../jev-build-time-evaluation-2026-09-27.md#tests-for-the-next-pull)) hold on a fresh pull? Each arm runs against the current setup in the same window. Directional only, with no pass or fail.
+
+**Same instrument as Experiment 3:**
+- The raters are Jev `jev-1.13.0`, Codex `gpt-5.6-sol`, Claude Opus 5.5 and Grok `grok-4.5`, plus the operator optionally.
+- They get the same `questions.json` (hashes unchanged, so the B3 freeze and its 0.8 cut-off still hold), the same `raters.py brief`, and the same validator.
+- "Good" is `p_good ≥ 0.5`, read by the Codex/Claude/Grok strict majority, except in arm 5.
+- `jev.py split` seals each stage as before. Both halves are rated, and they are reported pooled with each half alongside.
+
+**Arms (all K calls sort by recency, 10 posts, in one pinned block, B4):**
+
+| # | Arm | Control, same window | Cells |
+|---|---|---|---|
+| 1 | Each K query with ` -has:links` added (source `Knl-recency`) | The same query, plain (`K-recency`) | Demand: `demand-tech-1`, `-tech-2`, `-comedy-1b`, `-comedy-2b`. Tool research: `tr-tech-1`, `-tech-2`, `-tech-3`, `tr-comedy-2`. 2 queries each. `Kspam-recency` runs as a reference |
+| 2 | Worth-joining posts ≤1 h and ≤2 h old at read | The full 6 h read | The 4 current Worth-joining cards. Under recency, a 2 h window returns exactly the ≤2 h slice of the 6 h call, so this is a cut on the 6 h read at no cost. The relevancy-sort version (2 h against 6 h) is dropped to fit the budget (operator, 28 Sep) |
+| 3 | Replies rated with the post they reply to (`parent`) in the packet | The same replies rated without it | Up to 120 replies from all three stages, the first by `sha256(post id)`. The parents are fetched after the pull with one `GET /2/tweets` per 100 (`harness.py parents`), so the search calls stay identical |
+| 4 | New cards `wj-comedy-1b` and `wj-tech-2b` | `wj-comedy-1` and `wj-tech-2`, same window | The idea text is unchanged; only the queries change (below) |
+| 5 | Three-question rule: type `genuine` (most probable) AND `outside_domain` < 0.5 AND `reply_worthy` ≥ 0.5 | Current rule, `p_good ≥ 0.5` | Every B4 post, from the same answers; no new calls |
+
+`tr-comedy-1` (CapCut) stays out, as in B3 (Claude Code took its place).
+
+**Arm 4 wording.** On B3, off-domain posts (panel majority on `outside_domain`) were 7 and 8 of 10 per query for `wj-comedy-1`, and 5 and 4 of 10 for `wj-tech-2`. Each fix targets what matched:
+
+| Card | Query | What went wrong on B3 | New query |
+|---|---|---|---|
+| `wj-comedy-1b` | v1 | "stand up" matched "stand up for" in politics | `("stand-up comedy" OR "standup comedy" OR "comedy special" OR "open mic" OR "tight five" OR comedian OR satire OR satirical) -is:retweet -is:reply lang:en min_replies:5` |
+| `wj-comedy-1b` | v2 | "bit" matched "a bit"; "hot take" matched sport and crypto | `(comedian OR comic OR "stand-up" OR standup OR satirist) (joke OR bit OR set OR crowd OR heckler OR special) -is:retweet -is:reply lang:en min_replies:10 min_likes:50` |
+| `wj-tech-2b` | v1 | "new model" matched cars, fashion and characters; "just dropped" matched spam | `("just released" OR "just dropped" OR "now available" OR "new model") ("AI model" OR LLM OR "open weights" OR "open source model" OR benchmark OR API) -is:retweet -is:reply lang:en` |
+| `wj-tech-2b` | v2 | "Grok" matched replies that mention @grok | `(released OR launched OR announces OR announced) (GPT OR Claude OR Gemini OR Grok OR Llama OR Qwen OR DeepSeek) (model OR AI) -@grok -is:retweet -is:reply lang:en` |
+
+`-is:reply` joins both tech queries, as on every other Worth-joining card (a B3 lesson). The filters (`min_replies:`, `min_likes:`) stay as each original had them, so wording is the only other change. A Codex blind review before `config --refreeze` may change the wording once, and any change is recorded here before the pull.
+
+**Measures, with what B3 suggests (a prediction, not a bar):**
+
+| Arm | Measures | B3 suggests |
+|---|---|---|
+| 1 | Per query pair: posts returned, good rate, spam share (panel type), unique good posts, good posts only the plain query found, good per estimated $ | Knl's good rate is higher (B3: 29% of posts without a link good, 16% with), and it misses about 20% of the good posts |
+| 2 | Good rate, and the share of all good posts, by age at read: ≤1 h, 1–2 h, 2–6 h | A ≤2 h cut keeps at least 90% of good posts and drops at least 30% of posts |
+| 3 | Per rater, with and without the parent: `text_decidable` yes-rate, good-or-not flips, the panel's dispute rate (not unanimous), Jev's agreement with the panel | Disputes fall and `text_decidable` rises |
+| 4 | New card against old: `outside_domain` rate (panel majority), good rate, unique good posts, posts returned | Off-domain falls to at most 30% for `wj-comedy-1b` and at most 20% for `wj-tech-2b` |
+| 5 | Share good under each rule, per job; LLM pairwise agreement and κ per rule; Jev's agreement with the panel per rule; the posts where the rules disagree (count and panel type); the operator's call on those posts if labelled | The three-question rule has higher LLM κ, and Jev's gap on Worth joining narrows |
+
+- **Side measure:** the frozen 0.8 cut-off on B4, a second out-of-sample read of B3's 92.6%.
+- **Arm 5 caveat:** for Tool research, "reply-worthy" fits badly, because that job looks for evidence, not leads. It is reported, flagged.
+- **Circularity:** B3 derived arms 3 and 5 from these raters' diagnostics. Only the operator's optional labels, on up to 40 posts where the two rules disagree, are independent of them.
+
+**Money:**
+- **X API:** US$3.00 estimated. That is 48 search calls (US$2.40) and ≤120 parent posts (US$0.60).
+- **The limit:** raised to US$8.70 of cumulative estimate (operator, 28 Sep). US$5.26 was used before B4.
+- **Expected bill:** X billed 55–60% of the estimate before (about US$1.65–1.80, or A$2.35–2.55 at 0.703). The console reads AUD and is converted at the ECB rate before any comparison.
+- **Other raters:** Grok about US$2.3 as a rater. Jev under US$0.10, inside its US$1 ceiling. Codex and Claude run on subscriptions.
+- **Not run:** the Worth-joining re-read.
+
+**Run order:**
+1. **Checks:** `harness.py status`, and the console before (`console --before <AUD>`).
+2. **Freeze and pin:** `config --refreeze`, then `config --pin-block B4`.
+3. **Pull, one sitting, outside 19:30–20:30 Brisbane:**
+   1. `stage1 --source K-recency` for `wj-tech-1`, `wj-tech-2`, `wj-tech-2b`, `wj-comedy-1`, `wj-comedy-1b` and `wj-comedy-2`.
+   2. `stage2 --source K-recency` and `--source Knl-recency` for the four Demand ideas.
+   3. `stage3 --source K-recency`, `--source Knl-recency` and `--source Kspam-recency` for the four tools.
+4. **Build and seal:** `corpus --stage N --block B4` and `jev.py split` for each stage. Then `harness.py manifest --block B4` and `harness.py parents --block B4`, and `jev.py parent-set` for each stage and half.
+5. **Rate** every set and each `-parent` set with all four raters. Claude subagents return their JSON lines in their final reply; `extract_subagent.py` collects them before `raters.py ingest`.
+6. **Console after,** then `arms.py --block B4`, and a write-up of totals and rates only, with no post text.
+
+The daily snapshot job stays paused (until 11 Oct) and untouched.
+
 ## Sources
 
 - **TypeSafe docs and official posts:** docs.typesafe.ai and typesafe.ai/blog.
