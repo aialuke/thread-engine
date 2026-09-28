@@ -11,7 +11,7 @@ argument-hint: "<link to the first post>"
 
 1. Take the root id from the link (the number after `/status/`).
 2. Read the live thread: run `python3 scripts/x_api.py thread <root id>`. It returns the root and the account's own thread cards in order. Note each one's id, time, text and media. Save the output to `ledger/raw/<root id>-posted.txt` (it holds only the account's own posts).
-3. Match the queue row: the row with `status: approved` or `drafted` whose draft cards match the live text best. If unsure, ask the operator which slug. Read that row's `format`, `lane`, `experiment`, `arm`, `hypothesis`.
+3. Match the queue row: the row with `status: drafted` whose draft cards match the live text best. If unsure, ask the operator which slug. Read that row's `format`, `lane`, `experiment`, `arm`, `hypothesis`.
 4. Compare every live card with its draft card. Put each difference in exactly one class:
    - `preference` — wording, length, order, emphasis, a changed title. Nothing factual changed.
    - `correction` — a fact fixed by the operator.

@@ -1,6 +1,6 @@
 # <slug>
 
-<!-- hook: scene, wasted spend, N settings, "nobody was going to tell you" -->
+<!-- hook: beat order and length from .claude/skills/hidden-settings/SKILL.md (result first, under 600 characters) -->
 
 ---
 

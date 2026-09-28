@@ -43,4 +43,4 @@ Replies bring most of the account's reach. They work toward this promise when th
 
 ## Before 24 Sep
 
-Ledger posts from before this date were labelled under the old promise ("useful tech that saves an Australian creator or device owner money or time"). They get relabelled against the tests above once `loop.py set-lane` exists.
+Ledger posts from before this date were labelled under the old promise ("useful tech that saves an Australian creator or device owner money or time"). The weekly review relabels them against the tests above with `loop.py set-lane`.

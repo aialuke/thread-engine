@@ -1,0 +1,98 @@
+diff --git a/.claude/skills/posted/SKILL.md b/.claude/skills/posted/SKILL.md
+index 7fb0b15..c040bd0 100644
+--- a/.claude/skills/posted/SKILL.md
++++ b/.claude/skills/posted/SKILL.md
+@@ -11,7 +11,7 @@ argument-hint: "<link to the first post>"
+ 
+ 1. Take the root id from the link (the number after `/status/`).
+ 2. Read the live thread: run `python3 scripts/x_api.py thread <root id>`. It returns the root and the account's own thread cards in order. Note each one's id, time, text and media. Save the output to `ledger/raw/<root id>-posted.txt` (it holds only the account's own posts).
+-3. Match the queue row: the row with `status: approved` or `drafted` whose draft cards match the live text best. If unsure, ask the operator which slug. Read that row's `format`, `lane`, `experiment`, `arm`, `hypothesis`.
++3. Match the queue row: the row with `status: drafted` whose draft cards match the live text best. If unsure, ask the operator which slug. Read that row's `format`, `lane`, `experiment`, `arm`, `hypothesis`.
+ 4. Compare every live card with its draft card. Put each difference in exactly one class:
+    - `preference` — wording, length, order, emphasis, a changed title. Nothing factual changed.
+    - `correction` — a fact fixed by the operator.
+diff --git a/reference/audience.md b/reference/audience.md
+index c44fb07..fcdf9af 100644
+--- a/reference/audience.md
++++ b/reference/audience.md
+@@ -43,4 +43,4 @@ Replies bring most of the account's reach. They work toward this promise when th
+ 
+ ## Before 24 Sep
+ 
+-Ledger posts from before this date were labelled under the old promise ("useful tech that saves an Australian creator or device owner money or time"). They get relabelled against the tests above once `loop.py set-lane` exists.
++Ledger posts from before this date were labelled under the old promise ("useful tech that saves an Australian creator or device owner money or time"). The weekly review relabels them against the tests above with `loop.py set-lane`.
+diff --git a/CLAUDE.md b/CLAUDE.md
+index c450f47..4ef272a 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -11,5 +11,5 @@
+ - Drafts are the product. Do not post. Do not write to X.
+ - Only the operator creates APPROVED via /approve.
+ - Do not hand-edit loop/state.json, ledger/*.json, experiments.md, or learnings.md; use scripts/loop.py.
+-- X API keys live in macOS Keychain and are not available here. Skip snapshot/metrics that need them. Use committed ledger/ and reviews/ instead.
++- In a cloud session the X API keys (macOS Keychain) are not available: skip snapshot/metrics that need them and use committed ledger/ and reviews/ instead.
+ - Start non-trivial work in Plan mode.
+\ No newline at end of file
+diff --git a/drafts/_template/thread.md b/drafts/_template/thread.md
+index 2aee6b0..5ec0bfa 100644
+--- a/drafts/_template/thread.md
++++ b/drafts/_template/thread.md
+@@ -1,6 +1,6 @@
+ # <slug>
+ 
+-<!-- hook: scene, wasted spend, N settings, "nobody was going to tell you" -->
++<!-- hook: beat order and length from .claude/skills/hidden-settings/SKILL.md (result first, under 600 characters) -->
+ 
+ ---
+ 
+diff --git a/.claude/skills/hidden-settings/examples.md b/.claude/skills/hidden-settings/examples.md
+index 0a04058..78de7de 100644
+--- a/.claude/skills/hidden-settings/examples.md
++++ b/.claude/skills/hidden-settings/examples.md
+@@ -4,7 +4,7 @@ Beat-check. A new settings draft takes its beat order from `SKILL.md`. Posted tr
+ 
+ Sourced dollars below are from the shipped gold. A new draft omits a figure until it has a source.
+ 
+-MacBook battery shipped gold is `examples/macbook-battery.md` (conversation `2102172499031253210`). Where snap, thesis, or the reply CTA differ from A and B, follow `SKILL.md`. Every "Reply with…" and "Save this before…" line in these examples is now refused by the gate (engagement solicitation); write the closing question as a real question instead.
++MacBook battery shipped gold is `examples/macbook-battery.md` (conversation `2102172499031253210`). Where snap, thesis, or the reply CTA differ from A and B, follow `SKILL.md`. The shipped transcripts in `examples/` close with "Reply with…" or "Save this before…", which the gate refuses as engagement solicitation; the closers below show the real-question form.
+ 
+ iPhone 18 Pro vs 17 Pro shipped gold is `examples/iphone-18-pro-aperture.md` (conversation `2102272933087363155`). Comparison hook, difference card, and comparison closer: follow `.claude/skills/format-comparison/SKILL.md`. Settings drafts follow the A and B lists below: result, then neglect, then the remaining beats.
+ 
+@@ -38,7 +38,7 @@ Money villain: the extra speed tier.
+ ✓ Channel. Split bands. QoS. Firmware. DNS. Ghost devices. Band steering. IoT on 2.4.
+ Same gateway. Same plan. Different evenings.
+ Ten minutes. No speed-tier upgrade.
+-Reply with the gateway model (xFi, XB7, XB8, sticker name) and which of the 8 the menu has.
++Which gateway is yours: xFi, XB7 or XB8? The menus differ, and 3 of these 8 matter most on each.
+ 
+ ## B) iPhone Camera — 7 settings
+ 
+@@ -69,4 +69,4 @@ Shipped gold: `examples/iphone-camera-7-settings/` (conversation `21019266391984
+ ✓ Grid + Level. AE/AF Lock. Photographic Style. Resolution. 28/35mm default. Volume shutter. Preserve Settings.
+ Same phone. Same lens. Same wedding. Different photos.
+ Four minutes. No course. No new phone.
+-Reply with the model — 13, 15, 16 Pro, 17 — and which of these 7 exist on it.
++Which iPhone is yours? The Camera menus differ, and 3 of these 7 matter most on each.
+diff --git a/.claude/skills/next/SKILL.md b/.claude/skills/next/SKILL.md
+index 1c93aaa..c2d13eb 100644
+--- a/.claude/skills/next/SKILL.md
++++ b/.claude/skills/next/SKILL.md
+@@ -16,7 +16,7 @@ The operator's main command, in Grok or Claude Code. Speak plainly. The operator
+ 1. Run `python3 scripts/snapshot.py`. Run it every time: a repeat on the same day costs nothing and records nothing twice.
+ 2. Run `python3 scripts/loop.py status`.
+ 3. Read the last few lines of `ledger/runs.log`, not only the last: step 1's fresh run can hide an earlier failure. If any line since the previous `snapshot ok` before it says `snapshot failed stage=`, say that first, in one sentence: recording failed at that stage, which is not the Mac or the X API credits; if a later run says `snapshot ok`, that run filled in what was missed (`loop.py` skips snapshots it already has). If the last run says `snapshot failed error=`, or the last `snapshot ok` is more than 30 hours old, say that first, in one sentence, with the likely cause: the Mac was off or locked, or the X API credits ran out.
+-4. Tell the operator in two or three lines what changed: new reads, follower change, anything marked non-organic, any experiment status change. Add one line from the "Original Content Rewards" block in `ledger/SUMMARY.md`: verified followers against 500, and the last reading of X's eligibility screen.
++4. Tell the operator briefly what changed: new reads, follower change, anything marked non-organic, any experiment status change. Add one line from the "Original Content Rewards" block in `ledger/SUMMARY.md`: verified followers against 500, and the last reading of X's eligibility screen.
+ 
+ ## 2. Weekly work, when `review.review_due` is true
+ 
+diff --git a/.claude/skills/results/SKILL.md b/.claude/skills/results/SKILL.md
+index 33ad3d6..233ff85 100644
+--- a/.claude/skills/results/SKILL.md
++++ b/.claude/skills/results/SKILL.md
+@@ -32,4 +32,4 @@ Plain English. No JSON, no code in what the operator reads. Say "not enough data
+    - **Profile.** Run `python3 scripts/x_api.py me`. Say whether the bio and the pinned post match `reference/audience.md`. The pin should be the newest PAID → FREE post that's live, sourced and unboosted (operator, 24 Sep 2026); until one exists, nothing boosted. If not, suggest a one-sentence bio and a pin with no link or a well-known link (algorithm fact A14).
+    - **PAID → FREE runway.** Count the `paid-free-*` rows still `queued` in `queue/topics.yaml`. When two or fewer remain, say so and ask whether the series ends, repeats with singles, or takes a new roster.
+ 6. Run `python3 scripts/loop.py mark-reviewed`, then `python3 scripts/loop.py commit-data --message "weekly review YYYY-Www"`.
+-7. Tell the operator the three things that matter most, in three sentences, and where the full review is.
++7. Tell the operator what matters most, in plain sentences, and where the full review is.

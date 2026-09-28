@@ -11,5 +11,5 @@
 - Drafts are the product. Do not post. Do not write to X.
 - Only the operator creates APPROVED via /approve.
 - Do not hand-edit loop/state.json, ledger/*.json, experiments.md, or learnings.md; use scripts/loop.py.
-- X API keys live in macOS Keychain and are not available here. Skip snapshot/metrics that need them. Use committed ledger/ and reviews/ instead.
+- In a cloud session the X API keys (macOS Keychain) are not available: skip snapshot/metrics that need them and use committed ledger/ and reviews/ instead.
 - Start non-trivial work in Plan mode.

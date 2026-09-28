@@ -4,7 +4,7 @@ Beat-check. A new settings draft takes its beat order from `SKILL.md`. Posted tr
 
 Sourced dollars below are from the shipped gold. A new draft omits a figure until it has a source.
 
-MacBook battery shipped gold is `examples/macbook-battery.md` (conversation `2102172499031253210`). Where snap, thesis, or the reply CTA differ from A and B, follow `SKILL.md`. Every "Reply with…" and "Save this before…" line in these examples is now refused by the gate (engagement solicitation); write the closing question as a real question instead.
+MacBook battery shipped gold is `examples/macbook-battery.md` (conversation `2102172499031253210`). Where snap, thesis, or the reply CTA differ from A and B, follow `SKILL.md`. The shipped transcripts in `examples/` close with "Reply with…" or "Save this before…", which the gate refuses as engagement solicitation; the closers below show the real-question form.
 
 iPhone 18 Pro vs 17 Pro shipped gold is `examples/iphone-18-pro-aperture.md` (conversation `2102272933087363155`). Comparison hook, difference card, and comparison closer: follow `.claude/skills/format-comparison/SKILL.md`. Settings drafts follow the A and B lists below: result, then neglect, then the remaining beats.
 
@@ -38,7 +38,7 @@ Money villain: the extra speed tier.
 ✓ Channel. Split bands. QoS. Firmware. DNS. Ghost devices. Band steering. IoT on 2.4.
 Same gateway. Same plan. Different evenings.
 Ten minutes. No speed-tier upgrade.
-Reply with the gateway model (xFi, XB7, XB8, sticker name) and which of the 8 the menu has.
+Which gateway is yours: xFi, XB7 or XB8? The menus differ, and 3 of these 8 matter most on each.
 
 ## B) iPhone Camera — 7 settings
 
@@ -69,4 +69,4 @@ Shipped gold: `examples/iphone-camera-7-settings/` (conversation `21019266391984
 ✓ Grid + Level. AE/AF Lock. Photographic Style. Resolution. 28/35mm default. Volume shutter. Preserve Settings.
 Same phone. Same lens. Same wedding. Different photos.
 Four minutes. No course. No new phone.
-Reply with the model — 13, 15, 16 Pro, 17 — and which of these 7 exist on it.
+Which iPhone is yours? The Camera menus differ, and 3 of these 7 matter most on each.
