@@ -26,21 +26,21 @@ Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snap
 Needs 500 verified followers and 500,000 verified Home Timeline impressions on originals in 90 days (no replies, no boosted reach).
 
 - X's eligibility screen, read 2026-09-24: 26 verified followers, 337 qualified impressions.
-- Verified followers from the daily read: 23 of 500.
+- Verified followers from the daily read: 24 of 500.
 - Organic impressions on originals and quotes, last 90 days: 2,654. This counts every viewer on every surface, so it is an upper bound; X counts only Premium viewers on the Home feed.
 - Share that qualified at the last screen reading: 12% (the two readings may be from different days).
 
 ## Account
 
-Followers: 36 on 2026-09-27. In the 7 days to then: 4 new, 4 lost; 1 of the new credited to a post or reply they engaged with (a lower bound).
+Followers: 37 on 2026-09-28. In the 7 days to then: 5 new, 4 lost; 1 of the new credited to a post or reply they engaged with (a lower bound).
 
-Follows per profile visit, items from those 7 days: 4 / 67.
+Follows per profile visit, items from those 7 days: 5 / 66.
 
 | Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 | New follows (X export) |
 |---|---:|---:|---:|---:|---:|---:|
-| original | 11 | 2120 | 21 | 33 | 9.9 | 13 |
+| original | 10 | 1983 | 21 | 32 | 10.6 | 13 |
 | quote | 2 | 249 | 0 | 1 | 0.0 | 0 |
 | reply | 153 | 29004 | 42 | 119 | 1.4 | 4 |
-| thread card | 25 | 719 | 4 | 11 | 5.6 | 1 |
+| thread card | 17 | 499 | 3 | 11 | 6.0 | 1 |
 
-Top topics by organic impressions (X's own labels, a proxy): Politics (2635), Technology Business (2529), Technology (2501), Apple (1522), Pauline Hanson (1424).
+Top topics by organic impressions (X's own labels, a proxy): Politics (2635), Technology Business (2316), Technology (2288), Pauline Hanson (1424), Apple (1216).
