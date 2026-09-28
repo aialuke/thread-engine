@@ -13,7 +13,7 @@ Shared tone for every format. Format rules live in `.claude/skills/format-*/`. F
 
 ## What every post delivers
 
-The operator's own test, verdict, numbers, voice and lesson are the thing each post delivers. AI helps draft and the pipeline makes clips, but a generated clip or text is the evidence, never the product. X's rewards program makes a post ineligible if it "was created or posted using automated means" and doesn't define the phrase; posting stays manual, and the human judgement has to be visible in the post.
+Each post delivers the operator's own test, verdict, numbers, voice and lesson, with the human judgement visible in the post. AI drafts and the pipeline makes clips; a generated clip or text is evidence, never the product. The reason: X's rewards program makes a post ineligible if it "was created or posted using automated means".
 
 ## Texture
 
@@ -35,7 +35,7 @@ game changer · unlock · most people don't know · wait for it · 🚨🔥👇 
 
 X's rewards rules: "Do not solicit engagements: repeatedly instructing users to engage with posts, such as asking to like, reply, bookmark, follow, or repost." Breaking it can remove the account from the program.
 
-- Ask a real question ("Which TV is yours? The menus differ."), never an instruction ("Reply with your model", "Save this before…", "Drop it below", "Follow for more", "Like and repost").
+- Ask a real question ("Which TV is yours? The menus differ."), never an instruction ("Drop a hi", "Reply with your model", "Save this before…", "Drop it below", "Follow for more", "Like and repost").
 - The gate refuses these instructions (`scripts/post_thread.py`).
 
 ## Truth budget
@@ -60,15 +60,14 @@ Every figure is sourced this session: an official page, `PATHS.md` / `CLAIMS.md`
 ## Networking
 
 - Personal networking, yes: reply to a builder's progress post by naming the project and asking a real question.
-- Bare "👋", repeated lines and "drop a hi" posts, no.
-- An occasional connect post is allowed in the `other` lane, at most 1 in 15 originals, written for that moment and asked as a real question. "Drop a hi" and "drop it below" are instructions to engage, and the gate refuses them. The "Drop a hi" post brought 13 of the 19 follows on 18–24 Sep, so the loop watches whether those followers ever engage.
+- An occasional connect post is allowed in the `other` lane, at most 1 in 15 originals, written for that moment and asked as a real question. "Drop a hi" is an instruction to engage (Asking for engagement). The "Drop a hi" post brought 13 of the 19 follows on 18–24 Sep, so the loop watches whether those followers ever engage.
 
 ## Makers
 
 The people who make the free tools the account posts about (PAID → FREE, `.claude/skills/format-tool-swap/SKILL.md`).
 
 - Tag a free tool's organisation account, checked with `python3 scripts/x_api.py user <handle>` that session. Never tag a person, and never a premium vendor.
-- Never post the same shout-out twice, and never paste one line under several makers' posts (A13).
+- A shout-out is a reply, so the Replies no-repeat rule covers it: never one line under several makers' posts (A13).
 - One maker touch a day: a specific reply on a maker's post, a quote of their release, or the shout-out under a PAID → FREE post.
 - Repost only a maker's release post, never your own post and never someone's mega-list of alternatives. A repost with a caption is a quote.
 - Quote only a maker's news. Never quote a premium vendor (Adobe, Maxon, Streamlabs) to pick a fight.
