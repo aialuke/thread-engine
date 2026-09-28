@@ -1,9 +1,8 @@
 ---
 name: verify-settings
 description: >
-  Fact-check a draft against current official pages. Fail closed. Paths
-  mode writes PATHS.md; claims mode writes CLAIMS.md. Unconfirmed rows are
-  VERIFY.
+  Verify candidate or existing draft claims and changed Settings paths.
+  Writes PATHS.md or CLAIMS.md; unconfirmed rows stay VERIFY.
 when-to-use: >
   Use before a draft is marked ready, when a Settings path might have
   changed, or /verify-settings.
@@ -31,7 +30,7 @@ Mode: `paths` (default) checks menu paths into `PATHS.md`. `claims` checks every
 
 2. **Official docs.**
    Open the vendor page (Apple Support, manufacturer admin guide, ISP gateway help). Confirm control name, full path, models or OS versions. Date: `YYYY-MM-DD`.
-   Done: each kept row has a live official URL. Forums and memory are not sources.
+   Done: each kept row has a live official URL confirming the control name, full path and applicable models or OS versions. Forums and memory are not sources.
 
 3. **Write `drafts/<slug>/PATHS.md`.**
 
@@ -50,21 +49,25 @@ Mode: `paths` (default) checks menu paths into `PATHS.md`. `claims` checks every
    Done: every candidate is a row.
 
 4. **Gated controls.**
-   Pro-only, model-only, plan-only, firmware-only → say so in Notes. Thread body uses ⚠️ once (`/hidden-settings` emoji budget). `PATHS.md` names every gated row in prose.
-   Done: every gated row is labelled in Notes.
+   Pro-only, model-only, plan-only, firmware-only → say so in Notes. `PATHS.md` names every gated row in prose.
+   Done: every gated row is labelled in Notes and named in the required prose.
 
 5. **VERIFY.**
    Unconfirmed → Path `VERIFY`, Confidence `VERIFY`. Row stays. Card stays off the ready list.
    Done: no guessed menu in `PATHS.md` or in any card file.
 
 6. **Stop.**
-   Tick Verify boxes in `CHECKLIST.md` when that file exists. `PATHS.md` is the deliverable. Confidence `VERIFY` means the draft is not ready.
+   Tick only satisfied Verify boxes in `CHECKLIST.md` when that file exists. `PATHS.md` is the deliverable. Confidence `VERIFY` means the draft is not ready.
 
 
 ## Claims mode
 
-1. **List claims.** Every figure, price, free-tier statement, platform, spec, and "no watermark"-style promise in the cards. Each is one row.
+1. **List claims.** Inventory research candidates and the selected format's required verification rows. On rechecks, also cover every factual claim in existing cards: every figure, price, free-tier statement, platform, spec, and "no watermark"-style promise. Each is one row; leave unassigned `Card` cells blank.
 2. **Official source.** The vendor's own pricing, feature, spec or support page, opened this session. Reviews, forums, and memory are not sources.
+
+   "Tested" only when the operator says they did it.
+   **The operator's own run** (build-log and tool-verdict claims such as "the pipeline made this script in 4 minutes" or "Grok caught 3 bugs Codex missed", and an optional tool-swap test such as "opened a layered PSD in Photopea"): Source URL is `operator, <date>` plus the artifact that shows it, a screenshot in the draft's `images/` or a log file path. Vendor-stated or tested: `tested`. No artifact means the row is `VERIFY`.
+
 3. **Write `drafts/<slug>/CLAIMS.md`:**
 
    ```markdown
@@ -76,7 +79,5 @@ Mode: `paths` (default) checks menu paths into `PATHS.md`. `claims` checks every
    ```
 
    Confidence: `high` (the page states it), `medium` (the page states it for a narrower case; Notes says which), `VERIFY` (not found).
-   "Tested" only when the operator says they did it.
-   **The operator's own run** (build-log and tool-verdict claims such as "the pipeline made this script in 4 minutes" or "Grok caught 3 bugs Codex missed", and an optional tool-swap test such as "opened a layered PSD in Photopea"): Source URL is `operator, <date>` plus the artifact that shows it, a screenshot in the draft's `images/` or a log file path. Vendor-stated or tested: `tested`. No artifact means the row is `VERIFY`.
 4. **VERIFY.** Unconfirmed claims stay as `VERIFY` rows and come out of the cards. Never soften a claim to keep it.
-5. **Stop.** Tick the verify boxes in `CHECKLIST.md`.
+5. **Stop.** Done: every inventoried claim is accounted for in `CLAIMS.md`, with evidence and applicability recorded or an unresolved `VERIFY` row retained; no unsupported claim remains in cards. Tick only satisfied verify boxes in `CHECKLIST.md` when that file exists.
