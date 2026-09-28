@@ -12,3 +12,8 @@ loop/inbox/
 # X API raw responses and follower ids: other people's data, kept on this Mac only
 ledger/raw/api/
 loop/followers/
+
+# Jev referee: captured prompts can contain whatever the operator pasted.
+# Local policy may only tighten the committed thresholds.
+receipts/prompts/
+jev/thresholds.local.yaml

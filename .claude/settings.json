@@ -13,6 +13,7 @@
     "UserPromptSubmit": [
       {
         "hooks": [
+          { "type": "command", "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/jev_referee.py\"", "timeout": 8 },
           { "type": "command", "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/approve.py\"", "timeout": 20 }
         ]
       }
@@ -21,6 +22,12 @@
       {
         "hooks": [
           { "type": "command", "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/guard_approved.py\"", "timeout": 10 }
+        ]
+      },
+      {
+        "matcher": "spawn_subagent|Task|Agent|workflow|run_terminal_command|Bash|search_replace|Write|Edit|StrReplace",
+        "hooks": [
+          { "type": "command", "command": "python3 \"${CLAUDE_PROJECT_DIR:-.}/scripts/jev_referee.py\"", "timeout": 8 }
         ]
       }
     ]

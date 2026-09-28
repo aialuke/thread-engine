@@ -1,0 +1,45 @@
+# Numbers for the Jev referee. Question text lives in questions.json.
+# A local file, thresholds.local.yaml, may only tighten these.
+# mode may be set to active there when the operator says so.
+policy_version: 1
+model: jev-1.13.0
+mode: shadow
+timeout_seconds: 5
+git_timeout_seconds: 2
+tokens:
+  max_request: 64000
+  max_state_plus_longest_question: 32000
+  prefer_state: 8000
+  chars_per_token: 4
+  diff_line_cap: 400
+  max_file_read_bytes: 262144
+skip:
+  commit:
+    max_files: 1
+    max_lines: 20
+    message_prefixes:
+      - "fix:"
+      - "docs:"
+      - "chore:"
+  delete_dirs:
+    - node_modules
+    - .cache
+    - dist
+    - build
+    - coverage
+    - .next
+    - __pycache__
+delete_edit:
+  min_removed_feature_lines: 1
+  removed_over_added: 2
+forks:
+  spawn:
+    confidence_floor: 0.50
+    low_confidence_option: no_spawn
+  commit:
+    extra_deletion_ask: 0.70
+    needs_human_ask: 0.70
+    in_scope_floor: 0.50
+  delete:
+    unused_min: 0.85
+    choice_confidence_min: 0.80

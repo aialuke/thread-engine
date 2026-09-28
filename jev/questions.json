@@ -1,0 +1,59 @@
+{
+  "spawn": {
+    "route": {
+      "type": "choice",
+      "instructions": "Who should do this work?",
+      "criteria": {
+        "main_default": "The current agent does the work itself.",
+        "cheap_explore": "A cheap helper for lookup or boilerplate.",
+        "careful_plan": "A slower helper for design or multi-file work.",
+        "no_spawn": "Do not spawn a helper."
+      }
+    }
+  },
+  "commit": {
+    "in_scope": {
+      "type": "noul",
+      "instructions": "This diff matches the user's request and nothing important is missing.",
+      "criteria": {
+        "true": "The diff does what was asked and does not leave out a necessary part.",
+        "false": "The diff misses the request or leaves out something important."
+      }
+    },
+    "extra_deletion": {
+      "type": "noul",
+      "instructions": "This diff deletes or disables behaviour the user did not ask to remove.",
+      "criteria": {
+        "true": "Code or behaviour is removed or disabled without being asked.",
+        "false": "Removals are only what the user asked to remove, or there are none."
+      }
+    },
+    "needs_human": {
+      "type": "noul",
+      "instructions": "A person should look before this is committed.",
+      "criteria": {
+        "true": "A person should review this diff before it is committed.",
+        "false": "The diff is safe to commit without a person looking."
+      }
+    }
+  },
+  "delete": {
+    "disposition": {
+      "type": "choice",
+      "instructions": "What should happen to this file or code?",
+      "criteria": {
+        "keep": "Leave it in place.",
+        "delete": "Remove it.",
+        "ask_luke": "Ask Luke before removing it."
+      }
+    },
+    "unused": {
+      "type": "noul",
+      "instructions": "This is unused or the user asked to remove it.",
+      "criteria": {
+        "true": "Nothing still needs it, or the user asked for it to be removed.",
+        "false": "It is still used, or the user did not ask to remove it."
+      }
+    }
+  }
+}
