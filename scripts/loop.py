@@ -395,6 +395,36 @@ def cmd_due(repo: Repo, args) -> dict:
             "window_hours": [SNAPSHOT_MIN_H, SNAPSHOT_MAX_H]}
 
 
+def cmd_due_reads(repo: Repo, args) -> dict:
+    """The X reads the daily run should make now, and where each one moves the read cursors.
+
+    Not `due`, which lists ledger posts awaiting a snapshot. Writes nothing: record-activity moves the cursors.
+    The organic-metrics horizon is X's, so the caller passes it in (--horizon-days).
+    """
+    if args.backfill:
+        need(args.fetched_at and args.since, "--backfill needs --fetched-at and --since")
+        fetched = parse_time(args.fetched_at)
+        return {"stage": "backfill", "cursor": {"read48_until": iso(fetched - timedelta(hours=SNAPSHOT_MIN_H)),
+                                                "final_until": iso(parse_time(args.since))}}
+    need(args.horizon_days is not None, "--horizon-days is required: X's organic-metrics horizon in days")
+    # Whole seconds: iso() drops fractions, so a fractional clock would put the floor outside the horizon.
+    now = now_arg(args.now).replace(microsecond=0)
+    api = repo.state().get("api", {})
+    floor = now - timedelta(days=args.horizon_days)
+    read_from = max(parse_time(api["read48_until"]) if api.get("read48_until") else now - timedelta(hours=SNAPSHOT_MAX_H),
+                    floor)
+    read_to = now - timedelta(hours=SNAPSHOT_MIN_H)
+    final_from = max(parse_time(api["final_until"]) if api.get("final_until") else floor, floor)
+    final_to = now - timedelta(days=FINAL_MIN_DAYS)
+    # The 48h window is always returned: its cursor moves on even when there is nothing to fetch.
+    windows = [{"stage": "48h", "start": iso(read_from), "end": iso(read_to), "fetch": read_from < read_to,
+                "cursor": {"read48_until": iso(read_to)}}]
+    if final_from < final_to:
+        windows.append({"stage": "final", "start": iso(final_from), "end": iso(final_to), "fetch": True,
+                        "cursor": {"final_until": iso(final_to)}})
+    return {"now": iso(now), "windows": windows}
+
+
 def cmd_record_snapshot(repo: Repo, args) -> dict:
     state = repo.state()
     payload = read_json(Path(args.json))
@@ -1174,6 +1204,7 @@ COMMANDS = {
     "init": cmd_init,
     "record-post": cmd_record_post,
     "due": cmd_due,
+    "due-reads": cmd_due_reads,
     "record-snapshot": cmd_record_snapshot,
     "mark-missed": cmd_mark_missed,
     "set-repliers-complete": cmd_set_repliers_complete,
@@ -1198,7 +1229,7 @@ COMMANDS = {
     "status": cmd_status,
     "validate": cmd_validate,
 }
-READ_ONLY = {"due", "next-slot", "lane-share", "review-due", "status", "validate"}
+READ_ONLY = {"due", "due-reads", "next-slot", "lane-share", "review-due", "status", "validate"}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1213,6 +1244,11 @@ def build_parser() -> argparse.ArgumentParser:
         if name in {"record-post", "record-snapshot", "open-experiment", "record-activity",
                     "record-interactions", "record-followers"}:
             sp.add_argument("--json", required=True, help="payload file")
+        if name == "due-reads":
+            sp.add_argument("--horizon-days", type=float, help="how far back X still returns organic metrics")
+            sp.add_argument("--backfill", action="store_true", help="the cursors for a backfill file instead")
+            sp.add_argument("--fetched-at", help="with --backfill: when the file was fetched")
+            sp.add_argument("--since", help="with --backfill: the earliest time the file covers")
         if name == "set-reference":
             sp.add_argument("--status", required=True)
             sp.add_argument("--files", default="")

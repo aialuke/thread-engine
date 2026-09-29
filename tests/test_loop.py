@@ -353,6 +353,59 @@ class ApiData(LoopCase):
         self.assertIn("unknown organic", self.fails("record-activity", "--json", self.payload(
             {"stage": "48h", "observed_at": hours(40), "items": [self.item("9000000002", T0, shares=3)]})))
 
+    def due_reads(self, now: str, *extra: str) -> dict:
+        return self.ok("due-reads", "--horizon-days", "29", *extra, now=now)
+
+    def test_due_reads_first_run_returns_both_windows_with_their_cursors(self) -> None:
+        now = hours(24 * 10)
+        out = self.due_reads(now)
+        self.assertEqual(out["now"], now)
+        self.assertEqual(out["windows"], [
+            {"stage": "48h", "start": hours(24 * 10 - 60), "end": hours(24 * 10 - 36), "fetch": True,
+             "cursor": {"read48_until": hours(24 * 10 - 36)}},
+            {"stage": "final", "start": hours(24 * 10 - 24 * 29), "end": hours(24 * 10 - 24 * 26), "fetch": True,
+             "cursor": {"final_until": hours(24 * 10 - 24 * 26)}}])
+
+    def test_due_reads_resumes_from_the_saved_cursors(self) -> None:
+        self.activity("48h", hours(24 * 9), [], cursor={"read48_until": hours(24 * 9), "final_until": hours(-24 * 17)})
+        windows = self.due_reads(hours(24 * 10))["windows"]
+        self.assertEqual((windows[0]["start"], windows[1]["start"]), (hours(24 * 9), hours(-24 * 17)))
+
+    def test_due_reads_clamps_an_old_cursor_to_the_horizon(self) -> None:
+        self.activity("48h", hours(0), [], cursor={"read48_until": hours(-24 * 40), "final_until": hours(-24 * 40)})
+        windows = self.due_reads(hours(24 * 10))["windows"]
+        floor = hours(24 * 10 - 24 * 29)
+        self.assertEqual((windows[0]["start"], windows[1]["start"]), (floor, floor))
+
+    def test_due_reads_keeps_an_empty_48h_window_and_drops_an_empty_final_window(self) -> None:
+        now = hours(24 * 10)
+        self.activity("48h", now, [], cursor={"read48_until": hours(24 * 10 - 36), "final_until": hours(24 * 10 - 24 * 26)})
+        windows = self.due_reads(now)["windows"]
+        self.assertEqual([w["stage"] for w in windows], ["48h"])
+        self.assertFalse(windows[0]["fetch"])
+        self.assertEqual(windows[0]["cursor"], {"read48_until": hours(24 * 10 - 36)})
+
+    def test_due_reads_rounds_the_clock_down_to_whole_seconds(self) -> None:
+        out = self.due_reads("2026-10-11T00:00:00.750Z")
+        self.assertEqual(out["now"], "2026-10-11T00:00:00Z")
+        self.assertEqual(out["windows"][1]["start"], hours(24 * 10 - 24 * 29))
+
+    def test_due_reads_backfill_returns_the_cursor_pair(self) -> None:
+        out = self.ok("due-reads", "--backfill", "--fetched-at", hours(24 * 10), "--since", T0)
+        self.assertEqual(out, {"stage": "backfill",
+                               "cursor": {"read48_until": hours(24 * 10 - 36), "final_until": T0}})
+
+    def test_due_reads_writes_nothing(self) -> None:
+        state = self.root / "loop" / "state.json"
+        before = state.read_text()
+        self.due_reads(hours(24 * 10))
+        self.ok("due-reads", "--backfill", "--fetched-at", hours(24 * 10), "--since", T0)
+        self.assertEqual(state.read_text(), before)
+
+    def test_due_reads_needs_the_horizon_or_the_backfill_facts(self) -> None:
+        self.assertIn("--horizon-days", self.fails("due-reads", now=hours(24 * 10)))
+        self.assertIn("--fetched-at", self.fails("due-reads", "--backfill", now=hours(24 * 10)))
+
     def test_follow_credit_is_counts_only_and_a_lower_bound(self) -> None:
         self.ok("record-interactions", "--json", self.payload({
             "observed_at": hours(1), "self_ids": ["111"], "since_id": "9000000050",
