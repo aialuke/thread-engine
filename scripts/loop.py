@@ -29,17 +29,17 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from loop_core.reads import (FINAL_MIN_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage,
+                             final_ready, past_window, read_windows, snapshot_kind, valid_snapshot)
+
 DEFAULT_ROOT = Path(__file__).resolve().parent.parent
 LOCAL_TZ = ZoneInfo("Australia/Brisbane")
 
-SNAPSHOT_MIN_H = 36.0
-SNAPSHOT_MAX_H = 60.0
 EXPLORE_ALTERNATE_DAYS = 28
 REVIEW_EVERY_DAYS = 7
 STALE_AFTER_DAYS = 42
 LANE_WINDOW = 15
 MIN_COHORT = 3
-FINAL_MIN_DAYS = 26
 FOLLOWER_FILES_KEPT = 2
 INTERACTION_DAYS = 7
 CONVERSATION_DAYS = 30
@@ -263,30 +263,6 @@ def age_hours(post: dict, at: datetime) -> float:
     return (at - parse_time(post["posted_at"])).total_seconds() / 3600
 
 
-def snapshot_kind(hours: float) -> str:
-    if hours < SNAPSHOT_MIN_H:
-        return "early"
-    if hours <= SNAPSHOT_MAX_H:
-        return "valid"
-    return "late"
-
-
-def best_snapshot(post: dict) -> dict | None:
-    snaps = post.get("snapshots", [])
-    for kind in ("valid", "late"):
-        chosen = [s for s in snaps if s["kind"] == kind]
-        if chosen:
-            return chosen[0] if kind == "valid" else chosen[-1]
-    return None
-
-
-def valid_snapshot(post: dict) -> dict | None:
-    for snap in post.get("snapshots", []):
-        if snap["kind"] == "valid":
-            return snap
-    return None
-
-
 def primary_value(snap: dict | None, metric: str) -> int | None:
     if snap is None:
         return None
@@ -381,16 +357,12 @@ def cmd_due(repo: Repo, args) -> dict:
         if post["missed"] or valid_snapshot(post):
             continue
         hours = age_hours(post, at)
-        if post["retrospective"] and hours > SNAPSHOT_MAX_H:
+        stage = due_stage(hours, post["retrospective"])
+        if stage is None:
             continue
         row = {"root_id": post["root_id"], "slug": post["slug"], "age_hours": round(hours, 1),
                "card_ids": [c["id"] for c in post.get("cards", [])]}
-        if hours < SNAPSHOT_MIN_H:
-            pending.append(row)
-        elif hours <= SNAPSHOT_MAX_H:
-            due.append(row)
-        else:
-            missed.append(row)
+        {"pending": pending, "due": due, "missed": missed}[stage].append(row)
     return {"due": due, "missed": missed, "pending": pending,
             "window_hours": [SNAPSHOT_MIN_H, SNAPSHOT_MAX_H]}
 
@@ -403,25 +375,16 @@ def cmd_due_reads(repo: Repo, args) -> dict:
     """
     if args.backfill:
         need(args.fetched_at and args.since, "--backfill needs --fetched-at and --since")
-        fetched = parse_time(args.fetched_at)
-        return {"stage": "backfill", "cursor": {"read48_until": iso(fetched - timedelta(hours=SNAPSHOT_MIN_H)),
-                                                "final_until": iso(parse_time(args.since))}}
+        cursor = backfill_cursor(parse_time(args.fetched_at), parse_time(args.since))
+        return {"stage": "backfill", "cursor": {key: iso(at) for key, at in cursor.items()}}
     need(args.horizon_days is not None, "--horizon-days is required: X's organic-metrics horizon in days")
     # Whole seconds: iso() drops fractions, so a fractional clock would put the floor outside the horizon.
     now = now_arg(args.now).replace(microsecond=0)
     api = repo.state().get("api", {})
-    floor = now - timedelta(days=args.horizon_days)
-    read_from = max(parse_time(api["read48_until"]) if api.get("read48_until") else now - timedelta(hours=SNAPSHOT_MAX_H),
-                    floor)
-    read_to = now - timedelta(hours=SNAPSHOT_MIN_H)
-    final_from = max(parse_time(api["final_until"]) if api.get("final_until") else floor, floor)
-    final_to = now - timedelta(days=FINAL_MIN_DAYS)
-    # The 48h window is always returned: its cursor moves on even when there is nothing to fetch.
-    windows = [{"stage": "48h", "start": iso(read_from), "end": iso(read_to), "fetch": read_from < read_to,
-                "cursor": {"read48_until": iso(read_to)}}]
-    if final_from < final_to:
-        windows.append({"stage": "final", "start": iso(final_from), "end": iso(final_to), "fetch": True,
-                        "cursor": {"final_until": iso(final_to)}})
+    saved = {key: parse_time(api[key]) if api.get(key) else None for key in ("read48_until", "final_until")}
+    windows = [{**w, "start": iso(w["start"]), "end": iso(w["end"]),
+                "cursor": {key: iso(at) for key, at in w["cursor"].items()}}
+               for w in read_windows(now, saved, args.horizon_days)]
     return {"now": iso(now), "windows": windows}
 
 
@@ -435,7 +398,7 @@ def cmd_record_snapshot(repo: Repo, args) -> dict:
     need(hours >= 0, "observed before the post existed")
     kind = snapshot_kind(hours)
     if payload.get("stage") == "final":
-        need(hours >= FINAL_MIN_DAYS * 24, f"a final read needs a post at least {FINAL_MIN_DAYS} days old")
+        need(final_ready(hours), f"a final read needs a post at least {FINAL_MIN_DAYS} days old")
         kind = "final"
         if any(s["kind"] == "final" for s in post["snapshots"]):
             return {"recorded": False, "reason": "final read already exists", "root_id": root_id}
@@ -691,7 +654,7 @@ def cmd_mark_missed(repo: Repo, args) -> dict:
     for post in repo.posts():
         if post["missed"] or valid_snapshot(post) or best_snapshot(post):
             continue
-        if age_hours(post, at) > SNAPSHOT_MAX_H:
+        if past_window(age_hours(post, at)):
             post["missed"] = True
             repo.save_post(post)
             marked.append(post["root_id"])
