@@ -706,6 +706,18 @@ class ReadWindowRules(LoopCase):
         self.assertEqual((self.root / "ledger" / "SUMMARY.md").read_text(), SUMMARY_GOLDEN)
         self.assertEqual((self.root / "experiments.md").read_text(), EXPERIMENTS_GOLDEN)
 
+    def test_view_prose_follows_the_window_constants(self) -> None:
+        from loop_core import reads
+        self.post("5000000000", T0)
+        real = reads.SNAPSHOT_MAX_H
+        reads.SNAPSHOT_MAX_H = 72.0
+        self.addCleanup(setattr, reads, "SNAPSHOT_MAX_H", real)
+        self.post("5000000001", T0)  # any command re-renders the views
+        summary = (self.root / "ledger" / "SUMMARY.md").read_text()
+        self.assertIn("the 36–72 hour snapshot", summary)
+        self.assertIn("read at 36–72 hours", summary)
+        self.assertNotIn("36–60", summary)
+
 
 def loop_sources(scripts: Path) -> list[Path]:
     """loop.py and every module it loads from loop_core."""

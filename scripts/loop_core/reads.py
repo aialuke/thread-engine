@@ -53,6 +53,11 @@ def due_stage(hours: float, retrospective: bool) -> str | None:
     return "missed"
 
 
+def window_label() -> str:
+    """The 48h window as prose, e.g. "36–60 hour". The generated views quote it instead of restating it."""
+    return f"{SNAPSHOT_MIN_H:g}–{SNAPSHOT_MAX_H:g} hour"
+
+
 def past_window(hours: float) -> bool:
     """True once the 48h window has closed."""
     return hours > SNAPSHOT_MAX_H
