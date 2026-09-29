@@ -1,5 +1,8 @@
 # Audience promise
 
+Status: current
+Checked: 2026-09-29
+
 Chosen by the operator on 24 Sep 2026, from `reviews/audit-2026-09.md`. The weekly review reports whether posts keep to it.
 
 **Promise:** an Australian builder making a real AI idea → script → finished-video pipeline with AI agents (Claude, Codex, Grok), showing the workflow, the proof and the lessons, for builders and creators who use AI.

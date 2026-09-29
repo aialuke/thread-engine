@@ -13,6 +13,7 @@ Local factory for @exitzerocode X posts, with a learning loop. The goal is compe
 - Never post, schedule, or call an X write API. The account's own numbers come from `scripts/x_api.py` (read-only X API keys in the Keychain; the keys never enter a session). Other people's posts and research go through Grok's X tools or `scripts/x_read.py`, which make one read-only Grok call.
 - Never create, edit or delete `APPROVED`. Only the operator's typed `/approve <slug>` creates it (a hook does it; another hook blocks every agent attempt).
 - Voice, banned phrases included, is `voice/exit-zero.md`. Format rules are the format skills.
+- Knowledge lookup: read `research/index.md` first, then open only the pages it names. A cited answer that took several sources may be saved to `research/<date>-<slug>.md` (quote-or-drop citations) with an index line and a `reviews/log.md` line, only after the operator says yes. The parent agent indexes literature-reader reports; the reader never edits the index.
 - Loop state lives in `loop/state.json` and `ledger/*.json` and changes only through `scripts/loop.py`. Never hand-edit them or the generated `experiments.md`, `learnings.md`, `ledger/SUMMARY.md`.
 
 ## What the loop may never change
@@ -29,12 +30,14 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 | `/ready <slug>` | Run the gate and copy cards to the clipboard one at a time |
 | `/posted <link>` | Record what went live |
 | `/results` | Numbers now, or the weekly review when due |
+| `/lint` | Read-only check of the docs: unindexed files, dangling `D`/`A`/`P` references, stale markers. Writes one report |
 | `/apply <lesson>` / `/undo-rule <lesson>` | Accept or revert a proposed rule change |
 
 ## Layout
 
 - `AGENTS.md` — this contract
 - `README.md` — the operator's guide
+- `research/index.md` — catalogue of `research/`, `reference/`, `reviews/`, `queue/` and `receipts/`; `reviews/log.md` — append-only log of document ingests, decisions and lints
 - `reference/x-algorithm.md` — verified X ranking facts with sources; `reference/x-api.md` — what the X API can and cannot read, prices, and the privacy rules; `reference/audience.md` — audience promise and lane definition
 - `voice/exit-zero.md` — shared voice, truth budget, image and reply rules
 - `.claude/skills/format-{settings,comparison,tool-swap,single-tip,build-log,tool-verdict}/` — one format each, with its checklist. Settings detail stays in `.claude/skills/hidden-settings/`

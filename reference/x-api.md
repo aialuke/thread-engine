@@ -2,9 +2,11 @@
 
 Sources: https://docs.x.com/x-api (OpenAPI 2.168), https://docs.x.com/x-api/getting-started/pricing, https://docs.x.com/x-api/fundamentals/metrics
 Read: 2026-09-24. Live tests: 2026-09-24, pay-per-use app, OAuth 1.0a user context.
+Status: current
+Checked: 2026-09-24
 Client: `scripts/x_api.py`. Keys: macOS Keychain, service `thread-engine-x`.
 
-This is what the X API can and cannot tell the loop about the account's own posts. Other people's posts and research still go through Grok (`scripts/x_read.py`).
+This is what the X API can and cannot tell the loop about the account's own posts. Other people's posts and research still go through Grok (`scripts/x_read.py`). D88 (26 Sep 2026) drops Grok from the product; the factory keeps this path until `reviews/factory-drop-grok-plan.md` is done.
 
 ## Verified facts
 

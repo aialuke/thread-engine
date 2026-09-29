@@ -1,6 +1,6 @@
 # UI direction: decision log
 
-A running record of decisions about a Thread Engine interface: what was decided, why, and what was rejected. Each round of the mock builds on this. Nothing here is built yet.
+A running record of decisions about a Thread Engine interface: what was decided, why, and what was rejected. Each round of the mock builds on this. Nothing here is built yet: only the mock in `ui/mock/` exists. The log runs to D106 (as of 2026-09-28).
 
 Mock: https://claude.ai/artifact/8zaBcxWAknJaXWkReQQPqg (private until the operator shares it).
 
