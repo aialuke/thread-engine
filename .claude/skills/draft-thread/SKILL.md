@@ -24,20 +24,20 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
 1. **Contract.** Read `AGENTS.md`, `voice/exit-zero.md`, `reference/audience.md`, `reference/x-algorithm.md`, and `queue/topics.yaml`.
    Done: all five read this session.
 
-2. **Topic.** Find the queue row. Note `format`, `lane`, `experiment`, `arm`, `treatment`, and `hypothesis` if present. A row with no `format` is `settings`.
-   Done: slug, format and, if set, the experiment arm are written down.
+2. **Topic.** Find the queue row. Note `format`, `lane`, `experiment`, `arm`, `treatment`, and `hypothesis` if present. A row with no `format` is `settings`. Resolve the folder `drafts/YYYY-MM-DD-slug/` (today's date in Australia/Brisbane); reuse it if it exists.
+   Done: slug, folder, format and, if set, the experiment arm are written down.
 
-3. **Format.** Read `.claude/skills/format-<format>/SKILL.md` and every file it points to. A settings row also reads `.claude/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening and length from the format, because the shipped roots predate the result-first, under-600-character rule.
+3. **Format.** Read `.claude/skills/format-<format>/SKILL.md`, its contract and checklist, and each reference whose stated condition applies to this draft. A settings row also reads `.claude/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening and length from the format, because the shipped roots predate the result-first, under-600-character rule.
    If the row is a `treatment` or `control` arm, the arm's description wins over the format's defaults (for example card count). Never change anything else about the post, so the test stays clean.
-   Done: shape, research rule, image rule and checklist are known.
+   Done: the applicable shape, research and verification mode, image rule and checklist are identified, including any arm override.
 
-4. **Research, then write.** Finish research before any card prose, following the format's research rule. No official source → the item is omitted. A build-log or tool-verdict starts with the format's **Material** questions to the operator; without their answers and real proof, stop and suggest another format. A tool-swap needs only research; offer the operator an optional quick test once (see the format).
-   Done: a candidate list exists. `01-hook.md` does not.
+4. **Research, then write.** Finish research before any card prose, following the format's research rule. Collect the evidence the format requires: official sources for vendor claims, the operator's account plus real proof for claims about their own runs. No qualifying source → the item is omitted. A build-log or tool-verdict starts with the format's **Material** questions to the operator; without their answers and real proof, stop and suggest another format. A tool-swap needs only research; offer the operator an optional quick test once (see the format).
+   Done: every retained candidate has the format's required evidence; a build-log or tool-verdict has the operator's Material answers and real proof; no card prose has been written or revised this run.
 
 5. **Verify.** Run `/verify-settings <folder>` in the mode the format names (`paths`, `claims`, or both). Cards use `high` and `medium` rows only. `VERIFY` rows stay in `PATHS.md` / `CLAIMS.md` and out of cards.
-   Done: `PATHS.md` and/or `CLAIMS.md` exist in the draft folder.
+   Done: every candidate is accounted for in `PATHS.md` and/or `CLAIMS.md` in the draft folder, with evidence or a retained `VERIFY` row; only supported `high` and `medium` rows are eligible for cards.
 
-6. **Files.** `drafts/YYYY-MM-DD-slug/` (today's date in Australia/Brisbane). Reuse the folder if it exists.
+6. **Files.** In the draft folder:
    - `FORMAT` — one word: `settings`, `comparison`, `tool-swap`, `single-tip`, `build-log`, or `tool-verdict`
    - `01-hook.md` and further consecutive `NN-<name>.md` cards as the format's shape says. A single-tip has only `01-hook.md`; a build-log, tool-verdict or tool-swap has at most one card after it (a tool-swap's is the maker shout-out, `02-shoutout.md`).
    - `REPLIES.md` for a tool-swap: talking points from `CLAIMS.md`, never paste-ready replies
@@ -46,10 +46,10 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
    Done: files exist. Card count matches the format, the hook, and the arm.
 
 7. **Queue.** Set the row's `status` to `drafted` and `draft:` to the folder.
-   Done: the row says `drafted`.
+   Done: the row says `drafted` and `draft:` points to this folder.
 
 8. **Gate.** Never create, edit or delete `APPROVED`. A hook blocks it anyway.
-   Done: `APPROVED` is absent.
+   Done: this run left `APPROVED` untouched. Revised cards need the operator's `/approve <slug>` again before `/ready`.
 
 9. **Preview.** Print every card in order, separated by `---`, with each card's character count as X counts it (`python3 scripts/post_thread.py <folder> --count`; `→`, `▷` and emoji count 2). Then list leftover `VERIFY` rows and what `images.md` asks for. End with exactly:
    `Read the cards. If you change any, that's fine. When they're right, type /approve <slug>. Then /ready <slug>.`
