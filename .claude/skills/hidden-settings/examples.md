@@ -6,11 +6,11 @@ Sourced dollars below are from the shipped gold. A new draft omits a figure unti
 
 MacBook battery shipped gold is `examples/macbook-battery.md` (conversation `2102172499031253210`). Where snap, thesis, or the reply CTA differ from A and B, follow `SKILL.md`. The shipped transcripts in `examples/` close with "Reply with…" or "Save this before…", which the gate refuses as engagement solicitation; the closers below show the real-question form.
 
-iPhone 18 Pro vs 17 Pro shipped gold is `examples/iphone-18-pro-aperture.md` (conversation `2102272933087363155`). Comparison hook, difference card, and comparison closer: follow `.claude/skills/format-comparison/SKILL.md`. Settings drafts follow the A and B lists below: result, then neglect, then the remaining beats.
+iPhone 18 Pro vs 17 Pro shipped gold is `examples/iphone-18-pro-aperture.md` (conversation `2102272933087363155`), a comparison: follow `.claude/skills/format-comparison/SKILL.md`.
 
-Each card is title — default — path — action — payoff.
+Card shape: `Card micro-structure` in `SKILL.md` (title — default — path — action — payoff).
 
-## A) Router QoS — Comcast/Xfinity style, 8 settings
+## A) Router QoS — Comcast/Xfinity style, 8 settings (historical count; the cap is now 7)
 
 Money villain: the extra speed tier.
 
