@@ -707,12 +707,32 @@ class ReadWindowRules(LoopCase):
         self.assertEqual((self.root / "experiments.md").read_text(), EXPERIMENTS_GOLDEN)
 
 
+def loop_sources(scripts: Path) -> list[Path]:
+    """loop.py and every module it loads from loop_core."""
+    return [scripts / "loop.py", *sorted((scripts / "loop_core").rglob("*.py"))]
+
+
 class Isolation(unittest.TestCase):
-    def test_no_network_imports_or_environment(self) -> None:
+    def offences(self, paths: list[Path]) -> tuple[set[str], list[Path]]:
         from test_scripts import FORBIDDEN_TOP, _imported_tops, _reads_environ
-        path = REPO / "scripts" / "loop.py"
-        self.assertEqual(_imported_tops(path) & FORBIDDEN_TOP, set())
-        self.assertFalse(_reads_environ(path))
+        network = {name for path in paths for name in _imported_tops(path) & FORBIDDEN_TOP}
+        return network, [path for path in paths if _reads_environ(path)]
+
+    def test_no_network_imports_or_environment(self) -> None:
+        sources = loop_sources(REPO / "scripts")
+        self.assertGreater(len(sources), 1)
+        self.assertEqual(self.offences(sources), (set(), []))
+
+    def test_scan_reaches_nested_modules(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            scripts = Path(tmp)
+            (scripts / "loop.py").write_text("import json\n")
+            nested = scripts / "loop_core" / "deep"
+            nested.mkdir(parents=True)
+            (nested / "leak.py").write_text("import urllib.request\nimport os\nos.environ\n")
+            network, environ = self.offences(loop_sources(scripts))
+            self.assertEqual(network, {"urllib"})
+            self.assertEqual(environ, [nested / "leak.py"])
 
 
 if __name__ == "__main__":

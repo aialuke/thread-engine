@@ -83,6 +83,8 @@ class DailyRun(unittest.TestCase):
         self.root = Path(self.tmp.name)
         (self.root / "scripts").mkdir()
         shutil.copy(REPO / "scripts" / "loop.py", self.root / "scripts" / "loop.py")
+        shutil.copytree(REPO / "scripts" / "loop_core", self.root / "scripts" / "loop_core",
+                        ignore=shutil.ignore_patterns("__pycache__"))
         shutil.copy(REPO / ".gitignore", self.root / ".gitignore")
         for args in (["init", "-q"], ["config", "user.email", "t@t"], ["config", "user.name", "t"],
                      ["config", "commit.gpgsign", "false"]):
