@@ -26,6 +26,7 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 - `queue/topics.yaml` is the backlog; `queue/research-backlog.md` is operator-chosen research to do later; `queue/paid-free-roster.md` lists PAID → FREE claims to check, never copy.
 - `drafts/<date>-<slug>/` holds numbered cards (`01-hook.md` …), which are the posts. `shipped/<slug>/NOTES.md` holds post-ship notes.
 - `ledger/activity/` and `ledger/raw/` are written only by `loop.py`. `loop/inbox/`, `loop/followers/` and `ledger/raw/api/` hold other people's data and are not committed.
+- `scripts/loop_core/reads.py` holds the Read-window rules (48h, Final and Backfill read thresholds, due/missed, due-reads windows) as pure functions; `scripts/loop.py` stays the only writer and calls it.
 - `scripts/post_thread.py` is the gate: it refuses without `APPROVED`, and applies the format and voice checks. Read the script for the exact refusals; `--count` prints X's character counts with no approval.
 - Tests: `python3 -m unittest discover -s tests`.
 
