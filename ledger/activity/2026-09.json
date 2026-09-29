@@ -9882,6 +9882,68 @@
           }
         }
       }
+    },
+    "2104112656609419289": {
+      "id": "2104112656609419289",
+      "kind": "reply",
+      "created_at": "2026-09-27T07:35:24Z",
+      "conversation_id": "2103946635831050740",
+      "topics": [],
+      "text": "@_ Interested to give this a try and see how it goes!",
+      "reads": {
+        "48h": {
+          "at": "2026-09-29T10:00:05Z",
+          "age_hours": 50.4,
+          "label": "valid",
+          "public": {
+            "impressions": 364,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 364,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
+    },
+    "2104202210653700463": {
+      "id": "2104202210653700463",
+      "kind": "original",
+      "created_at": "2026-09-27T13:31:15Z",
+      "conversation_id": "2104202210653700463",
+      "topics": [],
+      "text": "My favourite question for Claude after any plan write or file read:\n\n“Was there anything you overlooked?”\n\nI ask it 3 times.\n\nEach pass surfaces issues that would have cost hours to fix later.",
+      "reads": {
+        "48h": {
+          "at": "2026-09-29T10:00:05Z",
+          "age_hours": 44.5,
+          "label": "valid",
+          "public": {
+            "impressions": 15,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "bookmarks": 0
+          },
+          "organic": {
+            "impressions": 15,
+            "likes": 0,
+            "replies": 0,
+            "reposts": 0,
+            "profile_visits": 0,
+            "url_clicks": 0
+          }
+        }
+      }
     }
   }
 }

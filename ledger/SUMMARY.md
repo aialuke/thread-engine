@@ -20,27 +20,28 @@ Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snap
 | Thu 24 Sep 16:21 | x-2103006795451302193 | other | other | retro | 23 | 23 | 0% | 0 | 0 | 0 | – | valid 51.6h |
 | Thu 24 Sep 22:08 | x-2103094305309311383 | other | other | retro | 16 | 16 | 0% | 0 | 0 | 0 | – | valid 45.9h |
 | Fri 25 Sep 06:00 | x-2103212881525280913 | other | other | retro | 135 | 135 | 0% | 0 | 0 | 0 | – | valid 38h |
+| Sun 27 Sep 23:31 | x-2104202210653700463 | other | other | retro | 15 | 15 | 0% | 0 | 0 | 0 | – | valid 44.5h |
 
 ## Original Content Rewards
 
 Needs 500 verified followers and 500,000 verified Home Timeline impressions on originals in 90 days (no replies, no boosted reach).
 
 - X's eligibility screen, read 2026-09-24: 26 verified followers, 337 qualified impressions.
-- Verified followers from the daily read: 24 of 500.
-- Organic impressions on originals and quotes, last 90 days: 2,654. This counts every viewer on every surface, so it is an upper bound; X counts only Premium viewers on the Home feed.
+- Verified followers from the daily read: 25 of 500.
+- Organic impressions on originals and quotes, last 90 days: 2,669. This counts every viewer on every surface, so it is an upper bound; X counts only Premium viewers on the Home feed.
 - Share that qualified at the last screen reading: 12% (the two readings may be from different days).
 
 ## Account
 
-Followers: 37 on 2026-09-28. In the 7 days to then: 5 new, 4 lost; 1 of the new credited to a post or reply they engaged with (a lower bound).
+Followers: 37 on 2026-09-29. In the 7 days to then: 6 new, 5 lost; 1 of the new credited to a post or reply they engaged with (a lower bound).
 
-Follows per profile visit, items from those 7 days: 5 / 66.
+Follows per profile visit, items from those 7 days: 6 / 33.
 
 | Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 | New follows (X export) |
 |---|---:|---:|---:|---:|---:|---:|
-| original | 10 | 1983 | 21 | 32 | 10.6 | 13 |
+| original | 8 | 482 | 1 | 6 | 2.1 | 0 |
 | quote | 2 | 249 | 0 | 1 | 0.0 | 0 |
-| reply | 153 | 29004 | 42 | 119 | 1.4 | 4 |
-| thread card | 17 | 499 | 3 | 11 | 6.0 | 1 |
+| reply | 108 | 28301 | 32 | 97 | 1.1 | 1 |
+| thread card | 3 | 92 | 0 | 1 | 0.0 | 0 |
 
-Top topics by organic impressions (X's own labels, a proxy): Politics (2635), Technology Business (2316), Technology (2288), Pauline Hanson (1424), Apple (1216).
+Top topics by organic impressions (X's own labels, a proxy): Politics (1779), Pauline Hanson (1424), 2024 US Presidential Election (1054), United States politics (1054), Technology (1030).
