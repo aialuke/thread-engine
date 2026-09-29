@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Daily X API read of the account's own posts. Run by the launchd job and by /next.
 
-Each run reads, through scripts/x_api.py (owned reads, see reference/x-api.md):
+Each run reads, through scripts/x_api.py (owned reads, see reference/x-api.md),
+the windows `loop.py due-reads` hands back (see CONTEXT.md for Read, 48h read
+and Final read):
 - every post, reply and quote that has turned 36 hours old since the last run
   (its 36-60 hour read; later than 60 hours is labelled late);
 - every item that has turned 26 days old: the final read, before X drops
   organic numbers at 30 days;
 - follower ids, and mentions since the last run.
 
+loop.py owns those thresholds and the read cursors; this script holds none.
 Everything is recorded through loop.py. A failed read records nothing and moves
 no cursor, so the next good run picks the same items up. Raw responses go to
 ledger/raw/api/ (gitignored). Prints plain English.
@@ -23,15 +26,13 @@ import json
 import re
 import subprocess
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import x_api  # noqa: E402
 
 ROOT = x_api.ROOT
-READ48_MIN_H = 36
-FINAL_MIN_DAYS = 26
 NONORGANIC_SHARE = x_api.NONORGANIC_SHARE
 
 
@@ -177,28 +178,25 @@ def log(line: str) -> None:
 
 
 def run(reader=None, now: datetime | None = None) -> int:
-    # One whole-second clock for the run: the retention floor is built from it, and x_api.timeline checks the
+    # One whole-second clock for the run: loop.py builds the windows from it, and x_api.timeline checks each
     # window against it. iso() drops fractions, so a fractional clock would put the floor just outside the horizon.
     now = (now or datetime.now(timezone.utc)).replace(microsecond=0)
-    api = loop("status").get("api", {})
-    floor = now - timedelta(days=x_api.ORGANIC_DAYS)
-    read_from = max(x_api.parse_time(api["read48_until"]) if api.get("read48_until") else now - timedelta(hours=60), floor)
-    read_to = now - timedelta(hours=READ48_MIN_H)
-    final_from = max(x_api.parse_time(api["final_until"]) if api.get("final_until") else floor, floor)
-    final_to = now - timedelta(days=FINAL_MIN_DAYS)
+    plan = loop("--now", x_api.iso(now), "due-reads", "--horizon-days", str(x_api.ORGANIC_DAYS))
     private = ROOT / "loop" / "followers" / "interactions.json"
     since = json.loads(private.read_text()).get("mentions_since_id") if private.is_file() else None
     try:
         reader = reader or ApiReader()
         followers = reader.followers()
-        items48 = reader.timeline(x_api.iso(read_from), x_api.iso(read_to), now) if read_from < read_to else []
-        final = reader.timeline(x_api.iso(final_from), x_api.iso(final_to), now) if final_from < final_to else []
+        reads = [(w, reader.timeline(w["start"], w["end"], now) if w["fetch"] else []) for w in plan["windows"]]
         mentions = reader.mentions(since)
     except (x_api.XApiError, RuntimeError) as exc:
         log(f"{x_api.iso(now)} snapshot failed error={str(exc)[:160]!r}")
         print(f"The X read failed, so nothing was recorded and nothing moved on: {exc}. "
               "The next run picks the same posts up.")
         return 1
+    items48 = next((items for w, items in reads if w["stage"] == "48h"), [])
+    final = next((items for w, items in reads if w["stage"] == "final"), [])
+    windows = [(w["stage"], items, w["cursor"]) for w, items in reads]
     # Recording is not all-or-nothing: a failure here leaves earlier writes in place, so say so.
     stage = "raw-file"
     try:
@@ -207,9 +205,6 @@ def run(reader=None, now: datetime | None = None) -> int:
         raw.write_text(json.dumps({"fetched_at": x_api.iso(now), "followers": followers, "read48": items48,
                                    "final": final, "mentions": mentions}, indent=1, ensure_ascii=False) + "\n",
                        encoding="utf-8")
-        windows = [("48h", items48, {"read48_until": x_api.iso(read_to)})]
-        if final_from < final_to:
-            windows.append(("final", final, {"final_until": x_api.iso(final_to)}))
         stage = "record"
         lines = process(now, followers, windows, mentions, str(raw.relative_to(ROOT)))
         stage = "usage"
@@ -235,9 +230,8 @@ def ingest(path: str) -> int:
     """Record a backfill file from x_api.py backfill: one 'backfill' read of every item, and the cursors."""
     raw = json.loads((ROOT / path).read_text(encoding="utf-8"))
     observed = x_api.parse_time(raw["fetched_at"])
-    cursor = {"read48_until": x_api.iso(observed - timedelta(hours=READ48_MIN_H)),
-              "final_until": x_api.iso(x_api.parse_time(raw["since"]))}
-    lines = process(observed, raw["followers"], [("backfill", raw["timeline"], cursor)], raw["mentions"], path)
+    plan = loop("due-reads", "--backfill", "--fetched-at", raw["fetched_at"], "--since", raw["since"])
+    lines = process(observed, raw["followers"], [("backfill", raw["timeline"], plan["cursor"])], raw["mentions"], path)
     log(f"{x_api.iso(datetime.now(timezone.utc))} snapshot ingest {path} items={len(raw['timeline'])}")
     loop("commit-data", "--message", f"ingest {Path(path).name}")
     print("\n".join(lines))
