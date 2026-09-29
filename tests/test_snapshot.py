@@ -46,16 +46,21 @@ def tweet(item_id: str, hours_ago: float, kind: str = "original", reply_to: str 
 class FakeReader:
     def __init__(self, followers: list[dict], items: list[dict], mentions: list[dict] | None = None, fail: bool = False):
         self._followers, self.items, self._mentions, self.fail = followers, items, list(mentions or []), fail
-        self.windows, self.since = [], []
+        self.windows, self.since, self.nows = [], [], []
+        # x_api.timeline reads its own clock when it is not handed the run's; that clock is later than the run's.
+        self.clock = NOW + timedelta(seconds=1)
 
     def followers(self) -> list[dict]:
         if self.fail:
             raise x_api.XApiError("Keychain has no consumer_key under thread-engine-x, or the Keychain is locked")
         return self._followers
 
-    def timeline(self, start: str, end: str) -> list[dict]:
+    def timeline(self, start: str, end: str, now: datetime | None = None) -> list[dict]:
         self.windows.append((start, end))
+        self.nows.append(now)
         begin, finish = x_api.parse_time(start), x_api.parse_time(end)
+        if begin < (now or self.clock) - timedelta(days=x_api.ORGANIC_DAYS):
+            raise x_api.XApiError(f"start {start} is more than {x_api.ORGANIC_DAYS} days ago")
         return [i for i in self.items if begin <= x_api.parse_time(i["created_at"]) < finish]
 
     def mentions(self, since_id):
@@ -190,6 +195,37 @@ class DailyRun(unittest.TestCase):
         self.assertEqual(self.ledger("1000000009")["snapshots"][-1]["kind"], "final")
         self.assertEqual(self.activity()["1000000009"]["reads"]["final"]["organic"]["impressions"], 300)
         self.assertEqual(self.state()["api"]["final_until"], x_api.iso(NOW - timedelta(days=26)))
+
+    def test_first_run_reads_the_final_window_from_the_retention_floor(self) -> None:
+        reader = FakeReader(FOLLOWERS, self.items)
+        code, out = self.run_once(reader)
+        self.assertEqual(code, 0, out)
+        self.assertEqual(reader.windows[1][0], x_api.iso(NOW - timedelta(days=x_api.ORGANIC_DAYS)))
+
+    def test_cursor_older_than_the_floor_is_clamped_to_it(self) -> None:
+        self.run_once(FakeReader(FOLLOWERS, self.items))
+        later = NOW + timedelta(days=5)  # the saved final_until is now 31 days old
+        reader = FakeReader(FOLLOWERS, self.items)
+        code, out = self.run_once(reader, now=later)
+        self.assertEqual(code, 0, out)
+        self.assertEqual(reader.windows[1][0], x_api.iso(later - timedelta(days=x_api.ORGANIC_DAYS)))
+
+    def test_one_whole_second_clock_is_used_for_the_run_and_every_read(self) -> None:
+        reader = FakeReader(FOLLOWERS, self.items)
+        code, out = self.run_once(reader, now=NOW + timedelta(microseconds=500000))
+        self.assertEqual(code, 0, out)
+        self.assertEqual(reader.nows, [NOW, NOW])
+
+    def test_reader_hands_the_run_clock_to_the_timeline_read(self) -> None:
+        class Pages:
+            def pages(self, path, params, auth):
+                return []
+
+        reader = snapshot.ApiReader(Pages())
+        edge = x_api.iso(NOW - timedelta(days=x_api.ORGANIC_DAYS))
+        self.assertEqual(reader.timeline(edge, x_api.iso(NOW), now=NOW), [])
+        with self.assertRaises(x_api.XApiError):
+            reader.timeline(x_api.iso(NOW - timedelta(days=x_api.ORGANIC_DAYS, seconds=1)), x_api.iso(NOW), now=NOW)
 
     def test_ingest_backfill_sets_cursors(self) -> None:
         raw = {"fetched_at": x_api.iso(NOW), "since": "2026-10-01T00:00:00Z", "followers": FOLLOWERS,

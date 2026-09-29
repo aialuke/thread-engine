@@ -85,8 +85,8 @@ class ApiReader:
     def followers(self) -> list[dict]:
         return x_api.followers(self.client)
 
-    def timeline(self, start: str, end: str) -> list[dict]:
-        return x_api.timeline(self.client, start, end)
+    def timeline(self, start: str, end: str, now: datetime | None = None) -> list[dict]:
+        return x_api.timeline(self.client, start, end, now)
 
     def mentions(self, since_id: str | None) -> list[dict]:
         return x_api.mentions(self.client, since_id)
@@ -177,7 +177,9 @@ def log(line: str) -> None:
 
 
 def run(reader=None, now: datetime | None = None) -> int:
-    now = now or datetime.now(timezone.utc)
+    # One whole-second clock for the run: the retention floor is built from it, and x_api.timeline checks the
+    # window against it. iso() drops fractions, so a fractional clock would put the floor just outside the horizon.
+    now = (now or datetime.now(timezone.utc)).replace(microsecond=0)
     api = loop("status").get("api", {})
     floor = now - timedelta(days=x_api.ORGANIC_DAYS)
     read_from = max(x_api.parse_time(api["read48_until"]) if api.get("read48_until") else now - timedelta(hours=60), floor)
@@ -189,8 +191,8 @@ def run(reader=None, now: datetime | None = None) -> int:
     try:
         reader = reader or ApiReader()
         followers = reader.followers()
-        items48 = reader.timeline(x_api.iso(read_from), x_api.iso(read_to)) if read_from < read_to else []
-        final = reader.timeline(x_api.iso(final_from), x_api.iso(final_to)) if final_from < final_to else []
+        items48 = reader.timeline(x_api.iso(read_from), x_api.iso(read_to), now) if read_from < read_to else []
+        final = reader.timeline(x_api.iso(final_from), x_api.iso(final_to), now) if final_from < final_to else []
         mentions = reader.mentions(since)
     except (x_api.XApiError, RuntimeError) as exc:
         log(f"{x_api.iso(now)} snapshot failed error={str(exc)[:160]!r}")
