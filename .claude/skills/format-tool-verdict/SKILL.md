@@ -2,7 +2,7 @@
 name: format-tool-verdict
 description: >
   Tool-verdict format: which tool won a real task the operator ran, the
-  test, the evidence, and where the result stops. Used by /draft-thread.
+  test, the evidence, and where the result stops.
 when-to-use: Use for a verdict from real use of two or more AI tools on the same task, or /format-tool-verdict.
 ---
 

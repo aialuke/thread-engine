@@ -2,7 +2,7 @@
 name: format-comparison
 description: >
   Comparison format: new product against the one it replaces. Comparison
-  hook, difference cards, comparison closer. Used by /draft-thread.
+  hook, difference cards, comparison closer.
 when-to-use: Use for a product comparison thread, or /format-comparison.
 ---
 

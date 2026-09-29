@@ -2,7 +2,7 @@
 name: format-build-log
 description: >
   Build-log format: one standalone post on what the pipeline did, with
-  real proof attached, how, and what broke. Used by /draft-thread.
+  real proof attached, how, and what broke.
 when-to-use: Use for a build-in-public update, what the pipeline did today, or /format-build-log.
 ---
 

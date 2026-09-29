@@ -1,9 +1,9 @@
 ---
 name: format-settings
 description: >
-  Loader for the settings format (multi-post Hidden Settings thread).
-  Points at the settings contract and lists its research, fact-check,
-  image and checklist rules. Used by /draft-thread.
+  Settings format (multi-post Hidden Settings thread): points at the
+  settings contract and lists its research, fact-check, image and
+  checklist rules.
 user-invocable: false
 ---
 

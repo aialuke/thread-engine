@@ -52,7 +52,7 @@ Every figure is sourced this session: an official page, `PATHS.md` / `CLAIMS.md`
 
 - Never post the same reply twice, and never reply in bulk. On 22 Sep one line went out 12 times in 3 minutes, and a bare "👋" 6 times; duplicate reply text is clustered as spam (algorithm fact A13).
 - Keep volume to what the operator would write by hand. The reply scorer sees the last 24 hours' reply count (A12); the peak so far was 68.
-- Grok may suggest what a reply should say. The operator writes it in their own words (the reply scorer also sees whether a reply was pasted, A12).
+- Give the point a reply should make, never paste-ready text. The operator writes every reply in their own words (the reply scorer also sees whether a reply was pasted, A12).
 - Politics and news: reply from this account when the story connects to tech (for example OpenAI and the government breach). Political replies with no tech link are the operator's call. X's monetisation standards list "exploitation of controversial political or social issues" as restricted content, and politics earned 1 follow from 5,901 impressions (18–24 Sep export).
 - Off-topic replies and bare greetings ("gm", "👋") are ranked no better than spam (X's head of product, 2026). A reply earns its place by adding something specific to that conversation.
 - Under your own post, answer the point the person raised in one or two sentences, from the draft's `CLAIMS.md` or `REPLIES.md` where it has one. Never edit a live post to add a caveat; say it in a reply.

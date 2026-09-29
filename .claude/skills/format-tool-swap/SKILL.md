@@ -4,7 +4,6 @@ description: >
   PAID → FREE series: a fixed two-line header, then 2 to 5 swaps from one
   roster category, each a named paid tool, a free tool, and one sourced
   proof line. Optional one-handle maker shout-out.
-  Used by /draft-thread.
 when-to-use: Use for a PAID → FREE post, a paid-to-free swap list, free alternatives, or /format-tool-swap.
 ---
 
@@ -108,7 +107,7 @@ Re-check a handle in the post's own session; accounts change.
 
 ## REPLIES.md
 
-Talking points for replies under the post, with sources. Never paste-ready: the operator writes every reply (`voice/exit-zero.md`, and the reply scorer sees pasted text, A12).
+Talking points for replies under the post, with sources (`voice/exit-zero.md` → Replies).
 
 - One point per `CLAIMS.md` limit, and one per paid side that has a free plan ("Streamlabs Desktop is free; Ultra is the paid layer").
 - Answer the row the person raised, in one or two sentences. Don't defend all five.
@@ -122,8 +121,7 @@ Optional. A real screenshot from the operator's own use is the best image the po
 
 - **Cadence:** one PAID → FREE parent every other day, inside the account's cap of two originals a day, hours apart (operator, 24 Sep 2026). Categories go in `queue/topics.yaml` order.
 - **Pin:** pin the newest PAID → FREE post that's live, sourced and unboosted, with no link (A14). The operator pins on X.
-- **Makers:** the rules in `voice/exit-zero.md` → Makers. One maker touch a day; repost only makers' release posts; quote only makers' news; never quote a premium vendor to pick a fight.
-- **Never boost** (`voice/exit-zero.md` → Boosting).
+- **Makers and boosting:** `voice/exit-zero.md` → Makers and → Boosting.
 
 ## How it's judged
 

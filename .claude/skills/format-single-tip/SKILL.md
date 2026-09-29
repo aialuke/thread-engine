@@ -2,7 +2,7 @@
 name: format-single-tip
 description: >
   Single-tip format: one standalone post with one setting or tip and its
-  whole payoff. No thread. Used by /draft-thread.
+  whole payoff. No thread.
 when-to-use: Use for a single standalone tip post, or /format-single-tip.
 ---
 
