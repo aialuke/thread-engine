@@ -13,13 +13,13 @@ Speak plainly. The operator does not read code or JSON: turn every helper output
 
 ## 1. Catch up
 
-1. Run `python3 scripts/snapshot.py`. Run it every time: a same-day repeat records nothing twice, and X charges each item once per UTC day (a soft guarantee, `reference/x-api.md` P5).
-2. Run `python3 scripts/loop.py status`.
-3. Read the last few lines of `ledger/runs.log`, not only the last: step 1's fresh run can hide an earlier failure. For each case below, say it first, in one sentence:
+1. Run `python3 scripts/loop.py status` and keep its `health.warnings`: step 2's fresh run would hide a daily job that didn't run.
+2. Run `python3 scripts/snapshot.py`. Run it every time: a same-day repeat records nothing twice, and X charges each item once per UTC day (a soft guarantee, `reference/x-api.md` P5).
+3. Run `python3 scripts/loop.py status` again.
+4. Say each string in `health.warnings` from the first status output and any new one from this one first, one sentence each. It covers a last run that failed, a last `snapshot ok` more than 26 hours old (the daily job didn't run: the Mac was off or locked, or the job is unloaded), and posts inside the last 48 hours of their final read. If the list is empty, say nothing about it. Then read the last few lines of `ledger/runs.log`, not only the last: step 1's fresh run can hide an earlier failure.
    - a line since the previous `snapshot ok` says `snapshot failed stage=`: recording failed at that stage, which is not the Mac or the X API credits. If a later run says `snapshot ok`, that run filled in what was missed (`loop.py` skips snapshots it already has).
    - the last run says `snapshot failed error=`: the X read failed; give the logged error in plain words.
-   - the last `snapshot ok` is more than 30 hours old and no error line explains it: the daily job didn't run (the Mac was off or locked, or the job is unloaded).
-4. Tell the operator in two or three lines what changed: new reads, follower change, anything marked non-organic, any experiment status change. Add one line from the "Original Content Rewards" block in `ledger/SUMMARY.md`: verified followers against 500, and the last reading of X's eligibility screen.
+5. Tell the operator in two or three lines what changed: new reads, follower change, anything marked non-organic, any experiment status change. Add one line from the "Original Content Rewards" block in `ledger/SUMMARY.md`: verified followers against 500, and the last reading of X's eligibility screen.
 
 Done: the operator has heard what changed, and any failed or missed snapshot, in plain words.
 
