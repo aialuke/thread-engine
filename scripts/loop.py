@@ -7,6 +7,7 @@ readable views (experiments.md, learnings.md, ledger/SUMMARY.md).
 
 No network access. Git is used only by commit-rule, undo and commit-data.
 The Read-window rules (36-60h, 26 days, missed, due-reads windows) live in loop_core/reads.py.
+Whether a Read becomes a Snapshot (the ordered refusals and skips) lives in loop_core/snapshots.py.
 What each Payload must look like (validation, defaults, keys) lives in loop_core/payloads.py.
 
 X API data (from snapshot.py) lands in three places:
@@ -36,8 +37,9 @@ from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEY
                                 cursor_updates, experiment_terms, experiment_texts, follower_inputs, follower_total,
                                 interaction_inputs, newer_since_id, post_from_payload, snapshot_from_payload, snapshot_is_final,
                                 snapshot_observed, snapshot_root_id, validate_post, verified_count)
-from loop_core.reads import (FINAL_MAX_DAYS, FINAL_MIN_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage,
-                             in_final_window, past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
+from loop_core.reads import (SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage, need_final_age,
+                             past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
+from loop_core.snapshots import admit_snapshot
 from loop_core.times import iso, parse_time
 
 DEFAULT_ROOT = Path(__file__).resolve().parent.parent
@@ -282,10 +284,6 @@ def cmd_due_reads(repo: Repo, args) -> dict:
     return {"now": iso(now), "windows": windows}
 
 
-def need_final_age(hours: float) -> None:
-    need(in_final_window(hours), f"a final read needs a post {FINAL_MIN_DAYS} to {FINAL_MAX_DAYS} days old")
-
-
 def cmd_record_snapshot(repo: Repo, args) -> dict:
     state = repo.state()
     payload = read_json(Path(args.json))
@@ -293,16 +291,10 @@ def cmd_record_snapshot(repo: Repo, args) -> dict:
     post = repo.post(root_id)
     observed = snapshot_observed(payload)
     hours = age_hours(post, observed)
-    need(hours >= 0, "observed before the post existed")
-    kind = snapshot_kind(hours)
-    if snapshot_is_final(payload):
-        need_final_age(hours)
-        kind = "final"
-        if any(s["kind"] == "final" for s in post["snapshots"]):
-            return {"recorded": False, "reason": "final read already exists", "root_id": root_id}
-    if kind == "valid" and valid_snapshot(post):
-        return {"recorded": False, "reason": "valid snapshot already exists", "root_id": root_id}
-    need(not (kind == "valid" and post["missed"]), "post already marked missed")
+    admission = admit_snapshot(post, hours, snapshot_is_final(payload))
+    if admission.skip is not None:
+        return {"recorded": False, "reason": admission.skip, "root_id": root_id}
+    kind = admission.kind
     snap = snapshot_from_payload(payload, observed, hours, kind, state["self_handles"])
     post["snapshots"].append(snap)
     repo.save_post(post)

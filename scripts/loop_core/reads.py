@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
+from loop_core.errors import need
+
 SNAPSHOT_MIN_H = 36.0
 SNAPSHOT_MAX_H = 60.0
 FINAL_MIN_DAYS = 26
@@ -67,6 +69,11 @@ def past_window(hours: float) -> bool:
 def in_final_window(hours: float) -> bool:
     """True for a post old enough for its Final read and young enough for X to still return organic numbers."""
     return FINAL_MIN_DAYS * 24 <= hours <= FINAL_MAX_DAYS * 24
+
+
+def need_final_age(hours: float) -> None:
+    """Refuse a Final read of a post outside the Final window."""
+    need(in_final_window(hours), f"a final read needs a post {FINAL_MIN_DAYS} to {FINAL_MAX_DAYS} days old")
 
 
 def backfill_cursor(fetched: datetime, since: datetime) -> dict[str, datetime]:
