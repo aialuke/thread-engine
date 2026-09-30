@@ -34,7 +34,7 @@ Whether a post serves the account's audience: `main` (tech and building, for bui
 _Avoid_: channel
 
 **Truth budget**:
-The rule that every figure or claim in a Card is sourced this session: an official page, the operator, or the operator's own test with its artifact. A claim that can't be sourced comes out of the Card; it is never softened to keep it.
+The rule that every figure or claim in a Card is sourced this session: an official page, the operator, or the operator's own run with its artifact. A claim that can't be sourced comes out of the Card; it is never softened to keep it.
 _Avoid_: fact-check (for the rule), accuracy policy
 
 **VERIFY**:
@@ -66,7 +66,7 @@ _Avoid_: change, diff
 ### Measuring
 
 **Daily run**:
-The once-a-day pass that performs every Read that has come due and records the results. Its script and skill are both named `snapshot`, but a Snapshot is a record, not a pass.
+The pass, run at least once a day, that performs every Read that has come due and records the results. Not called a snapshot run: a Snapshot is a record, not a pass.
 _Avoid_: snapshot run, snapshot job
 
 **Read**:
@@ -116,7 +116,7 @@ The next batch of unconsumed treatment posts, as many as the Experiment's size, 
 _Avoid_: cycle, batch
 
 **Arm**:
-A post's assignment inside an Experiment: Treatment, Control, or none for a post outside one. Only treatment posts enter Rounds, and a retrospective post cannot have an Arm. Skills and queue rows also say "the arm" for the Treatment's rule.
+A post's assignment inside an Experiment: Treatment, Control, or none for a post outside one. Only treatment posts enter Rounds, and a retrospective post cannot join an Experiment, so its Arm is none. Skills and queue rows also say "the arm" for the Treatment's rule.
 _Avoid_: group
 
 **Lesson**:
