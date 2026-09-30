@@ -55,4 +55,3 @@ Each line holds until its exit condition; skills point here instead of restating
 - Issues live in GitHub Issues (`aialuke/thread-engine`) via `gh`; see `docs/agents/issue-tracker.md`.
 - Triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`; see `docs/agents/triage-labels.md`.
 - Domain docs: one `CONTEXT.md` and `docs/adr/` at the repo root; see `docs/agents/domain.md`.
-- When the user grilling a design card says it is ready for Jev, follow `.claude/skills/jev-card/SKILL.md`.

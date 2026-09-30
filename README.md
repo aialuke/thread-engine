@@ -1,21 +1,21 @@
 # thread-engine
 
-Makes @exitzerocode posts and learns which ones grow the account. You type slash commands in Grok or Claude Code, whichever you have open, and paste posts into X. The agent runs everything else. Your own numbers come from the X API with read-only keys; research into other people's posts goes through Grok, so Claude Code needs Grok installed too.
+Makes @exitzerocode posts and learns which ones grow the account. You type slash commands in Grok or Claude Code, whichever you have open, and paste posts into X. The agent runs everything else. Your own numbers come from the X API with read-only keys; research into other people's posts goes through `scripts/x_read.py`, which calls Grok, so Claude Code needs Grok installed too until D88 (`reviews/factory-drop-grok-plan.md`) removes it.
 
 ## The cycle
 
 1. **`/next`** — catches up on results, then proposes one post (topic, format, what it tests, when to post) and 2–3 conversations worth a reply today. Say yes or change it. You write every reply yourself.
-2. **`/draft-thread <slug>`** — Grok researches, checks every path and claim, and writes the cards. It starts in Plan mode, so you see the plan first.
+2. **`/draft-thread <slug>`** — the agent researches, checks every path and claim, and writes the cards. It starts in Plan mode, so you see the plan first.
 3. **Read the cards.** Change anything you like.
 4. **`/approve <slug>`** — only you can do this. It approves the cards exactly as they are. If a card changes later, approve again.
-5. **`/ready <slug>`** — Grok checks the draft and puts card 1 on your clipboard. Paste it into X as a new post. Say `next` for each following card and post it as a reply to the one before.
-6. **`/posted <link to the first post>`** — Grok records what actually went live and asks how long it took.
+5. **`/ready <slug>`** — the agent checks the draft and puts card 1 on your clipboard. Paste it into X as a new post. Say `next` for each following card and post it as a reply to the one before.
+6. **`/posted <link to the first post>`** — the agent records what actually went live and asks how long it took.
 
 ### PAID → FREE posts
 
 The series has a few extra steps of yours (rules: `.claude/skills/format-tool-swap/SKILL.md`):
 
-- Draft it with `/draft-thread`, not in a Grok chat, so every row is checked and the loop measures it.
+- Draft it with `/draft-thread`, not in a chat outside this repo, so every row is checked and the loop measures it.
 - Testing a tool is optional. If a quick test is easy (a tool you already use), a screenshot of it makes the post stronger; the draft offers it once.
 - The shout-out to a maker is card 2: post it 10–20 minutes after card 1, not straight away. Type `/posted` once it's live.
 - `REPLIES.md` in the draft has points to make if people reply. Write your replies in your own words.
@@ -30,8 +30,8 @@ Numbers are collected automatically by the daily job: every post, reply and quot
 - **Once a week, export your X analytics:** on a computer, X → Premium → Analytics → Content → Export, last 7 days. Leave the file in Downloads; `/results` picks it up. It's the only way to see which posts bring new followers.
 - Each review can propose up to two rule changes, each backed by a test. **`/apply <lesson>`** accepts one. **`/undo-rule <lesson>`** takes it back.
 - One experiment runs at a time. A result needs 3 posts to look promising and 3 more to be adopted. With one or two posts a day, expect about one answer every week or two.
-- **Experiments are paused until there are two weeks of organic numbers** (from 24 Sep 2026). Until then, posts are recorded and compared, but nothing is declared a winner.
-- `experiments.md`, `learnings.md` and `ledger/SUMMARY.md` are always up to date to read. Never edit them; Grok rewrites them.
+- **Experiments are paused until 2026-10-08**, two weeks of organic numbers from 24 Sep 2026. Until then, posts are recorded and compared, but nothing is declared a winner. On or after that date `/next` asks whether to restart them.
+- `experiments.md`, `learnings.md` and `ledger/SUMMARY.md` are always up to date to read. Never edit them; the loop rewrites them.
 
 ## Staying eligible for X's rewards program
 
@@ -42,11 +42,11 @@ The target is X's Original Content Rewards: 500 verified followers and 500,000 v
 - **Now and then:** check x.com/i/under_the_hood for any label on the account.
 - **Don't boost.** Boosted reach doesn't count and X's terms treat it as inflating views.
 - **Keep the pinned post link-free**, or linked only to a well-known site. A pin with a link X rates as low quality can hide all your posts from Home for a week.
-- **Grok balance:** `/next`'s research runs on Grok Build. If it says the balance ran out, top it up.
+- **Grok balance (until D88):** `/next`'s research runs on Grok Build. If it says the balance ran out, top it up.
 
 ## What never changes
 
-Only you approve a post. Nothing is posted for you. Every figure needs a source checked in the same session. The learning loop can change formats, length, timing, topics and hook style, never those rules.
+Only you approve a post. Nothing is posted for you. Every figure needs a source checked in the draft's verify run. The learning loop can change formats, length, timing, topics and hook style, never those rules.
 
 ## One-time setup
 
@@ -56,7 +56,7 @@ Only you approve a post. Nothing is posted for you. Every figure needs a source 
 
 ## Monthly outside check (optional)
 
-Grok drafts, measures and grades its own work. Once a month, ask a different model to check it blind. In a Claude Code session in this folder, say:
+The agent drafts, measures and grades its own work. Once a month, ask a different model to check it blind. In a Claude Code session in this folder, say:
 
 > Read only `ledger/*.json`, `ledger/activity/` and `ledger/raw/`. Without opening `learnings.md`, `experiments.md` or `reviews/`, write down which formats, lengths and posting times did best and how sure you are. Then open `learnings.md` and list where it disagrees with you.
 

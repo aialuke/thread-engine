@@ -89,21 +89,7 @@ A swap with no official page for its task is cut, not softened.
 - **Posted 10–20 minutes after the root,** as a reply to it. The run sheet and `/ready` say so, and `/posted` waits until it's live.
 - **Ends at the thank-you.** The card carries nothing about the next post.
 
-Handles checked with `x_api.py user` on 24 Sep 2026:
-
-| Handle | Account | Verified | Last post |
-|---|---|---|---|
-| `@photopeacom` | Photopea | no | 9 Sep |
-| `@Blackmagic_News` | Blackmagic Design (news account; help lives on its forum) | business | 20 Sep |
-| `@Blender` | Blender | blue | 23 Sep |
-| `@OBSProject` | OBS | business | 19 Sep |
-| `@use_bruno` | Bruno | blue | 23 Sep |
-| `@obsdmd` | Obsidian (not `@Obsidian`, a game studio) | blue | 16 Sep |
-| `@ollama` | ollama | business | 23 Sep |
-| `@kritaartists` | Krita Artists, the community account that posts Krita releases (confirm it speaks for the project before tagging) | no | 16 Sep |
-| `@Krita_Painting` | **doesn't exist.** Post 1 tagged it | – | – |
-
-Re-check a handle in the post's own session; accounts change.
+Check every handle with `python3 scripts/x_api.py user <handle>` in the post's own verify run; accounts change. The handles checked on 24 Sep 2026 are in `shipped/paid-to-free-tools/NOTES.md`.
 
 ## REPLIES.md
 
@@ -131,7 +117,7 @@ Root only, on organic engagement and visits per organic impression at the 36–6
 
 - After Effects over Cinema 4D for Blender's row, and Streamlabs Ultra over Camtasia for OBS's.
 - "Finding" over "I found".
-- No job-first hooks ("Need to open a PSD without Photoshop?").
+- Hooks open on the category header, so the root leads with the header, never a job question.
 - The category word, not the roster's long category titles.
 
 ## Checklist

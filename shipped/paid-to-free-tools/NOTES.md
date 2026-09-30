@@ -72,3 +72,19 @@ From the X API at 12.8 hours, plus X's analytics export for 18–24 Sep. The 36�
 ## Lane
 
 The ledger says `other`. The reasons recorded on 24 Sep were test 1 (not from the build) and test 3 ("No watermark" unsourced). Test 1 now passes, because `main` covers tech broadly. Test 3 doesn't: Blackmagic's pages don't state "No watermark", and the operator chose not to test it (24 Sep 2026). So it stays `other`, and it's non-organic either way.
+
+## Maker handles (checked 24 Sep 2026)
+
+Checked with `x_api.py user` on 24 Sep 2026. Re-check in the post's own verify run.
+
+| Handle | Account | Verified | Last post |
+|---|---|---|---|
+| `@photopeacom` | Photopea | no | 9 Sep |
+| `@Blackmagic_News` | Blackmagic Design (news account; help lives on its forum) | business | 20 Sep |
+| `@Blender` | Blender | blue | 23 Sep |
+| `@OBSProject` | OBS | business | 19 Sep |
+| `@use_bruno` | Bruno | blue | 23 Sep |
+| `@obsdmd` | Obsidian (not `@Obsidian`, a game studio) | blue | 16 Sep |
+| `@ollama` | ollama | business | 23 Sep |
+| `@kritaartists` | Krita Artists, the community account that posts Krita releases (confirm it speaks for the project before tagging) | no | 16 Sep |
+| `@Krita_Painting` | **doesn't exist.** Post 1 tagged it | – | – |
