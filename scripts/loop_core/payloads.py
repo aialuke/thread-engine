@@ -282,8 +282,13 @@ def experiment_terms(payload: dict) -> tuple[str, float, list[str]]:
     need(metric not in UNSCORABLE, f"primary {metric!r} cannot be scored: {UNSCORABLE.get(metric, '')}")
     effect = float(payload.get("effect", 1.5))
     need(effect > 1.0, "effect must be above 1.0")
-    cohort = [str(c) for c in payload.get("cohort", [])]
+    raw = payload.get("cohort", [])
+    need(isinstance(raw, list), "cohort must be a list of post ids")
+    cohort = [str(c) for c in raw]
     need(len(cohort) >= MIN_COHORT, f"cohort needs at least {MIN_COHORT} posts")
+    for root_id in cohort:
+        need(cohort.count(root_id) == 1, f"cohort lists {root_id} more than once")
+        need(POST_ID_RE.match(root_id) is not None, f"cohort has {root_id!r}, which is not a post id")
     return metric, effect, cohort
 
 

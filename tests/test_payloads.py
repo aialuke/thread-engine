@@ -269,10 +269,18 @@ class FollowerInputs(Refused):
 
 class ExperimentPayloads(Refused):
     def test_terms(self) -> None:
-        self.assertEqual(payloads.experiment_terms({"primary": "likes", "cohort": [1, 2, 3]}),
-                         ("likes", 1.5, ["1", "2", "3"]))
-        self.assertEqual(payloads.experiment_terms({"primary": "likes", "effect": "2", "cohort": "abc"})[1:],
-                         (2.0, ["a", "b", "c"]))
+        self.assertEqual(payloads.experiment_terms({"primary": "likes", "cohort": [10001, "10002", "10003"]}),
+                         ("likes", 1.5, ["10001", "10002", "10003"]))
+        self.assertEqual(payloads.experiment_terms({"primary": "likes", "effect": "2", "cohort": ["10001", "10002", "10003"]})[1:],
+                         (2.0, ["10001", "10002", "10003"]))
+
+    def test_cohort_must_be_a_list_of_unique_post_ids(self) -> None:
+        self.assertRefused(lambda: payloads.experiment_terms({"primary": "likes", "cohort": "abc"}),
+                           "cohort must be a list of post ids")
+        self.assertRefused(lambda: payloads.experiment_terms({"primary": "likes", "cohort": ["10001", "10001", "10002"]}),
+                           "cohort lists 10001 more than once")
+        self.assertRefused(lambda: payloads.experiment_terms({"primary": "likes", "cohort": ["10001", "10002", "abc"]}),
+                           "cohort has 'abc', which is not a post id")
 
     def test_term_refusals_in_order(self) -> None:
         self.assertRefused(lambda: payloads.experiment_terms({}),
