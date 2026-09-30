@@ -23,7 +23,7 @@ Approval (`/approve`), the truth budget, fail-closed fact-checks, the shared gat
 
 - `research/index.md` catalogues `research/`, `reference/`, `reviews/`, `queue/` and `receipts/`; `reviews/log.md` is the append-only log of ingests, decisions and lints.
 - `reference/x-algorithm.md` holds verified X ranking facts (cited as A1, A2…); `reference/x-api.md` holds what the X API can read, prices and privacy rules.
-- `queue/topics.yaml` is the backlog; `queue/research-backlog.md` is operator-chosen research to do later; `queue/paid-free-roster.md` lists PAID → FREE claims to check, never copy.
+- `queue/topics.yaml` is the Queue of Topics; `queue/research-backlog.md` is operator-chosen research to do later; `queue/paid-free-roster.md` lists PAID → FREE claims to check, never copy.
 - `drafts/<date>-<slug>/` holds numbered cards (`01-hook.md` …), which are the posts. `shipped/<slug>/NOTES.md` holds post-ship notes.
 - `ledger/activity/` and `ledger/raw/` are written only by `loop.py`. `loop/inbox/`, `loop/followers/` and `ledger/raw/api/` hold other people's data and are not committed.
 - `scripts/loop_core/reads.py` holds the Read-window rules (48h, Final and Backfill read thresholds, due/missed, due-reads windows) as pure functions; `scripts/loop.py` stays the only writer and calls it.
