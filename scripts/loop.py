@@ -31,8 +31,8 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from loop_core.errors import LoopError, need
-from loop_core.payloads import (METRICS, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEYS, check_count, validate_item,
-                                validate_post, validate_snapshot)
+from loop_core.payloads import (METRICS, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEYS, activity_header, check_count,
+                                cursor_updates, post_from_payload, snapshot_from_payload, validate_item, validate_post)
 from loop_core.reads import (FINAL_MAX_DAYS, FINAL_MIN_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage,
                              in_final_window, past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
 from loop_core.times import iso, parse_time
@@ -55,7 +55,6 @@ UNSCORABLE = {
     "replies": "a root's replies count the account's own thread cards",
 }
 OPEN_STATES = {"testing", "promising", "unclear"}
-READ_STAGES = {"backfill", "48h", "final"}
 # X's analytics export (Analytics → Content → Export): organic, per post, with the follows and
 # shares the pay-per-use API cannot read (reference/x-api.md P11).
 EXPORT_COLUMNS = {"Impressions": "impressions", "Likes": "likes", "Replies": "replies", "Reposts": "reposts",
@@ -224,28 +223,7 @@ def cmd_init(repo: Repo, args) -> dict:
 def cmd_record_post(repo: Repo, args) -> dict:
     repo.state()
     payload = read_json(Path(args.json))
-    post = {
-        "root_id": str(payload.get("root_id", "")),
-        "slug": payload.get("slug"),
-        "format": payload.get("format"),
-        "lane": payload.get("lane"),
-        "posted_at": payload.get("posted_at", ""),
-        "retrospective": payload.get("retrospective", False),
-        "made_in_repo": payload.get("made_in_repo", True),
-        "experiment": payload.get("experiment"),
-        "arm": payload.get("arm", "none"),
-        "hypothesis": payload.get("hypothesis"),
-        "cards": payload.get("cards", []),
-        "media": payload.get("media", []),
-        "ai_media": payload.get("ai_media", False),
-        "production_minutes": payload.get("production_minutes"),
-        "edits": payload.get("edits", []),
-        "draft": payload.get("draft"),
-        "snapshots": [],
-        "missed": False,
-        "auto": bool(payload.get("auto", False)),
-    }
-    validate_post(post)
+    post = post_from_payload(payload)
     path = repo.post_path(post["root_id"])
     if path.exists():
         existing = read_json(path)
@@ -328,33 +306,7 @@ def cmd_record_snapshot(repo: Repo, args) -> dict:
     if kind == "valid" and valid_snapshot(post):
         return {"recorded": False, "reason": "valid snapshot already exists", "root_id": root_id}
     need(not (kind == "valid" and post["missed"]), "post already marked missed")
-    if payload.get("repliers") is not None:
-        self_handles = set(state["self_handles"])
-        repliers = [str(h).lstrip("@").lower() for h in payload["repliers"]]
-        outside = [h for h in repliers if h not in self_handles]
-        outside_count, outside_names = len(outside), sorted(set(outside))
-    else:
-        # X API reads count outside replies by id; names of other accounts are not stored.
-        outside_count, outside_names = payload.get("outside_replies"), []
-        check_count(outside_count, "outside_replies")
-    root = {m: payload.get("root", {}).get(m) for m in METRICS}
-    snap = {
-        "observed_at": iso(observed),
-        "age_hours": round(hours, 1),
-        "kind": kind,
-        "source": payload.get("source", "grok"),
-        "root": root,
-        "cards": payload.get("cards", []),
-        "outside_replies": outside_count,
-        "outside_repliers": outside_names,
-        "repliers_complete": payload.get("repliers_complete"),
-        "followers": payload.get("followers"),
-        "raw_file": payload.get("raw_file"),
-        "missing": [m for m in METRICS if root[m] is None],
-    }
-    if payload.get("organic") is not None:
-        snap["organic"] = {k: payload["organic"].get(k) for k in ORGANIC_KEYS}
-    validate_snapshot(snap)
+    snap = snapshot_from_payload(payload, observed, hours, kind, state["self_handles"])
     post["snapshots"].append(snap)
     repo.save_post(post)
     return {"recorded": True, "root_id": root_id, "kind": kind, "age_hours": snap["age_hours"],
@@ -365,9 +317,7 @@ def cmd_record_activity(repo: Repo, args) -> dict:
     """One row per post, reply and quote, with a read per stage. Advances the read cursors last."""
     state = repo.state()
     payload = read_json(Path(args.json))
-    stage = payload.get("stage")
-    need(stage in READ_STAGES, f"stage must be one of {sorted(READ_STAGES)}")
-    observed = parse_time(payload.get("observed_at", ""))
+    stage, observed = activity_header(payload)
     months: dict[str, dict] = {}
     recorded = 0
     for item in payload.get("items", []):
@@ -395,9 +345,7 @@ def cmd_record_activity(repo: Repo, args) -> dict:
         data["items"] = dict(sorted(data["items"].items(), key=lambda kv: kv[1]["created_at"]))
         write_json(repo.activity_dir / f"{month}.json", data)
     api = state.setdefault("api", {})
-    for key in ("read48_until", "final_until"):
-        if (payload.get("cursor") or {}).get(key):
-            api[key] = iso(parse_time(payload["cursor"][key]))
+    api.update(cursor_updates(payload))
     repo.save_state(state)
     return {"recorded": recorded, "stage": stage, "cursors": api}
 

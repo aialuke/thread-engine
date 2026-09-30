@@ -7,9 +7,10 @@ a duplicate is loop.py's to decide. Messages are part of the CLI, so they do not
 from __future__ import annotations
 
 import re
+from datetime import datetime
 
 from loop_core.errors import need
-from loop_core.times import parse_time
+from loop_core.times import iso, parse_time
 
 FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "build-log", "tool-verdict", "other"}
 ARMS = {"treatment", "control", "none"}
@@ -19,6 +20,8 @@ ITEM_KINDS = {"original", "quote", "reply", "thread_card", "repost"}
 PUBLIC_KEYS = ("impressions", "likes", "replies", "reposts", "quotes", "bookmarks")
 ORGANIC_KEYS = ("impressions", "likes", "replies", "reposts", "profile_visits", "url_clicks")
 POST_ID_RE = re.compile(r"^[0-9]{5,25}$")
+READ_STAGES = {"backfill", "48h", "final"}
+CURSOR_KEYS = ("read48_until", "final_until")
 
 
 def check_count(value, field: str) -> None:
@@ -71,3 +74,75 @@ def validate_item(item: dict) -> None:
         for key, value in (item.get(group) or {}).items():
             need(key in keys, f"unknown {group} measure {key!r}")
             check_count(value, f"{group}.{key}")
+
+
+def post_from_payload(payload: dict) -> dict:
+    """The post record a record-post Payload describes, defaults filled in and validated. No snapshots yet."""
+    post = {
+        "root_id": str(payload.get("root_id", "")),
+        "slug": payload.get("slug"),
+        "format": payload.get("format"),
+        "lane": payload.get("lane"),
+        "posted_at": payload.get("posted_at", ""),
+        "retrospective": payload.get("retrospective", False),
+        "made_in_repo": payload.get("made_in_repo", True),
+        "experiment": payload.get("experiment"),
+        "arm": payload.get("arm", "none"),
+        "hypothesis": payload.get("hypothesis"),
+        "cards": payload.get("cards", []),
+        "media": payload.get("media", []),
+        "ai_media": payload.get("ai_media", False),
+        "production_minutes": payload.get("production_minutes"),
+        "edits": payload.get("edits", []),
+        "draft": payload.get("draft"),
+        "snapshots": [],
+        "missed": False,
+        "auto": bool(payload.get("auto", False)),
+    }
+    validate_post(post)
+    return post
+
+
+def snapshot_from_payload(payload: dict, observed: datetime, hours: float, kind: str, self_handles: list[str]) -> dict:
+    """The Snapshot a record-snapshot Payload describes, for a Read already placed at `hours` old as `kind`."""
+    if payload.get("repliers") is not None:
+        own = set(self_handles)
+        repliers = [str(h).lstrip("@").lower() for h in payload["repliers"]]
+        outside = [h for h in repliers if h not in own]
+        outside_count, outside_names = len(outside), sorted(set(outside))
+    else:
+        # X API reads count outside replies by id; names of other accounts are not stored.
+        outside_count, outside_names = payload.get("outside_replies"), []
+        check_count(outside_count, "outside_replies")
+    root = {m: payload.get("root", {}).get(m) for m in METRICS}
+    snap = {
+        "observed_at": iso(observed),
+        "age_hours": round(hours, 1),
+        "kind": kind,
+        "source": payload.get("source", "grok"),
+        "root": root,
+        "cards": payload.get("cards", []),
+        "outside_replies": outside_count,
+        "outside_repliers": outside_names,
+        "repliers_complete": payload.get("repliers_complete"),
+        "followers": payload.get("followers"),
+        "raw_file": payload.get("raw_file"),
+        "missing": [m for m in METRICS if root[m] is None],
+    }
+    if payload.get("organic") is not None:
+        snap["organic"] = {k: payload["organic"].get(k) for k in ORGANIC_KEYS}
+    validate_snapshot(snap)
+    return snap
+
+
+def activity_header(payload: dict) -> tuple[str, datetime]:
+    """The stage and observation time of a record-activity Payload."""
+    stage = payload.get("stage")
+    need(stage in READ_STAGES, f"stage must be one of {sorted(READ_STAGES)}")
+    return stage, parse_time(payload.get("observed_at", ""))
+
+
+def cursor_updates(payload: dict) -> dict[str, str]:
+    """The read cursors a record-activity Payload moves, as stored timestamps. Absent or empty ones stay put."""
+    given = payload.get("cursor") or {}
+    return {key: iso(parse_time(given[key])) for key in CURSOR_KEYS if given.get(key)}

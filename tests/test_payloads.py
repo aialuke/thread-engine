@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import sys
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
@@ -13,6 +14,7 @@ from loop_core import payloads  # noqa: E402
 from loop_core.errors import LoopError  # noqa: E402
 
 T0 = "2026-10-01T00:00:00Z"
+OBSERVED = datetime(2026, 10, 3, tzinfo=timezone.utc)
 
 
 def post(**change) -> dict:
@@ -112,6 +114,82 @@ class CheckCount(Refused):
         for bad in (-1, 1.0, "3", True, False):
             with self.subTest(bad=bad):
                 self.assertRefused(lambda: payloads.check_count(bad, "n"), "n must be a non-negative integer or null")
+
+
+class PostFromPayload(Refused):
+    def test_defaults_are_filled_in(self) -> None:
+        got = payloads.post_from_payload({"root_id": 1000000001, "slug": "s", "format": "other", "lane": "other",
+                                          "posted_at": T0})
+        self.assertEqual(got, {
+            "root_id": "1000000001", "slug": "s", "format": "other", "lane": "other", "posted_at": T0,
+            "retrospective": False, "made_in_repo": True, "experiment": None, "arm": "none", "hypothesis": None,
+            "cards": [], "media": [], "ai_media": False, "production_minutes": None, "edits": [], "draft": None,
+            "snapshots": [], "missed": False, "auto": False})
+
+    def test_auto_is_coerced_and_snapshots_are_never_taken_from_the_payload(self) -> None:
+        got = payloads.post_from_payload({**post(), "auto": 1, "snapshots": [{"kind": "x"}], "missed": True})
+        self.assertEqual((got["auto"], got["snapshots"], got["missed"]), (True, [], False))
+
+    def test_an_invalid_post_is_refused(self) -> None:
+        self.assertRefused(lambda: payloads.post_from_payload({**post(), "lane": "z"}), "lane must be main or other")
+
+
+class SnapshotFromPayload(Refused):
+    def build(self, payload: dict, kind: str = "valid", handles=("me",)) -> dict:
+        return payloads.snapshot_from_payload({"observed_at": T0, **payload}, OBSERVED, 48.04, kind, list(handles))
+
+    def test_repliers_are_counted_outside_the_accounts_own_handles(self) -> None:
+        snap = self.build({"repliers": ["Me", "@Other", "other", "third"]})
+        self.assertEqual((snap["outside_replies"], snap["outside_repliers"]), (3, ["other", "third"]))
+
+    def test_without_repliers_the_count_is_taken_as_given_and_no_names_are_stored(self) -> None:
+        snap = self.build({"outside_replies": 4})
+        self.assertEqual((snap["outside_replies"], snap["outside_repliers"]), (4, []))
+        self.assertRefused(lambda: self.build({"outside_replies": -1}),
+                           "outside_replies must be a non-negative integer or null")
+
+    def test_shape_and_defaults(self) -> None:
+        snap = self.build({"root": {"views": 5, "likes": 1}})
+        self.assertEqual(snap["observed_at"], "2026-10-03T00:00:00Z")
+        self.assertEqual((snap["age_hours"], snap["kind"], snap["source"]), (48.0, "valid", "grok"))
+        self.assertEqual(snap["missing"], ["reposts", "quotes", "replies", "bookmarks"])
+        self.assertNotIn("organic", snap)
+
+    def test_organic_keeps_only_known_measures(self) -> None:
+        snap = self.build({"organic": {"likes": 2, "bogus": 9}})
+        self.assertEqual(snap["organic"], {"impressions": None, "likes": 2, "replies": None, "reposts": None,
+                                           "profile_visits": None, "url_clicks": None})
+
+    def test_the_built_snapshot_is_validated(self) -> None:
+        self.assertRefused(lambda: self.build({"root": {"views": -1}}),
+                           "root.views must be a non-negative integer or null")
+
+
+class ActivityHeader(Refused):
+    def test_stage_and_time(self) -> None:
+        self.assertEqual(payloads.activity_header({"stage": "48h", "observed_at": T0}),
+                         ("48h", datetime(2026, 10, 1, tzinfo=timezone.utc)))
+
+    def test_refusals(self) -> None:
+        self.assertRefused(lambda: payloads.activity_header({"stage": "x", "observed_at": T0}),
+                           "stage must be one of ['48h', 'backfill', 'final']")
+        self.assertRefused(lambda: payloads.activity_header({"stage": "final"}),
+                           "bad time ''; use ISO 8601 with a timezone")
+
+
+class CursorUpdates(Refused):
+    def test_only_named_and_non_empty_cursors_move(self) -> None:
+        got = payloads.cursor_updates({"cursor": {"read48_until": "2026-10-01T10:00:00+10:00", "final_until": "",
+                                                  "other": "2026-10-01T00:00:00Z"}})
+        self.assertEqual(got, {"read48_until": "2026-10-01T00:00:00Z"})
+
+    def test_none_given(self) -> None:
+        self.assertEqual(payloads.cursor_updates({}), {})
+        self.assertEqual(payloads.cursor_updates({"cursor": None}), {})
+
+    def test_a_bad_cursor_is_refused(self) -> None:
+        self.assertRefused(lambda: payloads.cursor_updates({"cursor": {"final_until": "zz"}}),
+                           "bad time 'zz'; use ISO 8601 with a timezone")
 
 
 if __name__ == "__main__":
