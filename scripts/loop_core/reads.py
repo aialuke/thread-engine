@@ -15,6 +15,7 @@ SNAPSHOT_MIN_H = 36.0
 SNAPSHOT_MAX_H = 60.0
 FINAL_MIN_DAYS = 26
 FINAL_MAX_DAYS = 29  # X drops organic numbers at 30 days; matches x_api.ORGANIC_DAYS (a test checks)
+FINAL_WARN_H = FINAL_MAX_DAYS * 24 - 48  # a post without a Final read is at risk for its last 48 hours
 
 
 def snapshot_kind(hours: float) -> str:
@@ -69,6 +70,11 @@ def past_window(hours: float) -> bool:
 def in_final_window(hours: float) -> bool:
     """True for a post old enough for its Final read and young enough for X to still return organic numbers."""
     return FINAL_MIN_DAYS * 24 <= hours <= FINAL_MAX_DAYS * 24
+
+
+def final_at_risk(hours: float) -> bool:
+    """True for a post inside the Final window's last 48 hours: it has one or two daily runs left to be read."""
+    return FINAL_WARN_H <= hours <= FINAL_MAX_DAYS * 24
 
 
 def need_final_age(hours: float) -> None:
