@@ -100,15 +100,15 @@ A treatment hypothesis judged in Rounds against a threshold fixed when it opens 
 _Avoid_: test, trial, A/B
 
 **Cohort**:
-The earlier posts an Experiment is measured against, accepted by the operator with the Experiment and ideally from the same Lane and matching the format the treatment is compared with. A post joins only if it is organic and has a Snapshot that can be scored on the Experiment's measure. Its median times the effect sets the threshold. It is the reference the threshold comes from, not the Control: its posts all predate the Experiment.
+The earlier posts an Experiment is measured against, accepted by the operator with the Experiment and ideally from the same Lane and matching the format the treatment is compared with. A post joins only if it is organic and has a Snapshot that can be scored on the Experiment's measure. Its median times the effect sets the threshold. It is the reference the threshold comes from; unlike Control posts, its posts all predate the Experiment.
 _Avoid_: sample, baseline
 
 **Treatment**:
-The one change an Experiment tests, stated as the exact rule a post follows. A treatment post follows it and is the only kind that is scored.
+The one change an Experiment tests, stated as the exact rule a post follows. A treatment post is one that follows it.
 _Avoid_: variant, intervention
 
 **Control**:
-A post normally made on an exploit Slot while an Experiment is open, following the current best approach. It is recorded for context and never scored: the Treatment is judged against the Cohort's threshold, not against Control posts. What an Experiment says it compares with is only a description, and may differ from what Control posts do.
+A post normally made on an exploit Slot while an Experiment is open, following the current best approach. It is recorded for context and never scored: the Treatment is judged against the Cohort's threshold, not against Control posts. The Experiment's own "compared with" wording is a description and may not match what Control posts do.
 _Avoid_: control group
 
 **Round**:
@@ -116,7 +116,7 @@ The next batch of unconsumed treatment posts, as many as the Experiment's size, 
 _Avoid_: cycle, batch
 
 **Arm**:
-A post's assignment inside an Experiment: Treatment, Control, or none for a post outside one. Only treatment posts enter Rounds, and a retrospective post cannot have an Arm. "The arm" also names the rule itself: the exact terms of the Treatment or of the Control.
+A post's assignment inside an Experiment: Treatment, Control, or none for a post outside one. Only treatment posts enter Rounds, and a retrospective post cannot have an Arm. Skills and queue rows also say "the arm" for the Treatment's rule.
 _Avoid_: group
 
 **Lesson**:
@@ -124,5 +124,5 @@ An evidence-backed statement recorded when an Experiment closes, or when an oper
 _Avoid_: finding, insight
 
 **Slot**:
-The next post's explore-or-exploit recommendation, from the time since the loop started and the posts made since. Explore posts the treatment (or asks for an Experiment); exploit posts the current best approach. It also names the Arm: treatment on explore, control on exploit.
+The next post's explore-or-exploit recommendation, from the time since the loop started and the posts made since. Explore posts the treatment, or asks for an Experiment if none is open; exploit posts the current best approach, as a Control post when one is open.
 _Avoid_: turn, next post
