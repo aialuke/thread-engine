@@ -51,6 +51,46 @@ class Helpers(unittest.TestCase):
         self.assertTrue(all(before in experiments.OPEN_STATES for before, _ in experiments.TRANSITIONS))
 
 
+class LessonBasis(unittest.TestCase):
+    def measured(self, **extra) -> dict:
+        return {"id": "L-001", "experiment": "E-001", "status": "adopted", "evidence": [f"p{i}" for i in range(6)], **extra}
+
+    def rounds(self, *sizes: int) -> dict:
+        return experiment("adopted", cohort=[{"root_id": f"c{i}"} for i in range(5)],
+                          rounds=[{"posts": ["x"] * n} for n in sizes])
+
+    def test_measured_lesson_states_rounds_posts_cohort_and_the_caveat(self) -> None:
+        text = experiments.lesson_basis(self.measured(), [self.rounds(3, 3)])
+        self.assertEqual(text, "Provisional: adopted after 2 rounds (6 treatment posts) against a cohort of 5. "
+                               + experiments.FALSE_ADOPTION_CAVEAT)
+
+    def test_a_mixed_round_first_counts_all_three_rounds(self) -> None:
+        text = experiments.lesson_basis(self.measured(), [self.rounds(3, 3, 3)])
+        self.assertIn("after 3 rounds (9 treatment posts)", text)
+
+    def test_preference_lesson_names_its_edits_and_says_nothing_was_measured(self) -> None:
+        lesson = {"id": "L-002", "experiment": None, "status": "adopted", "source": "operator edits",
+                  "evidence": ["a", "b", "c"]}
+        self.assertEqual(experiments.lesson_basis(lesson, []),
+                         "Provisional: 3 operator edits (a, b, c). Not measured against anything.")
+
+    def test_only_adopted_lessons_have_a_basis(self) -> None:
+        for status in ("stale", "no_effect", "not_replicated"):
+            self.assertIsNone(experiments.lesson_basis(self.measured(status=status), [self.rounds(3, 3)]))
+
+    def test_a_missing_experiment_is_said_not_guessed(self) -> None:
+        self.assertEqual(experiments.lesson_basis(self.measured(), []),
+                         "Provisional: experiment E-001 is not in the ledger, so its rounds cannot be shown.")
+
+    def test_the_caveat_matches_the_two_round_chance_of_adoption(self) -> None:
+        def chance(p: float) -> float:
+            win, mixed = p ** 3, 3 * p ** 2 * (1 - p)
+            return win * win + mixed * win * win
+        self.assertAlmostEqual(chance(0.5), 1 / 50, delta=0.01)
+        self.assertAlmostEqual(chance(2 / 3), 1 / 8, delta=0.01)
+        self.assertIn("1 time in 50 to 1 in 8", experiments.FALSE_ADOPTION_CAVEAT)
+
+
 class Evaluate(unittest.TestCase):
     def test_too_few_posts_change_nothing_and_say_how_many_are_needed(self) -> None:
         new, answer = experiments.evaluate_rounds(state(experiment()), ready(300, 400), AT)

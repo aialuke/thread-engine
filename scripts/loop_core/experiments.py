@@ -25,6 +25,9 @@ TRANSITIONS = {
     ("unclear", "mixed"): "no_effect",
     ("unclear", "fail"): "no_effect",
 }
+# Two passing rounds of three (or mixed, then two passes) adopt a lesson. At a chance-pass rate of 1/2 per post
+# that is about 2%; at 2/3 it is about 12.7% (blind Codex review task-munjqiqe-7wiz8s, re-derived 2026-09-30).
+FALSE_ADOPTION_CAVEAT = "A chance result adopts about 1 time in 50 to 1 in 8 at this size."
 
 
 def open_experiment(state: dict) -> dict | None:
@@ -44,6 +47,22 @@ def round_result(passes: int, size: int) -> str:
     if passes >= size - 1:
         return "mixed"
     return "fail"
+
+
+def lesson_basis(lesson: dict, experiments: list[dict]) -> str | None:
+    """What an adopted Lesson rests on, in one sentence for the operator. None for a Lesson that is not adopted."""
+    if lesson["status"] != "adopted":
+        return None
+    if lesson.get("experiment") is None:
+        edits = lesson["evidence"]
+        return f"Provisional: {len(edits)} operator edits ({', '.join(edits)}). Not measured against anything."
+    exp = next((e for e in experiments if e["id"] == lesson["experiment"]), None)
+    if exp is None:
+        return f"Provisional: experiment {lesson['experiment']} is not in the ledger, so its rounds cannot be shown."
+    rounds = len(exp["rounds"])
+    posts = sum(len(rnd["posts"]) for rnd in exp["rounds"])
+    return (f"Provisional: adopted after {rounds} rounds ({posts} treatment posts) against a cohort of "
+            f"{len(exp['cohort'])}. {FALSE_ADOPTION_CAVEAT}")
 
 
 def evaluate_rounds(state: dict, ready: list[tuple[str, float]], at: str,
