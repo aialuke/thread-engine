@@ -21,8 +21,8 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
 
 ## Steps (this order)
 
-1. **Contract.** Read `AGENTS.md`, `voice/exit-zero.md`, `reference/audience.md`, `reference/x-algorithm.md`, and `queue/topics.yaml`.
-   Done: all five read this session.
+1. **Contract.** Read `voice/exit-zero.md`, `reference/audience.md` and `queue/topics.yaml` (`AGENTS.md` is already loaded). Also read `reference/x-algorithm.md` when the format or arm depends on timing, reach or lane share, or when a format skill cites an `An` fact.
+   Done: the three files read, plus the algorithm page when one of those conditions applies.
 
 2. **Topic.** Find the queue row. Note `format`, `lane`, `experiment`, `arm`, `treatment`, and `hypothesis` if present. A row with no `format` is `settings`. Resolve the folder `drafts/YYYY-MM-DD-slug/` (today's date in Australia/Brisbane); reuse it if it exists.
    Done: slug, folder, format and, if set, the experiment arm are written down.

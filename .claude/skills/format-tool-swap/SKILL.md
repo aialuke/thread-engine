@@ -59,7 +59,7 @@ Paid product → Free tool
 
 ## Research, and an optional test
 
-Research is enough: every row stands on the vendors' own pages (below). Testing isn't a gate (operator, 24 Sep 2026: "I don't need to test something to research and understand it").
+Research is enough: every row stands on the vendors' own pages (below). Testing isn't a gate (operator: "I don't need to test something to research and understand it").
 
 A test adds value when it's easy. Offer it once per draft, never as a condition. The operator already uses Photopea, DaVinci Resolve, OBS and Obsidian, and a quick test (for example "open a layered PSD in Photopea") gives the post:
 - a real screenshot;
@@ -119,7 +119,7 @@ Optional. A real screenshot from the operator's own use is the best image the po
 
 ## Series operations
 
-- **Cadence:** one PAID → FREE parent every other day, inside the account's cap of two originals a day, hours apart (operator, 24 Sep 2026). Categories go in `queue/topics.yaml` order.
+- **Cadence:** one PAID → FREE parent every other day, inside the account's cap of two originals a day, hours apart (the cap `/next` applies). Categories go in `queue/topics.yaml` order.
 - **Pin:** pin the newest PAID → FREE post that's live, sourced and unboosted, with no link (A14). The operator pins on X.
 - **Makers and boosting:** `voice/exit-zero.md` → Makers and → Boosting.
 

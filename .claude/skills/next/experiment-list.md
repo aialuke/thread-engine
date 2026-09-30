@@ -11,7 +11,7 @@ Run `python3 scripts/loop.py next-slot`.
   2. Short thread (3 cards) against the long threads already shipped (6 to 9 posts).
   3. Posting hour: the US-overlap slots in `SKILL.md` step 4.4, against the account's usual daytime Brisbane posting.
   4. Root length: under 280 characters against 500–600.
-  5. Replies: five substantive replies in the lane on a posting day against none, measured by followers gained that week. **Review-only** (operator, 28 Sep 2026): watched in the weekly review, never opened with `open-experiment`, which scores single roots only.
+  5. Replies: five substantive replies in the lane on a posting day against none, measured by followers gained that week. **Review-only:** watched in the weekly review, never opened with `open-experiment`, which scores single roots only.
   6. PAID → FREE category: one category against another (for example developer against creator), with the header, shape, slot and shout-out held fixed. Cohort: earlier organic PAID → FREE posts.
 
   State: the question, the treatment, what it is compared with, the cohort, meaning earlier posts from `ledger/SUMMARY.md` in the same lane that match the comparison format, at least 3, and the primary: `engagement_rate` unless the cohort passes the `visit_rate` screen, named in the proposal for the operator's yes. When the operator says yes, write `loop/inbox/experiment.json` (`question`, `treatment`, `control`, `cohort` ids, `primary` the rate the operator said yes to, `effect` 1.5, `reference_facts` like ["A1","A5"]) and run `python3 scripts/loop.py open-experiment --json loop/inbox/experiment.json`.

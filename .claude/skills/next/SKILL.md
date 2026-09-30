@@ -23,30 +23,28 @@ Speak plainly. The operator does not read code or JSON: turn every helper output
 
 Done: the operator has heard what changed, and any failed or missed snapshot, in plain words.
 
-## 2. Weekly work, when `review.review_due` is true
+## 2. Weekly work
 
-1. Follow `.claude/skills/results/SKILL.md` (it writes the weekly review and ends with `mark-reviewed`).
-2. Algorithm check: follow the refresh rule in `reference/x-algorithm.md` (compare each cited file's blob SHA with `main`). If any changed or is gone: `python3 scripts/loop.py set-reference --status stale --files <paths>` and tell the operator which facts need a re-read before lessons that cite them are trusted. If none: `set-reference --status current`.
-3. Offer `/lint` once (docs check). Run it only if the operator says yes.
+When `review.review_due` is true, follow `.claude/skills/next/weekly.md`. Otherwise skip to step 3.
 
 ## 3. Pick the slot
 
-**Experiments are paused** (24 Sep 2026, `reviews/audit-2026-09.md`) until two weeks of organic X API data exist. The change that lifts the pause rewrites this section; while this paragraph stands, they are paused. Propose the post with no experiment arm, skip `next-slot`, and tell the operator in one line that experiments restart once the organic numbers are in.
+Read Current state in `AGENTS.md`. While it says experiments are paused, propose the post with no experiment arm, skip `next-slot`, and tell the operator in one line that experiments restart once the organic numbers are in.
 
-When the pause is lifted, follow `experiment-list.md` in this folder.
+When Current state no longer says paused, follow `experiment-list.md` in this folder.
 
 ## 4. Pick the topic
 
-1. Lane: read `reference/audience.md`. Say the `lane.share` in one line. While the operator trials formats, a share below 0.8 (12 of 15) is reported, not a reason to refuse an `other` post.
+1. Lane: read `reference/audience.md`. Say the `lane.share` in one line. While the operator trials formats, a share below the target in `reference/audience.md` is reported, not a reason to refuse an `other` post.
 2. Demand: run one or two searches for recent questions in the lane (for example `"how do I" free video editor lang:en -filter:replies`) with `python3 scripts/x_read.py search "<query>"`. It checks every post Grok returns against X and drops invented or misquoted ones; never cite a post it dropped, and don't use `x_keyword_search` directly, because it skips that check. Record each hit as a lead: post id, the query, and that the search returns at most 10. Leads are not proof of demand.
 3. Queue: consider `status: queued` rows in `queue/topics.yaml`. PAID → FREE rows (`format: tool-swap`) go in the queue's order, one parent every other day: say when the last one went out.
-4. Timing: propose a posting time in Australia/Brisbane. At most two originals a day, hours apart (operator, 24 Sep 2026): say how many originals went out today and how many hours since the last one. The operator should be there to reply in the first hour. A stranger only sees a post after its first like, and the like-based pool stops re-indexing at 48 hours (`reference/x-algorithm.md` A6), so prefer a time when builder mutuals and US Premium users are awake: the US-overlap slots, 22:00–23:00 or 05:00–07:00 Australia/Brisbane from Tuesday night to Friday morning, until experiment 3 in `experiment-list.md` says otherwise. The slots are a hypothesis from `reviews/reports/Driving verified home timeline impressions.md`, not a finding. US daylight saving ends on 1 Nov, which moves US mornings an hour later in Brisbane. The operator confirmed both slots work for them, first hour included.
+4. Timing: propose a posting time in Australia/Brisbane. At most two originals a day, hours apart: say how many originals went out today and how many hours since the last one. The operator should be there to reply in the first hour. A stranger only sees a post after its first like, and the like-based pool stops re-indexing at 48 hours (`reference/x-algorithm.md` A6), so prefer a time when builder mutuals and US Premium users are awake: the US-overlap windows, 22:00–23:00 or 05:00–07:00 Australia/Brisbane from Tuesday night to Friday morning, until experiment 3 in `experiment-list.md` says otherwise. The windows are a hypothesis from `reviews/reports/Driving verified home timeline impressions.md`, not a finding. US daylight saving ends on 1 Nov, which moves US mornings an hour later in Brisbane. The operator confirmed both windows work for them, first hour included.
 
 Done: the lane share, the leads (or that none were found), the queue state and the timing figures have each been said in a line.
 
 ## 5. Propose, then write the row
 
-Propose one post in four lines: topic, format, experiment arm (or none), posting time. Say why in one sentence. When the operator accepts or edits it, write or update the queue row:
+Propose one post in four lines: topic, format, experiment arm (or none), posting time. Say why in one sentence. Then stop and wait for the operator's yes or edit. Write or update the queue row only after it:
 
 ```yaml
   - slug: <kebab-slug>
@@ -63,6 +61,8 @@ Propose one post in four lines: topic, format, experiment arm (or none), posting
 
 ## 6. Replies worth making today
 
+Run this once the operator has answered step 5.
+
 A reply's job is gaining verified followers and real mutual follows, whose early likes open a new original to strangers (A6) and who rank the account's originals higher (A10). Find 2 or 3 conversations from the last few hours worth a reply, with `python3 scripts/x_read.py search "<query>"` (checked against X; never suggest a post it dropped):
 - a builder's progress post in the lane (AI tools, agents, video pipelines, shipping), preferring verified accounts and existing mutuals;
 - an early spot in a big AI or tool conversation;
@@ -72,4 +72,4 @@ For each: the link, and in one line the point a reply could make. Remind the ope
 
 Done: 2–3 links, each with the point a reply could make, every one from `x_read.py` results.
 
-End with: `Next: /draft-thread <slug>` (start with /plan if you want to review the plan first).
+End with `Next: /draft-thread <slug>` for the slug the operator accepted (start with /plan if you want to review the plan first).
