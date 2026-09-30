@@ -31,8 +31,10 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from loop_core.errors import LoopError, need
-from loop_core.payloads import (METRICS, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEYS, activity_header, check_count,
-                                cursor_updates, post_from_payload, snapshot_from_payload, validate_item, validate_post)
+from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEYS, activity_header,
+                                cursor_updates, experiment_terms, experiment_texts, follower_inputs, follower_total,
+                                interaction_inputs, post_from_payload, snapshot_from_payload, validate_item,
+                                validate_post, verified_count)
 from loop_core.reads import (FINAL_MAX_DAYS, FINAL_MIN_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage,
                              in_final_window, past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
 from loop_core.times import iso, parse_time
@@ -44,16 +46,10 @@ EXPLORE_ALTERNATE_DAYS = 28
 REVIEW_EVERY_DAYS = 7
 STALE_AFTER_DAYS = 42
 LANE_WINDOW = 15
-MIN_COHORT = 3
 FOLLOWER_FILES_KEPT = 2
 INTERACTION_DAYS = 7
 CONVERSATION_DAYS = 30
 
-# Stored, but never an experiment's primary: they cannot tell a better post from a worse one.
-UNSCORABLE = {
-    "views": "views include paid (boosted) reach and say nothing about follows",
-    "replies": "a root's replies count the account's own thread cards",
-}
 OPEN_STATES = {"testing", "promising", "unclear"}
 # X's analytics export (Analytics → Content → Export): organic, per post, with the follows and
 # shares the pay-per-use API cannot read (reference/x-api.md P11).
@@ -393,24 +389,15 @@ def cmd_record_interactions(repo: Repo, args) -> dict:
     """Who replied to us, and who we replied to. Private: loop/followers/, gitignored."""
     repo.state()
     payload = read_json(Path(args.json))
-    observed = parse_time(payload.get("observed_at", ""))
-    self_ids = {str(i) for i in payload.get("self_ids", [])}
+    observed, mentions, targets, since = interaction_inputs(payload)
     data = repo.interactions()
-    for mention in payload.get("mentions", []):
-        author = str(mention.get("author_id", ""))
-        if not author or author in self_ids:
-            continue
-        conv = data["conversations"].setdefault(str(mention["conversation_id"]),
-                                                {"at": mention["created_at"], "replies": []})
-        if mention["id"] not in conv["replies"]:
-            conv["replies"].append(mention["id"])
-        _note_person(data["people"], author, str(mention.get("replied_to") or mention["conversation_id"]),
-                     mention["created_at"], "replied")
-    for target in payload.get("reply_targets", []):
-        user = str(target.get("user_id", ""))
-        if user and user not in self_ids:
-            _note_person(data["people"], user, str(target["item_id"]), target["at"], "replied_to")
-    since = payload.get("since_id")
+    for author, conversation, mention_id, created_at, item in mentions:
+        conv = data["conversations"].setdefault(conversation, {"at": created_at, "replies": []})
+        if mention_id not in conv["replies"]:
+            conv["replies"].append(mention_id)
+        _note_person(data["people"], author, item, created_at, "replied")
+    for user, item, at in targets:
+        _note_person(data["people"], user, item, at, "replied_to")
     if since and (not data["mentions_since_id"] or int(since) > int(data["mentions_since_id"])):
         data["mentions_since_id"] = str(since)
     people_cut = observed - timedelta(days=INTERACTION_DAYS)
@@ -431,19 +418,17 @@ def cmd_record_followers(repo: Repo, args) -> dict:
     """
     repo.state()
     payload = read_json(Path(args.json))
-    observed = parse_time(payload.get("observed_at", ""))
-    self_ids = {str(i) for i in payload.get("self_ids", [])}
-    ids = sorted({str(i) for i in payload.get("ids", [])} - self_ids)
+    observed, ids = follower_inputs(payload)
     day = observed.date().isoformat()
     earlier = [p for p in sorted(repo.private_dir.glob("followers-*.json")) if p.stem[len("followers-"):] < day]
     previous = set(read_json(earlier[-1])["ids"]) if earlier else None
     write_json(repo.private_dir / f"followers-{day}.json", {"at": iso(observed), "ids": ids})
     for old in sorted(repo.private_dir.glob("followers-*.json"))[:-FOLLOWER_FILES_KEPT]:
         old.unlink()
-    row = {"date": day, "at": iso(observed), "followers": payload.get("total", len(ids))}
-    if payload.get("verified") is not None:
-        check_count(payload["verified"], "verified")
-        row["verified_followers"] = payload["verified"]
+    row = {"date": day, "at": iso(observed), "followers": follower_total(payload, ids)}
+    verified = verified_count(payload)
+    if verified is not None:
+        row["verified_followers"] = verified
     if previous is None:
         row["baseline"] = True
     else:
@@ -538,13 +523,7 @@ def cmd_open_experiment(repo: Repo, args) -> dict:
     state = repo.state()
     need(open_experiment(state) is None, "an experiment is already open; one at a time")
     payload = read_json(Path(args.json))
-    metric = str(payload.get("primary") or "")
-    need(metric in METRICS, f"primary must be one of {METRICS}")
-    need(metric not in UNSCORABLE, f"primary {metric!r} cannot be scored: {UNSCORABLE.get(metric, '')}")
-    effect = float(payload.get("effect", 1.5))
-    need(effect > 1.0, "effect must be above 1.0")
-    cohort = [str(c) for c in payload.get("cohort", [])]
-    need(len(cohort) >= MIN_COHORT, f"cohort needs at least {MIN_COHORT} posts")
+    metric, effect, cohort = experiment_terms(payload)
     values, used = [], []
     for root_id in cohort:
         post = repo.post(root_id)
@@ -556,17 +535,16 @@ def cmd_open_experiment(repo: Repo, args) -> dict:
             values.append(value)
             used.append({"root_id": root_id, "value": value, "kind": snap["kind"]})
     need(len(values) >= MIN_COHORT, f"only {len(values)} cohort posts have a {metric} snapshot")
-    for field in ("question", "treatment", "control"):
-        need(isinstance(payload.get(field), str) and payload[field].strip(), f"{field} required")
+    texts = experiment_texts(payload)
     median = statistics.median(values)
     need(median > 0, f"the cohort's median {metric} is 0, so every post would clear the bar; "
                      "pick a measure the cohort actually has")
     exp = {
         "id": next_id("E", state["experiments"]),
-        "question": payload["question"],
-        "treatment": payload["treatment"],
-        "control": payload["control"],
-        "reference_facts": payload.get("reference_facts", []),
+        "question": texts["question"],
+        "treatment": texts["treatment"],
+        "control": texts["control"],
+        "reference_facts": texts["reference_facts"],
         "primary": metric,
         "effect": effect,
         "size": 3,

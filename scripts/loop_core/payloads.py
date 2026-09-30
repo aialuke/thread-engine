@@ -22,6 +22,12 @@ ORGANIC_KEYS = ("impressions", "likes", "replies", "reposts", "profile_visits", 
 POST_ID_RE = re.compile(r"^[0-9]{5,25}$")
 READ_STAGES = {"backfill", "48h", "final"}
 CURSOR_KEYS = ("read48_until", "final_until")
+MIN_COHORT = 3
+# Stored, but never an experiment's primary: they cannot tell a better post from a worse one.
+UNSCORABLE = {
+    "views": "views include paid (boosted) reach and say nothing about follows",
+    "replies": "a root's replies count the account's own thread cards",
+}
 
 
 def check_count(value, field: str) -> None:
@@ -146,3 +152,70 @@ def cursor_updates(payload: dict) -> dict[str, str]:
     """The read cursors a record-activity Payload moves, as stored timestamps. Absent or empty ones stay put."""
     given = payload.get("cursor") or {}
     return {key: iso(parse_time(given[key])) for key in CURSOR_KEYS if given.get(key)}
+
+
+def interaction_inputs(payload: dict) -> tuple[datetime, list[tuple], list[tuple], object]:
+    """What a record-interactions Payload says: when, our own ids, who replied to us, who we replied to.
+
+    Mentions by us or by no one are dropped before their other fields are read, as they always were.
+    Returns (observed, mentions, reply_targets, since_id). A mention is (author, conversation_id,
+    mention id, created_at, item replied to); a reply target is (user, item, at). `since_id` comes back
+    exactly as given: whether it is a number only matters once one is saved.
+    """
+    observed = parse_time(payload.get("observed_at", ""))
+    self_ids = {str(i) for i in payload.get("self_ids", [])}
+    mentions = []
+    for mention in payload.get("mentions", []):
+        author = str(mention.get("author_id", ""))
+        if not author or author in self_ids:
+            continue
+        conversation = str(mention["conversation_id"])
+        created_at = mention["created_at"]
+        mentions.append((author, conversation, mention["id"], created_at,
+                         str(mention.get("replied_to") or mention["conversation_id"])))
+    targets = []
+    for target in payload.get("reply_targets", []):
+        user = str(target.get("user_id", ""))
+        if user and user not in self_ids:
+            targets.append((user, str(target["item_id"]), target["at"]))
+    return observed, mentions, targets, payload.get("since_id")
+
+
+def follower_inputs(payload: dict) -> tuple[datetime, list[str]]:
+    """When a record-followers Payload was read, and its follower ids without our own, sorted."""
+    observed = parse_time(payload.get("observed_at", ""))
+    self_ids = {str(i) for i in payload.get("self_ids", [])}
+    return observed, sorted({str(i) for i in payload.get("ids", [])} - self_ids)
+
+
+def follower_total(payload: dict, ids: list[str]) -> object:
+    """The account's follower count: the Payload's `total` when it gives one, else how many ids it listed."""
+    return payload.get("total", len(ids))
+
+
+def verified_count(payload: dict) -> int | None:
+    """The verified-follower count, or None when the Payload has none."""
+    if payload.get("verified") is None:
+        return None
+    check_count(payload["verified"], "verified")
+    return payload["verified"]
+
+
+def experiment_terms(payload: dict) -> tuple[str, float, list[str]]:
+    """The measure, the effect to beat and the cohort of an open-experiment Payload."""
+    metric = str(payload.get("primary") or "")
+    need(metric in METRICS, f"primary must be one of {METRICS}")
+    need(metric not in UNSCORABLE, f"primary {metric!r} cannot be scored: {UNSCORABLE.get(metric, '')}")
+    effect = float(payload.get("effect", 1.5))
+    need(effect > 1.0, "effect must be above 1.0")
+    cohort = [str(c) for c in payload.get("cohort", [])]
+    need(len(cohort) >= MIN_COHORT, f"cohort needs at least {MIN_COHORT} posts")
+    return metric, effect, cohort
+
+
+def experiment_texts(payload: dict) -> dict:
+    """The question, the two arms and any reference facts of an open-experiment Payload. The three texts are required."""
+    for field in ("question", "treatment", "control"):
+        need(isinstance(payload.get(field), str) and payload[field].strip(), f"{field} required")
+    return {"question": payload["question"], "treatment": payload["treatment"], "control": payload["control"],
+            "reference_facts": payload.get("reference_facts", [])}

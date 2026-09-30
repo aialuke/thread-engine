@@ -192,5 +192,85 @@ class CursorUpdates(Refused):
                            "bad time 'zz'; use ISO 8601 with a timezone")
 
 
+class InteractionInputs(Refused):
+    MENTION = {"author_id": "9", "id": "m1", "conversation_id": 100, "created_at": T0}
+
+    def test_mentions_and_targets_are_normalised(self) -> None:
+        observed, mentions, targets, since = payloads.interaction_inputs({
+            "observed_at": T0, "self_ids": [1],
+            "mentions": [self.MENTION, {**self.MENTION, "id": "m2", "replied_to": 55}],
+            "reply_targets": [{"user_id": 7, "item_id": 200, "at": T0}], "since_id": "abc"})
+        self.assertEqual(observed, datetime(2026, 10, 1, tzinfo=timezone.utc))
+        self.assertEqual(mentions, [("9", "100", "m1", T0, "100"), ("9", "100", "m2", T0, "55")])
+        self.assertEqual(targets, [("7", "200", T0)])
+        self.assertEqual(since, "abc")
+
+    def test_own_authorless_and_targetless_entries_are_dropped_unread(self) -> None:
+        _, mentions, targets, since = payloads.interaction_inputs({
+            "observed_at": T0, "self_ids": ["9"],
+            "mentions": [{"author_id": 9}, {"id": "x"}], "reply_targets": [{"user_id": 9}, {}]})
+        self.assertEqual((mentions, targets, since), ([], [], None))
+
+    def test_a_missing_field_is_a_key_error_not_a_refusal(self) -> None:
+        # Compatibility with the CLI today (see test_payloads_contract).
+        with self.assertRaises(KeyError):
+            payloads.interaction_inputs({"observed_at": T0, "mentions": [{"author_id": "9", "id": "m"}]})
+
+    def test_observed_at_is_required(self) -> None:
+        self.assertRefused(lambda: payloads.interaction_inputs({}), "bad time ''; use ISO 8601 with a timezone")
+
+
+class FollowerInputs(Refused):
+    def test_ids_are_text_sorted_and_without_our_own(self) -> None:
+        observed, ids = payloads.follower_inputs({"observed_at": T0, "self_ids": [2], "ids": [3, 1, 2, 3]})
+        self.assertEqual((observed, ids), (datetime(2026, 10, 1, tzinfo=timezone.utc), ["1", "3"]))
+
+    def test_missing_ids_is_empty_and_null_is_a_type_error(self) -> None:
+        self.assertEqual(payloads.follower_inputs({"observed_at": T0})[1], [])
+        with self.assertRaises(TypeError):
+            payloads.follower_inputs({"observed_at": T0, "ids": None})
+
+    def test_total_defaults_to_the_id_count(self) -> None:
+        self.assertEqual(payloads.follower_total({}, ["1", "2"]), 2)
+        self.assertEqual(payloads.follower_total({"total": 500}, ["1"]), 500)
+
+    def test_verified(self) -> None:
+        self.assertIsNone(payloads.verified_count({}))
+        self.assertIsNone(payloads.verified_count({"verified": None}))
+        self.assertEqual(payloads.verified_count({"verified": 0}), 0)
+        self.assertRefused(lambda: payloads.verified_count({"verified": -1}),
+                           "verified must be a non-negative integer or null")
+
+
+class ExperimentPayloads(Refused):
+    def test_terms(self) -> None:
+        self.assertEqual(payloads.experiment_terms({"primary": "likes", "cohort": [1, 2, 3]}),
+                         ("likes", 1.5, ["1", "2", "3"]))
+        self.assertEqual(payloads.experiment_terms({"primary": "likes", "effect": "2", "cohort": "abc"})[1:],
+                         (2.0, ["a", "b", "c"]))
+
+    def test_term_refusals_in_order(self) -> None:
+        self.assertRefused(lambda: payloads.experiment_terms({}),
+                           "primary must be one of ('views', 'likes', 'reposts', 'quotes', 'replies', 'bookmarks')")
+        self.assertRefused(lambda: payloads.experiment_terms({"primary": "replies"}),
+                           "primary 'replies' cannot be scored: a root's replies count the account's own thread cards")
+        self.assertRefused(lambda: payloads.experiment_terms({"primary": "likes", "effect": 1.0, "cohort": []}),
+                           "effect must be above 1.0")
+        self.assertRefused(lambda: payloads.experiment_terms({"primary": "likes", "cohort": [1, 2]}),
+                           "cohort needs at least 3 posts")
+
+    def test_a_non_numeric_effect_is_a_value_error(self) -> None:
+        with self.assertRaises(ValueError):
+            payloads.experiment_terms({"primary": "likes", "effect": "x"})
+
+    def test_texts(self) -> None:
+        got = payloads.experiment_texts({"question": " q ", "treatment": "t", "control": "c"})
+        self.assertEqual(got, {"question": " q ", "treatment": "t", "control": "c", "reference_facts": []})
+        self.assertRefused(lambda: payloads.experiment_texts({"question": "q", "treatment": "t", "control": " "}),
+                           "control required")
+        self.assertRefused(lambda: payloads.experiment_texts({"question": "q", "treatment": 3, "control": "c"}),
+                           "treatment required")
+
+
 if __name__ == "__main__":
     unittest.main()

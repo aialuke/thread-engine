@@ -213,6 +213,13 @@ class InteractionsPayload(Cli):
         self.assertEqual((run.returncode, run.stdout), (1, ""))
         self.assertIn("TypeError", run.stderr)
 
+    def test_a_skipped_mention_is_not_read_further(self) -> None:
+        # Compatibility: own and authorless mentions are dropped before conversation_id is looked up.
+        bare = {"id": "1"}
+        result = self.ok("record-interactions", "--json", self.payload({
+            "observed_at": T0, "self_ids": [9], "mentions": [{**bare, "author_id": "9"}, bare]}))
+        self.assertEqual(result, {"people": 0, "mentions_since_id": None, "outside_replies": {}})
+
     def test_own_and_authorless_mentions_are_skipped(self) -> None:
         result = self.ok("record-interactions", "--json", self.payload({
             "observed_at": T0, "self_ids": [9],
