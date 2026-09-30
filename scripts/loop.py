@@ -38,10 +38,11 @@ from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEY
                                 cursor_updates, experiment_terms, experiment_texts, follower_inputs, follower_total,
                                 interaction_inputs, newer_since_id, post_from_payload, snapshot_from_payload, snapshot_is_final,
                                 snapshot_observed, snapshot_root_id, validate_post, verified_count)
-from loop_core import rates
+from loop_core import health, rates
 from loop_core.experiments import OPEN_STATES, evaluate_rounds, lesson_basis, next_id, next_slot, open_experiment
-from loop_core.reads import (SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage, need_final_age,
-                             past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
+from loop_core.reads import (FINAL_MAX_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage,
+                             final_at_risk, need_final_age, past_window, read_windows, snapshot_kind, valid_snapshot,
+                             window_label)
 from loop_core.snapshots import admit_snapshot
 from loop_core.times import iso, parse_time
 
@@ -732,6 +733,17 @@ def cmd_commit_data(repo: Repo, args) -> dict:
     return {"committed": repo.git("rev-parse", "HEAD").strip()}
 
 
+def daily_run_health(repo: Repo, at: datetime) -> dict:
+    """Warnings from ledger/runs.log and the ledger: a stale or failed Daily run, a Final read about to be lost. Reads only."""
+    log = repo.root / "ledger" / "runs.log"
+    lines = log.read_text(encoding="utf-8").splitlines() if log.is_file() else []
+    rows = repo.activity()
+    at_risk = [(post["root_id"], parse_time(post["posted_at"]) + timedelta(days=FINAL_MAX_DAYS))
+               for post in repo.posts()
+               if final_at_risk(age_hours(post, at)) and not rows.get(post["root_id"], {}).get("reads", {}).get("final")]
+    return {"warnings": health.warnings(at, health.last_runs(lines), at_risk)}
+
+
 def cmd_status(repo: Repo, args) -> dict:
     state = repo.state()
     exp = open_experiment(state)
@@ -743,6 +755,7 @@ def cmd_status(repo: Repo, args) -> dict:
         "open_experiment": exp,
         "reference": state["reference"],
         "api": state.get("api", {}),
+        "health": daily_run_health(repo, now_arg(args.now)),
         "stale_lessons": [l["id"] for l in state["lessons"] if l["status"] == "stale"],
     }
 

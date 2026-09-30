@@ -438,6 +438,34 @@ class ApiData(LoopCase):
             rows.update(json.loads(path.read_text())["items"])
         return rows
 
+    def write_runs(self, *lines: str) -> None:
+        (self.root / "ledger").mkdir(exist_ok=True)
+        (self.root / "ledger" / "runs.log").write_text("".join(line + "\n" for line in lines), encoding="utf-8")
+
+    def test_status_health_reads_the_run_log(self) -> None:
+        now = hours(100)
+        self.assertIn("No daily run", self.ok("status", now=now)["health"]["warnings"][0])
+        self.write_runs(f"{hours(99)} snapshot ok read48=0 final=0 followers=1 api_items=1 cost_usd=0.001")
+        self.assertEqual(self.ok("status", now=now)["health"], {"warnings": []})
+        self.write_runs(f"{hours(60)} snapshot ok read48=0", f"{hours(90)} snapshot failed error='credits'")
+        warnings = self.ok("status", now=now)["health"]["warnings"]
+        self.assertEqual(len(warnings), 2)
+        self.assertIn("credits", warnings[1])
+
+    def test_status_warns_of_a_final_read_about_to_be_lost(self) -> None:
+        self.post("9700000001", T0)
+        self.post("9700000002", T0)
+        self.post("9700000003", hours(400))
+        self.post("9700000004", hours(-200))
+        self.activity("final", hours(27 * 24), [self.item("9700000002", T0, kind="original")])
+        now = hours(650)  # 9700000001 and 9700000002 are 650h old; 9700000004 is past the cutoff
+        self.write_runs(f"{hours(649)} snapshot ok read48=0")
+        got = self.ok("status", now=now)["health"]["warnings"]
+        self.assertEqual(len(got), 1, got)
+        self.assertIn("9700000001", got[0])
+        self.write_runs(f"{hours(599)} snapshot ok read48=0")
+        self.assertEqual(self.ok("status", now=hours(600))["health"], {"warnings": []})  # 647h: not yet at risk
+
     def test_activity_rows_labels_and_cursor(self) -> None:
         made = self.activity("48h", hours(40), [self.item("9000000001", T0)], cursor={"read48_until": hours(4)})
         self.assertEqual(made["cursors"]["read48_until"], hours(4))
