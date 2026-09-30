@@ -13,7 +13,7 @@ Shared tone for every format. Format rules live in `.claude/skills/format-*/`. F
 
 ## What every post delivers
 
-Each post delivers the operator's own test, verdict, numbers, voice and lesson, with the human judgement visible in the post. AI drafts and the pipeline makes clips; a generated clip or text is evidence, never the product. The reason: X's rewards program makes a post ineligible if it "was created or posted using automated means".
+Each post delivers the operator's own verdict, voice and lesson, with the human judgement visible in the post. Where the format rests on a run (build-log, tool-verdict), the operator's own test and numbers come with it; a tool-swap rests on sourced research, and the operator's choice of swaps and the judgement in the proof lines make it theirs. AI drafts and the pipeline makes clips; a generated clip or text is evidence, never the product. The reason: X's rewards program makes a post ineligible if it "was created or posted using automated means".
 
 ## Texture
 
@@ -31,7 +31,7 @@ Cut fake urgency, em-dash stacks, an omniscient expert with no scene, a new look
 
 ## Asking for engagement
 
-End a post with one real question that only a reader of that post could answer: the question names the fork that changes the reader's answer, such as their model or plan. The gate refuses a fixed list of engagement phrases (`SOLICIT_RE` in `scripts/post_thread.py`); the rule is wider than the list, so a post that asks readers to like, save, share or follow breaks it even when no phrase matches.
+End a thread's closer, and a standalone post whose format has no fixed ending, with one real question that only a reader of that post could answer. A post with a fixed ending ends as its format says: the tool-swap root ends on its last proof line, the shout-out on its thank-you, the comparison root on 🧵. The question names the fork that changes the reader's answer, such as their model or plan. The gate refuses a fixed list of engagement phrases (`SOLICIT_RE` in `scripts/post_thread.py`); the rule is wider than the list, so a post that asks readers to like, save, share or follow breaks it even when no phrase matches.
 
 X's rewards rules: "Do not solicit engagements: repeatedly instructing users to engage with posts, such as asking to like, reply, bookmark, follow, or repost." Breaking it can remove the account from the program.
 
