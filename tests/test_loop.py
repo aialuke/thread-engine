@@ -755,6 +755,25 @@ class Isolation(unittest.TestCase):
         self.assertGreater(len(sources), 1)
         self.assertEqual(self.offences(sources), (set(), []))
 
+    def test_loop_core_writes_no_files(self) -> None:
+        """loop.py is the only writer; loop_core modules stay pure."""
+        from test_scripts import _writes_files
+        core = sorted((REPO / "scripts" / "loop_core").rglob("*.py"))
+        self.assertGreater(len(core), 1)
+        self.assertEqual([p for p in core if _writes_files(p)], [])
+
+    def test_write_scan_catches_writes_and_io_imports(self) -> None:
+        from test_scripts import _writes_files
+        cases = {"write_text": "p.write_text('x')\n", "unlink": "p.unlink()\n", "open_w": "open('f', 'w')\n",
+                 "open_kw": "open('f', mode='a')\n", "open_var": "open('f', mode)\n",
+                 "subprocess": "import subprocess\n", "tempfile": "from tempfile import mkstemp\n"}
+        clean = {"read": "open('f')\nopen('f', 'r')\nPath('f').read_text()\n", "pure": "x = 1 + 1\n"}
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, source in {**cases, **clean}.items():
+                path = Path(tmp) / f"{name}.py"
+                path.write_text(source)
+                self.assertEqual(_writes_files(path), name in cases, name)
+
     def test_scan_reaches_nested_modules(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             scripts = Path(tmp)

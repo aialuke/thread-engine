@@ -51,6 +51,23 @@ def _reads_environ(path: Path) -> bool:
     return False
 
 
+WRITE_CALLS = {"write_text", "write_bytes", "unlink", "replace", "rename", "mkdir", "rmdir", "touch", "remove"}
+IO_IMPORTS = {"subprocess", "shutil", "tempfile"}
+
+
+def _writes_files(path: Path) -> bool:
+    """True when the module writes or deletes files, opens one for writing, or imports a way to."""
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr in WRITE_CALLS:
+            return True
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "open":
+            modes = [a for a in node.args[1:2]] + [k.value for k in node.keywords if k.arg == "mode"]
+            if any(not isinstance(m, ast.Constant) or set(str(m.value)) & set("wax+") for m in modes):
+                return True
+    return bool(_imported_tops(path) & IO_IMPORTS)
+
+
 SWAP_HEADER = "PAID → FREE\nFinding free creator tools that actually hold up."
 POST_ONE = SWAP_HEADER + """
 
