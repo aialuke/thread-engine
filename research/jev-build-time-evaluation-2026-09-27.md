@@ -1,6 +1,6 @@
 # Jev for build-time research and tuning
 
-Research date: 27 September 2026. Status: assessment and proposed evaluation; no Jev calls, integration, or benchmark runs performed.
+Research date: 27 September 2026. Status of the sections up to "Decision to revisit after evaluation": an assessment and proposed evaluation, written before any Jev call. Later sections record results from 28 and 30 September 2026.
 
 ## Recommendation
 
@@ -251,9 +251,9 @@ X billed about 55–60% of the harness estimate, in both the pilot and B3. Treat
 
 All five can be measured with the same raters and harness.
 
-## Judging text with Jev (glossary and placement runs, 30 September 2026)
+## Judging text with Jev (glossary, placement and Proof runs, 30 September 2026)
 
-Three runs asked Jev to judge repo text: glossary candidates against how the repo uses each term (two runs) and where a set of learnings should live (one run). Protocol, controls and pass rules are in `research/jev-test/README.md`; the procedure is the `jev-judge-run` skill.
+Four runs asked Jev to judge repo text: glossary candidates against how the repo uses each term (two runs), where a set of learnings should live (one run), and whether the word "Proof" carries one sense (one run, with a known-split control and a wording follow-up). Protocol, controls and pass rules are in `research/jev-test/README.md`; the procedure is the `jev-judge-run` skill.
 
 ### Which question types held up
 
@@ -261,10 +261,10 @@ Three runs asked Jev to judge repo text: glossary candidates against how the rep
 |---|---|---|
 | Implementation detail in a definition | 0.98 on a file-name-laden definition against 0.16-0.33 on the real entries | Yes |
 | Project-specific term or general word | General terms scored 0.08-0.14, defined terms 0.79-0.95 | Yes |
-| Used in one sense | Clean terms 0.76-0.91, muddy terms 0.09-0.18 on a hand-audited set (gap 0.69) | Yes, with a hand-audited calibration set |
+| Used in one sense | Clean terms 0.76-0.91, muddy terms 0.09-0.18 on a hand-audited set (gap 0.69). Proof run: clean 0.75-0.81, muddy 0.09-0.19; a known 4-and-4 split of one word (Hook as the opening Card against Hook as a tool hook) scored 0.21, and 0.18 with a parenthetical added to the question | Yes, with a hand-audited calibration set and a known-split control asked in the judged question's own wording |
 | Cloze: which glossary entry fits a blanked usage | 1.00 on clean terms; separated overlapping entries (Explore and exploit against Slot) | Yes |
-| Definition faithful to a usage (yes/no) | Wrong Shout-out definition 0.52 against 0.53 for the right one | No |
-| Definition self-contained | Real entries 0.24-0.56, the undefined-word control 0.24 | No |
+| Definition faithful to a usage (yes/no) | Wrong Shout-out definition 0.52 against 0.53 for the right one. Proof run: wrong definition 0.14 against 0.79 for the right one | No: one separation does not overturn one failure; repeat first |
+| Definition self-contained | Real entries 0.24-0.56, the undefined-word control 0.24. Proof run: control 0.19 against 0.41-0.42 on the real definitions | No: a gap, not a clean split |
 | Where should this learning live (Choice of six documents) | 2 of 5 controls right, confidently wrong (0.79-0.90) | No |
 | Cost of misreading (Score, five levels) | Answers split between the extremes (0.25 at level 0, 0.29 at level 4) | Not as one Score question |
 
@@ -277,3 +277,10 @@ Three runs asked Jev to judge repo text: glossary candidates against how the rep
 - **Placement is a convention judgment.** Choosing between documentation homes depends on what each file is for, which the state could not carry. Not a fit for Jev.
 - **Rankings held across runs** (Voice and Explore and exploit low on one-sense in both), though the snippets differed. Repeats with different samples show the variance; one run does not.
 - **Cost:** about $0.01 per full battery of 17 requests; the placement run was 2 requests.
+- **Proof run: Jev gave no usable signal, and a blind Codex disagreed with its first reading.** Under the question's first wording Jev saw no overload (one-sense: evidence-only 0.76, proof-line-only 0.81, mixed 0.64) and a known-split control (Hook, 0.21 and 0.18) showed that wording can catch a large split. Under a neutral wording the same snippets were inconclusive (0.56, 0.71, 0.44; a pure card under the 0.60 floor). A blind Codex, given the 38 usages unlabelled, found four senses and said more than one glossary entry was needed. The operator settled it on 30 September with two glossary entries (Proof and Proof line), decided from the repo's own usage and Codex's reading, not from Jev. Reading (untested): one-sense catches a domain split (post copy against tool plumbing) and may miss a smaller difference inside one domain (an attached file against a sentence of copy).
+- **A control must use the judged question's wording.** The first known-split control omitted the "alone or in 'proof line'" parenthetical the Proof cards carried, so it validated a different question; a blind Grok review caught this. The neutral Proof wording lowered all three Proof cards by 0.1-0.2 while the Hook control did not move, which fits the parenthetical having lifted the Proof scores (inference).
+- **List what is in each card's state, not only the snippets.** The Proof and calibration cards carried the 36 glossary definitions from `CONTEXT.md`, and the run's disclosure said `CONTEXT.md` was not sent.
+- **Jev cannot find a sense the card does not offer.** My cards tested two senses; Codex found two more (a standard of evidence for a claim, and a test that an agent cannot reach approval). Cluster the usages blind first, then build the cloze options from what it finds.
+- **Label from full lines, not grep cuts.** Labels made from truncated hits misfiled two lines of the approval-test sense as plain English and missed one line using two senses. The five lines I called ordinary English scored 0.00 on cloze, which was the warning: I verified two of them were mislabelled, and Codex put the other three in a third sense (unverified).
+- **Definition noise was about 0.1 on the Proof run.** The same evidence-only snippets scored 0.64-0.66 under three control definitions and 0.76 under the real one. A mixed-against-pure gap of 0.12 is inside that; the `jev-judge-run` skill asks for the shift to be measured and treats a gap inside it as no finding.
+- **Proof run cost:** 55 requests (40 main run, 3 hook control, 12 wording follow-up), about $0.02 at the documented $0.042 per million input tokens (466,957 input tokens; arithmetic, not a bill). Count requests from the saved answer files.

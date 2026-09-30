@@ -297,10 +297,11 @@ A definition that fails is marked "revise" with the failing questions. Nothing i
 **Result (2026-09-30): controls failed, so the new-definition scores are ignored.** The wrong Shout-out control scored
 0.52 on faithful (needed <= 0.50) and was indistinguishable from the real Shout-out entry (0.53). The
 implementation-detail control passed (0.98 vs 0.16-0.33 on the seven new entries) and the undefined-word control passed
-(0.24), but real entries also scored 0.24-0.56 on self_contained, so that question does not separate them. Only
-impl_detail is validated. Likely cause (unverified): most snippets mention the term without saying enough to confirm or
-refute a definition, so a yes/no "is this true of the usage" sits near 0.5. Next time: a Choice of
-consistent / contradicts / silent per snippet, and snippets where the term is the subject of the sentence.
+(0.24), but real entries also scored 0.24-0.56 on self_contained, so that question does not separate them. In that
+run only impl_detail was validated (later runs validated more: see the evaluation doc). Likely cause (unverified): most
+snippets mention the term without saying enough to confirm or refute a definition, so a yes/no "is this true of the
+usage" sits near 0.5. Next time: a Choice of consistent / contradicts / silent per snippet, and snippets where the term
+is the subject of the sentence.
 
 ## Placement judge (2026-09-30)
 
@@ -324,3 +325,148 @@ experiment-result control between rules_md and agents_md (0.42-0.43). Its confid
 its agreements on the real learnings carry no weight either. Likely cause (unverified): the six destinations overlap in
 purpose and the state carried too little of what each file is for. Placement between documentation homes is a
 convention judgment, not a semantic reading of text, and is not a fit for Jev without much richer destination context.
+
+## Proof judge (2026-09-30)
+
+`proof_judge.py` is the record of this run, not a template; the procedure is the `jev-judge-run` skill. It asks whether
+**Proof** is used in one sense.
+
+**Current reading (start here).** Jev does not separate Proof's evidence sense (A) from its proof-line sense (B) under
+the wording first used: mixed 0.64 against pure 0.76 and 0.81, far above a known split (Hook, 0.21 and 0.18). Under a
+neutral wording the answer is inconclusive by the declared rule (A 0.56, B 0.71, mixed 0.44; a pure card is under the
+0.60 floor). A blind Codex found four senses and said one entry is not enough. Jev's result is not evidence that Proof
+has one sense. **Decision (operator, 30 Sep): two glossary entries, Proof and Proof line**, written to `CONTEXT.md` on
+my recommendation, which rested on the repo's own usage read in full context and on Codex agreeing with the A/B split,
+not on Jev. Codex's other two senses were not given entries: claim substantiation is ordinary English plus sense A, and
+the approval-test "proof test" is UI-project vocabulary. My hand labels had errors, listed under "Second rater". 55 requests in all (40 main run, 3 hook control, 12 wording
+follow-up), about $0.02 at the documented price ($0.042 per million input tokens, 466,957 input tokens; arithmetic, not
+a bill).
+
+**Hand labels (mine, made before any request, and flawed).** I labelled 45 prose usages of "proof" in committed `.md`
+files (outside `jev-*` research, `discovery-test/` and `layer-3`) from grep output cut to 300 characters. I did not open
+the surrounding text, and that is where the errors below came from. 38 lines were kept and 7 dropped (outside sources,
+or a match I could not read). Sense **A**, evidence attached or shown (real proof: screenshot, recording, output,
+figure, named source): 24 lines (corrected from 25 after the run). Sense **B**, the `▷` proof line in a PAID → FREE post:
+9 lines. **C**, which I called ordinary English ("not proof of demand", "proof test"): 5 lines, used only in one
+cloze-only card; two of the five were wrongly labelled (see the second rater below). My prior: two senses (A, B), so
+overloaded.
+
+**Calibration terms.** I read 16 usages of each (seed `audit-<term>`), separate from the 8 usages each card samples
+(seeds `…-proof-cal-<rep>`), so the labels apply to the term, not to a card's snippets. Clean Cohort, Roster, Truth
+budget (one sense; Cohort has three field-name lines, Roster one odd line); muddy Control, Round, Hook, Topic (UI
+controls, round buttons, Claude Code hooks, off-topic and X topic labels beside the project sense). Same split as the
+2026-09-30 glossary runs.
+
+**Cards, each repeated for 3 reps with a different sample seed.** Proof A-only (8 snippets), B-only (8 of 9, so reps
+overlap), and mixed (4 A + 4 B). Every card asks `one_sense`, `specific`, `impl_detail` and a per-snippet cloze
+(the word masked; options Proof, Proof line, "a general English word"). For B the phrase "proof line(s)" is masked as
+one blank, so "line" does not leak the answer; A masks "proof". Calibration cards come from `glossary_judge.build_card`.
+Planted controls on the Proof text: an implementation-laden definition (file names), an undefined-word definition, and
+a wrong definition (the proof-line sentence, B, asked about the A snippets). One more card, `proof-c`, asks only the
+cloze for the 5 C lines.
+
+**Pass rule (calibration first; if any line fails, stop and ignore the Proof results).**
+1. `one_sense`: mean(clean) − mean(muddy) >= 0.25 over the 7 terms.
+2. Cloze accuracy: mean over the clean terms >= 0.70.
+3. `impl_detail`: planted laden definition >= 0.60 and both real Proof definitions <= 0.40.
+4. No calibration term's `one_sense` spans more than 0.30 across reps (else that question is unstable).
+The 0.25, 0.70 and 0.30 numbers were declared before the 2026-09-30 glossary run and are reused here, not tuned to its
+results. `self_contained` and `faithful` were unvalidated in that run; they stay unvalidated here unless the planted
+undefined-word control gives `self_contained` <= 0.40 and the wrong-definition control gives mean `faithful` <= 0.50
+on A snippets, in which case they are reported as a second signal, still not a verdict.
+
+**Decision rules for Proof (only after calibration passes).**
+- *Overloaded, split:* `one_sense` on A-only >= 0.60 and on B-only >= 0.60, and mixed <= min(A-only, B-only) − 0.25.
+  Action: propose two entries, Proof and Proof line.
+- *One sense, fold:* mixed within 0.25 of the pure cards. Action: one Proof entry with the proof line as an example;
+  my labels go to a second rater (Codex or Grok, read-only) before I accept that.
+- *Cloze:* accuracy >= 0.70 on A and on B means the senses are separable by context. Below that, report the cloze as
+  inconclusive; it is not evidence for one sense.
+- *Inconclusive:* any pure card below 0.60, or any rep span > 0.30. Report and change nothing.
+Nothing here edits `CONTEXT.md`; wording goes to the operator first.
+
+**Disclosure (corrected after review).** Sent to TypeSafe: snippets of repo prose (about 320 characters each) from
+committed `.md` files outside the excluded folders (skills, `voice/`, `reference/`, `reviews/`, `research/*.md`,
+`queue/`, and the root `AGENTS.md` and `README.md`), plus my definitions, and, in every Proof and calibration card,
+the 36 glossary definitions parsed from `CONTEXT.md`. Not sent: `drafts/`, `shipped/`, `receipts/`, `ledger/`,
+`loop/`, other people's data. The first version of this paragraph said `CONTEXT.md` was not sent; a blind Grok review
+found the glossary in the card state.
+
+**Result, main run (2026-09-30): calibration passed on all five lines.** 40 requests (21 calibration cards, 19 Proof
+and control cards), 3 reps, no failures. Pilot first: Cohort one-sense 0.82 and Control 0.10, inside the earlier run's
+ranges, then the rest.
+- Calibration: `one_sense` clean 0.75-0.81 against muddy 0.09-0.19 (gap 0.63); largest rep span 0.19; cloze on clean
+  terms 1.00; laden control `impl_detail` 0.98 against 0.14 (A) and 0.29 (B) on the real definitions.
+- Proof `one_sense`: A-only 0.76, B-only 0.81, mixed 0.64 (max rep span 0.13). The mixed gap to the lower pure card is
+  0.12, under the declared 0.25, so **by the pre-declared rule Jev does not see an overload (fold)**. It is well above
+  the muddy range (0.09-0.19), so Jev does not treat Proof like Control or Round.
+- Noise in that gap (my reading): the three control cards use the same A snippets as `proof-a` and scored 0.64-0.66
+  against 0.76, so a different proposed definition alone moves `one_sense` by about 0.1. The mixed gap is inside that.
+- Cloze: A 1.00, B 0.96 (one miss, `reviews/paid-free-session-2026-09.md:503`). Separable by context, but the B snippets
+  carry `▷` and "swap" cues, so this is not evidence of two senses. The 5 lines I labelled ordinary English scored 0.00
+  on cloze: Jev always picked Proof or Proof line, never "a general word". That was a warning about my label, not about
+  Jev: two of the five were the approval-test sense (see the second rater below).
+- Unvalidated signals: `faithful` separated this time (wrong definition 0.14 against 0.79 on A); `self_contained`
+  gave 0.19 on the undefined-word control against 0.41-0.42 on the real definitions, a gap but not a clean split.
+  Real B definition faithful only 0.60: the session notes talk about the line's shape and wording, not the reason.
+- Not verified at the time: whether Jev was reading "proof" and "proof line" as one word because my question said
+  "alone or in 'proof line'". The wording follow-up below tests it.
+
+**Follow-up control, rule declared before its requests (2026-09-30).** The run had no known-positive for a 4-and-4 split
+of one word, so a mixed score of 0.64 could not be read either way. Card `hook-mixed`: 4 usages of Hook as the opening
+Card or hook style (`.claude/skills/format-settings/checklist.md:12`, `reviews/paid-free-session-2026-09.md:108`,
+`README.md:49`, `reviews/ui-build-handoff/mock-only.md:43`) and 4 as a Claude Code or Grok hook that blocks or writes on
+a typed prompt (`.claude/skills/approve/SKILL.md:14`, `.claude/skills/draft-thread/SKILL.md:51`, `AGENTS.md:13`,
+`reviews/x-tools-pilot.md:37`). Every line was printed in full and read before labelling. The question was the Proof
+cards' wording with the word "hook" (this omitted the "alone or in ..." parenthetical; see the wording follow-up),
+3 reps, different order each. **Rule:** `one_sense` can detect a 4-and-4 split only if `hook-mixed` <= mean(clean
+terms) - 0.25. If it can, the Proof mixed score of 0.64 counts as Jev not seeing a split. If it cannot, the Proof
+"fold" verdict above is void and Jev says nothing about the A/B split.
+
+**Control result: `hook-mixed` one_sense 0.21 (span 0.09), against a threshold of 0.52, so the question can detect a
+4-and-4 split.** 3 requests, no failures. What it does not settle (inference, untested): Hook's two senses sit in
+different domains (post copy against tool plumbing), while A and B sit in one (evidence for a post). A question that
+catches a domain split may miss a smaller difference in referent, such as an attached file against a sentence of copy.
+
+**Wording follow-up, rule declared before its requests (2026-09-30).** A blind Grok review pointed out that the hook
+control asked its question without the parenthetical the Proof cards used ("alone or in 'proof line'"). So 0.21 shows
+that the neutral wording detects a split, not that the Proof wording does. 12 requests, one question each, on the same
+snippets as the existing cards for each rep: (a) `neutral-a`, `neutral-b`, `neutral-mixed`, the Proof snippet sets asked
+as "Do all of `snippets` use the word 'proof' in one and the same sense?"; (b) `hook-mixed-p`, the hook snippets asked
+as "... the word 'hook' (alone or in 'hook style') ...", the parenthetical mirrored. **Rule:**
+1. If `hook-mixed-p` <= mean(clean terms) - 0.25, the parenthetical does not blunt split detection and the Proof
+   result above stands as a reading of its own wording. If not, that Proof one-sense result is void.
+2. Neutral Proof wording: either pure card < 0.60 or any rep span > 0.30 is inconclusive; else mixed <= min(pure) - 0.25
+   means Jev sees two senses (this overturns the fold); else the fold is confirmed. The neutral hook control (0.21)
+   already covers this wording.
+If the two wordings disagree, the disagreement is the finding.
+
+**Wording follow-up result: `hook-mixed-p` 0.18 (threshold 0.52), so the parenthetical does not blunt split detection
+and the parenthetical Proof result stands as a reading of its own wording. The neutral Proof wording is inconclusive
+under rule 2:** A-only 0.56, B-only 0.71, mixed 0.44 (max rep span 0.27), and the A card is under the 0.60 floor.
+Read with care (inference): the neutral wording lowered all three Proof cards (A by 0.20, B by 0.10, mixed by 0.20)
+but left the Hook control where it was (0.21 to 0.18), which fits the parenthetical having lifted the Proof scores.
+The mixed card stays 0.12 below the lower pure card under both wordings, inside the definition noise noted above. So
+Jev gives no usable signal either way on A against B; it is neither a split nor a confirmation of one sense.
+
+**Second rater: Codex, read-only, blind (2026-09-30).** Sent the 38 usages unlabelled and shuffled, with no verdict and
+no pointer at this file. Codex read the files and found **four senses and says more than one entry is needed**, against
+Jev's parenthetical-wording "fold". It agrees with my A and B split. It differs on the rest (its groupings, my checks in
+brackets):
+1. Artifact evidence, 23 lines: my A, less `reference/audience.md:20`.
+2. Proof line, 9 lines plus `.claude/skills/format-tool-swap/SKILL.md:67`: my B. Line 67 holds both senses
+   ("first-hand proof" and "the judgement in the proof lines"), so my A label for it was incomplete [checked by reading
+   the line]. The window sent to Jev in the A cards ends before the second sense, so Jev saw only the first.
+3. Claim substantiation, 4 lines (`reference/audience.md:20`, `research/layer-2-x-data-tiers.md:251` and `:255`,
+   `research/layer-1-switches-profiles.md:206`): evidence that warrants a claim, not an attached thing. I had
+   `audience.md:20` under A and the other three under C.
+4. Safety demonstration, 2 lines (`research/layer-1-switches-profiles.md:27` and `:219`, "D37's proof test"): a test
+   that an agent cannot reach approval. I had these as ordinary English (C). D37 does specify "a test proving an agent
+   can't trigger it" [checked, `reviews/ui-direction.md:47`], so C was wrong for these two: it is a project meaning.
+Codex's suggested entries: Run evidence, Proof line, Claim evidence, Approval safety test. That naming and the
+"claim evidence" group are its inference, not settled.
+
+**What the run does and does not show.** Jev: under the wording first used, no overload at the A/B level, far from a
+known split; under a neutral wording, inconclusive. Codex: overloaded, four senses. Me: A and B are distinct referents;
+whether that needs two entries is a wording call. The disagreement is unresolved and is the operator's to settle. Jev
+was not asked about the D37 sense or the claim-substantiation sense, so it says nothing about them.
