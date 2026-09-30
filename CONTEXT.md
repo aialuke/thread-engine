@@ -16,6 +16,10 @@ _Avoid_: pull, scrape, poll
 The ledger's record of one post's metrics as observed at one Read. A Read does not always produce one: replies are recorded as activity only, and a repeat valid or final observation is skipped.
 _Avoid_: read (for the record), reading, metrics row
 
+**Payload**:
+The JSON file a `record-*` or `open-experiment` command reads: one Read's observations, one post, or one experiment's terms. Its shape and call order are part of the loop's interface.
+_Avoid_: input file, request, body
+
 **48h read**:
 The Read of a post between 36 and 60 hours after it was posted. Named "48h" for the middle of that window, so it is not an exact age. A post that misses the window is marked missed.
 _Avoid_: 2-day read, early read
