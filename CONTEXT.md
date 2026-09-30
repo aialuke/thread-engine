@@ -41,7 +41,7 @@ The next batch of unconsumed treatment posts, as many as the Experiment's size, 
 _Avoid_: cycle, batch
 
 **Lesson**:
-An evidence-backed statement recorded when an Experiment closes, or when an operator preference is accepted. It need not be adopted.
+An evidence-backed statement recorded when an Experiment closes, or when an operator preference is accepted. It need not be adopted. An adopted Lesson is provisional: `learnings.md` gives its Basis (rounds, treatment posts, cohort size and the false-adoption caveat, or the operator edits behind it), and `/apply` shows that before the operator's yes.
 _Avoid_: finding, insight
 
 **Arm**:
