@@ -328,6 +328,10 @@ class Malformed(Refused):
                            "record-interactions: payload is malformed: invalid literal for int() with base 10: '5.5'")
         self.assertEqual(payloads.newer_since_id("10", "9"), "10")
         self.assertIsNone(payloads.newer_since_id("9", "10"))
+        self.assertEqual(payloads.newer_since_id(7.0, "5"), "7.0")  # compatibility: int() coercion once one is saved
+        self.assertIsNone(payloads.newer_since_id(True, "5"))
+        self.assertRefused(lambda: payloads.newer_since_id(7.0, None),
+                           "record-interactions: payload is malformed: invalid literal for int() with base 10: '7.0'")
         self.assertRefused(lambda: payloads.newer_since_id("abc", "5"),
                            "record-interactions: payload is malformed: invalid literal for int() with base 10: 'abc'")
         self.assertRefused(lambda: payloads.newer_since_id("6", "abc"),
