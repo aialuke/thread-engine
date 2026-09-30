@@ -321,7 +321,11 @@ class Malformed(Refused):
     def test_since_id(self) -> None:
         self.assertIsNone(payloads.newer_since_id(None, "5"))
         self.assertIsNone(payloads.newer_since_id("", None))
-        self.assertEqual(payloads.newer_since_id("abc", None), "abc")  # not read as a number while none is saved
+        self.assertEqual(payloads.newer_since_id("7", None), "7")
+        self.assertRefused(lambda: payloads.newer_since_id("abc", None),
+                           "record-interactions: payload is malformed: invalid literal for int() with base 10: 'abc'")
+        self.assertRefused(lambda: payloads.newer_since_id("5.5", None),
+                           "record-interactions: payload is malformed: invalid literal for int() with base 10: '5.5'")
         self.assertEqual(payloads.newer_since_id("10", "9"), "10")
         self.assertIsNone(payloads.newer_since_id("9", "10"))
         self.assertRefused(lambda: payloads.newer_since_id("abc", "5"),

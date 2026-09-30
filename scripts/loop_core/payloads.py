@@ -231,14 +231,14 @@ def interaction_inputs(payload: dict) -> tuple[datetime, Iterator[tuple], Iterat
 def newer_since_id(since: object, saved: object) -> str | None:
     """The mentions cursor to keep: `since` when it is set and beats the `saved` one, else None.
 
-    `since` is only read as a number once there is a saved one to compare with, as it always was.
+    `since` must be a number whenever it is set, so a bad one is refused before it can be saved.
     """
     if not since:
         return None
+    with malformed("record-interactions"):
+        newest = int(str(since))
     if not saved:
         return str(since)
-    with malformed("record-interactions"):
-        newest = int(since)
     try:
         kept = int(saved)
     except (TypeError, ValueError) as exc:

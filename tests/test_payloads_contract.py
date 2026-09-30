@@ -248,14 +248,18 @@ class InteractionsPayload(Cli):
             "mentions": [self.MENTION, {**self.MENTION, "author_id": ""}, {**self.MENTION, "author_id": "7", "id": "2"}]}))
         self.assertEqual(result, {"people": 1, "mentions_since_id": None, "outside_replies": {"1000000001": 1}})
 
-    def test_since_id_is_kept_as_text_and_only_compared_when_one_is_saved(self) -> None:
-        first = self.ok("record-interactions", "--json", self.payload({"observed_at": T0, "since_id": "abc"}))
-        self.assertEqual(first["mentions_since_id"], "abc")  # compatibility: not parsed while none is saved
-        # Compatibility: a non-numeric id is stored as given, and then poisons the next comparison.
-        run = self.send({"observed_at": T0, "since_id": "12"})
-        self.assertEqual(run.returncode, 1)
-        self.assertEqual(json.loads(run.stderr),
-                         {"error": "record-interactions: the saved mentions_since_id 'abc' is not a number"})
+    def test_since_id_is_kept_as_text_and_compared_with_the_saved_one(self) -> None:
+        self.ok("record-interactions", "--json", self.payload({"observed_at": T0, "since_id": "007"}))
+        kept = self.ok("record-interactions", "--json", self.payload({"observed_at": T0, "since_id": "5"}))
+        self.assertEqual(kept["mentions_since_id"], "007")
+        newer = self.ok("record-interactions", "--json", self.payload({"observed_at": T0, "since_id": "12"}))
+        self.assertEqual(newer["mentions_since_id"], "12")
+
+    def test_a_first_non_numeric_since_id_is_refused_and_writes_nothing(self) -> None:
+        run = self.send({"observed_at": T0, "since_id": "abc"})
+        self.assertEqual((run.returncode, run.stdout), (1, ""))
+        self.assertRegex(json.loads(run.stderr)["error"], r"^record-interactions: payload is malformed: ")
+        self.assertFalse((self.root / "loop" / "followers" / "interactions.json").exists())
 
     def test_a_non_numeric_since_id_is_refused_once_one_is_saved(self) -> None:
         self.ok("record-interactions", "--json", self.payload({"observed_at": T0, "since_id": "5"}))
