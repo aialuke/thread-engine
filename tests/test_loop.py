@@ -764,10 +764,12 @@ class Isolation(unittest.TestCase):
 
     def test_write_scan_catches_writes_and_io_imports(self) -> None:
         from test_scripts import _writes_files
-        cases = {"write_text": "p.write_text('x')\n", "unlink": "p.unlink()\n", "open_w": "open('f', 'w')\n",
+        cases = {"write_text": "p.write_text('x')\n", "unlink": "p.unlink()\n", "path_replace": "p.replace(q)\n",
+                 "os_replace": "import os\nos.replace(a, b)\n", "open_w": "open('f', 'w')\n",
                  "open_kw": "open('f', mode='a')\n", "open_var": "open('f', mode)\n",
                  "subprocess": "import subprocess\n", "tempfile": "from tempfile import mkstemp\n"}
-        clean = {"read": "open('f')\nopen('f', 'r')\nPath('f').read_text()\n", "pure": "x = 1 + 1\n"}
+        clean = {"read": "open('f')\nopen('f', 'r')\nPath('f').read_text()\n", "pure": "x = 1 + 1\n",
+                 "str_replace": "value.replace('Z', '+00:00')\n"}
         with tempfile.TemporaryDirectory() as tmp:
             for name, source in {**cases, **clean}.items():
                 path = Path(tmp) / f"{name}.py"

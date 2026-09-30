@@ -51,7 +51,7 @@ def _reads_environ(path: Path) -> bool:
     return False
 
 
-WRITE_CALLS = {"write_text", "write_bytes", "unlink", "replace", "rename", "mkdir", "rmdir", "touch", "remove"}
+WRITE_CALLS = {"write_text", "write_bytes", "unlink", "rename", "mkdir", "rmdir", "touch", "remove"}
 IO_IMPORTS = {"subprocess", "shutil", "tempfile"}
 
 
@@ -60,6 +60,11 @@ def _writes_files(path: Path) -> bool:
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     for node in ast.walk(tree):
         if isinstance(node, ast.Attribute) and node.attr in WRITE_CALLS:
+            return True
+        # Path.replace(target) or os.replace(a, b) move files; str.replace(old, new[, count]) does not.
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "replace"
+                and (len(node.args) + len(node.keywords) == 1
+                     or (isinstance(node.func.value, ast.Name) and node.func.value.id == "os"))):
             return True
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "open":
             modes = [a for a in node.args[1:2]] + [k.value for k in node.keywords if k.arg == "mode"]
