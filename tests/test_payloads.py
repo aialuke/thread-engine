@@ -211,18 +211,28 @@ class InteractionInputs(Refused):
             "mentions": [{"author_id": 9}, {"id": "x"}], "reply_targets": [{"user_id": 9}, {}]})
         self.assertEqual((list(mentions), list(targets), since), ([], [], None))
 
-    def test_a_missing_field_is_a_key_error_not_a_refusal(self) -> None:
-        # Compatibility with the CLI today (see test_payloads_contract).
+    def test_a_missing_field_is_a_refusal(self) -> None:
         _, mentions, _, _ = payloads.interaction_inputs({"observed_at": T0,
                                                          "mentions": [{"author_id": "9", "id": "m"}]})
-        with self.assertRaises(KeyError):
-            list(mentions)
+        self.assertRefused(lambda: list(mentions), "record-interactions: payload is missing 'conversation_id'")
+
+    def test_a_bad_time_is_refused_where_the_entry_is_reached(self) -> None:
+        good = {"author_id": "9", "id": "m", "conversation_id": 1, "created_at": T0}
+        for bad in ("zz", None, 5):
+            _, mentions, targets, _ = payloads.interaction_inputs({
+                "observed_at": T0, "mentions": [{**good, "created_at": bad}],
+                "reply_targets": [{"user_id": "7", "item_id": 2, "at": bad}]})
+            with self.subTest(bad=bad):
+                with self.assertRaises(LoopError):
+                    list(mentions)
+                with self.assertRaises(LoopError):
+                    list(targets)
 
     def test_entries_are_read_only_as_they_are_asked_for(self) -> None:
         good = {"author_id": "9", "id": "m", "conversation_id": 1, "created_at": T0}
         _, mentions, _, _ = payloads.interaction_inputs({"observed_at": T0, "mentions": [good, {"author_id": "8"}]})
         self.assertEqual(next(mentions)[:3], ("9", "1", "m"))  # the bad second entry has not been read yet
-        with self.assertRaises(KeyError):
+        with self.assertRaises(LoopError):
             next(mentions)
 
     def test_observed_at_is_required(self) -> None:
@@ -234,9 +244,11 @@ class FollowerInputs(Refused):
         observed, ids = payloads.follower_inputs({"observed_at": T0, "self_ids": [2], "ids": [3, 1, 2, 3]})
         self.assertEqual((observed, ids), (datetime(2026, 10, 1, tzinfo=timezone.utc), ["1", "3"]))
 
-    def test_missing_ids_is_empty_and_null_is_a_type_error(self) -> None:
-        self.assertEqual(payloads.follower_inputs({"observed_at": T0})[1], [])
-        with self.assertRaises(TypeError):
+    def test_ids_are_required_and_must_be_a_list(self) -> None:
+        self.assertRefused(lambda: payloads.follower_inputs({"observed_at": T0}),
+                           "record-followers: ids required (a missing list would record zero followers)")
+        self.assertEqual(payloads.follower_inputs({"observed_at": T0, "ids": []})[1], [])
+        with self.assertRaises(LoopError):
             payloads.follower_inputs({"observed_at": T0, "ids": None})
 
     def test_total_defaults_to_the_id_count(self) -> None:
@@ -268,9 +280,9 @@ class ExperimentPayloads(Refused):
         self.assertRefused(lambda: payloads.experiment_terms({"primary": "likes", "cohort": [1, 2]}),
                            "cohort needs at least 3 posts")
 
-    def test_a_non_numeric_effect_is_a_value_error(self) -> None:
-        with self.assertRaises(ValueError):
-            payloads.experiment_terms({"primary": "likes", "effect": "x"})
+    def test_a_non_numeric_effect_is_refused(self) -> None:
+        self.assertRefused(lambda: payloads.experiment_terms({"primary": "likes", "effect": "x"}),
+                           "open-experiment: payload is malformed: could not convert string to float: 'x'")
 
     def test_texts(self) -> None:
         got = payloads.experiment_texts({"question": " q ", "treatment": "t", "control": "c"})
@@ -279,6 +291,39 @@ class ExperimentPayloads(Refused):
                            "control required")
         self.assertRefused(lambda: payloads.experiment_texts({"question": "q", "treatment": 3, "control": "c"}),
                            "treatment required")
+
+
+class Malformed(Refused):
+    def test_wrong_shapes_are_refused_not_raised(self) -> None:
+        for call in (lambda: payloads.post_from_payload([]), lambda: payloads.snapshot_root_id(None),
+                     lambda: payloads.activity_header({"stage": []}), lambda: payloads.experiment_texts(None),
+                     lambda: list(payloads.activity_items({"items": "x"})),
+                     lambda: payloads.snapshot_from_payload({"root": 1}, OBSERVED, 48.0, "valid", [])):
+            with self.subTest(call=call):
+                with self.assertRaises(LoopError):
+                    call()
+
+    def test_a_missing_key_is_named_or_refused(self) -> None:
+        # validate_item reads the id first, and a missing one is a LoopError of its own.
+        self.assertRefused(lambda: list(payloads.activity_items({"items": [{"kind": "reply"}]})),
+                           "item id missing or bad")
+        self.assertRefused(lambda: payloads.follower_inputs({"observed_at": T0, "ids": [1], "self_ids": 5}),
+                           "record-followers: payload is malformed: 'int' object is not iterable")
+
+    def test_loop_errors_pass_through_untouched(self) -> None:
+        self.assertRefused(lambda: payloads.activity_header({"stage": "x", "observed_at": T0}),
+                           "stage must be one of ['48h', 'backfill', 'final']")
+
+    def test_since_id(self) -> None:
+        self.assertIsNone(payloads.newer_since_id(None, "5"))
+        self.assertIsNone(payloads.newer_since_id("", None))
+        self.assertEqual(payloads.newer_since_id("abc", None), "abc")  # not read as a number while none is saved
+        self.assertEqual(payloads.newer_since_id("10", "9"), "10")
+        self.assertIsNone(payloads.newer_since_id("9", "10"))
+        self.assertRefused(lambda: payloads.newer_since_id("abc", "5"),
+                           "record-interactions: payload is malformed: invalid literal for int() with base 10: 'abc'")
+        self.assertRefused(lambda: payloads.newer_since_id("6", "abc"),
+                           "record-interactions: the saved mentions_since_id 'abc' is not a number")
 
 
 if __name__ == "__main__":

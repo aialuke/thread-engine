@@ -6,11 +6,13 @@ a duplicate is loop.py's to decide. Messages are part of the CLI, so they do not
 
 from __future__ import annotations
 
+import functools
 import re
 from collections.abc import Iterator
+from contextlib import contextmanager
 from datetime import datetime
 
-from loop_core.errors import need
+from loop_core.errors import LoopError, need
 from loop_core.times import iso, parse_time
 
 FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "build-log", "tool-verdict", "other"}
@@ -29,6 +31,31 @@ UNSCORABLE = {
     "views": "views include paid (boosted) reach and say nothing about follows",
     "replies": "a root's replies count the account's own thread cards",
 }
+
+
+@contextmanager
+def malformed(command: str):
+    """Report a wrong-shaped Payload as a refusal, not a traceback.
+
+    Only what runs inside is covered: a missing key, a field of the wrong type, a number that is not one.
+    loop.py's own state code is outside it, so a bug there still shows as the traceback it is.
+    """
+    try:
+        yield
+    except KeyError as exc:
+        raise LoopError(f"{command}: payload is missing {exc.args[0]!r}") from exc
+    except (TypeError, AttributeError, ValueError) as exc:
+        raise LoopError(f"{command}: payload is malformed: {exc}") from exc
+
+
+def guarded(command: str):
+    def wrap(func):
+        @functools.wraps(func)
+        def inner(*args, **kwargs):
+            with malformed(command):
+                return func(*args, **kwargs)
+        return inner
+    return wrap
 
 
 def check_count(value, field: str) -> None:
@@ -83,6 +110,7 @@ def validate_item(item: dict) -> None:
             check_count(value, f"{group}.{key}")
 
 
+@guarded("record-post")
 def post_from_payload(payload: dict) -> dict:
     """The post record a record-post Payload describes, defaults filled in and validated. No snapshots yet."""
     post = {
@@ -110,6 +138,7 @@ def post_from_payload(payload: dict) -> dict:
     return post
 
 
+@guarded("record-snapshot")
 def snapshot_from_payload(payload: dict, observed: datetime, hours: float, kind: str, self_handles: list[str]) -> dict:
     """The Snapshot a record-snapshot Payload describes, for a Read already placed at `hours` old as `kind`."""
     if payload.get("repliers") is not None:
@@ -142,6 +171,7 @@ def snapshot_from_payload(payload: dict, observed: datetime, hours: float, kind:
     return snap
 
 
+@guarded("record-activity")
 def activity_header(payload: dict) -> tuple[str, datetime]:
     """The stage and observation time of a record-activity Payload."""
     stage = payload.get("stage")
@@ -149,6 +179,7 @@ def activity_header(payload: dict) -> tuple[str, datetime]:
     return stage, parse_time(payload.get("observed_at", ""))
 
 
+@guarded("record-activity")
 def cursor_updates(payload: dict) -> dict[str, str]:
     """The read cursors a record-activity Payload moves, as stored timestamps. Absent or empty ones stay put."""
     given = payload.get("cursor") or {}
@@ -165,40 +196,70 @@ def interaction_inputs(payload: dict) -> tuple[datetime, Iterator[tuple], Iterat
     Entries by us or by no one are dropped before their other fields are read. `since_id` comes back exactly
     as given: whether it is a number only matters once one is saved.
     """
-    observed = parse_time(payload.get("observed_at", ""))
-    self_ids = {str(i) for i in payload.get("self_ids", [])}
+    command = "record-interactions"
+    with malformed(command):
+        observed = parse_time(payload.get("observed_at", ""))
+        self_ids = {str(i) for i in payload.get("self_ids", [])}
+        since = payload.get("since_id")
 
     def mentions() -> Iterator[tuple]:
-        for mention in payload.get("mentions", []):
-            author = str(mention.get("author_id", ""))
-            if not author or author in self_ids:
-                continue
-            conversation = str(mention["conversation_id"])
-            created_at = mention["created_at"]
-            yield (author, conversation, mention["id"], created_at,
-                   str(mention.get("replied_to") or mention["conversation_id"]))
+        with malformed(command):
+            for mention in payload.get("mentions", []):
+                author = str(mention.get("author_id", ""))
+                if not author or author in self_ids:
+                    continue
+                conversation = str(mention["conversation_id"])
+                created_at = mention["created_at"]
+                item = str(mention.get("replied_to") or mention["conversation_id"])
+                parse_time(created_at)
+                yield author, conversation, mention["id"], created_at, item
 
     def targets() -> Iterator[tuple]:
-        for target in payload.get("reply_targets", []):
-            user = str(target.get("user_id", ""))
-            if user and user not in self_ids:
-                yield user, str(target["item_id"]), target["at"]
+        with malformed(command):
+            for target in payload.get("reply_targets", []):
+                user = str(target.get("user_id", ""))
+                if user and user not in self_ids:
+                    item, at = str(target["item_id"]), target["at"]
+                    parse_time(at)
+                    yield user, item, at
 
-    return observed, mentions(), targets(), payload.get("since_id")
+    return observed, mentions(), targets(), since
 
 
+def newer_since_id(since: object, saved: object) -> str | None:
+    """The mentions cursor to keep: `since` when it is set and beats the `saved` one, else None.
+
+    `since` is only read as a number once there is a saved one to compare with, as it always was.
+    """
+    if not since:
+        return None
+    if not saved:
+        return str(since)
+    with malformed("record-interactions"):
+        newest = int(since)
+    try:
+        kept = int(saved)
+    except (TypeError, ValueError) as exc:
+        raise LoopError(f"record-interactions: the saved mentions_since_id {saved!r} is not a number") from exc
+    return str(since) if newest > kept else None
+
+
+@guarded("record-followers")
 def follower_inputs(payload: dict) -> tuple[datetime, list[str]]:
     """When a record-followers Payload was read, and its follower ids without our own, sorted."""
     observed = parse_time(payload.get("observed_at", ""))
     self_ids = {str(i) for i in payload.get("self_ids", [])}
-    return observed, sorted({str(i) for i in payload.get("ids", [])} - self_ids)
+    need("ids" in payload, "record-followers: ids required (a missing list would record zero followers)")
+    return observed, sorted({str(i) for i in payload["ids"]} - self_ids)
 
 
+@guarded("record-followers")
 def follower_total(payload: dict, ids: list[str]) -> object:
     """The account's follower count: the Payload's `total` when it gives one, else how many ids it listed."""
     return payload.get("total", len(ids))
 
 
+@guarded("record-followers")
 def verified_count(payload: dict) -> int | None:
     """The verified-follower count, or None when the Payload has none."""
     if payload.get("verified") is None:
@@ -207,6 +268,7 @@ def verified_count(payload: dict) -> int | None:
     return payload["verified"]
 
 
+@guarded("open-experiment")
 def experiment_terms(payload: dict) -> tuple[str, float, list[str]]:
     """The measure, the effect to beat and the cohort of an open-experiment Payload."""
     metric = str(payload.get("primary") or "")
@@ -219,9 +281,35 @@ def experiment_terms(payload: dict) -> tuple[str, float, list[str]]:
     return metric, effect, cohort
 
 
+@guarded("open-experiment")
 def experiment_texts(payload: dict) -> dict:
     """The question, the two arms and any reference facts of an open-experiment Payload. The three texts are required."""
     for field in ("question", "treatment", "control"):
         need(isinstance(payload.get(field), str) and payload[field].strip(), f"{field} required")
     return {"question": payload["question"], "treatment": payload["treatment"], "control": payload["control"],
             "reference_facts": payload.get("reference_facts", [])}
+
+
+@guarded("record-snapshot")
+def snapshot_root_id(payload: dict) -> str:
+    """Which post a record-snapshot Payload is about. The first thing read, so a non-object Payload stops here."""
+    return str(payload.get("root_id", ""))
+
+
+@guarded("record-snapshot")
+def snapshot_observed(payload: dict) -> datetime:
+    return parse_time(payload.get("observed_at", ""))
+
+
+@guarded("record-snapshot")
+def snapshot_is_final(payload: dict) -> bool:
+    """True when the Payload says its Read is a Final read."""
+    return payload.get("stage") == "final"
+
+
+def activity_items(payload: dict) -> Iterator[dict]:
+    """The items of a record-activity Payload, each validated as the caller reaches it."""
+    with malformed("record-activity"):
+        for item in payload.get("items", []):
+            validate_item(item)
+            yield item

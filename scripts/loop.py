@@ -32,10 +32,10 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from loop_core.errors import LoopError, need
-from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEYS, activity_header,
+from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEYS, activity_header, activity_items,
                                 cursor_updates, experiment_terms, experiment_texts, follower_inputs, follower_total,
-                                interaction_inputs, post_from_payload, snapshot_from_payload, validate_item,
-                                validate_post, verified_count)
+                                interaction_inputs, newer_since_id, post_from_payload, snapshot_from_payload, snapshot_is_final,
+                                snapshot_observed, snapshot_root_id, validate_post, verified_count)
 from loop_core.reads import (FINAL_MAX_DAYS, FINAL_MIN_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage,
                              in_final_window, past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
 from loop_core.times import iso, parse_time
@@ -289,13 +289,13 @@ def need_final_age(hours: float) -> None:
 def cmd_record_snapshot(repo: Repo, args) -> dict:
     state = repo.state()
     payload = read_json(Path(args.json))
-    root_id = str(payload.get("root_id", ""))
+    root_id = snapshot_root_id(payload)
     post = repo.post(root_id)
-    observed = parse_time(payload.get("observed_at", ""))
+    observed = snapshot_observed(payload)
     hours = age_hours(post, observed)
     need(hours >= 0, "observed before the post existed")
     kind = snapshot_kind(hours)
-    if payload.get("stage") == "final":
+    if snapshot_is_final(payload):
         need_final_age(hours)
         kind = "final"
         if any(s["kind"] == "final" for s in post["snapshots"]):
@@ -317,8 +317,7 @@ def cmd_record_activity(repo: Repo, args) -> dict:
     stage, observed = activity_header(payload)
     months: dict[str, dict] = {}
     recorded = 0
-    for item in payload.get("items", []):
-        validate_item(item)
+    for item in activity_items(payload):
         month = item["created_at"][:7]
         if month not in months:
             path = repo.activity_dir / f"{month}.json"
@@ -399,8 +398,9 @@ def cmd_record_interactions(repo: Repo, args) -> dict:
         _note_person(data["people"], author, item, created_at, "replied")
     for user, item, at in targets:
         _note_person(data["people"], user, item, at, "replied_to")
-    if since and (not data["mentions_since_id"] or int(since) > int(data["mentions_since_id"])):
-        data["mentions_since_id"] = str(since)
+    newest = newer_since_id(since, data["mentions_since_id"])
+    if newest is not None:
+        data["mentions_since_id"] = newest
     people_cut = observed - timedelta(days=INTERACTION_DAYS)
     conv_cut = observed - timedelta(days=CONVERSATION_DAYS)
     data["people"] = {u: p for u, p in data["people"].items() if parse_time(p["at"]) >= people_cut}

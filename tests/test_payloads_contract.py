@@ -200,18 +200,18 @@ class InteractionsPayload(Cli):
     def test_observed_at_is_required_and_reported(self) -> None:
         self.assertEqual(self.fails("record-interactions", "--json", self.payload({})), BAD_TIME.format(""))
 
-    def test_a_mention_without_conversation_id_is_a_traceback(self) -> None:
-        # Compatibility: exit 1, empty stdout, KeyError on stderr (not {"error": ...}).
+    def test_a_mention_without_conversation_id_is_refused(self) -> None:
         run = self.send({"observed_at": T0, "mentions": [{k: v for k, v in self.MENTION.items()
                                                           if k != "conversation_id"}]})
         self.assertEqual((run.returncode, run.stdout), (1, ""))
-        self.assertIn("KeyError: 'conversation_id'", run.stderr)
+        self.assertEqual(json.loads(run.stderr),
+                         {"error": "record-interactions: payload is missing 'conversation_id'"})
         self.assertFalse((self.root / "loop" / "followers" / "interactions.json").exists())
 
-    def test_null_mentions_is_a_traceback(self) -> None:
+    def test_null_mentions_is_refused(self) -> None:
         run = self.send({"observed_at": T0, "mentions": None})
         self.assertEqual((run.returncode, run.stdout), (1, ""))
-        self.assertIn("TypeError", run.stderr)
+        self.assertRegex(json.loads(run.stderr)["error"], r"^record-interactions: payload is malformed: ")
 
     def test_a_skipped_mention_is_not_read_further(self) -> None:
         # Compatibility: own and authorless mentions are dropped before conversation_id is looked up.
@@ -243,9 +243,17 @@ class InteractionsPayload(Cli):
     def test_since_id_is_kept_as_text_and_only_compared_when_one_is_saved(self) -> None:
         first = self.ok("record-interactions", "--json", self.payload({"observed_at": T0, "since_id": "abc"}))
         self.assertEqual(first["mentions_since_id"], "abc")  # compatibility: not parsed while none is saved
+        # Compatibility: a non-numeric id is stored as given, and then poisons the next comparison.
         run = self.send({"observed_at": T0, "since_id": "12"})
         self.assertEqual(run.returncode, 1)
-        self.assertIn("ValueError", run.stderr)  # compatibility: int("abc") once one is saved
+        self.assertEqual(json.loads(run.stderr),
+                         {"error": "record-interactions: the saved mentions_since_id 'abc' is not a number"})
+
+    def test_a_non_numeric_since_id_is_refused_once_one_is_saved(self) -> None:
+        self.ok("record-interactions", "--json", self.payload({"observed_at": T0, "since_id": "5"}))
+        run = self.send({"observed_at": T0, "since_id": "abc"})
+        self.assertEqual(run.returncode, 1)
+        self.assertRegex(json.loads(run.stderr)["error"], r"^record-interactions: payload is malformed: ")
 
 
 class FollowersPayload(Cli):
@@ -259,14 +267,16 @@ class FollowersPayload(Cli):
     def test_observed_at_is_required(self) -> None:
         self.assertEqual(self.fails("record-followers", "--json", self.payload({})), BAD_TIME.format(""))
 
-    def test_missing_ids_means_zero_followers(self) -> None:
-        self.assertEqual(self.ok("record-followers", "--json", self.payload({"observed_at": T0})),
-                         {"date": "2026-10-01", "at": T0, "followers": 0, "baseline": True})
+    def test_missing_ids_is_refused_and_nothing_is_written(self) -> None:
+        # Was: recorded zero followers, so the next real list would be credited as all-new followers.
+        self.assertEqual(self.fails("record-followers", "--json", self.payload({"observed_at": T0})),
+                         "record-followers: ids required (a missing list would record zero followers)")
+        self.assertEqual(self.files(), [])
 
-    def test_null_ids_is_a_traceback(self) -> None:
+    def test_null_ids_is_refused(self) -> None:
         run = self.send({"observed_at": T0, "ids": None})
         self.assertEqual((run.returncode, run.stdout), (1, ""))
-        self.assertIn("TypeError", run.stderr)
+        self.assertRegex(json.loads(run.stderr)["error"], r"^record-followers: payload is malformed: ")
         self.assertEqual(self.files(), [])
 
     def test_a_bad_verified_count_fails_after_the_ids_file_is_written(self) -> None:
@@ -315,11 +325,9 @@ class ExperimentPayload(LoopCase):
             with self.subTest(data=data):
                 self.assertEqual(self.refused(data), message)
 
-    def test_a_non_numeric_effect_is_a_traceback(self) -> None:
-        # Compatibility: float("x") escapes as ValueError; main only catches LoopError.
-        path = self.payload({"primary": "likes", "effect": "x"})
-        with self.assertRaises(ValueError):
-            self.run_loop("open-experiment", "--json", path)
+    def test_a_non_numeric_effect_is_refused(self) -> None:
+        self.assertEqual(self.refused({"primary": "likes", "effect": "x"}),
+                         "open-experiment: payload is malformed: could not convert string to float: 'x'")
 
     def test_text_fields_are_checked_after_the_cohort(self) -> None:
         ids = self.seed()
