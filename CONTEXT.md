@@ -15,16 +15,15 @@ The text of one post within a Draft. A Draft's Cards are numbered in the order t
 _Avoid_: slide, tweet, part
 
 **Topic**:
-The subject one Draft covers; a Draft has exactly one. The queue lists Topics, and a queue row is that Topic's record, with its status. A PAID → FREE row is a Topic like any other; its category word comes from the Roster. Not X's own topic labels on a post, which the ledger also calls topics.
-_Avoid_: queue row (for the subject)
+The subject one Draft covers; a Draft has exactly one. The queue lists Topics, and a queue row is that Topic's record, with its status. A PAID → FREE row is a Topic like any other. It is not X's own topic labels on a post, which the ledger also calls topics.
 
 **Roster**:
-The operator's gathered list of paid tools and free alternatives that PAID → FREE posts draw their categories and candidate rows from. It is a source of claims to check, never of wording. Its long category titles are not the category word. It is not a queue; a Topic is taken from it, not listed in it.
-_Avoid_: directory, tool list
+The operator's gathered list of paid tools and free alternatives that PAID → FREE posts draw their categories from. It is a source of claims to check, never of wording. It is not a queue; a Topic is taken from it, not listed in it.
+_Avoid_: tool list
 
 **Hook**:
 The first Card of a Draft, the one a stranger is shown (the root, once posted). In a single standalone post it is the whole post. Not a Claude Code hook. **Hook style** is how a Hook is written, not a separate thing; it is one of the levers a Lesson may change.
-_Avoid_: opener, intro, root (before it is posted)
+_Avoid_: opener, intro
 
 **Format**:
 The shape a Draft takes, such as single tip, tool swap, comparison, build log or settings thread. It is chosen for the Draft. Independent of Lane.
@@ -32,7 +31,7 @@ _Avoid_: template, type
 
 **Lane**:
 Whether a post serves the account's audience: `main` (tech and building, for builders and AI-using creators) or `other` (networking, banter, opinion with no tech angle). Set per post, and judged by audience fit, never by Format. The share of `main` posts is reported, not enforced, while formats are trialled.
-_Avoid_: category, topic, channel
+_Avoid_: channel
 
 **Truth budget**:
 The rule that every figure or claim in a Card is sourced this session: an official page, the operator, or the operator's own run with its artifact. A claim that can't be sourced comes out of the Card; it is never softened to keep it.
@@ -101,7 +100,7 @@ A treatment hypothesis judged in Rounds against a threshold fixed when it opens 
 _Avoid_: test, trial, A/B
 
 **Cohort**:
-The earlier posts an Experiment is measured against: at least three, from the same Lane and matching the format the treatment is compared with. A post joins only if it is organic and has a valid or late Snapshot; when the Experiment is scored on a rate, it also needs at least 50 organic impressions. Its median times the effect sets the threshold. It is the reference the threshold comes from, not the Control: its posts all predate the Experiment.
+The earlier posts an Experiment is measured against, accepted by the operator with the Experiment and ideally from the same Lane and matching the format the treatment is compared with. A post joins only if it is organic and has a Snapshot that can be scored on the Experiment's measure. Its median times the effect sets the threshold. It is the reference the threshold comes from, not the Control: its posts all predate the Experiment.
 _Avoid_: sample, baseline
 
 **Treatment**:
@@ -109,7 +108,7 @@ The one change an Experiment tests, stated as the exact rule a post follows. A t
 _Avoid_: variant, intervention
 
 **Control**:
-A post made on an exploit Slot while an Experiment is open, following the current best approach. It is recorded for context and never scored: the Treatment is judged against the Cohort's threshold, not against Control posts. What an Experiment says it compares with is only a description, and may differ from what Control posts do.
+A post normally made on an exploit Slot while an Experiment is open, following the current best approach. It is recorded for context and never scored: the Treatment is judged against the Cohort's threshold, not against Control posts. What an Experiment says it compares with is only a description, and may differ from what Control posts do.
 _Avoid_: control group
 
 **Round**:
@@ -117,7 +116,7 @@ The next batch of unconsumed treatment posts, as many as the Experiment's size, 
 _Avoid_: cycle, batch
 
 **Arm**:
-A post's assignment inside an Experiment: Treatment, Control, or none for a post outside one. Only treatment posts enter Rounds, and a retrospective post cannot have an Arm.
+A post's assignment inside an Experiment: Treatment, Control, or none for a post outside one. Only treatment posts enter Rounds, and a retrospective post cannot have an Arm. "The arm" also names the rule itself: the exact terms of the Treatment or of the Control.
 _Avoid_: group
 
 **Lesson**:
@@ -125,5 +124,5 @@ An evidence-backed statement recorded when an Experiment closes, or when an oper
 _Avoid_: finding, insight
 
 **Slot**:
-The next post's explore-or-exploit recommendation, from the time since the loop started and the posts made since. Explore posts the treatment (or asks for an Experiment); exploit posts the current best approach.
+The next post's explore-or-exploit recommendation, from the time since the loop started and the posts made since. Explore posts the treatment (or asks for an Experiment); exploit posts the current best approach. It also names the Arm: treatment on explore, control on exploit.
 _Avoid_: turn, next post
