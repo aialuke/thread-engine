@@ -17,7 +17,7 @@ Local factory for @exitzerocode X posts, with a learning loop: compelling conten
 
 ## What the loop may never change
 
-The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate refusals, and the no-X-writes rule. Lessons may change format, length, lane mix, hook style, timing and topic choice, through `/apply` only.
+Approval (`/approve`), the truth budget, fail-closed fact-checks, the shared gate refusals, and the no-X-writes rule. Lessons may change format, length, lane mix, hook style, timing and topic choice, through `/apply` only.
 
 ## Layout
 
