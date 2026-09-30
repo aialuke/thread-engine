@@ -31,3 +31,23 @@ _Avoid_: 30-day read, last read
 **Backfill read**:
 A one-off Read of everything in a saved file, used to catch the ledger up. It counts as a Read but is not tied to a post's age.
 _Avoid_: import, restore
+
+**Experiment**:
+A treatment hypothesis judged in Rounds against a threshold fixed when it opens (the cohort's median times the effect). One is open at a time; it ends adopted, not replicated or no effect.
+_Avoid_: test, trial, A/B
+
+**Round**:
+The next batch of unconsumed treatment posts, as many as the Experiment's size, each with a valid Snapshot. How many clear the threshold decides the Experiment's next state.
+_Avoid_: cycle, batch
+
+**Lesson**:
+An evidence-backed statement recorded when an Experiment closes, or when an operator preference is accepted. It need not be adopted.
+_Avoid_: finding, insight
+
+**Arm**:
+A post's assignment inside an Experiment: treatment, control, or none for a post outside one. Only treatment posts enter Rounds.
+_Avoid_: group, variant
+
+**Slot**:
+The next post's explore-or-exploit recommendation, from the time since the loop started and the posts made since. Explore posts the treatment (or asks for an Experiment); exploit posts the current best approach.
+_Avoid_: turn, next post
