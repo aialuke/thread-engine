@@ -20,6 +20,7 @@ from unittest import mock
 
 from test_loop import REPO, T0, LoopCase, hours
 
+from loop_core import experiments  # noqa: E402
 import loop  # noqa: E402  (after test_loop: it puts scripts/ on the path)
 
 LOOP = REPO / "scripts" / "loop.py"
@@ -349,10 +350,10 @@ class Evaluate(ExperimentSetup):
                          {"evaluated": False, "reason": "no open experiment"})
 
     def test_round_result_thresholds(self) -> None:
-        self.assertEqual([loop.round_result(p, 3) for p in (3, 2, 1, 0)], ["pass", "mixed", "fail", "fail"])
+        self.assertEqual([experiments.round_result(p, 3) for p in (3, 2, 1, 0)], ["pass", "mixed", "fail", "fail"])
 
     def test_the_transition_table(self) -> None:
-        self.assertEqual(loop.TRANSITIONS, {
+        self.assertEqual(experiments.TRANSITIONS, {
             ("testing", "pass"): "promising", ("testing", "mixed"): "unclear", ("testing", "fail"): "no_effect",
             ("promising", "pass"): "adopted", ("promising", "mixed"): "not_replicated",
             ("promising", "fail"): "not_replicated",

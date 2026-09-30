@@ -8,6 +8,7 @@ readable views (experiments.md, learnings.md, ledger/SUMMARY.md).
 No network access. Git is used only by commit-rule, undo and commit-data.
 The Read-window rules (36-60h, 26 days, missed, due-reads windows) live in loop_core/reads.py.
 Whether a Read becomes a Snapshot (the ordered refusals and skips) lives in loop_core/snapshots.py.
+How a Round moves an Experiment and what a closed one teaches lives in loop_core/experiments.py.
 What each Payload must look like (validation, defaults, keys) lives in loop_core/payloads.py.
 
 X API data (from snapshot.py) lands in three places:
@@ -37,6 +38,7 @@ from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEY
                                 cursor_updates, experiment_terms, experiment_texts, follower_inputs, follower_total,
                                 interaction_inputs, newer_since_id, post_from_payload, snapshot_from_payload, snapshot_is_final,
                                 snapshot_observed, snapshot_root_id, validate_post, verified_count)
+from loop_core.experiments import OPEN_STATES, evaluate_rounds, next_id, open_experiment
 from loop_core.reads import (SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage, need_final_age,
                              past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
 from loop_core.snapshots import admit_snapshot
@@ -53,7 +55,6 @@ FOLLOWER_FILES_KEPT = 2
 INTERACTION_DAYS = 7
 CONVERSATION_DAYS = 30
 
-OPEN_STATES = {"testing", "promising", "unclear"}
 # X's analytics export (Analytics → Content → Export): organic, per post, with the follows and
 # shares the pay-per-use API cannot read (reference/x-api.md P11).
 EXPORT_COLUMNS = {"Impressions": "impressions", "Likes": "likes", "Replies": "replies", "Reposts": "reposts",
@@ -184,17 +185,6 @@ def primary_value(snap: dict | None, metric: str) -> int | None:
     if snap is None:
         return None
     return snap.get("root", {}).get(metric)
-
-
-def open_experiment(state: dict) -> dict | None:
-    for exp in state["experiments"]:
-        if exp["status"] in OPEN_STATES:
-            return exp
-    return None
-
-
-def next_id(prefix: str, items: list[dict]) -> str:
-    return f"{prefix}-{len(items) + 1:03d}"
 
 
 # ---------- commands ----------
@@ -554,27 +544,6 @@ def cmd_open_experiment(repo: Repo, args) -> dict:
     return {"opened": exp["id"], "cohort_median": median, "threshold": exp["threshold"]}
 
 
-TRANSITIONS = {
-    ("testing", "pass"): "promising",
-    ("testing", "mixed"): "unclear",
-    ("testing", "fail"): "no_effect",
-    ("promising", "pass"): "adopted",
-    ("promising", "mixed"): "not_replicated",
-    ("promising", "fail"): "not_replicated",
-    ("unclear", "pass"): "promising",
-    ("unclear", "mixed"): "no_effect",
-    ("unclear", "fail"): "no_effect",
-}
-
-
-def round_result(passes: int, size: int) -> str:
-    if passes == size:
-        return "pass"
-    if passes >= size - 1:
-        return "mixed"
-    return "fail"
-
-
 def cmd_evaluate(repo: Repo, args) -> dict:
     state = repo.state()
     exp = open_experiment(state)
@@ -591,36 +560,10 @@ def cmd_evaluate(repo: Repo, args) -> dict:
         value = primary_value(snap, exp["primary"])
         if value is not None:
             ready.append((post["root_id"], value))
-    events = []
     at = iso(now_arg(args.now))
-    while exp["status"] in OPEN_STATES and len(ready) >= exp["size"]:
-        batch, ready = ready[: exp["size"]], ready[exp["size"]:]
-        passes = sum(1 for _, value in batch if value >= exp["threshold"])
-        result = round_result(passes, exp["size"])
-        before = exp["status"]
-        exp["status"] = TRANSITIONS[(before, result)]
-        exp["rounds"].append({"posts": [pid for pid, _ in batch],
-                              "values": [value for _, value in batch],
-                              "passes": passes, "result": result, "at": at})
-        events.append({"from": before, "result": result, "to": exp["status"]})
-        if exp["status"] not in OPEN_STATES:
-            exp["closed_at"] = at
-            evidence = [pid for rnd in exp["rounds"] for pid in rnd["posts"]]
-            state["lessons"].append({
-                "id": next_id("L", state["lessons"]),
-                "experiment": exp["id"],
-                "statement": exp["treatment"],
-                "status": exp["status"],
-                "evidence": evidence,
-                "reference_facts": exp.get("reference_facts", []),
-                "created_at": at,
-                "last_evidence_at": at,
-                "rule_state": "none",
-            })
-    waiting = exp["size"] - len(ready) if exp["status"] in OPEN_STATES else 0
+    state, result = evaluate_rounds(state, ready, at)
     repo.save_state(state)
-    return {"evaluated": True, "experiment": exp["id"], "status": exp["status"],
-            "events": events, "posts_needed_for_next_round": waiting}
+    return result
 
 
 def cmd_next_slot(repo: Repo, args) -> dict:
