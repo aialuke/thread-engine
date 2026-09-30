@@ -256,3 +256,71 @@ The rubric wording is unchanged. The one allowed revision is held back: the real
 - **Stability:** 0 of 30 repeated calls changed a verdict. Confidence AUROC was 0.75–0.83. Every rater answered every post.
 - **Not included:** the operator's labels, by the operator's choice; they can be added to validation later. The Worth-joining re-read hadn't run yet.
 - **Full write-up and the AUD/USD correction:** [`../jev-build-time-evaluation-2026-09-27.md`](../jev-build-time-evaluation-2026-09-27.md#results-experiment-3-the-b3-pull-28-september-2026).
+
+## Glossary judge (2026-09-30)
+
+`glossary_judge.py` asks Jev whether proposed `CONTEXT.md` definitions match how the repo uses each term
+(`build`, `run [term]`, `report`). Snippets are prose from committed `.md` files only. Answers are in
+`private/glossary/` (v1, superseded, in `private/glossary-v1/`).
+
+**Calibration set, hand-audited before the v2 run** (8 usages read each): clean = Cohort, Roster, Truth budget;
+muddy = Control, Round (3+ senses seen), Hook, Topic (glossary admits a second sense); general = JSON, retry,
+regex, endpoint; exploratory, outside the rule = Lane, Slot, Arm.
+
+**Pass rule, declared before any v2 request. Fail means stop, with no rescue edits:**
+- specific >= 0.70 on Cohort, Roster, Truth budget, Hook, Topic
+- specific <= 0.30 on every general term
+- one-sense: mean(clean) minus mean(muddy) >= 0.25
+- cloze accuracy: mean over clean terms >= 0.70
+- faithful: mean of each clean term's minimum >= 0.60
+
+v1 failed the one-sense check (gap 0.15 vs 0.20) because Lane and Slot were wrongly labelled clean.
+
+## Glossary check of the new entries (2026-09-30)
+
+`glossary_check.py` asks Jev whether the seven new `CONTEXT.md` definitions (Post, Ledger, Queue, Organic,
+Retrospective post, Shout-out, Voice) match the repo's usage. Slot is not checked: its entry deliberately
+excludes the clock-time and feed senses. Three reps per term, each a different 8-snippet sample (seeds 1-3, prose
+`.md` only, no matches inside backticks, no outside-source notes), so 24 snippets per term.
+
+**Controls, planted before the run** (they must behave as the questions claim, else the new results are ignored):
+- wrong definition: Shout-out as "a line in a Card" -> mean faithful <= 0.50
+- implementation-laden: Ledger as file names and scripts -> impl_detail >= 0.60
+- undefined words: Queue leaning on "Wibbler" and "Foozle" -> self_contained <= 0.40
+
+**Pass rule for each new definition** (mean over the 3 reps; controls must pass first):
+- mean faithful >= 0.75, self_contained >= 0.60, impl_detail <= 0.40
+- any question whose 3 reps span > 0.30 is flagged unstable, not passed
+
+A definition that fails is marked "revise" with the failing questions. Nothing is edited automatically.
+
+**Result (2026-09-30): controls failed, so the new-definition scores are ignored.** The wrong Shout-out control scored
+0.52 on faithful (needed <= 0.50) and was indistinguishable from the real Shout-out entry (0.53). The
+implementation-detail control passed (0.98 vs 0.16-0.33 on the seven new entries) and the undefined-word control passed
+(0.24), but real entries also scored 0.24-0.56 on self_contained, so that question does not separate them. Only
+impl_detail is validated. Likely cause (unverified): most snippets mention the term without saying enough to confirm or
+refute a definition, so a yes/no "is this true of the usage" sits near 0.5. Next time: a Choice of
+consistent / contradicts / silent per snippet, and snippets where the term is the subject of the sentence.
+
+## Placement judge (2026-09-30)
+
+`placement_judge.py` asks Jev, per learning from the Jev runs, where it should live: skill, research doc, memory,
+RULES.md, AGENTS.md, or none (already covered / leave out). Two requests, destination order reversed in the second.
+Sent: my own learning statements and destination descriptions only.
+
+**Recommendations (mine, fixed before the run):** L1 skill, L2 research doc, L3 memory, L4 RULES.md, L5 none,
+L6 none, L7 none, L8 AGENTS.md.
+
+**Controls with known answers (fixed before the run):** C1 skill, C2 memory, C3 AGENTS.md, C4 research doc,
+C5 RULES.md.
+
+**Pass rule:** trust the learnings' verdicts only if >= 4 of 5 controls are picked correctly in both orders.
+Otherwise stop and report. A learning counts as agreeing only if both orders pick my recommendation; a split
+between orders is reported as order-sensitive, not as a verdict. Disagreement goes to the operator, not to Jev.
+
+**Result (2026-09-30): controls failed (2/5 in both orders), so the placement verdicts are ignored.** Jev sent the
+release-steps skill control to memory (0.79-0.83), the project-invariant control to rules_md (0.89-0.90), and split the
+experiment-result control between rules_md and agents_md (0.42-0.43). Its confident wrong answers on obvious cases mean
+its agreements on the real learnings carry no weight either. Likely cause (unverified): the six destinations overlap in
+purpose and the state carried too little of what each file is for. Placement between documentation homes is a
+convention judgment, not a semantic reading of text, and is not a fit for Jev without much richer destination context.

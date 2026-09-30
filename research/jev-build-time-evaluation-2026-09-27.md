@@ -250,3 +250,30 @@ X billed about 55–60% of the harness estimate, in both the pilot and B3. Treat
 5. The three-question rule against the current product rule.
 
 All five can be measured with the same raters and harness.
+
+## Judging text with Jev (glossary and placement runs, 30 September 2026)
+
+Three runs asked Jev to judge repo text: glossary candidates against how the repo uses each term (two runs) and where a set of learnings should live (one run). Protocol, controls and pass rules are in `research/jev-test/README.md`; the procedure is the `jev-judge-run` skill.
+
+### Which question types held up
+
+| Question | Control result | Use it? |
+|---|---|---|
+| Implementation detail in a definition | 0.98 on a file-name-laden definition against 0.16-0.33 on the real entries | Yes |
+| Project-specific term or general word | General terms scored 0.08-0.14, defined terms 0.79-0.95 | Yes |
+| Used in one sense | Clean terms 0.76-0.91, muddy terms 0.09-0.18 on a hand-audited set (gap 0.69) | Yes, with a hand-audited calibration set |
+| Cloze: which glossary entry fits a blanked usage | 1.00 on clean terms; separated overlapping entries (Explore and exploit against Slot) | Yes |
+| Definition faithful to a usage (yes/no) | Wrong Shout-out definition 0.52 against 0.53 for the right one | No |
+| Definition self-contained | Real entries 0.24-0.56, the undefined-word control 0.24 | No |
+| Where should this learning live (Choice of six documents) | 2 of 5 controls right, confidently wrong (0.79-0.90) | No |
+| Cost of misreading (Score, five levels) | Answers split between the extremes (0.25 at level 0, 0.29 at level 4) | Not as one Score question |
+
+### What we learnt
+
+- **The calibration set decides the run.** The first run failed because Lane and Slot were labelled clean unread. Reading 8 usages of each term found real overloads (Slot as clock time, feed position and Experiment Slot; Voice as tone, voice notes and voice samples). The reruns used a hand-audited set.
+- **Snippet quality moves scores.** Code identifiers and field names (`"cohort": []`, `retrospective: false`), a code-graph folder and third-party notes pulled faithful scores down. Prose only, no matches inside backticks and a provenance filter fixed most of it.
+- **A yes/no on a tangential snippet sits near 0.5.** Most usages mention a term without saying enough to confirm or refute a definition. Untested next step: a Choice of consistent, contradicts or silent per snippet, on snippets where the term is the subject.
+- **Jev did catch a wrong definition once** (Shout-out as a line in a Card, faithful 0.29 in the first run), but not under the second run's sampling. One catch is not validation.
+- **Placement is a convention judgment.** Choosing between documentation homes depends on what each file is for, which the state could not carry. Not a fit for Jev.
+- **Rankings held across runs** (Voice and Explore and exploit low on one-sense in both), though the snippets differed. Repeats with different samples show the variance; one run does not.
+- **Cost:** about $0.01 per full battery of 17 requests; the placement run was 2 requests.
