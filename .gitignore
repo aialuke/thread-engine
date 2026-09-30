@@ -13,6 +13,9 @@ loop/inbox/
 ledger/raw/api/
 loop/followers/
 
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
 # Jev referee: captured prompts can contain whatever the operator pasted.
 # Local policy may only tighten the committed thresholds.
 receipts/prompts/
