@@ -26,9 +26,10 @@ class Stages(unittest.TestCase):
         self.assertEqual(stages, ["pending", "due", "due", "missed"])
         self.assertEqual([reads.due_stage(h, True) for h in (35.99, 60, 60.01)], ["pending", "due", None])
 
-    def test_past_window_and_final_ready(self) -> None:
+    def test_past_window_and_in_final_window(self) -> None:
         self.assertEqual([reads.past_window(h) for h in (60, 60.01)], [False, True])
-        self.assertEqual([reads.final_ready(h) for h in (24 * 26 - 0.01, 24 * 26, 24 * 90)], [False, True, True])
+        self.assertEqual([reads.in_final_window(h) for h in (24 * 26 - 0.01, 24 * 26, 24 * 29, 24 * 29 + 0.01)],
+                         [False, True, True, False])
 
     def test_best_snapshot_prefers_first_valid_else_last_late(self) -> None:
         late = [{"kind": "late", "n": 1}, {"kind": "late", "n": 2}, {"kind": "early", "n": 3}]

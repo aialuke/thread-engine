@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 SNAPSHOT_MIN_H = 36.0
 SNAPSHOT_MAX_H = 60.0
 FINAL_MIN_DAYS = 26
+FINAL_MAX_DAYS = 29  # X drops organic numbers at 30 days; matches x_api.ORGANIC_DAYS (a test checks)
 
 
 def snapshot_kind(hours: float) -> str:
@@ -63,8 +64,9 @@ def past_window(hours: float) -> bool:
     return hours > SNAPSHOT_MAX_H
 
 
-def final_ready(hours: float) -> bool:
-    return hours >= FINAL_MIN_DAYS * 24
+def in_final_window(hours: float) -> bool:
+    """True for a post old enough for its Final read and young enough for X to still return organic numbers."""
+    return FINAL_MIN_DAYS * 24 <= hours <= FINAL_MAX_DAYS * 24
 
 
 def backfill_cursor(fetched: datetime, since: datetime) -> dict[str, datetime]:

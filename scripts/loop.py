@@ -30,8 +30,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from loop_core.reads import (FINAL_MIN_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage,
-                             final_ready, past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
+from loop_core.reads import (FINAL_MAX_DAYS, FINAL_MIN_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage,
+                             in_final_window, past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
 
 DEFAULT_ROOT = Path(__file__).resolve().parent.parent
 LOCAL_TZ = ZoneInfo("Australia/Brisbane")
@@ -389,6 +389,10 @@ def cmd_due_reads(repo: Repo, args) -> dict:
     return {"now": iso(now), "windows": windows}
 
 
+def need_final_age(hours: float) -> None:
+    need(in_final_window(hours), f"a final read needs a post {FINAL_MIN_DAYS} to {FINAL_MAX_DAYS} days old")
+
+
 def cmd_record_snapshot(repo: Repo, args) -> dict:
     state = repo.state()
     payload = read_json(Path(args.json))
@@ -399,7 +403,7 @@ def cmd_record_snapshot(repo: Repo, args) -> dict:
     need(hours >= 0, "observed before the post existed")
     kind = snapshot_kind(hours)
     if payload.get("stage") == "final":
-        need(final_ready(hours), f"a final read needs a post at least {FINAL_MIN_DAYS} days old")
+        need_final_age(hours)
         kind = "final"
         if any(s["kind"] == "final" for s in post["snapshots"]):
             return {"recorded": False, "reason": "final read already exists", "root_id": root_id}
@@ -459,6 +463,8 @@ def cmd_record_activity(repo: Repo, args) -> dict:
         row["topics"] = item.get("topics", [])
         row["text"] = item.get("text", "")
         hours = (observed - parse_time(item["created_at"])).total_seconds() / 3600
+        if stage == "final":
+            need_final_age(hours)
         label = snapshot_kind(hours) if stage == "48h" else stage
         reads = row.setdefault("reads", {})
         if stage == "48h" and reads.get("48h", {}).get("label") == "valid" and label != "valid":

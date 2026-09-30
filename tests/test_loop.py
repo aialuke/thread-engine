@@ -491,7 +491,7 @@ class ApiData(LoopCase):
         made = self.ok("record-snapshot", "--json", self.payload(data))
         self.assertEqual(made["kind"], "valid")
         early_final = dict(data, observed_at=hours(24 * 20), stage="final")
-        self.assertIn("26 days", self.fails("record-snapshot", "--json", self.payload(early_final)))
+        self.assertIn("26 to 29 days", self.fails("record-snapshot", "--json", self.payload(early_final)))
         final = dict(data, observed_at=hours(24 * 27), stage="final")
         self.assertEqual(self.ok("record-snapshot", "--json", self.payload(final))["kind"], "final")
         self.assertFalse(self.ok("record-snapshot", "--json", self.payload(final))["recorded"])
@@ -626,16 +626,36 @@ class ReadWindowRules(LoopCase):
             self.post(root_id, T0)
             self.assertEqual(self.kind_at(root_id, h), kind, h)
 
-    def test_final_read_needs_26_days_and_has_no_upper_age(self) -> None:
+    def final_payload(self, root_id: str, days: float) -> dict:
+        return {"root_id": root_id, "observed_at": hours(24 * days), "stage": "final",
+                "root": {"views": 1, "likes": 0, "reposts": 0, "quotes": 0, "replies": 0, "bookmarks": 0}}
+
+    def test_final_read_must_be_26_to_29_days_old(self) -> None:
         self.post("4000000010", T0)
-        short = {"root_id": "4000000010", "observed_at": hours(24 * 26 - 0.01), "stage": "final",
-                 "root": {"views": 1, "likes": 0, "reposts": 0, "quotes": 0, "replies": 0, "bookmarks": 0}}
-        self.assertIn("26 days", self.fails("record-snapshot", "--json", self.payload(short)))
-        for i, days in enumerate((26, 45)):
+        for days in (26 - 0.01, 29 + 0.01, 45):
+            error = self.fails("record-snapshot", "--json", self.payload(self.final_payload("4000000010", days)))
+            self.assertIn("26 to 29 days", error, days)
+        for i, days in enumerate((26, 27, 29)):
             root_id = f"40000000{20 + i}"
             self.post(root_id, T0)
-            data = dict(short, root_id=root_id, observed_at=hours(24 * days))
-            self.assertEqual(self.ok("record-snapshot", "--json", self.payload(data))["kind"], "final", days)
+            made = self.ok("record-snapshot", "--json", self.payload(self.final_payload(root_id, days)))
+            self.assertEqual(made["kind"], "final", days)
+
+    def test_final_activity_read_must_be_26_to_29_days_old(self) -> None:
+        item = {"id": "4000000040", "kind": "original", "created_at": T0, "conversation_id": "4000000040",
+                "public": {}, "organic": {"impressions": 10}}
+        for days in (26 - 0.01, 29 + 0.01):
+            data = {"stage": "final", "observed_at": hours(24 * days), "items": [item]}
+            self.assertIn("26 to 29 days", self.fails("record-activity", "--json", self.payload(data)), days)
+        self.assertEqual(list((self.root / "ledger" / "activity").glob("2*.json")), [])
+        for days in (26, 29):
+            data = {"stage": "final", "observed_at": hours(24 * days), "items": [item]}
+            self.assertEqual(self.ok("record-activity", "--json", self.payload(data))["recorded"], 1)
+
+    def test_final_max_days_matches_the_x_organic_horizon(self) -> None:
+        import x_api
+        from loop_core import reads
+        self.assertEqual(reads.FINAL_MAX_DAYS, x_api.ORGANIC_DAYS)
 
     def test_a_valid_snapshot_is_refused_once_the_post_is_missed(self) -> None:
         self.post("4000000030", T0)
