@@ -53,6 +53,12 @@ _Avoid_: fact-check (for the rule), accuracy policy
 The status a path or claim carries in the Draft's `PATHS.md` or `CLAIMS.md` until a source confirms it. A VERIFY row stays in those files and out of the Cards; the word appearing in a Card makes the Gate refuse.
 _Avoid_: TODO, unconfirmed, pending
 
+**Proof**:
+Evidence a Card points at for a claim: an attached screenshot, recording or output file, or a figure or named source. AI-made images are illustration, never proof.
+
+**Proof line**:
+The one line under each swap in a PAID → FREE post: a claim about what the free tool does, true as written and sourced under the Truth budget. It is a claim, not proof.
+
 ### Approval and posting
 
 **Operator**:
