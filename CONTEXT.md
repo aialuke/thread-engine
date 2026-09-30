@@ -14,6 +14,18 @@ _Avoid_: thread (for the unit), post (for the unit)
 The text of one post within a Draft. A Draft's Cards are numbered in the order they are posted.
 _Avoid_: slide, tweet, part
 
+**Topic**:
+The subject one Draft covers; a Draft has exactly one. The queue lists Topics, and a queue row is that Topic's record, with its status. A PAID → FREE row is a Topic like any other; its category word comes from the Roster.
+_Avoid_: idea, subject, queue item (for the subject)
+
+**Roster**:
+The operator's gathered list of paid tools and free alternatives that PAID → FREE posts draw their categories and candidate rows from. It is a source of claims to check, never of wording: nothing in it reaches a Card until the Truth budget is met. It is not a queue; a Topic is taken from it, not listed in it.
+_Avoid_: directory, tool list
+
+**Hook**:
+The first Card of a Draft, the one a stranger is shown (the root, once posted). In a single standalone post it is the whole post. **Hook style** is how a Hook is written, not a separate thing; it is one of the levers a Lesson may change.
+_Avoid_: opener, intro, root (before it is posted)
+
 **Format**:
 The shape a Draft takes, such as single tip, tool swap, comparison, build log or settings thread. It is chosen for the Draft. Independent of Lane.
 _Avoid_: template, type
@@ -88,12 +100,24 @@ _Avoid_: input file, request, body
 A treatment hypothesis judged in Rounds against a threshold fixed when it opens (the cohort's median times the effect), scored, for new proposals, on one organic rate: likes plus reposts, or profile visits, per 1,000 organic impressions. A post under 50 organic impressions is not a cohort member, and as a treatment post with measured numbers it counts as a miss; a post with no rate at all (no impressions or a missing count) is left out. One is open at a time; it ends adopted, not replicated or no effect.
 _Avoid_: test, trial, A/B
 
+**Cohort**:
+The earlier posts an Experiment is measured against: at least three, from the same Lane and matching the format the treatment is compared with. It is proposed with the Experiment, and the operator's yes accepts it. A post joins only if it is organic and has a valid or late Snapshot with at least 50 organic impressions. It is frozen when the Experiment opens, and its median times the effect sets the threshold. It is a baseline, not the Control: its posts all predate the Experiment.
+_Avoid_: control group, sample, baseline
+
+**Treatment**:
+The one change an Experiment tests, stated as the exact rule a post follows. A treatment post follows it and is the only kind that is scored.
+_Avoid_: variant, intervention
+
+**Control**:
+What the Treatment is compared with, stated in words when the Experiment opens. A control post is one made on an exploit Slot while an Experiment is open, following the current best approach. It is recorded for context and never scored; the threshold comes from the Cohort, not from Control posts.
+_Avoid_: baseline, comparison group
+
 **Round**:
 The next batch of unconsumed treatment posts, as many as the Experiment's size, each with a valid Snapshot. How many clear the threshold decides the Experiment's next state.
 _Avoid_: cycle, batch
 
 **Arm**:
-A post's assignment inside an Experiment: treatment, control, or none for a post outside one. Only treatment posts enter Rounds.
+A post's assignment inside an Experiment: Treatment, Control, or none for a post outside one. Only treatment posts enter Rounds.
 _Avoid_: group, variant
 
 **Lesson**:
