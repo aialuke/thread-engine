@@ -1,0 +1,162 @@
+[
+ {
+  "id": "B01",
+  "file": "voice/exit-zero.md",
+  "line": 44,
+  "sentence": "AI-made images are illustration only.",
+  "same": "An AI-made image may serve only as an illustration.",
+  "flip": "An AI-made image may serve as a screenshot or as proof."
+ },
+ {
+  "id": "B02",
+  "file": "voice/exit-zero.md",
+  "line": 50,
+  "sentence": "Every reply is written once, for one conversation.",
+  "same": "Write each reply a single time, for a single conversation.",
+  "flip": "Write each reply once and reuse it across several conversations."
+ },
+ {
+  "id": "B03",
+  "file": "voice/exit-zero.md",
+  "line": 52,
+  "sentence": "Give the point a reply should make, never paste-ready text.",
+  "same": "Supply the point a reply should make, and not text ready to paste.",
+  "flip": "Supply the point a reply should make, always as text ready to paste."
+ },
+ {
+  "id": "B04",
+  "file": "voice/exit-zero.md",
+  "line": 60,
+  "sentence": "An occasional connect post is allowed in the `other` lane, at most 1 in 15 originals",
+  "same": "A connect post may go in the other lane, no more than 1 in every 15 originals.",
+  "flip": "A connect post may go in the other lane, at least 1 in every 15 originals."
+ },
+ {
+  "id": "B05",
+  "file": "voice/exit-zero.md",
+  "line": 66,
+  "sentence": "Never tag a person, and never a premium vendor.",
+  "same": "Do not tag a person, and do not tag a premium vendor.",
+  "flip": "Always tag the person, and always tag a premium vendor."
+ },
+ {
+  "id": "B06",
+  "file": "voice/exit-zero.md",
+  "line": 67,
+  "sentence": "A shout-out is a reply, so the Replies no-repeat rule covers it: never one line under several makers' posts",
+  "same": "A shout-out counts as a reply, so the no-repeat rule applies: the same line is not posted under several makers' posts.",
+  "flip": "A shout-out counts as a reply, so the no-repeat rule applies: post the same line under several makers' posts."
+ },
+ {
+  "id": "B07",
+  "file": "voice/exit-zero.md",
+  "line": 69,
+  "sentence": "Repost only a maker's release post, never your own post and never someone's mega-list of alternatives.",
+  "same": "Repost a maker's release post and nothing else, not your own post and not someone's mega-list of alternatives.",
+  "flip": "Repost a maker's release post, your own post and someone's mega-list of alternatives."
+ },
+ {
+  "id": "B08",
+  "file": "voice/exit-zero.md",
+  "line": 70,
+  "sentence": "Quote only a maker's news.",
+  "same": "A quote should be of a maker's news and nothing else.",
+  "flip": "Quote any post you like, not only a maker's news."
+ },
+ {
+  "id": "B09",
+  "file": "voice/exit-zero.md",
+  "line": 10,
+  "sentence": "Concrete numbers only if the draft's verify run sourced them",
+  "same": "Use a concrete number only when the draft's verify run has sourced it.",
+  "flip": "Use a concrete number even when the draft's verify run has not sourced it."
+ },
+ {
+  "id": "B10",
+  "file": "voice/exit-zero.md",
+  "line": 11,
+  "sentence": "The root post stands alone: a stranger who sees only the root gets the whole payoff.",
+  "same": "The root has to work by itself: someone who sees only the root receives the entire payoff.",
+  "flip": "The root depends on the replies: someone who sees only the root does not receive the payoff."
+ },
+ {
+  "id": "B11",
+  "file": ".claude/skills/format-build-log/SKILL.md",
+  "line": 31,
+  "sentence": "Under 280 characters when possible, never over 600.",
+  "same": "Aim for under 280 characters, and stay at or below 600.",
+  "flip": "Aim for under 280 characters, and go over 600 when it helps."
+ },
+ {
+  "id": "B12",
+  "file": ".claude/skills/format-comparison/SKILL.md",
+  "line": 32,
+  "sentence": "One difference per post.",
+  "same": "Each post carries a single difference.",
+  "flip": "Each post carries several differences."
+ },
+ {
+  "id": "B13",
+  "file": ".claude/skills/format-tool-swap/SKILL.md",
+  "line": 88,
+  "sentence": "no two shout-outs share wording",
+  "same": "Each shout-out is worded differently from every other.",
+  "flip": "Shout-outs reuse the same wording."
+ },
+ {
+  "id": "B14",
+  "file": ".claude/skills/format-tool-swap/SKILL.md",
+  "line": 64,
+  "sentence": "Offer it once per draft, never as a condition.",
+  "same": "A test should be offered a single time per draft, and never made a condition.",
+  "flip": "A test should be offered repeatedly per draft, and made a condition."
+ },
+ {
+  "id": "B15",
+  "file": ".claude/skills/format-tool-swap/SKILL.md",
+  "line": 55,
+  "sentence": "Name the job the free tool does, never \"replaces\" or a promised 1:1 swap.",
+  "same": "Describe the job the free tool does, without saying it replaces the paid one or promising a 1:1 swap.",
+  "flip": "Say the free tool replaces the paid one, and promise a 1:1 swap."
+ },
+ {
+  "id": "B16",
+  "file": ".claude/skills/format-tool-swap/SKILL.md",
+  "line": 51,
+  "sentence": "Say \"open source\" only when `CLAIMS.md` shows it.",
+  "same": "Call a tool open source only when the CLAIMS.md rows show it.",
+  "flip": "Call a tool open source whether or not the CLAIMS.md rows show it."
+ },
+ {
+  "id": "B17",
+  "file": ".claude/skills/format-tool-swap/SKILL.md",
+  "line": 108,
+  "sentence": "one PAID → FREE parent every other day",
+  "same": "A PAID → FREE post goes up on alternate days.",
+  "flip": "A PAID → FREE post goes up every day."
+ },
+ {
+  "id": "B18",
+  "file": ".claude/skills/draft-thread/SKILL.md",
+  "line": 51,
+  "sentence": "Never create, edit or delete `APPROVED`.",
+  "same": "Do not create, change or remove the APPROVED file.",
+  "flip": "Create the APPROVED file once the operator agrees in chat."
+ },
+ {
+  "id": "B19",
+  "file": ".claude/skills/ready/SKILL.md",
+  "line": 22,
+  "sentence": "The operator does every paste and post; this skill has no X write access.",
+  "same": "Every paste and post is done by the operator, and this skill cannot write to X.",
+  "flip": "The skill pastes and posts to X for the operator."
+ },
+ {
+  "id": "B20",
+  "file": ".claude/skills/apply/SKILL.md",
+  "line": 11,
+  "sentence": "The lesson must be `adopted` with rule `none`.",
+  "same": "A lesson qualifies only when it is adopted and its rule state is none.",
+  "flip": "A lesson qualifies only when it is adopted and its rule state is already applied."
+ }
+]

@@ -15,7 +15,7 @@ Jev suits semantic reading of text: does a definition match a usage, is a term u
 
 ## Conflict questions (do two passages clash?)
 
-Measured 30 Sep; rules and results are in `research/jev-test/README.md` (the run script stays local, uncommitted). On a sentence reversed on the page Jev caught 18 or 19 of 19 built conflicts and flagged none of 20 consistent pairs, in every question form tried (Choice, Noul, opposite-polarity Noul, plain "do they contradict?", random option names). It missed conflicts that only appear when an agent does a task, in every form and with the task named, and it did not register the 3 fixed conflicts that survived a blind check.
+Measured 30 Sep; rules and results are in `research/jev-test/README.md`; the run script is `research/jev-test/conflict_judge.py` with its pairs in `conflict_items.json`. On a sentence reversed on the page Jev caught 18 or 19 of 19 built conflicts and flagged none of 20 consistent pairs, in every question form tried (Choice, Noul, opposite-polarity Noul, plain "do they contradict?", random option names). It missed conflicts that only appear when an agent does a task, in every form and with the task named, and it did not register the 3 fixed conflicts that survived a blind check.
 
 1. **First pass only.** Check a changed sentence against its neighbours. A "followable" is no clearance: send every pair to a blind Codex, and settle a real conflict by what fresh agents do on a concrete free-text task.
 2. **Do not reword to rescue a miss.** Five forms scored alike on built pairs and alike on the real misses. Re-ask in the opposite polarity as a cheap check (the two answers summed to 0.95-1.0 on average, range 0.75-1.18) and send disagreement to the second rater.
