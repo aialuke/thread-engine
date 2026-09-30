@@ -11,6 +11,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "scripts"))
 
+from datetime import datetime, timedelta, timezone  # noqa: E402
+
 from loop_core import experiments  # noqa: E402
 
 AT = "2026-11-01T00:00:00Z"
@@ -117,6 +119,56 @@ class Evaluate(unittest.TestCase):
             state(experiment("adopted"), experiment(id="E-002")), ready(300, 300, 300), AT)
         self.assertEqual((answer["experiment"], new["experiments"][0]["status"]), ("E-002", "adopted"))
         self.assertEqual(new["experiments"][1]["status"], "promising")
+
+
+START = datetime(2026, 10, 1, tzinfo=timezone.utc)
+
+
+def stamp(hours: float) -> str:
+    return (START + timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def made(*hours: float, retrospective: bool = False) -> list[dict]:
+    return [{"retrospective": retrospective, "posted_at": stamp(h)} for h in hours]
+
+
+def slot(count: int, days: float, **kw) -> dict:
+    st = kw.pop("state", state())
+    return experiments.next_slot(st, START, made(*range(count)), START + timedelta(days=days))
+
+
+class NextSlot(unittest.TestCase):
+    def test_it_alternates_up_to_28_days_then_explores_one_in_three(self) -> None:
+        self.assertEqual(slot(0, 27.99)["rule"], "alternate")
+        self.assertEqual(slot(0, 28)["rule"], "one in three explores")
+
+    def test_the_slot_follows_the_count(self) -> None:
+        alternate = [slot(n, 1)["slot"] for n in range(4)]
+        third = [slot(n, 40)["slot"] for n in range(7)]
+        self.assertEqual(alternate, ["explore", "exploit", "explore", "exploit"])
+        self.assertEqual(third, ["explore", "exploit", "exploit", "explore", "exploit", "exploit", "explore"])
+
+    def test_explore_without_an_experiment_says_to_open_one(self) -> None:
+        self.assertEqual(slot(0, 1), {"slot": "explore", "posts_since_start": 0, "rule": "alternate",
+                                      "experiment": None, "arm": None, "action": "open an experiment first"})
+
+    def test_an_open_experiment_sets_the_arm_for_each_slot(self) -> None:
+        st = state(experiment("promising"), lessons=[{"id": "L-001", "status": "adopted"},
+                                                     {"id": "L-002", "status": "no_effect"}])
+        self.assertEqual(slot(0, 1, state=st), {
+            "slot": "explore", "posts_since_start": 0, "rule": "alternate", "experiment": "E-001",
+            "arm": "treatment", "action": "post the treatment"})
+        self.assertEqual(slot(1, 1, state=st), {
+            "slot": "exploit", "posts_since_start": 1, "rule": "alternate", "experiment": "E-001",
+            "arm": "control", "action": "post the current best approach", "adopted_lessons": ["L-001"]})
+
+    def test_exploit_lists_no_lessons_when_none_is_adopted(self) -> None:
+        self.assertEqual(slot(1, 1)["adopted_lessons"], [])
+
+    def test_the_start_time_counts_and_earlier_or_retrospective_posts_do_not(self) -> None:
+        posts = made(-1, 0, 5) + made(2, retrospective=True)
+        got = experiments.next_slot(state(), START, posts, START + timedelta(days=1))
+        self.assertEqual(got["posts_since_start"], 2)
 
 
 if __name__ == "__main__":

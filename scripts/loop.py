@@ -38,7 +38,7 @@ from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEY
                                 cursor_updates, experiment_terms, experiment_texts, follower_inputs, follower_total,
                                 interaction_inputs, newer_since_id, post_from_payload, snapshot_from_payload, snapshot_is_final,
                                 snapshot_observed, snapshot_root_id, validate_post, verified_count)
-from loop_core.experiments import OPEN_STATES, evaluate_rounds, next_id, open_experiment
+from loop_core.experiments import OPEN_STATES, evaluate_rounds, next_id, next_slot, open_experiment
 from loop_core.reads import (SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage, need_final_age,
                              past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
 from loop_core.snapshots import admit_snapshot
@@ -47,7 +47,6 @@ from loop_core.times import iso, parse_time
 DEFAULT_ROOT = Path(__file__).resolve().parent.parent
 LOCAL_TZ = ZoneInfo("Australia/Brisbane")
 
-EXPLORE_ALTERNATE_DAYS = 28
 REVIEW_EVERY_DAYS = 7
 STALE_AFTER_DAYS = 42
 LANE_WINDOW = 15
@@ -570,24 +569,7 @@ def cmd_next_slot(repo: Repo, args) -> dict:
     state = repo.state()
     at = now_arg(args.now)
     started = parse_time(state["started_at"])
-    live = [p for p in repo.posts() if not p["retrospective"] and parse_time(p["posted_at"]) >= started]
-    count = len(live)
-    alternating = at - started < timedelta(days=EXPLORE_ALTERNATE_DAYS)
-    explore = count % 2 == 0 if alternating else count % 3 == 0
-    exp = open_experiment(state)
-    slot = {"slot": "explore" if explore else "exploit", "posts_since_start": count,
-            "rule": "alternate" if alternating else "one in three explores"}
-    if explore:
-        slot["experiment"] = exp["id"] if exp else None
-        slot["arm"] = "treatment" if exp else None
-        slot["action"] = "post the treatment" if exp else "open an experiment first"
-    else:
-        adopted = [l for l in state["lessons"] if l["status"] == "adopted"]
-        slot["experiment"] = exp["id"] if exp else None
-        slot["arm"] = "control" if exp else None
-        slot["action"] = "post the current best approach"
-        slot["adopted_lessons"] = [l["id"] for l in adopted]
-    return slot
+    return next_slot(state, started, repo.posts(), at)
 
 
 def cmd_lane_share(repo: Repo, args) -> dict:

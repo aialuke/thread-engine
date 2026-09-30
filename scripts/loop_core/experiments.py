@@ -1,4 +1,5 @@
-"""The Experiment rules: which states are open, how a Round moves an Experiment, what a closed one teaches.
+"""The Experiment rules: which states are open, how a Round moves an Experiment, what a closed one teaches,
+which Slot comes next.
 
 Vocabulary is CONTEXT.md's. Plain dicts in, plain dicts out: no files, no clock, no argparse. The
 caller (loop.py) reads the ledger and the clock, and saves the state this returns.
@@ -7,7 +8,11 @@ caller (loop.py) reads the ledger and the clock, and saves the state this return
 from __future__ import annotations
 
 import copy
+from datetime import datetime, timedelta
 
+from loop_core.times import parse_time
+
+EXPLORE_ALTERNATE_DAYS = 28
 OPEN_STATES = {"testing", "promising", "unclear"}
 TRANSITIONS = {
     ("testing", "pass"): "promising",
@@ -78,3 +83,29 @@ def evaluate_rounds(state: dict, ready: list[tuple[str, int]], at: str) -> tuple
     waiting = exp["size"] - len(ready) if exp["status"] in OPEN_STATES else 0
     return state, {"evaluated": True, "experiment": exp["id"], "status": exp["status"],
                    "events": events, "posts_needed_for_next_round": waiting}
+
+
+def next_slot(state: dict, started: datetime, posts: list[dict], at: datetime) -> dict:
+    """The next Slot: explore or exploit, from the time since `started` and the posts made since then.
+
+    Every other post alternates for the first 28 days, then one in three explores. Retrospective posts and
+    posts from before `started` do not count.
+    """
+    live = [p for p in posts if not p["retrospective"] and parse_time(p["posted_at"]) >= started]
+    count = len(live)
+    alternating = at - started < timedelta(days=EXPLORE_ALTERNATE_DAYS)
+    explore = count % 2 == 0 if alternating else count % 3 == 0
+    exp = open_experiment(state)
+    slot = {"slot": "explore" if explore else "exploit", "posts_since_start": count,
+            "rule": "alternate" if alternating else "one in three explores"}
+    if explore:
+        slot["experiment"] = exp["id"] if exp else None
+        slot["arm"] = "treatment" if exp else None
+        slot["action"] = "post the treatment" if exp else "open an experiment first"
+    else:
+        adopted = [l for l in state["lessons"] if l["status"] == "adopted"]
+        slot["experiment"] = exp["id"] if exp else None
+        slot["arm"] = "control" if exp else None
+        slot["action"] = "post the current best approach"
+        slot["adopted_lessons"] = [l["id"] for l in adopted]
+    return slot
