@@ -4,6 +4,6 @@
 
 A lesson changes the drafting rules only when it is `adopted` and the operator types `/apply`.
 
-| Lesson | Status | Rule | Claim | Evidence | Last evidence |
-|---|---|---|---|---|---|
-| – | – | – | No lessons yet | – | – |
+| Lesson | Status | Rule | Claim | Evidence | Last evidence | Basis |
+|---|---|---|---|---|---|---|
+| – | – | – | No lessons yet | – | – | – |

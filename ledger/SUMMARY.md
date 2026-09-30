@@ -33,15 +33,15 @@ Needs 500 verified followers and 500,000 verified Home Timeline impressions on o
 
 ## Account
 
-Followers: 37 on 2026-09-29. In the 7 days to then: 6 new, 5 lost; 1 of the new credited to a post or reply they engaged with (a lower bound).
+Followers: 37 on 2026-09-30. In the 7 days to then: 6 new, 5 lost; 1 of the new credited to a post or reply they engaged with (a lower bound).
 
-Follows per profile visit, items from those 7 days: 6 / 33.
+Follows per profile visit, items from those 7 days: 6 / 32.
 
 | Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 | New follows (X export) |
 |---|---:|---:|---:|---:|---:|---:|
-| original | 8 | 482 | 1 | 6 | 2.1 | 0 |
-| quote | 2 | 249 | 0 | 1 | 0.0 | 0 |
-| reply | 108 | 28301 | 32 | 97 | 1.1 | 1 |
-| thread card | 3 | 92 | 0 | 1 | 0.0 | 0 |
+| original | 7 | 427 | 1 | 5 | 2.3 | 0 |
+| quote | 1 | 15 | 0 | 0 | – | 0 |
+| reply | 100 | 27914 | 31 | 94 | 1.1 | 1 |
+| thread card | 1 | 26 | 0 | 0 | – | 0 |
 
 Top topics by organic impressions (X's own labels, a proxy): Politics (1779), Pauline Hanson (1424), 2024 US Presidential Election (1054), United States politics (1054), Technology (1030).
