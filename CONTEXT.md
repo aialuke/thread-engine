@@ -46,7 +46,7 @@ The tone every Card is written in: dry, specific and competent, with the operato
 _Avoid_: tone, style
 
 **Truth budget**:
-The rule that every figure or claim in a Card is sourced this session: an official page, the operator, or the operator's own run with its artifact. A claim that can't be sourced comes out of the Card; it is never softened to keep it.
+The rule that every figure or claim in a Card is sourced by the Draft's verify run, with each row dated in its `PATHS.md` or `CLAIMS.md` ("this session" elsewhere means that run): an official page, the operator, or the operator's own run with its artifact. Later sessions rely on the dated rows. A claim that can't be sourced comes out of the Card; it is never softened to keep it.
 _Avoid_: fact-check (for the rule), accuracy policy
 
 **VERIFY**:
@@ -58,6 +58,10 @@ Evidence a Card points at for a claim: an attached screenshot, recording or outp
 
 **Proof line**:
 The one line under each swap in a PAID → FREE post: a claim about what the free tool does, true as written and sourced under the Truth budget. It is a claim, not proof.
+
+### Legacy names
+
+Some code and command names predate the glossary and keep their old words: `/draft-thread` and `post_thread.py` (say Draft), `snapshot.py`, `/snapshot` and the log's `snapshot ok` (they run the Daily run and record Snapshots), and the `shipped/` folder and the queue's `shipped` status (say Posted). Use the glossary term in prose and in what the operator reads.
 
 ### Approval and posting
 
@@ -158,5 +162,5 @@ An evidence-backed statement recorded when an Experiment closes, or when an oper
 _Avoid_: finding, insight
 
 **Slot**:
-The next post's recommendation, explore or exploit, from the time since the loop started and the posts made since. An **explore** Slot posts the Treatment, or asks for an Experiment if none is open. An **exploit** Slot posts the current best approach, as a Control post when one is open. Not a clock time for posting or a place in X's feed, which other docs also call a slot.
+The next post's recommendation, explore or exploit, from the time since the loop started and the posts made since. An **explore** Slot posts the Treatment, or asks for an Experiment if none is open. An **exploit** Slot posts the current best approach, as a Control post when one is open. Not a clock time for posting (called a window) or a place in X's feed, which other docs also call a slot.
 _Avoid_: turn, next post

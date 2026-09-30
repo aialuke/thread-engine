@@ -1,7 +1,7 @@
 # Audience promise
 
 Status: current
-Checked: 2026-09-29
+Checked: 2026-09-30
 
 Chosen by the operator on 24 Sep 2026, from `reviews/audit-2026-09.md`. The weekly review reports whether posts keep to it.
 
@@ -11,7 +11,7 @@ Chosen by the operator on 24 Sep 2026, from `reviews/audit-2026-09.md`. The week
 
 ## Main lane
 
-**For now (operator, 24 Sep 2026):** the account doesn't have enough builder material yet, so while formats are trialled, `main` covers **tech broadly**: AI, software, tools, devices and tech news. The builder path is the direction; posts from the build are preferred but not required. Test 1 below applies in this wider form until the operator narrows it.
+The builder path is the direction: posts from the build are preferred. While formats are trialled, `main` also covers **tech broadly** (AI, software, tools, devices and tech news), as Current state in `AGENTS.md` says; test 1 below applies in that wider form until the operator narrows it.
 
 A post is in the `main` lane when all three are true:
 
