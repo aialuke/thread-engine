@@ -33,7 +33,7 @@ A one-off Read of everything in a saved file, used to catch the ledger up. It co
 _Avoid_: import, restore
 
 **Experiment**:
-A treatment hypothesis judged in Rounds against a threshold fixed when it opens (the cohort's median times the effect). One is open at a time; it ends adopted, not replicated or no effect.
+A treatment hypothesis judged in Rounds against a threshold fixed when it opens (the cohort's median times the effect), scored on one organic rate: likes plus reposts, or profile visits, per 1,000 organic impressions. A post under 50 organic impressions is not a cohort member, and as a treatment post it counts as a miss. One is open at a time; it ends adopted, not replicated or no effect.
 _Avoid_: test, trial, A/B
 
 **Round**:

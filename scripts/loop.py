@@ -38,6 +38,7 @@ from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEY
                                 cursor_updates, experiment_terms, experiment_texts, follower_inputs, follower_total,
                                 interaction_inputs, newer_since_id, post_from_payload, snapshot_from_payload, snapshot_is_final,
                                 snapshot_observed, snapshot_root_id, validate_post, verified_count)
+from loop_core import rates
 from loop_core.experiments import OPEN_STATES, evaluate_rounds, next_id, next_slot, open_experiment
 from loop_core.reads import (SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage, need_final_age,
                              past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
@@ -180,10 +181,20 @@ def age_hours(post: dict, at: datetime) -> float:
     return (at - parse_time(post["posted_at"])).total_seconds() / 3600
 
 
-def primary_value(snap: dict | None, metric: str) -> int | None:
+def primary_value(snap: dict | None, metric: str) -> float | None:
+    """A Snapshot's value for an Experiment's primary: a rate from its organic read, else a root count."""
     if snap is None:
         return None
+    if metric in rates.PRIMARIES:
+        return rates.rate(metric, snap.get("organic"))
     return snap.get("root", {}).get(metric)
+
+
+def cohort_admits(snap: dict | None, metric: str) -> bool:
+    """Whether a cohort post's Snapshot can be scored on this primary. A rate also needs the impression floor."""
+    if primary_value(snap, metric) is None:
+        return False
+    return metric not in rates.PRIMARIES or rates.above_floor(snap.get("organic"))
 
 
 # ---------- commands ----------
@@ -501,6 +512,19 @@ def cmd_mark_missed(repo: Repo, args) -> dict:
     return {"marked_missed": marked}
 
 
+def post_visits(post: dict) -> int:
+    """A cohort post's organic profile visits, from the Snapshot the cohort used."""
+    return (best_snapshot(post) or {}).get("organic", {}).get("profile_visits") or 0
+
+
+def primary_label(metric: str) -> str:
+    """How the generated Experiments view names a primary."""
+    if metric in rates.PRIMARIES:
+        what = "likes plus reposts" if metric == "engagement_rate" else "profile visits"
+        return f"organic {what} per 1,000 organic impressions ({metric})"
+    return f"root {metric}"
+
+
 def cmd_open_experiment(repo: Repo, args) -> dict:
     state = repo.state()
     need(open_experiment(state) is None, "an experiment is already open; one at a time")
@@ -513,10 +537,17 @@ def cmd_open_experiment(repo: Repo, args) -> dict:
              f"{root_id} is marked non-organic ({(post.get('nonorganic') or {}).get('reason')}); it cannot be in a cohort")
         snap = best_snapshot(post)
         value = primary_value(snap, metric)
-        if snap is not None and value is not None:
+        if cohort_admits(snap, metric):
             values.append(value)
             used.append({"root_id": root_id, "value": value, "kind": snap["kind"]})
-    need(len(values) >= MIN_COHORT, f"only {len(values)} cohort posts have a {metric} snapshot")
+    if metric in rates.PRIMARIES:
+        need(len(values) >= MIN_COHORT, f"only {len(values)} cohort posts have {'an' if metric[0] in 'aeiou' else 'a'} {metric} "
+                                        f"snapshot with {rates.MIN_IMPRESSIONS} or more organic impressions")
+    else:
+        need(len(values) >= MIN_COHORT, f"only {len(values)} cohort posts have a {metric} snapshot")
+    if metric == "visit_rate":
+        reason = rates.visit_screen([post_visits(repo.post(u["root_id"])) for u in used])
+        need(reason is None, reason)
     texts = experiment_texts(payload)
     median = statistics.median(values)
     need(median > 0, f"the cohort's median {metric} is 0, so every post would clear the bar; "
@@ -549,7 +580,7 @@ def cmd_evaluate(repo: Repo, args) -> dict:
     if exp is None:
         return {"evaluated": False, "reason": "no open experiment"}
     consumed = {pid for rnd in exp["rounds"] for pid in rnd["posts"]}
-    ready = []
+    ready, notes = [], {}
     for post in repo.posts():
         if post.get("experiment") != exp["id"] or post.get("arm") != "treatment":
             continue
@@ -557,10 +588,12 @@ def cmd_evaluate(repo: Repo, args) -> dict:
             continue
         snap = valid_snapshot(post)
         value = primary_value(snap, exp["primary"])
+        if value is not None and exp["primary"] in rates.PRIMARIES and not rates.above_floor(snap.get("organic")):
+            value, notes[post["root_id"]] = 0.0, "below_floor"
         if value is not None:
             ready.append((post["root_id"], value))
     at = iso(now_arg(args.now))
-    state, result = evaluate_rounds(state, ready, at)
+    state, result = evaluate_rounds(state, ready, at, notes)
     repo.save_state(state)
     return result
 
@@ -909,13 +942,15 @@ def render(repo: Repo) -> None:
         lines.append(f"- **Status:** {exp['status']}\n")
         lines.append(f"- **Treatment:** {exp['treatment']}\n")
         lines.append(f"- **Compared with:** {exp['control']}\n")
-        lines.append(f"- **Primary outcome:** root {exp['primary']} at the {window} snapshot\n")
+        lines.append(f"- **Primary outcome:** {primary_label(exp['primary'])} at the {window} snapshot\n")
         lines.append(f"- **Bar to beat:** {fmt(exp['threshold'])} ({exp['effect']:g} × cohort median {fmt(exp['cohort_median'])})\n")
         lines.append(f"- **Cohort, frozen {exp['opened_at'][:10]}:** "
                      + ", ".join(f"{c['root_id']} ({c['value']}, {c['kind']})" for c in exp["cohort"]) + "\n")
         for i, rnd in enumerate(exp["rounds"], start=1):
+            below = [pid for pid, note in rnd.get("notes", {}).items() if note == "below_floor"]
             lines.append(f"- **Round {i}:** {rnd['passes']} of {len(rnd['posts'])} beat the bar "
-                         f"({', '.join(map(str, rnd['values']))}), {rnd['result']}\n")
+                         f"({', '.join(map(str, rnd['values']))}), {rnd['result']}"
+                         + (f"; below_floor, counted as a miss: {', '.join(below)}" if below else "") + "\n")
         lines.append("\n")
     atomic_write(repo.root / "experiments.md", "".join(lines))
 

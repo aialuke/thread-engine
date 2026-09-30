@@ -331,7 +331,7 @@ class ExperimentPayload(LoopCase):
         return ids
 
     def test_terms_messages(self) -> None:
-        metrics = "('views', 'likes', 'reposts', 'quotes', 'replies', 'bookmarks')"
+        metrics = "('views', 'likes', 'reposts', 'quotes', 'replies', 'bookmarks', 'engagement_rate', 'visit_rate')"
         cases = [
             ({}, f"primary must be one of {metrics}"),
             ({"primary": "views"},

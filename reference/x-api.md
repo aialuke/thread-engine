@@ -41,6 +41,10 @@ On a computer, X → Premium → Analytics → Content → Export gives a CSV (`
 
 The loop compares follower IDs day to day. Each new follower is credited once, to the most recent of: replying to one of our posts (from mentions), or being an account one of our replies went to (`in_reply_to_user_id`). Anyone who followed without either stays unattributed, so per-post credit is a lower bound. Quoters aren't matched: a quote that doesn't tag us never appears in mentions.
 
+## How experiments use it
+
+Experiments score the root's organic rate (P7): likes plus reposts, or profile visits, per 1,000 organic impressions, with a 50-impression floor. Root replies stay out because of P8, and quotes and bookmarks because organic metrics lack them (P7). Measured 20-27 Sep 2026 on 8 unboosted originals with 50+ impressions: engagement rate median 7.35 per 1,000; 7 of 8 had zero profile visits (VERIFY on the 8 Oct data).
+
 ## Not verified, do not plan around
 
 - Whether the follower list comes back newest-first. If it does, the daily read can stop at the first known follower.

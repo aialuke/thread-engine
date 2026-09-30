@@ -256,6 +256,102 @@ class Experiments(LoopCase):
             self.snap(root_id, hours(40, posted), 900, bookmarks=900)
         self.assertEqual(self.ok("evaluate", now=hours(200))["events"], [])
 
+    def snap_organic(self, root_id: str, observed_at: str, impressions: int, likes: int = 0, reposts: int = 0,
+                     visits: int = 0) -> dict:
+        data = {"root_id": root_id, "observed_at": observed_at,
+                "root": {"views": impressions, "likes": likes, "reposts": reposts, "quotes": 0, "replies": 9,
+                         "bookmarks": 0},
+                "organic": {"impressions": impressions, "likes": likes, "replies": 9, "reposts": reposts,
+                            "profile_visits": visits, "url_clicks": 0},
+                "followers": 40}
+        return self.ok("record-snapshot", "--json", self.payload(data))
+
+    def rate_cohort(self, rows=((1000, 10, 0, 0), (1000, 20, 0, 0), (1000, 30, 0, 0))) -> list[str]:
+        ids = []
+        for i, (impressions, likes, reposts, visits) in enumerate(rows):
+            root_id = f"21000000{i:02d}"
+            self.post(root_id, hours(-500 + i), retrospective=True, made_in_repo=False)
+            self.snap_organic(root_id, hours(-400 + i), impressions, likes, reposts, visits)
+            ids.append(root_id)
+        return ids
+
+    def open_rate(self, cohort: list[str], primary: str = "engagement_rate") -> dict:
+        return self.ok("open-experiment", "--json", self.payload({
+            "question": "q", "treatment": "t", "control": "c", "primary": primary, "cohort": cohort}), now=T0)
+
+    def rate_treatment(self, start: int, rows: list[tuple[int, int, int]]) -> None:
+        for i, (impressions, likes, reposts) in enumerate(rows):
+            root_id = f"31000000{start + i:02d}"
+            posted = hours(10 * (start + i))
+            self.post(root_id, posted, experiment="E-001", arm="treatment")
+            self.snap_organic(root_id, hours(40, posted), impressions, likes, reposts)
+
+    def test_engagement_rate_cohort_median_and_bar_are_per_thousand_impressions(self) -> None:
+        opened = self.open_rate(self.rate_cohort())
+        self.assertEqual((opened["cohort_median"], opened["threshold"]), (20.0, 30.0))
+
+    def test_engagement_rate_counts_likes_plus_reposts_only(self) -> None:
+        ids = self.rate_cohort(((1000, 9, 1, 0), (1000, 15, 5, 0), (1000, 25, 5, 0)))
+        self.assertEqual(self.open_rate(ids)["cohort_median"], 20.0)
+
+    def test_cohort_posts_under_the_floor_or_without_organic_are_not_admitted(self) -> None:
+        ids = self.rate_cohort(((49, 5, 0, 0), (1000, 20, 0, 0), (1000, 30, 0, 0)))
+        error = self.fails("open-experiment", "--json", self.payload({
+            "question": "q", "treatment": "t", "control": "c", "primary": "engagement_rate", "cohort": ids}))
+        self.assertEqual(error, "only 2 cohort posts have an engagement_rate snapshot with 50 or more organic impressions")
+        bare = self.seed_cohort()
+        self.assertIn("only 0 cohort posts", self.attempt(bare, "engagement_rate"))
+        four = self.rate_cohort(((49, 5, 0, 0), (1000, 20, 0, 0), (1000, 30, 0, 0), (100, 3, 0, 0)))
+        opened = self.open_rate(four)
+        self.assertEqual(opened["cohort_median"], 30.0)
+        exp = json.loads((self.root / "loop" / "state.json").read_text())["experiments"][0]
+        self.assertEqual([c["root_id"] for c in exp["cohort"]], four[1:])
+
+    def test_zero_median_rate_cohort_refused(self) -> None:
+        self.assertIn("median", self.attempt(self.rate_cohort(((1000, 0, 0, 0), (1000, 0, 0, 0), (1000, 5, 0, 0))),
+                                             "engagement_rate"))
+
+    def test_visit_rate_needs_spread_across_the_cohort(self) -> None:
+        self.assertIn("median profile visits is 0", self.attempt(
+            self.rate_cohort(((1000, 1, 0, 0), (1000, 1, 0, 0), (1000, 1, 0, 3))), "visit_rate"))
+        self.assertIn("needs 5", self.attempt(
+            self.rate_cohort(((1000, 1, 0, 2), (1000, 1, 0, 2), (1000, 1, 0, 2))), "visit_rate"))
+        ids = self.rate_cohort(((1000, 1, 0, 2),) * 4 + ((1000, 1, 0, 3), (1000, 1, 0, 2)))
+        self.assertEqual(self.open_rate(ids, "visit_rate")["cohort_median"], 2.0)
+
+    def test_treatment_rates_are_scored_and_below_the_floor_is_a_miss_with_a_note(self) -> None:
+        self.open_rate(self.rate_cohort())
+        self.rate_treatment(0, [(1000, 40, 0), (1000, 50, 0), (49, 40, 0)])
+        result = self.ok("evaluate", now=hours(200))
+        self.assertEqual((result["status"], result["events"][0]["result"]), ("unclear", "mixed"))
+        rnd = json.loads((self.root / "loop" / "state.json").read_text())["experiments"][0]["rounds"][0]
+        self.assertEqual((rnd["values"], rnd["passes"], rnd["notes"]), ([40.0, 50.0, 0.0], 2, {"3100000002": "below_floor"}))
+        self.assertIn("below_floor", (self.root / "experiments.md").read_text())
+
+    def test_a_treatment_post_without_organic_numbers_waits(self) -> None:
+        self.open_rate(self.rate_cohort())
+        self.rate_treatment(0, [(1000, 40, 0), (1000, 50, 0)])
+        bare = "3100000009"
+        self.post(bare, hours(95), experiment="E-001", arm="treatment")
+        self.snap(bare, hours(40, hours(95)), 1000)
+        self.assertEqual(self.ok("evaluate", now=hours(300))["posts_needed_for_next_round"], 1)
+
+    def test_control_posts_do_not_count_toward_a_rate_experiment(self) -> None:
+        self.open_rate(self.rate_cohort())
+        for i in range(3):
+            root_id = f"41000000{i:02d}"
+            posted = hours(10 * i)
+            self.post(root_id, posted, experiment="E-001", arm="control")
+            self.snap_organic(root_id, hours(40, posted), 1000, likes=900)
+        self.assertEqual(self.ok("evaluate", now=hours(200))["events"], [])
+
+    def test_a_round_without_notes_keeps_its_old_shape(self) -> None:
+        self.open(self.seed_cohort())
+        self.treatment(0, [300, 400, 500])
+        self.ok("evaluate", now=hours(200))
+        rnd = json.loads((self.root / "loop" / "state.json").read_text())["experiments"][0]["rounds"][0]
+        self.assertNotIn("notes", rnd)
+
     def attempt(self, cohort: list[str], primary: str) -> str:
         return self.fails("open-experiment", "--json", self.payload({
             "question": "q", "treatment": "t", "control": "c", "primary": primary, "cohort": cohort}))

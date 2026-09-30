@@ -46,11 +46,13 @@ def round_result(passes: int, size: int) -> str:
     return "fail"
 
 
-def evaluate_rounds(state: dict, ready: list[tuple[str, int]], at: str) -> tuple[dict, dict]:
+def evaluate_rounds(state: dict, ready: list[tuple[str, float]], at: str,
+                    notes: dict[str, str] | None = None) -> tuple[dict, dict]:
     """Run every Round the ready posts complete on the open Experiment. Returns (new state, evaluate's answer).
 
-    `ready` is (root_id, primary value) for each unconsumed treatment post, in posting order. The caller has
-    already checked that an Experiment is open. `state` is not changed; a closed Experiment adds a Lesson to the
+    `ready` is (root_id, primary value) for each unconsumed treatment post, in posting order. `notes` says why
+    a post's value is a forced miss (root_id to reason); a Round keeps the notes of its own posts. The caller
+    has already checked that an Experiment is open. `state` is not changed; a closed Experiment adds a Lesson to the
     new state, and posts left over once it closes are dropped.
     """
     state = copy.deepcopy(state)
@@ -62,9 +64,12 @@ def evaluate_rounds(state: dict, ready: list[tuple[str, int]], at: str) -> tuple
         result = round_result(passes, exp["size"])
         before = exp["status"]
         exp["status"] = TRANSITIONS[(before, result)]
-        exp["rounds"].append({"posts": [pid for pid, _ in batch],
-                              "values": [value for _, value in batch],
-                              "passes": passes, "result": result, "at": at})
+        rnd = {"posts": [pid for pid, _ in batch], "values": [value for _, value in batch],
+               "passes": passes, "result": result, "at": at}
+        noted = {pid: (notes or {})[pid] for pid, _ in batch if pid in (notes or {})}
+        if noted:
+            rnd["notes"] = noted
+        exp["rounds"].append(rnd)
         events.append({"from": before, "result": result, "to": exp["status"]})
         if exp["status"] not in OPEN_STATES:
             exp["closed_at"] = at

@@ -284,7 +284,7 @@ class ExperimentPayloads(Refused):
 
     def test_term_refusals_in_order(self) -> None:
         self.assertRefused(lambda: payloads.experiment_terms({}),
-                           "primary must be one of ('views', 'likes', 'reposts', 'quotes', 'replies', 'bookmarks')")
+                           "primary must be one of ('views', 'likes', 'reposts', 'quotes', 'replies', 'bookmarks', 'engagement_rate', 'visit_rate')")
         self.assertRefused(lambda: payloads.experiment_terms({"primary": "replies"}),
                            "primary 'replies' cannot be scored: a root's replies count the account's own thread cards")
         self.assertRefused(lambda: payloads.experiment_terms({"primary": "likes", "effect": 1.0, "cohort": []}),

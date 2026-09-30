@@ -13,6 +13,7 @@ from contextlib import contextmanager
 from datetime import datetime
 
 from loop_core.errors import LoopError, need
+from loop_core.rates import PRIMARIES
 from loop_core.times import iso, parse_time
 
 FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "build-log", "tool-verdict", "other"}
@@ -26,6 +27,7 @@ POST_ID_RE = re.compile(r"^[0-9]{5,25}$")
 READ_STAGES = {"backfill", "48h", "final"}
 CURSOR_KEYS = ("read48_until", "final_until")
 MIN_COHORT = 3
+SCORABLE = METRICS + PRIMARIES  # what open-experiment accepts as a primary; METRICS alone is what a Snapshot stores
 # Stored, but never an experiment's primary: they cannot tell a better post from a worse one.
 UNSCORABLE = {
     "views": "views include paid (boosted) reach and say nothing about follows",
@@ -278,7 +280,7 @@ def verified_count(payload: dict) -> int | None:
 def experiment_terms(payload: dict) -> tuple[str, float, list[str]]:
     """The measure, the effect to beat and the cohort of an open-experiment Payload."""
     metric = str(payload.get("primary") or "")
-    need(metric in METRICS, f"primary must be one of {METRICS}")
+    need(metric in SCORABLE, f"primary must be one of {SCORABLE}")
     need(metric not in UNSCORABLE, f"primary {metric!r} cannot be scored: {UNSCORABLE.get(metric, '')}")
     effect = float(payload.get("effect", 1.5))
     need(effect > 1.0, "effect must be above 1.0")
