@@ -251,9 +251,9 @@ X billed about 55–60% of the harness estimate, in both the pilot and B3. Treat
 
 All five can be measured with the same raters and harness.
 
-## Judging text with Jev (glossary, placement and Proof runs, 30 September 2026)
+## Judging text with Jev (glossary, placement, Proof and conflict runs, 30 September 2026)
 
-Four runs asked Jev to judge repo text: glossary candidates against how the repo uses each term (two runs), where a set of learnings should live (one run), and whether the word "Proof" carries one sense (one run, with a known-split control and a wording follow-up). Protocol, controls and pass rules are in `research/jev-test/README.md`; the procedure is the `jev-judge-run` skill.
+Four runs asked Jev to judge repo text (a fifth, on whether two instructions conflict, is in the table and last bullets below): glossary candidates against how the repo uses each term (two runs), where a set of learnings should live (one run), and whether the word "Proof" carries one sense (one run, with a known-split control and a wording follow-up). Protocol, controls and pass rules are in `research/jev-test/README.md`; the procedure is the `jev-judge-run` skill.
 
 ### Which question types held up
 
@@ -267,12 +267,15 @@ Four runs asked Jev to judge repo text: glossary candidates against how the repo
 | Definition self-contained | Real entries 0.24-0.56, the undefined-word control 0.24. Proof run: control 0.19 against 0.41-0.42 on the real definitions | No: a gap, not a clean split |
 | Where should this learning live (Choice of six documents) | 2 of 5 controls right, confidently wrong (0.79-0.90) | No |
 | Cost of misreading (Score, five levels) | Answers split between the extremes (0.25 at level 0, 0.29 at level 4) | Not as one Score question |
+| Two passages: can both be followed (Choice, two wordings; conflict runs, 30 Sep) | 19 conflicts built by editing one term: 18 caught, 20 consistent pairs 0 flagged, AUC 1.00 (blind Codex agreed with the construction on 39 of 40). But the first run's control verdict failed leave-one-out (gap 0.17 and 0.11 once the planted pair is dropped), and the two real known conflicts scored 0.33 and 0.05 | Yes for a sentence reversed on the page; no for conflicts that need a task to appear |
+| Same, Noul ("is there a task where one breaks the other?") | Built pairs: 18 of 19 conflicts above 0.7, 20 of 20 consistent below 0.3. Real pairs: 10 of 14 between 0.3 and 0.7 | Yes, read as a band: between goes to a second rater |
+| Same, task named in the state (Choice) | Detected 2 of the 5 pairs where agents broke one rule (0.99 planted, 0.81 F6; missed 0.20, 0.09, 0.26); controls stayed under 0.2 | No |
 
 ### What we learnt
 
 - **The calibration set decides the run.** The first run failed because Lane and Slot were labelled clean unread. Reading 8 usages of each term found real overloads (Slot as clock time, feed position and Experiment Slot; Voice as tone, voice notes and voice samples). The reruns used a hand-audited set.
 - **Snippet quality moves scores.** Code identifiers and field names (`"cohort": []`, `retrospective: false`), a code-graph folder and third-party notes pulled faithful scores down. Prose only, no matches inside backticks and a provenance filter fixed most of it.
-- **A yes/no on a tangential snippet sits near 0.5.** Most usages mention a term without saying enough to confirm or refute a definition. Untested next step: a Choice of consistent, contradicts or silent per snippet, on snippets where the term is the subject.
+- **A yes/no on a tangential snippet sits near 0.5.** Most usages mention a term without saying enough to confirm or refute a definition. Tried on 30 Sep as a conflict question between two passages (table above): it separates reversed sentences and misses task-dependent conflicts.
 - **Jev did catch a wrong definition once** (Shout-out as a line in a Card, faithful 0.29 in the first run), but not under the second run's sampling. One catch is not validation.
 - **Placement is a convention judgment.** Choosing between documentation homes depends on what each file is for, which the state could not carry. Not a fit for Jev.
 - **Rankings held across runs** (Voice and Explore and exploit low on one-sense in both), though the snippets differed. Repeats with different samples show the variance; one run does not.
@@ -283,4 +286,11 @@ Four runs asked Jev to judge repo text: glossary candidates against how the repo
 - **Jev cannot find a sense the card does not offer.** My cards tested two senses; Codex found two more (a standard of evidence for a claim, and a test that an agent cannot reach approval). Cluster the usages blind first, then build the cloze options from what it finds.
 - **Label from full lines, not grep cuts.** Labels made from truncated hits misfiled two lines of the approval-test sense as plain English and missed one line using two senses. The five lines I called ordinary English scored 0.00 on cloze, which was the warning: I verified two of them were mislabelled, and Codex put the other three in a third sense (unverified).
 - **Definition noise was about 0.1 on the Proof run.** The same evidence-only snippets scored 0.64-0.66 under three control definitions and 0.76 under the real one. A mixed-against-pure gap of 0.12 is inside that; the `jev-judge-run` skill asks for the shift to be measured and treats a gap inside it as no finding.
+- **Conflict runs (30 Sep), what they showed about running Jev:**
+  - **Controls I label myself can pass for the wrong reason.** The first run passed on one planted pair; leave-one-out failed it. Controls built by editing one term of a real sentence, kept only where a blind Codex agreed with how they were made, passed cleanly. Of my two hand-labelled real "known conflicts", one is now doubtful (both raters called it followable).
+  - **Jev answers the sentence on the page.** Real conflicts were missed with the task named (T1), and a note stating the consequence moved one pair a lot (+0.65) but three others 0.09 to 0.20. A false note nudged three consistent controls up 0.13 to 0.17 without flipping any, so a note carries a small push and some information; a documented steering risk fits but was not separated from better reading (unverified).
+  - **Trimming can help, or hurt.** Cutting F10's second passage to the disputed sentence lifted it from 0.15 to 0.73; cutting CX1's to a sentence without its subject dropped it from 0.33 to 0.12. Keep the disputed sentence and who acts in it.
+  - **Behaviour settled what Jev could not.** Twelve haiku runs never split; each pair resolved the same way every time. Three of the four tasks forced a one-or-other choice by design, so this shows which rule wins, not that a conflict exists.
+  - **Two slips to avoid:** a planted passage labelled "planted sentence" is a tell (built pairs use the same source label), and a passage that reads the working tree changes under an old answer (pin it to a revision).
+  - **Cost:** 194 requests, about $0.005 (arithmetic); the sources behind the reading of Jev's limits are in `research/jev-design-cards-reading/where-jev-succeeds.md`.
 - **Proof run cost:** 55 requests (40 main run, 3 hook control, 12 wording follow-up), about $0.02 at the documented $0.042 per million input tokens (466,957 input tokens; arithmetic, not a bill). Count requests from the saved answer files.

@@ -2,8 +2,9 @@
 name: jev-judge-run
 description: >
   Jev judging of repo text or decisions as build-phase research: checks
-  glossary definitions, rubrics or labels against the repo's own usage. Not
-  for design-card votes (jev-card) or anything in scripts/ or the product path.
+  glossary definitions, rubrics or labels against the repo's own usage, or
+  whether two passages conflict. Not for design-card votes (jev-card) or
+  anything in scripts/ or the product path.
 ---
 
 # Jev judge run
@@ -11,6 +12,16 @@ description: >
 Plain English to the operator. Research only: code lives in `research/jev-test/`, never `scripts/`. Reuse the request checks and Keychain read in `scripts/jev_design_vote.py`; never run `security` yourself and never print a key. Jev supplies one rater's probabilities; the operator decides policy. Record every run in `research/jev-test/README.md`.
 
 Jev suits semantic reading of text: does a definition match a usage, is a term used in one sense, does a definition mention an implementation detail. Routing between documents and checking claims against code stay with you.
+
+## Conflict questions (do two passages clash?)
+
+Measured 30 Sep; rules and results are in `research/jev-test/README.md` (the run script stays local, uncommitted). Jev caught 18 of 19 conflicts built by editing one term and flagged none of 20 consistent pairs. It missed conflicts that only appear when an agent does a task, even with the task named in the state.
+
+1. **First pass only.** Check a changed sentence against its neighbours. A "followable" is no clearance: send every pair to a blind Codex, and settle a real conflict by what fresh agents do on a concrete free-text task.
+2. **Send the disputed sentence and who acts in it,** not the whole section. Cutting one pair to the sentence lifted it from 0.15 to 0.73; cutting another to a sentence without its subject dropped it from 0.33 to 0.12.
+3. **Read a Noul as a band:** below 0.3 no, above 0.7 yes, between goes to a second rater (10 of 14 real pairs landed between).
+4. **Controls are built, not labelled by you:** edit one term of a real sentence for the conflict, paraphrase it for the consistent pair, and keep a pair only where a blind second rater agrees with how it was made. Run leave-one-out on the control gap; the first run passed on one planted pair and failed it.
+5. **State no tell and no answer.** Show both passages under the same source label, and add no note saying what the conflict is (a false note nudged consistent pairs up 0.13-0.17). Pin each passage to a git revision so an old answer cannot belong to newer text.
 
 ## Before any request
 

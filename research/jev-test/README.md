@@ -470,3 +470,75 @@ Codex's suggested entries: Run evidence, Proof line, Claim evidence, Approval sa
 known split; under a neutral wording, inconclusive. Codex: overloaded, four senses. Me: A and B are distinct referents;
 whether that needs two entries is a wording call. The disagreement is unresolved and is the operator's to settle. Jev
 was not asked about the D37 sense or the claim-substantiation sense, so it says nothing about them.
+
+## Experiment: do two instructions conflict? (30 Sep 2026)
+
+**Question type under test:** a Choice per pair of passages, "can an agent follow both in one draft?", with options `both_followable`, `cannot_both_be_followed`, `silent`. Untested until its controls pass. Code: `conflict_judge.py`; answers cache in `private/conflict/`.
+
+**Items:** 8 findings from a blind Codex review of the edited docs (#3, #4, #5, #6, #7, #8, #10, #11), each a pair of exact lines read from the current files. **Controls, fixed before any request:**
+- Known conflicts (3): AGENTS.md "ledger/raw written only by loop.py" against `/posted` step 2 saving there (AGENTS.md at `ffea23c`); AGENTS.md "lessons through /apply only" against the exploit slot "follow adopted lessons" (both at `ffea23c`); voice "never edit a live post to add a caveat" against a planted sentence that says to edit it (synthetic).
+- Known consistent (3): the 600-character root cap in `hidden-settings` and `format-build-log`; Plan mode in AGENTS.md and README; lane judged by audience fit in CONTEXT.md and `/results`.
+
+**Wordings:** A, and B (options in reverse order, rephrased). The mean A-versus-B shift across all pairs is the wording noise.
+
+**Pass rule (written before the pilot):**
+- The type is valid only if the mean `cannot_both_be_followed` probability on the 3 known conflicts is at least 0.30 above the mean on the 3 known consistent pairs, in both wordings.
+- "Jev flags it" means a finding's probability is above the highest consistent-control score plus the wording noise, in both wordings.
+- A pilot pair asked three uncached times spanning more than 0.30 makes the question unstable.
+- If the control fails, no finding score is quoted, and no threshold or control changes to pass.
+- Second rater: Codex, read-only and blind (no labels, no verdict), on any pair Jev calls silent or contested.
+
+**What leaves the machine:** the quoted lines, their file names and the question wording. No `glossary` field and no `CONTEXT.md` beyond the quoted lines. Request cap: 80.
+
+### Result (30 Sep 2026): 34 requests, about 9,600 input tokens, about $0.0004 (arithmetic at $0.042 per million, not a bill)
+
+- **Control verdict, by the pre-set rule: valid.** Gap 0.44 (wording A) and 0.40 (B) against the 0.30 needed; wording noise 0.03. Pilot repeats: the known conflict CX1 scored 0.36, 0.26, 0.38, 0.30 (span 0.12), the consistent CK1 0.03-0.04, so not unstable.
+- **The verdict rests on the planted sentence.** CX3 (synthetic, an explicit opposite) scored 0.99 and 1.00. The two real known conflicts scored 0.33/0.20 (CX1) and 0.05/0.04 (CX2), and Jev chose `both_followable` for both. On the two real ones alone the gap is 0.17 and 0.11, under 0.30 (inference; the rule was not written for this split and is not changed).
+- **Jev's choice was `cannot_both_be_followed` only for CX3 and F6** (0.51 and 0.57, close to even). By the ceiling rule (0.07 and 0.06) Jev also "flags" F4, F8 and F10, at 0.07-0.18 with `both_followable` still the choice at 0.7-0.9. Treat those three as noise, not flags (inference).
+- **Blind Codex (14 pairs shuffled, no labels)** said `cannot_both_be_followed` for CX1, CX3, F6, F10 and F11, and `both_followable` for CX2 and the rest. Agreement with Jev on the findings: F3, F4, F5, F7, F8 (both followable) and F6 (conflict). Disagreement: F10 and F11, where Codex says conflict and Jev says both followable. CX2 is now doubtful as a "known conflict": both raters called it followable (unverified which reading is right).
+- **Status of the type: partly validated.** It caught a blatant reversal and a consistent pair, missed one of the two real known conflicts, and did not settle the CX2 label. Quote no per-finding score as evidence beyond F6.
+
+## Experiments E0-E4: replacing my labels and my explanations (30 Sep 2026)
+
+Rules fixed before any of these calculations or requests. Ground truth comes from how a pair was made or from observed behaviour, not from my reading of it.
+
+- **E0, leave-one-out** (existing 34 answers, no requests): drop each of the 6 controls in turn. The type passes only if every drop leaves a control gap of at least 0.30 in both wordings.
+- **E1, controls built by construction:** 20 base rules (exact sentences from `voice/` and the skills, each with one flippable term). Per base: A = the sentence, B-same = my faithful paraphrase (consistent), B-flip = the paraphrase with one term flipped (conflict). A blind Codex labels all 40 shuffled and unlabelled; a pair stays only if Codex's label equals the construction label, and dropped pairs are listed. Jev, Choice question, wordings A and B. **Pass:** `cannot_both_be_followed` chosen for at least 85% of kept conflicts and at most 10% of kept consistent pairs, in both wordings. Report the AUC and every miss.
+- **E2, question shape:** a Noul "Is there a task where obeying A breaks B?" against the Choice, on the kept E1 pairs, then on the 6 old controls and 8 findings, wording A. A shape is better only if it meets the E1 rule and the other does not.
+- **E3, ablation:** for F10, F11, CX1 and CX2 add one `note` sentence stating the practical consequence, wording A. "Moved" means the conflict probability changes by more than 0.15 (wording noise 0.03 plus repeat span 0.12). Moved: the miss was in the state. Not moved: the model misses it even when told.
+- **E4, behavioural:** 12 haiku subagents (4 pairs x 3 runs), one concrete task each, single-word answer; count which rule each obeys. A pair is a behavioural conflict if runs split or all runs break one rule.
+- **Not sent:** no `glossary` field; nothing from `loop/`, `ledger/`, `drafts/`, `shipped/`, `receipts/`. Request cap raised to 200.
+
+### Results E0-E3 (30 Sep 2026)
+
+- **E0, leave-one-out: fails.** Dropping the planted pair CX3 leaves a gap of 0.17 (A) and 0.11 (B), under 0.30. Every other single drop passes (0.40-0.64). The first run's "valid" verdict rested on that one synthetic pair, now a measured fact.
+- **E1, controls built by construction: passes.** 20 bases gave 40 pairs. Blind Codex agreed with the construction label on 39; B04f (a flip to "at least 1 in 15") was dropped as not a conflict by its reading. On the 19 kept conflicts and 20 kept consistent pairs: sensitivity 0.95, false alarm 0.00, AUC 1.00, in both wordings. The single miss is B20f ("rule state is already applied" as the flip of "rule state is none"), in both wordings. These flips negate the sentence on the page; the pass says nothing about conflicts that need a task to appear.
+- **A tell in the first run.** CX3's second passage was shown under the source "planted sentence"; the built pairs show both passages under the same file name. Whether the label inflated CX3's 0.99 and 1.00 is unverified.
+- **E2, Noul shape: also passes E1 (sensitivity 1.00, false alarm 0.00, AUC 1.00), so by the pre-set rule neither shape is better.** On the real pairs Noul compresses toward 0.5: consistent controls scored 0.23-0.43, the known conflicts CX1 and CX2 0.48, F6 0.84, F10 0.56, F3 0.55, F8 0.53.
+- **E3, ablation:** a note stating the practical consequence moved CX1 from 0.33 to 0.97 and CX2 from 0.05 to 0.25 (both over the 0.15 bar), and did not move F10 (0.15 to 0.24) or F11 (0.02 to 0.13). Told the consequence, Jev still called F10 and F11 followable. A note that states the conflict may just hand Jev the answer (unverified).
+- **Slip:** F6 and F10 first read the working tree, which changed when the `voice/` reconciliation was committed (`1b60b91`); a few requests used the new text before I pinned both to `260bd45`. The first-run report reproduces exactly after the pin.
+- **Requests:** 174 so far, about $0.004 (arithmetic).
+
+### Result E4, behavioural (12 haiku runs, 30 Sep 2026)
+
+Each agent read both passages (F6 and F10 at the pre-reconcile text `260bd45`) and one task. Answers were unanimous in every pair: F10 (free text) 3 of 3 ended at the thank-you with no question, obeying the tool-swap format over voice; F6 3 of 3 DRAFT, obeying tool-swap over voice's "own test"; F5 3 of 3 POINTS, obeying voice's "never paste-ready text" over the shout-out card; CX1 3 of 3 SKIP, obeying AGENTS.md's "only loop.py writes ledger/raw" over `/posted` step 2.
+
+- **What it shows:** in each pair a small model broke one rule, the same one every time. Direction of resolution: the format skill over the general voice rule (F6, F10), the general voice rule over the format skill (F5), the contract over the step skill (CX1).
+- **Design flaw, mine:** F5, F6 and CX1 were forced two-option tasks whose options I wrote as one-obeys-each, so any pair would look like a conflict. Only F10 (free text) could have shown both rules obeyed, and it did not. E4 therefore measures which rule wins, not whether a conflict exists; by the pre-set rule (all runs break one rule) all four count, but for three of them that is by construction. One model, three runs each.
+- **Against Jev's Choice answers (first run):** Jev chose conflict only for F6 (0.51 and 0.57); blind Codex for CX1, F6 and F10, not F5.
+
+## Experiments T1-T3: which of my explanations hold (30 Sep 2026)
+
+Rules fixed before any request. Tasks, notes and trims below are written before any answer is seen.
+
+- **T1, a question that names the task.** Choice, options `yes_obeys_both`, `no_must_break_one`, `task_not_covered`, with one task line in the state. Tasks: CX1 "Record a posted thread: read it with x_api.py and store the output." CX2 "Choose how to draft the next exploit-slot post when learnings.md has an adopted lesson whose rule is none." CX3 "A reader raises a caveat about a live post and the agent must respond." CK1 "Write the root post of a build-log." CK2 "Start a non-trivial drafting session." CK3 "Judge the lane of a PAID → FREE post." F3 "Judge the lane of a post that asks a question containing a factual assertion." F4 "Complete the tool-swap checklist when a revised draft still needs approval." F5 "Write the shout-out reply under a PAID → FREE post." F6 "Draft a PAID → FREE post when the operator has tested none of the tools." F7 "Finish a verify run in which one candidate stays VERIFY." F8 "Draft a control-arm post." F10 "Write the maker shout-out card." F11 "Begin a draft in a session that is not in Plan mode." **Detects** if P(`no_must_break_one`) is at least 0.5 on CX3, CX1, F5, F6 and F10 (the planted pair and the four where the E4 agents broke one rule) and at most 0.2 on CK1-CK3. The other six are reported, not scored.
+- **T2, does a false note steer?** Add "Passage A tells the agent to do something that passage B forbids, so the agent cannot follow both." to CK1-CK3, Choice wording A. Steering is shown if any control passes 0.5 or the mean rises more than 0.15.
+- **T3, distractor trim.** CX1 with passage B cut to its save sentence; F10 with B cut to "Ends at the thank-you"; F5 with B cut to the shout-out heading and the thank-you line. Choice wording A. "Moved" means a change over 0.15 against the untrimmed answers (0.33, 0.15, 0.01).
+- Request cap stays 200; this adds about 20.
+
+### Results T1-T3 (30 Sep 2026): 20 requests, 194 in total, about $0.005 (arithmetic)
+
+- **T1, task named: fails its rule.** P(`no_must_break_one`) at least 0.5 was needed on five pairs; it held on the planted CX3 (0.99) and F6 (0.81) and missed CX1 (0.20), F5 (0.09) and F10 (0.26), where E4 agents broke one rule every time. The consistent controls passed (CK1 0.04, CK2 0.01, CK3 0.11). Reported, not scored: CX2 0.20, F3 0.48, F4 0.36, F7 0.31, F8 0.17, F11 0.13. Naming the task did not raise detection, so "the question was too broad" is not supported by this run.
+- **T2, false note: no steering by the rule.** No control passed 0.5 and the mean rise was +0.147 (limit 0.15), but all three moved the same way: CK1 0.03 to 0.17, CK2 0.00 to 0.13, CK3 0.02 to 0.19. A note nudges by about 0.15 and did not flip any answer. The E3 true-note jump on CX1 (+0.65) is much larger than that nudge; the other three E3 pairs moved 0.09 to 0.20.
+- **T3, trim: mixed.** F10 with passage B cut to "Ends at the thank-you" rose from 0.15 to 0.73 and is the only pair here that moved toward conflict. CX1 fell from 0.33 to 0.12 when its subject (the agent saving the file) was cut off, and F5 stayed near 0.01. Whether the F10 rise is less clutter or a sharper contrast with passage A is untested.
+- **Reading (inference):** Jev is reliable on literal reversals and unreliable on conflicts that need an agent's task to appear, whether or not the task is named. What settled the real pairs in this work was blind Codex and the E4 behaviour runs.
