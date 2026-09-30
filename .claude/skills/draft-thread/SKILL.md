@@ -28,7 +28,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
    Done: slug, folder, format and, if set, the experiment arm are written down.
 
 3. **Format.** Read `.claude/skills/format-<format>/SKILL.md`, its contract and checklist, and each reference whose stated condition applies to this draft. A settings row also reads `.claude/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening and length from the format, because the shipped roots predate the result-first, under-600-character rule.
-   If the row is a `treatment` or `control` arm, the arm's description wins over the format's defaults (for example card count). Never change anything else about the post, so the test stays clean.
+   If the row is a `treatment` or `control` arm, the arm's description wins over the format's defaults (for example post count). Never change anything else about the post, so the test stays clean.
    Done: the applicable shape, research and verification mode, image rule and checklist are identified, including any arm override.
 
 4. **Research, then write.** Finish research before any card prose, following the format's research rule. Collect the evidence the format requires: official sources for vendor claims, the operator's account plus real proof for claims about their own runs. No qualifying source → the item is omitted. A build-log or tool-verdict starts with the format's **Material** questions to the operator; without their answers and real proof, stop and suggest another format. A tool-swap needs only research; offer the operator an optional quick test once (see the format).
@@ -43,7 +43,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
    - `REPLIES.md` for a tool-swap: talking points from `CLAIMS.md` (`voice/exit-zero.md` → Replies)
    - `images.md` — what to attach, following the format's image rule. Write `Attach: none` when nothing is attached.
    - `CHECKLIST.md` — copy of `.claude/skills/format-<format>/checklist.md`, boxes ticked where done
-   Done: files exist. Card count matches the format, the hook, and the arm.
+   Done: files exist. The number of cards matches the format, the hook, and the arm.
 
 7. **Queue.** Set the row's `status` to `drafted` and `draft:` to the folder.
    Done: the row says `drafted` and `draft:` points to this folder.

@@ -24,7 +24,7 @@ These fit:
 - lessons and mistakes;
 - tool verdicts from real use (e.g. Claude, Codex and Grok as blind reviewers of the same plan);
 - the free tools the pipeline actually uses;
-- PAID → FREE lists (`.claude/skills/format-tool-swap/SKILL.md`), for now under tech broadly;
+- free-tool lists (PAID → FREE, `.claude/skills/format-tool-swap/SKILL.md`) whose every swap passes the three tests, for now under tech broadly;
 - AI and tech-policy takes from a builder's point of view (government tech failures, AI regulation, the tools).
 
 Device and settings tips count as `main` for now (tech broadly). Once the operator narrows the lane, they count only when they come from the build (for example, the Mac settings changed to run the pipeline).

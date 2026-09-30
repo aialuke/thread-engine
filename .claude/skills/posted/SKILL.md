@@ -15,7 +15,7 @@ argument-hint: "<link to the first post>"
 4. Compare the live cards with the draft cards, both ways, so an added or removed card is a difference. Put each difference in exactly one class:
    - `preference` — wording, length, order, emphasis, a changed title. Nothing factual changed.
    - `correction` — a fact fixed by the operator.
-   - `deviation` — the post no longer follows the experiment arm (for example card count or length changed).
+   - `deviation` — the post no longer follows the experiment arm (for example post count or length changed).
    - `violation` — breaks `voice/exit-zero.md` or one of the gate's refusals (`scripts/post_thread.py`), or carries an unsourced or loosened figure.
    One line each: class, card, what changed. A difference that is both a `violation` and a `deviation` takes `violation`, and the deviation rule in step 6 still applies.
 5. Ask one question, once: "Roughly how many minutes did this one take, start to finish?"

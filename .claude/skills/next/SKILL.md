@@ -29,9 +29,9 @@ When `review.review_due` is true, follow `.claude/skills/next/weekly.md`. Otherw
 
 ## 3. Pick the slot
 
-Read Current state in `AGENTS.md`. While it says experiments are paused, propose the post with no experiment arm, skip `next-slot`, and tell the operator in one line that experiments restart once the organic numbers are in.
+Read Current state in `AGENTS.md`. While its pause line names a date still ahead (today in Australia/Brisbane), propose the post with no experiment arm, skip `next-slot`, and tell the operator in one line that experiments restart on that date.
 
-When Current state no longer says paused, follow `experiment-list.md` in this folder.
+On or after that date, ask the operator whether to lift the pause. On a yes, edit that line in `AGENTS.md` to say experiments are running, then follow `experiment-list.md` in this folder. On a no, treat it as paused and ask again next time.
 
 ## 4. Pick the topic
 
@@ -72,4 +72,4 @@ For each: the link, and in one line the point a reply could make. Remind the ope
 
 Done: 2–3 links, each with the point a reply could make, every one from `x_read.py` results.
 
-End with `Next: /draft-thread <slug>` for the slug the operator accepted (start with /plan if you want to review the plan first).
+End with `Next: /draft-thread <slug>` for the slug the operator accepted (it starts in Plan mode, so the operator sees the plan first).

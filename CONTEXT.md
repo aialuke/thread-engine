@@ -11,7 +11,7 @@ One topic's worth of posts, prepared for the operator to post by hand. It is a t
 _Avoid_: thread (for the unit), post (for the unit)
 
 **Card**:
-The text of one post within a Draft. A Draft's Cards are numbered in the order they are posted.
+The text of one post within a Draft. A Draft's Cards are numbered in the order they are posted. The root, each setting post and the closer are all Cards. A settings thread's **N** counts only its setting Cards, so it has N + 2 Cards in all.
 _Avoid_: slide, tweet, part
 
 **Topic**:

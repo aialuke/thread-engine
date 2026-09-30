@@ -19,7 +19,7 @@ Decisions are cited as `Dnn` (`reviews/ui-direction.md`), algorithm facts as `An
 | `research/layer-2-x-data-tiers.md` | synthesis, layer 2 | 2026-09-26 | current, cites D1–D87 |
 | `research/layer-3-engines.md` | synthesis, layer 3, no Grok | 2026-09-27 | current, cites D37–D104 |
 | `research/discovery-x-api-search-proposal.md` | proposal and decision (D88 path) | 2026-09-26 | orphan |
-| `research/jev-build-time-evaluation-2026-09-27.md` | proposal, "not evidence" | 2026-09-27 | orphan |
+| `research/jev-build-time-evaluation-2026-09-27.md` | proposal ("not evidence" for savings); its section "Judging text with Jev" records which question types are validated (cited by `jev-judge-run`) | 2026-09-27, section added 2026-09-30 | current |
 | `research/Jev cookbooks.md` | raw, vendor docs | 2026-09 | raw |
 | `research/jev-articles/` | raw, 6 vendor articles on Jev | 2026-09 | raw |
 | `research/jev-design-cards-reading/` | synthesis (`README.md`, `where-jev-succeeds.md`), snapshot (`votes-2026-09-28.md`), `readers/` = 5 literature-reader reports | 2026-09-28 | current |
