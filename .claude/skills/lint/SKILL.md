@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 # Lint
 
-Plain English to the operator. Read-only: write only `reviews/lint-YYYY-MM-DD.md` (Australia/Brisbane date) and one line appended to `reviews/log.md`. Never edit loop state, `ledger/`, generated views or `APPROVED`. The operator picks which findings to fix.
+Plain English to the operator. This skill's only two writes are `reviews/lint-YYYY-MM-DD.md` (Australia/Brisbane date) and one line appended to `reviews/log.md`; everything else is read. Never edit loop state, `ledger/`, generated views or `APPROVED`. The operator picks which findings to fix.
 
 Run these checks with grep and ls. Report each as file:line and one sentence.
 

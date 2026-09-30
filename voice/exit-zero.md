@@ -31,7 +31,7 @@ Cut fake urgency, em-dash stacks, an omniscient expert with no scene, a new look
 
 ## Asking for engagement
 
-End a post with one real question that only a reader of that post could answer: the question names the fork that changes the reader's answer, such as their model or plan. The gate refuses instructions to engage (`scripts/post_thread.py`).
+End a post with one real question that only a reader of that post could answer: the question names the fork that changes the reader's answer, such as their model or plan. The gate refuses a fixed list of engagement phrases (`SOLICIT_RE` in `scripts/post_thread.py`); the rule is wider than the list, so a post that asks readers to like, save, share or follow breaks it even when no phrase matches.
 
 X's rewards rules: "Do not solicit engagements: repeatedly instructing users to engage with posts, such as asking to like, reply, bookmark, follow, or repost." Breaking it can remove the account from the program.
 

@@ -29,7 +29,7 @@ When `review.review_due` is true, follow `.claude/skills/next/weekly.md`. Otherw
 
 ## 3. Pick the slot
 
-Read Current state in `AGENTS.md`. While its pause line names a date still ahead (today in Australia/Brisbane), propose the post with no experiment arm, skip `next-slot`, and tell the operator in one line that experiments restart on that date.
+Read Current state in `AGENTS.md`. If its experiment line says experiments are running, follow `experiment-list.md` in this folder. If it names a pause date still ahead (today in Australia/Brisbane), propose the post with no experiment arm, skip `next-slot`, and tell the operator in one line that experiments restart on that date.
 
 On or after that date, ask the operator whether to lift the pause. On a yes, edit that line in `AGENTS.md` to say experiments are running, then follow `experiment-list.md` in this folder. On a no, treat it as paused and ask again next time.
 

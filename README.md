@@ -19,8 +19,8 @@ The series has a few extra steps of yours (rules: `.claude/skills/format-tool-sw
 - Testing a tool is optional. If a quick test is easy (a tool you already use), a screenshot of it makes the post stronger; the draft offers it once.
 - The shout-out to a maker is card 2: post it 10–20 minutes after card 1, not straight away. Type `/posted` once it's live.
 - `REPLIES.md` in the draft has points to make if people reply. Write your replies in your own words.
-- Pin the newest PAID → FREE post that's sourced and not boosted. Post 1 (the boosted creator list) should be unpinned now.
-- At most two posts of your own a day, a few hours apart, and a PAID → FREE post every other day.
+- Pin the newest PAID → FREE post that's sourced and not boosted.
+- At most two originals of your own a day (replies don't count), a few hours apart, and a PAID → FREE post every other day.
 
 Numbers are collected automatically by the daily job: every post, reply and quote at 36–60 hours and again at 26–29 days, plus your follower count. Boosted posts are spotted and kept out of comparisons. If the Mac was off, the next run catches up.
 

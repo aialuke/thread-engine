@@ -23,7 +23,7 @@ Approval (`/approve`), the truth budget, fail-closed fact-checks, the shared gat
 
 Each line holds until its exit condition; skills point here instead of restating it.
 
-- Experiments are paused until 2026-10-08, two weeks of organic X API data from 2026-09-24 (`reviews/audit-2026-09.md`). `/next` proposes posts with no experiment arm. On or after that date `/next` asks the operator whether to lift the pause; the operator's yes edits this line.
+- Experiments are paused until 2026-10-08, two weeks of organic X API data from 2026-09-24 (`reviews/audit-2026-09.md`). `/next` proposes posts with no experiment arm. On or after that date `/next` asks the operator whether to lift the pause; the operator's yes rewrites this line to "Experiments are running since <date>".
 - The `main` lane covers tech broadly since 2026-09-24, until the operator narrows it to building (`reference/audience.md`).
 - Grok removal is planned, not done (D88): the scripts and skills still call it until `reviews/factory-drop-grok-plan.md` lands.
 
