@@ -30,8 +30,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from loop_core.errors import LoopError, need
 from loop_core.reads import (FINAL_MAX_DAYS, FINAL_MIN_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage,
                              in_final_window, past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
+from loop_core.times import iso, parse_time
 
 DEFAULT_ROOT = Path(__file__).resolve().parent.parent
 LOCAL_TZ = ZoneInfo("Australia/Brisbane")
@@ -68,25 +70,7 @@ POST_ID_RE = re.compile(r"^[0-9]{5,25}$")
 LESSON_RE = re.compile(r"^L-[0-9]{3}$")
 
 
-class LoopError(Exception):
-    pass
-
-
 # ---------- time and io ----------
-
-
-def parse_time(value: str) -> datetime:
-    try:
-        stamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError as exc:
-        raise LoopError(f"bad time {value!r}; use ISO 8601 with a timezone") from exc
-    if stamp.tzinfo is None:
-        raise LoopError(f"time {value!r} has no timezone")
-    return stamp.astimezone(timezone.utc)
-
-
-def iso(stamp: datetime) -> str:
-    return stamp.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def local(stamp_iso: str) -> str:
@@ -198,11 +182,6 @@ class Repo:
 
 
 # ---------- validation ----------
-
-
-def need(cond: bool, message: str) -> None:
-    if not cond:
-        raise LoopError(message)
 
 
 def check_count(value, field: str) -> None:
