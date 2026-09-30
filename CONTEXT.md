@@ -26,7 +26,7 @@ The first Card of a Draft, the one a stranger is shown (the root, once posted). 
 _Avoid_: opener, intro
 
 **Format**:
-The shape a Draft takes, such as single tip, tool swap, comparison, build log or settings thread. It is chosen for the Draft. Independent of Lane.
+The shape a Draft takes, such as single tip, tool swap, comparison, build log or settings thread. It is chosen for the Draft. A tool swap series is also called PAID → FREE. Independent of Lane.
 _Avoid_: template, type
 
 **Lane**:
@@ -34,7 +34,7 @@ Whether a post serves the account's audience: `main` (tech and building, for bui
 _Avoid_: channel
 
 **Truth budget**:
-The rule that every figure or claim in a Card is sourced this session: an official page, the operator, or the operator's own run with its artifact. A claim that can't be sourced comes out of the Card; it is never softened to keep it.
+The rule that every figure or claim in a Card is sourced this session: an official page, the operator, or the operator's own test with its artifact. A claim that can't be sourced comes out of the Card; it is never softened to keep it.
 _Avoid_: fact-check (for the rule), accuracy policy
 
 **VERIFY**:
@@ -61,12 +61,12 @@ _Avoid_: published, launched
 
 **Edit**:
 One difference between a posted Card's live text and the Draft's Card, in either direction, so an added or removed Card counts. Recorded by `/posted` in exactly one of four classes. A **preference** is wording, length, order or emphasis with nothing factual changed; three posts showing the same kind make it a candidate Lesson. A **correction** is a fact the operator fixed. A **deviation** is a change that leaves the post no longer following its Experiment's Arm, so the post drops out of that Experiment. A **violation** breaks the voice rules, a Gate refusal or the Truth budget; it is never learned as a preference, and it is reported so the Gate can gain a refusal. A change that is both a violation and a deviation is a violation, and the deviation's effect on the Experiment still applies.
-_Avoid_: change, diff, amendment (a different ledger field)
+_Avoid_: change, diff
 
 ### Measuring
 
 **Daily run**:
-The once-a-day pass that performs every Read that has come due and records the results.
+The once-a-day pass that performs every Read that has come due and records the results. Its script and skill are both named `snapshot`, but a Snapshot is a record, not a pass.
 _Avoid_: snapshot run, snapshot job
 
 **Read**:
