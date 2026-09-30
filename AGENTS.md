@@ -28,6 +28,7 @@ The `/approve` gate, the truth budget, fail-closed fact-checks, the shared gate 
 - `ledger/activity/` and `ledger/raw/` are written only by `loop.py`. `loop/inbox/`, `loop/followers/` and `ledger/raw/api/` hold other people's data and are not committed.
 - `scripts/loop_core/reads.py` holds the Read-window rules (48h, Final and Backfill read thresholds, due/missed, due-reads windows) as pure functions; `scripts/loop.py` stays the only writer and calls it.
 - `scripts/post_thread.py` is the gate: it refuses without `APPROVED`, and applies the format and voice checks. Read the script for the exact refusals; `--count` prints X's character counts with no approval.
+- `scripts/loop_core/payloads.py` holds what each Payload must look like (validators, defaults, the keys and coercions of the six payload commands) as pure functions; `errors.py` and `times.py` hold `LoopError`/`need` and `parse_time`/`iso`. State rules (post exists, duplicate Snapshot, experiment open) stay in `scripts/loop.py`. The messages are part of the CLI.
 - Tests: `python3 -m unittest discover -s tests`.
 
 ## Cloud session notes

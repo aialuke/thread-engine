@@ -7,6 +7,7 @@ readable views (experiments.md, learnings.md, ledger/SUMMARY.md).
 
 No network access. Git is used only by commit-rule, undo and commit-data.
 The Read-window rules (36-60h, 26 days, missed, due-reads windows) live in loop_core/reads.py.
+What each Payload must look like (validation, defaults, keys) lives in loop_core/payloads.py.
 
 X API data (from snapshot.py) lands in three places:
 - ledger/activity/YYYY-MM.json: one row per post, reply and quote, with its reads.
