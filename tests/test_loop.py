@@ -660,6 +660,22 @@ class Rules(LoopCase):
         state = json.loads((self.root / "loop" / "state.json").read_text())
         self.assertEqual(state["lessons"][0]["rule_state"], "reverted")
 
+    def test_learnings_show_the_basis_of_an_adopted_lesson_only(self) -> None:
+        self.ok("mark-reviewed", now=T0)
+        rows = {line.split("|")[1].strip(): line for line in
+                (self.root / "learnings.md").read_text().splitlines() if line.startswith("| L-")}
+        self.assertIn("| Basis |", (self.root / "learnings.md").read_text())
+        self.assertIn("experiment E-001 is not in the ledger", rows["L-001"])
+        self.assertTrue(rows["L-002"].rstrip(" |").endswith("| –"), rows["L-002"])
+
+    def test_rule_commit_body_carries_the_basis(self) -> None:
+        self.skill.write_text("v2\n", encoding="utf-8")
+        self.ok("commit-rule", "--lesson", "L-001", "--files", self.rel)
+        body = subprocess.run(["git", "log", "-1", "--format=%B"], cwd=self.root, capture_output=True,
+                              text=True, check=True).stdout
+        self.assertIn("Provisional: experiment E-001 is not in the ledger", body)
+        self.assertIn("Evidence: 1", body)
+
     def test_only_adopted_lessons_apply(self) -> None:
         self.skill.write_text("v2\n", encoding="utf-8")
         self.assertIn("only adopted", self.fails("commit-rule", "--lesson", "L-002", "--files", self.rel))

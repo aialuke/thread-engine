@@ -39,7 +39,7 @@ from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEY
                                 interaction_inputs, newer_since_id, post_from_payload, snapshot_from_payload, snapshot_is_final,
                                 snapshot_observed, snapshot_root_id, validate_post, verified_count)
 from loop_core import rates
-from loop_core.experiments import OPEN_STATES, evaluate_rounds, next_id, next_slot, open_experiment
+from loop_core.experiments import OPEN_STATES, evaluate_rounds, lesson_basis, next_id, next_slot, open_experiment
 from loop_core.reads import (SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage, need_final_age,
                              past_window, read_windows, snapshot_kind, valid_snapshot, window_label)
 from loop_core.snapshots import admit_snapshot
@@ -690,7 +690,8 @@ def cmd_commit_rule(repo: Repo, args) -> dict:
     changed = repo.git("status", "--porcelain", "--", *files).strip()
     need(bool(changed), "none of those files has changes to commit")
     repo.git("add", "--", *files)
-    message = f"feat(rules): apply {lesson['id']}\n\n{lesson['statement']}\nEvidence: {', '.join(lesson['evidence'])}"
+    message = (f"feat(rules): apply {lesson['id']}\n\n{lesson['statement']}\nEvidence: {', '.join(lesson['evidence'])}\n"
+               f"{lesson_basis(lesson, state['experiments'])}")
     repo.git("commit", "-m", message, "--", *files)
     sha = repo.git("rev-parse", "HEAD").strip()
     state["rules"].append({"lesson": lesson["id"], "commit": sha, "files": files,
@@ -956,12 +957,13 @@ def render(repo: Repo) -> None:
 
     lines = [head, "# Learnings\n\n",
              "A lesson changes the drafting rules only when it is `adopted` and the operator types `/apply`.\n\n",
-             "| Lesson | Status | Rule | Claim | Evidence | Last evidence |\n", "|---|---|---|---|---|---|\n"]
+             "| Lesson | Status | Rule | Claim | Evidence | Last evidence | Basis |\n", "|---|---|---|---|---|---|---|\n"]
     for lesson in state["lessons"]:
         lines.append(f"| {lesson['id']} | {lesson['status']} | {lesson['rule_state']} | {lesson['statement']} | "
-                     f"{', '.join(lesson['evidence'])} | {lesson['last_evidence_at'][:10]} |\n")
+                     f"{', '.join(lesson['evidence'])} | {lesson['last_evidence_at'][:10]} | "
+                     f"{lesson_basis(lesson, state['experiments']) or '–'} |\n")
     if not state["lessons"]:
-        lines.append("| – | – | – | No lessons yet | – | – |\n")
+        lines.append("| – | – | – | No lessons yet | – | – | – |\n")
     atomic_write(repo.root / "learnings.md", "".join(lines))
 
 
