@@ -9,7 +9,7 @@ Run `python3 scripts/loop.py next-slot`.
 - **explore, no open experiment:** propose the next experiment from this list, first one not yet run and not marked review-only:
   1. Standalone post (single-tip or tool-swap, root only) against the account's threads in the same lane. Cohort: main-lane threads with a valid or late snapshot. A PAID → FREE post in this arm skips its shout-out, so it stays root-only.
   2. Short thread (3 cards) against the long threads already shipped (6 to 9 posts).
-  3. Posting hour: the US-overlap slots in `SKILL.md` step 4.4, against the account's usual daytime Brisbane posting.
+  3. Posting hour: the US-overlap windows in `SKILL.md` step 4.4, against the account's usual daytime Brisbane posting.
   4. Root length: under 280 characters against 500–600.
   5. Replies: five substantive replies in the lane on a posting day against none, measured by followers gained that week. **Review-only:** watched in the weekly review, never opened with `open-experiment`, which scores single roots only.
   6. PAID → FREE category: one category against another (for example developer against creator), with the header, shape, slot and shout-out held fixed. Cohort: earlier organic PAID → FREE posts.
