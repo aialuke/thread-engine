@@ -16,7 +16,7 @@ From the operator's actual runs. Ask: which tools, which task, same input to eac
 
 ## Root
 
-1. **Verdict**: sentence 1 names the winner and the task it won ("For blind code review, Grok caught the most bugs").
+1. **Verdict**: sentence 1 names the winner and the task it won ("For <task>, <tool> <result>").
 2. **Test**: the task and how it was run: same input, how many runs.
 3. **Evidence**: 2 to 4 short lines, one per tool, each with what it did (a count, a catch, a miss).
 4. **Limit**: where the result stops (one task, n runs, the date and model versions), or where a losing tool still wins.
@@ -30,7 +30,7 @@ Optional: one self-reply card with the raw numbers or a screenshot of the output
 `/verify-settings <folder> claims`:
 - Every result is an operator-run row with its artifact.
 - Model names and versions come from the run itself.
-- Prices and plan limits need the vendor's own page, checked this session.
+- Prices and plan limits need the vendor's own page, checked in this verify run.
 - Never claim a tool is "best" beyond the task and runs tested.
 
 ## Images

@@ -12,7 +12,7 @@ user-invocable: true
 
 # Verify settings
 
-Fail closed. A path missing from an official page this session is `VERIFY`.
+Fail closed. A path missing from an official page opened in this verify run is `VERIFY`. Rows carry their date, so later sessions rely on them instead of re-verifying.
 
 Copy is `/draft-thread`. Format rules are in the draft's format skill (`.claude/skills/format-<FORMAT>/SKILL.md`).
 
@@ -42,7 +42,7 @@ Mode: `paths` (default) checks menu paths into `PATHS.md`. `claims` checks every
    | Setting | Path | Source URL | Date checked | Confidence | Notes |
    |---------|------|------------|--------------|------------|-------|
    | Grid and Level | Settings → Camera → Grid, Level | https://support.apple.com/… | YYYY-MM-DD | high | |
-   | Main Camera default | VERIFY | — | YYYY-MM-DD | VERIFY | no official path this session |
+   | Main Camera default | VERIFY | — | YYYY-MM-DD | VERIFY | no official path in this run |
    ```
 
    Confidence: `high` (page names the control), `medium` (page names the feature; label taken from that page), `VERIFY` (no official path).
@@ -63,10 +63,10 @@ Mode: `paths` (default) checks menu paths into `PATHS.md`. `claims` checks every
 ## Claims mode
 
 1. **List claims.** Inventory research candidates and the selected format's required verification rows. On rechecks, also cover every factual claim in existing cards: every figure, price, free-tier statement, platform, spec, and "no watermark"-style promise. Each is one row; leave unassigned `Card` cells blank.
-2. **Official source.** The vendor's own pricing, feature, spec or support page, opened this session. Reviews, forums, and memory are not sources.
+2. **Official source.** The vendor's own pricing, feature, spec or support page, opened in this verify run. Reviews, forums, and memory are not sources.
 
    "Tested" only when the operator says they did it.
-   **The operator's own run** (build-log and tool-verdict claims such as "the pipeline made this script in 4 minutes" or "Grok caught 3 bugs Codex missed", and an optional tool-swap test such as "opened a layered PSD in Photopea"): Source URL is `operator, <date>` plus the artifact that shows it, a screenshot in the draft's `images/` or a log file path. Vendor-stated or tested: `tested`. No artifact means the row is `VERIFY`.
+   **The operator's own run** (build-log and tool-verdict claims such as "the pipeline made this script in <n> minutes" or "<tool> caught <n> bugs <other tool> missed", and an optional tool-swap test such as "opened a <file type> in <tool>"): Source URL is `operator, <date>` plus the artifact that shows it, a screenshot in the draft's `images/` or a log file path. Vendor-stated or tested: `tested`. No artifact means the row is `VERIFY`.
 
 3. **Write `drafts/<slug>/CLAIMS.md`:**
 

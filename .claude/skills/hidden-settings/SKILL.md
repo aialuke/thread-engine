@@ -59,7 +59,7 @@ Skip line when the menu can be missing: `No Main Camera menu? Skip it.`
 - `✓` recap of the setting names, one line
 - Same-object line: same phone / same gateway / same wedding. Different result
 - Time and money already used in the hook; repeat only those figures
-- The closing question asks about the fork that changes which settings matter (model, chip, age, or ISP) and promises which 3 of the N to do first: "Which TV is yours? The menus differ, and 3 of these 7 matter most on each". Engagement rules: `voice/exit-zero.md` "Asking for engagement". The gold transcripts' closing "Reply with…" lines predate them; `examples.md` shows the current form.
+- The closing question asks about the fork that changes which settings matter (model, chip, age, or ISP) and promises which 3 of the N to do first: "Which <model> is yours? The menus differ, and 3 of these <N> matter most on each". Engagement rules: `voice/exit-zero.md` "Asking for engagement". The gold transcripts' closing "Reply with…" lines predate them; `examples.md` shows the current form.
 
 ## Emoji budget
 

@@ -48,12 +48,12 @@ Paid product → Free tool
   - If the paid product has a free plan, name the paid tier ("Streamlabs Ultra", "Copilot Pro") or cut the row.
 - **Free side.**
   - Say "free".
-  - Say "open source" only when `CLAIMS.md` shows it. Photopea isn't, and neither are Raycast or OrbStack.
+  - Say "open source" only when `CLAIMS.md` shows it.
 - **Proof lines.**
   - Positive, specific, short, and true as written for the task they name.
   - Written from the sources (and the operator's test, if there is one), never paraphrased from the roster.
   - Name the job the free tool does, never "replaces" or a promised 1:1 swap.
-  - No feature sheets ("3D Modeling, Sculpting and printing, …"), no changelog or LTS wording, no negatives. Limits live in `CLAIMS.md` and `REPLIES.md`.
+  - Plain words on the one job the tool does. Feature lists, changelog wording and LTS wording stay out, and so do negatives: limits live in `CLAIMS.md` and `REPLIES.md`.
 - **No @handles, hashtags or `1/5`** in the root; the gate refuses them.
 - **The payoff stands alone.** A stranger who sees only the root gets every swap.
 
@@ -61,7 +61,7 @@ Paid product → Free tool
 
 Research is enough: every row stands on the vendors' own pages (below). Testing isn't a gate (operator: "I don't need to test something to research and understand it").
 
-A test adds value when it's easy. Offer it once per draft, never as a condition. The operator already uses Photopea, DaVinci Resolve, OBS and Obsidian, and a quick test (for example "open a layered PSD in Photopea") gives the post:
+A test adds value when it's easy. Offer it once per draft, never as a condition. When the operator already uses a swap's free tool, a quick test (for example "open a layered file in <tool>") gives the post:
 - a real screenshot;
 - a `tested` row;
 - first-hand proof. X's rewards program counts content "you have personally created" and not "aggregated summaries" ([X Help Center](https://web.archive.org/web/20260916150107/https://help.x.com/en/using-x/original-content-rewards)). What makes a PAID → FREE post the operator's own is the choice of swaps and the judgement in the proof lines; a test or screenshot adds to that.
@@ -73,7 +73,7 @@ A test matters in one case: when the vendor's page doesn't state a claim (post 1
 `/verify-settings <folder> claims` writes `CLAIMS.md` in its usual table. Each swap needs these rows:
 
 - **The task it does:** from the free tool's own feature page ("opens and saves PSDs"). `vendor-stated`, or `tested` with a screenshot when the operator tried it.
-- **Free tier covers the task:** from the free tool's own pricing or feature page, checked this session.
+- **Free tier covers the task:** from the free tool's own pricing or feature page, checked in this verify run.
 - **The paid side is paid:** from the paid product's pricing page. If it has a free plan, the row says so and the card names the paid tier.
 - **The limit that matters:** quota, resolution cap, watermark, ads, platform, account needed. It feeds `REPLIES.md`.
 - **The shout-out:** its claim, with a recent source, and "handle checked with `python3 scripts/x_api.py user <handle>` on <date>": the right account, posting recently.
@@ -87,7 +87,7 @@ A swap with no official page for its task is cut, not softened.
 - **A short thank-you** that is true now ("still ships features and answers people"). Not a changelog, no version numbers, no em-dash stack. Its claim gets a `CLAIMS.md` row with a recent source.
 - **Never reused:** post 1's five-tag block is never reused, and no two shout-outs share wording (A13).
 - **Posted 10–20 minutes after the root,** as a reply to it. The run sheet and `/ready` say so, and `/posted` waits until it's live.
-- **No "Next one is…" teaser.**
+- **Ends at the thank-you.** The card carries nothing about the next post.
 
 Handles checked with `x_api.py user` on 24 Sep 2026:
 

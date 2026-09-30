@@ -27,11 +27,11 @@ The gate holds the list (`BANNED_RE` in `scripts/post_thread.py`) and refuses ev
 
 ## Farm tells (cut)
 
-"You're only using N% of your Mac." Fake urgency. Em-dash stacks. Omniscient expert with no scene. Swapping a look every photo. Asking for thoughts instead of a specific reply. Brochure words ("elite", "amazing", "seamless") and feature sheets copied from a product page; the PAID → FREE roster is full of them (`queue/paid-free-roster.md`).
+Cut fake urgency, em-dash stacks, an omniscient expert with no scene, a new look swapped in every photo, and a closing ask for thoughts in place of a specific question. Cut brochure words ("elite", "amazing", "seamless") and feature sheets copied from a product page; the PAID → FREE roster is full of them (`queue/paid-free-roster.md`).
 
 ## Asking for engagement
 
-End a post with one real question that only a reader of that post could answer ("Which TV is yours? The menus differ."). The gate refuses instructions to engage (`scripts/post_thread.py`).
+End a post with one real question that only a reader of that post could answer: the question names the fork that changes the reader's answer, such as their model or plan. The gate refuses instructions to engage (`scripts/post_thread.py`).
 
 X's rewards rules: "Do not solicit engagements: repeatedly instructing users to engage with posts, such as asking to like, reply, bookmark, follow, or repost." Breaking it can remove the account from the program.
 
@@ -63,7 +63,7 @@ Every figure is sourced by the draft's verify run: an official page, a `PATHS.md
 
 The people who make the free tools the account posts about (PAID → FREE, `.claude/skills/format-tool-swap/SKILL.md`).
 
-- Tag a free tool's organisation account, checked with `python3 scripts/x_api.py user <handle>` that session. Never tag a person, and never a premium vendor.
+- Tag a free tool's organisation account, checked with `python3 scripts/x_api.py user <handle>` in the post's own verify run. Never tag a person, and never a premium vendor.
 - A shout-out is a reply, so the Replies no-repeat rule covers it: never one line under several makers' posts (A13).
 - One maker touch a day: a specific reply on a maker's post, a quote of their release, or the shout-out under a PAID → FREE post.
 - Repost only a maker's release post, never your own post and never someone's mega-list of alternatives. A repost with a caption is a quote.

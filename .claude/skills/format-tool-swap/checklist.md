@@ -9,7 +9,7 @@
 - [ ] Proof lines positive and true as written, from the sources; no "replaces", feature sheets, changelog wording or roster copy
 - [ ] "Free", not "open source", unless CLAIMS.md shows it
 - [ ] No @handles, hashtags or 1/5 in the root; at most 600 as X counts (`post_thread.py <folder> --count`)
-- [ ] Optional shout-out: one line, one organisation handle checked with `x_api.py user` this session, not reused
+- [ ] Optional shout-out: one line, one organisation handle checked with `x_api.py user` in this draft's verify run, not reused
 - [ ] REPLIES.md: talking points from the limits and free plans, not paste-ready replies
 - [ ] Image optional: a real screenshot from the operator's use if there is one; no logos or press images
 - [ ] voice/exit-zero.md banned phrases and farm tells cut

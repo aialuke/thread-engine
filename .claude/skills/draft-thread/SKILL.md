@@ -17,7 +17,7 @@ Write the draft. Stop at a filled draft folder plus a chat preview. `AGENTS.md` 
 
 ## Argument
 
-A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, else the first `status: queued`.
+A queue slug. Bare `/draft-thread` → the queue row with `status: planned`. With none planned, stop and tell the operator to run `/next`, which sets the cadence, arm and posting time.
 
 ## Steps (this order)
 
@@ -27,7 +27,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`, els
 2. **Topic.** Find the queue row. Note `format`, `lane`, `experiment`, `arm`, `treatment`, and `hypothesis` if present. A row with no `format` is `settings`. Resolve the folder `drafts/YYYY-MM-DD-slug/` (today's date in Australia/Brisbane); reuse it if it exists.
    Done: slug, folder, format and, if set, the experiment arm are written down.
 
-3. **Format.** Read `.claude/skills/format-<format>/SKILL.md`, its contract and checklist, and each reference whose stated condition applies to this draft. A settings row also reads `.claude/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening and length from the format, because the shipped roots predate the result-first, under-600-character rule.
+3. **Format.** Read `.claude/skills/format-<format>/SKILL.md`, its contract and checklist, and each reference whose stated condition applies to this draft. A settings row also reads `.claude/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening and length from the format, because the shipped roots predate the result-first, under-600-character rule. Take the closer from the format too: the gold's closing lines ("Reply with…", 💬) predate the gate, which refuses them.
    If the row is a `treatment` or `control` arm, the arm's description wins over the format's defaults (for example post count). Never change anything else about the post, so the test stays clean.
    Done: the applicable shape, research and verification mode, image rule and checklist are identified, including any arm override.
 
