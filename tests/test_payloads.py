@@ -105,6 +105,9 @@ class ValidateItem(Refused):
                            "unknown public measure 'url_clicks'")
         self.assertRefused(lambda: payloads.validate_item(item(organic={"bookmarks": 1})),
                            "unknown organic measure 'bookmarks'")
+        for bad in (None, 1, "x", [1], [{}]):
+            self.assertRefused(lambda: payloads.validate_item(item(topics=bad)), "item topics must be a list of text")
+        payloads.validate_item(item(topics=["a", "b"]))
 
 
 class CheckCount(Refused):
@@ -248,8 +251,9 @@ class FollowerInputs(Refused):
         self.assertRefused(lambda: payloads.follower_inputs({"observed_at": T0}),
                            "record-followers: ids required (a missing list would record zero followers)")
         self.assertEqual(payloads.follower_inputs({"observed_at": T0, "ids": []})[1], [])
-        with self.assertRaises(LoopError):
-            payloads.follower_inputs({"observed_at": T0, "ids": None})
+        for bad in (None, {}, "12345", 7):
+            self.assertRefused(lambda: payloads.follower_inputs({"observed_at": T0, "ids": bad}),
+                               "record-followers: ids must be a list")
 
     def test_total_defaults_to_the_id_count(self) -> None:
         self.assertEqual(payloads.follower_total({}, ["1", "2"]), 2)

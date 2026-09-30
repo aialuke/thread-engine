@@ -73,6 +73,9 @@ class WrongTypedFields(LoopCase):
         """A new repo holding whatever the command needs to reach its payload checks."""
         self.tmp.cleanup()
         self.setUp()
+        # A follower day after the base payloads' items, so what a command stores is also read back by the
+        # account view main renders (it only looks at items from the 7 days before the last follower day).
+        self.ok("record-followers", "--json", self.payload({"observed_at": hours(24), "ids": ["2"]}))
         if command == "record-snapshot":
             self.post("1000000001", T0)
         if command == "open-experiment":

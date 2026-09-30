@@ -108,6 +108,8 @@ def validate_item(item: dict) -> None:
         for key, value in (item.get(group) or {}).items():
             need(key in keys, f"unknown {group} measure {key!r}")
             check_count(value, f"{group}.{key}")
+    topics = item.get("topics", [])
+    need(isinstance(topics, list) and all(isinstance(t, str) for t in topics), "item topics must be a list of text")
 
 
 @guarded("record-post")
@@ -250,6 +252,7 @@ def follower_inputs(payload: dict) -> tuple[datetime, list[str]]:
     observed = parse_time(payload.get("observed_at", ""))
     self_ids = {str(i) for i in payload.get("self_ids", [])}
     need("ids" in payload, "record-followers: ids required (a missing list would record zero followers)")
+    need(isinstance(payload["ids"], list), "record-followers: ids must be a list")
     return observed, sorted({str(i) for i in payload["ids"]} - self_ids)
 
 

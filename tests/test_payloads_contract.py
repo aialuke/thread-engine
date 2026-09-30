@@ -172,6 +172,14 @@ class ActivityPayload(Cli):
             with self.subTest(change=change):
                 self.assertEqual(self.refused(items=[{**self.ITEM, **change}]), message)
 
+    def test_topics_must_be_a_list_of_text_before_anything_is_written(self) -> None:
+        # Was accepted, stored, and then broke the account view once follower data existed.
+        for bad in (None, 1, [{}], [1], "x"):
+            with self.subTest(topics=bad):
+                self.assertEqual(self.refused(items=[{**self.ITEM, "topics": bad}]),
+                                 "item topics must be a list of text")
+        self.assertFalse((self.root / "ledger" / "activity" / "2026-10.json").exists())
+
     def test_a_bad_cursor_fails_after_the_month_file_is_written(self) -> None:
         # Check order (compatibility): items are written, then the cursor is parsed; the state cursor is not moved.
         error = self.refused(items=[self.ITEM], cursor={"read48_until": "zz"})
@@ -273,10 +281,18 @@ class FollowersPayload(Cli):
                          "record-followers: ids required (a missing list would record zero followers)")
         self.assertEqual(self.files(), [])
 
+    def test_ids_that_are_not_a_list_are_refused_and_nothing_is_written(self) -> None:
+        for bad in ({}, "12345", 7):
+            with self.subTest(ids=bad):
+                self.assertEqual(self.fails("record-followers", "--json",
+                                            self.payload({"observed_at": T0, "ids": bad})),
+                                 "record-followers: ids must be a list")
+        self.assertEqual(self.files(), [])
+
     def test_null_ids_is_refused(self) -> None:
         run = self.send({"observed_at": T0, "ids": None})
         self.assertEqual((run.returncode, run.stdout), (1, ""))
-        self.assertRegex(json.loads(run.stderr)["error"], r"^record-followers: payload is malformed: ")
+        self.assertEqual(json.loads(run.stderr), {"error": "record-followers: ids must be a list"})
         self.assertEqual(self.files(), [])
 
     def test_a_bad_verified_count_fails_after_the_ids_file_is_written(self) -> None:
