@@ -220,6 +220,20 @@ class InteractionsPayload(Cli):
             "observed_at": T0, "self_ids": [9], "mentions": [{**bare, "author_id": "9"}, bare]}))
         self.assertEqual(result, {"people": 0, "mentions_since_id": None, "outside_replies": {}})
 
+    def test_entries_are_read_one_at_a_time(self) -> None:
+        # Check order (compatibility): an early entry's bad time is refused before a later entry is read at all,
+        # and a reply target is only read after every mention has been applied.
+        late = {"author_id": "8"}
+        run = self.send({"observed_at": T0, "mentions": [{**self.MENTION, "created_at": "zz"}, late]})
+        self.assertEqual((run.returncode, run.stdout), (1, ""))
+        self.assertEqual(json.loads(run.stderr), {"error": BAD_TIME.format("zz")})
+        run = self.send({"observed_at": T0, "mentions": [{**self.MENTION, "created_at": "zz"}],
+                         "reply_targets": [{"user_id": "5"}]})
+        self.assertEqual(json.loads(run.stderr), {"error": BAD_TIME.format("zz")})
+        run = self.send({"observed_at": T0, "mentions": [self.MENTION],
+                         "reply_targets": [{"user_id": "5", "item_id": "1", "at": "zz"}, {"user_id": "6"}]})
+        self.assertEqual(json.loads(run.stderr), {"error": BAD_TIME.format("zz")})
+
     def test_own_and_authorless_mentions_are_skipped(self) -> None:
         result = self.ok("record-interactions", "--json", self.payload({
             "observed_at": T0, "self_ids": [9],

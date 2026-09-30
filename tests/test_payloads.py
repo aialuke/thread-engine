@@ -201,20 +201,29 @@ class InteractionInputs(Refused):
             "mentions": [self.MENTION, {**self.MENTION, "id": "m2", "replied_to": 55}],
             "reply_targets": [{"user_id": 7, "item_id": 200, "at": T0}], "since_id": "abc"})
         self.assertEqual(observed, datetime(2026, 10, 1, tzinfo=timezone.utc))
-        self.assertEqual(mentions, [("9", "100", "m1", T0, "100"), ("9", "100", "m2", T0, "55")])
-        self.assertEqual(targets, [("7", "200", T0)])
+        self.assertEqual(list(mentions), [("9", "100", "m1", T0, "100"), ("9", "100", "m2", T0, "55")])
+        self.assertEqual(list(targets), [("7", "200", T0)])
         self.assertEqual(since, "abc")
 
     def test_own_authorless_and_targetless_entries_are_dropped_unread(self) -> None:
         _, mentions, targets, since = payloads.interaction_inputs({
             "observed_at": T0, "self_ids": ["9"],
             "mentions": [{"author_id": 9}, {"id": "x"}], "reply_targets": [{"user_id": 9}, {}]})
-        self.assertEqual((mentions, targets, since), ([], [], None))
+        self.assertEqual((list(mentions), list(targets), since), ([], [], None))
 
     def test_a_missing_field_is_a_key_error_not_a_refusal(self) -> None:
         # Compatibility with the CLI today (see test_payloads_contract).
+        _, mentions, _, _ = payloads.interaction_inputs({"observed_at": T0,
+                                                         "mentions": [{"author_id": "9", "id": "m"}]})
         with self.assertRaises(KeyError):
-            payloads.interaction_inputs({"observed_at": T0, "mentions": [{"author_id": "9", "id": "m"}]})
+            list(mentions)
+
+    def test_entries_are_read_only_as_they_are_asked_for(self) -> None:
+        good = {"author_id": "9", "id": "m", "conversation_id": 1, "created_at": T0}
+        _, mentions, _, _ = payloads.interaction_inputs({"observed_at": T0, "mentions": [good, {"author_id": "8"}]})
+        self.assertEqual(next(mentions)[:3], ("9", "1", "m"))  # the bad second entry has not been read yet
+        with self.assertRaises(KeyError):
+            next(mentions)
 
     def test_observed_at_is_required(self) -> None:
         self.assertRefused(lambda: payloads.interaction_inputs({}), "bad time ''; use ISO 8601 with a timezone")

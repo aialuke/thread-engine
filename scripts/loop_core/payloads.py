@@ -7,6 +7,7 @@ a duplicate is loop.py's to decide. Messages are part of the CLI, so they do not
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 from datetime import datetime
 
 from loop_core.errors import need
@@ -154,31 +155,36 @@ def cursor_updates(payload: dict) -> dict[str, str]:
     return {key: iso(parse_time(given[key])) for key in CURSOR_KEYS if given.get(key)}
 
 
-def interaction_inputs(payload: dict) -> tuple[datetime, list[tuple], list[tuple], object]:
-    """What a record-interactions Payload says: when, our own ids, who replied to us, who we replied to.
+def interaction_inputs(payload: dict) -> tuple[datetime, Iterator[tuple], Iterator[tuple], object]:
+    """What a record-interactions Payload says: when, who replied to us, who we replied to, the newest id.
 
-    Mentions by us or by no one are dropped before their other fields are read, as they always were.
-    Returns (observed, mentions, reply_targets, since_id). A mention is (author, conversation_id,
-    mention id, created_at, item replied to); a reply target is (user, item, at). `since_id` comes back
-    exactly as given: whether it is a number only matters once one is saved.
+    Returns (observed, mentions, reply_targets, since_id). `mentions` and `reply_targets` are read lazily,
+    one entry at a time as the caller consumes them, so a bad entry is met at the same point it always was:
+    after the entries before it were applied and before the entries after it are looked at. A mention is
+    (author, conversation_id, mention id, created_at, item replied to); a reply target is (user, item, at).
+    Entries by us or by no one are dropped before their other fields are read. `since_id` comes back exactly
+    as given: whether it is a number only matters once one is saved.
     """
     observed = parse_time(payload.get("observed_at", ""))
     self_ids = {str(i) for i in payload.get("self_ids", [])}
-    mentions = []
-    for mention in payload.get("mentions", []):
-        author = str(mention.get("author_id", ""))
-        if not author or author in self_ids:
-            continue
-        conversation = str(mention["conversation_id"])
-        created_at = mention["created_at"]
-        mentions.append((author, conversation, mention["id"], created_at,
-                         str(mention.get("replied_to") or mention["conversation_id"])))
-    targets = []
-    for target in payload.get("reply_targets", []):
-        user = str(target.get("user_id", ""))
-        if user and user not in self_ids:
-            targets.append((user, str(target["item_id"]), target["at"]))
-    return observed, mentions, targets, payload.get("since_id")
+
+    def mentions() -> Iterator[tuple]:
+        for mention in payload.get("mentions", []):
+            author = str(mention.get("author_id", ""))
+            if not author or author in self_ids:
+                continue
+            conversation = str(mention["conversation_id"])
+            created_at = mention["created_at"]
+            yield (author, conversation, mention["id"], created_at,
+                   str(mention.get("replied_to") or mention["conversation_id"]))
+
+    def targets() -> Iterator[tuple]:
+        for target in payload.get("reply_targets", []):
+            user = str(target.get("user_id", ""))
+            if user and user not in self_ids:
+                yield user, str(target["item_id"]), target["at"]
+
+    return observed, mentions(), targets(), payload.get("since_id")
 
 
 def follower_inputs(payload: dict) -> tuple[datetime, list[str]]:
