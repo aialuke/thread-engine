@@ -8,7 +8,7 @@ when-to-use: Use for a verdict from real use of two or more AI tools on the same
 
 # Format: tool-verdict
 
-A verdict from the operator's own use: two or more tools given the same task, and what each did. Example: Claude, Codex and Grok as blind reviewers of the same plan. Shared voice: `voice/exit-zero.md`. Different from `comparison` (spec differences that change a purchase) and `tool-swap` (paid to free).
+A verdict from the operator's own use: two or more tools given the same task, and what each did. Example: three AI tools as blind reviewers of the same plan. Shared voice: `voice/exit-zero.md`. Different from `comparison` (spec differences that change a purchase) and `tool-swap` (paid to free).
 
 ## Material
 

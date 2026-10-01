@@ -9,7 +9,7 @@ argument-hint: "<slug>"
 
 # Approve
 
-This file exists so Claude Code and Grok accept `/approve <slug>` as a command. Without it, Claude Code stops at "Unknown command" and the prompt never reaches `.claude/hooks/approve.py`.
+This file exists so Claude Code accepts `/approve <slug>` as a command. Without it, Claude Code stops at "Unknown command" and the prompt never reaches `.claude/hooks/approve.py`.
 
 When the operator types `/approve <slug>`, the hook writes the approval and blocks the prompt, so this text is never shown to the model.
 

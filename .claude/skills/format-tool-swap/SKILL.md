@@ -44,7 +44,7 @@ Paid product → Free tool
 - **A single.** One swap with up to three `▷` lines, only for a tool held back for one: OBS, Krita, KeePassXC, Pi-hole.
 - **Paid side.**
   - One named product per row, never a description ("Paid chat apps", "Paid VPN mesh").
-  - When the roster names several, pick the one people on X actually talk about: check with `python3 scripts/x_read.py search "<query>"`, never a raw Grok search.
+  - When the roster names several, pick the one people on X actually talk about: check with `python3 scripts/x_read.py search "<query>"`.
   - If the paid product has a free plan, name the paid tier ("Streamlabs Ultra", "Copilot Pro") or cut the row.
 - **Free side.**
   - Say "free".
@@ -59,12 +59,9 @@ Paid product → Free tool
 
 ## Research, and an optional test
 
-Research is enough: every row stands on the vendors' own pages (below). Testing isn't a gate (operator: "I don't need to test something to research and understand it").
+Research is enough: every row stands on the vendors' own pages (below). Testing isn't a gate, and `background.md` says why.
 
-A test adds value when it's easy. Offer it once per draft, never as a condition. When the operator already uses a swap's free tool, a quick test (for example "open a layered file in <tool>") gives the post:
-- a real screenshot;
-- a `tested` row;
-- first-hand proof. X's rewards program counts content "you have personally created" and not "aggregated summaries" ([X Help Center](https://web.archive.org/web/20260916150107/https://help.x.com/en/using-x/original-content-rewards)). What makes a PAID → FREE post the operator's own is the choice of swaps and the judgement in the proof lines; a test or screenshot adds to that.
+A test adds value when it's easy. Offer it once per draft, never as a condition. When the operator already uses a swap's free tool, a quick test (for example "open a layered file in <tool>") gives the post a real screenshot, a `tested` row and first-hand proof.
 
 A test matters in one case: when the vendor's page doesn't state a claim (post 1's "No watermark" is the example), a test is the only way that claim reaches a card. Otherwise the claim, not the row, is cut.
 
@@ -103,15 +100,9 @@ Talking points for replies under the post, with sources (`voice/exit-zero.md` �
 
 Optional. A real screenshot from the operator's own use is the best image the post can carry. Never vendor logos or press images, never anything in `images/sources/`.
 
-## Series operations
+## Series operations and judging
 
-- **Cadence:** one PAID → FREE parent every other day, inside the account's cap of two originals a day, hours apart (the cap `/next` applies). Categories go in `queue/topics.yaml` order.
-- **Pin:** pin the newest PAID → FREE post that's live, sourced and unboosted, with no link (A14). The operator pins on X.
-- **Makers and boosting:** `voice/exit-zero.md` → Makers and → Boosting.
-
-## How it's judged
-
-Root only, on organic engagement and visits per organic impression at the 36–60 hour read (the loop's rules). Bookmarks aren't a ranking weight (A19); copy-link shares are (A9) but aren't visible (`queue/research-backlog.md` item 2). With the header and shape fixed, category can be the one variable in an experiment once experiments resume.
+Cadence, pinning, maker and boosting rules, and how the series is judged are in `.claude/skills/format-tool-swap/background.md`. Read it when scheduling or pinning a post or reading results; drafting doesn't need it.
 
 ## Settled (don't reopen unless the operator does)
 

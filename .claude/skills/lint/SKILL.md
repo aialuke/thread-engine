@@ -17,7 +17,7 @@ Run these checks with grep and ls. Report each as file:line and one sentence.
 2. **Dangling references.** Every `Dnn` cited outside `reviews/ui-direction.md` exists there; every `An` exists in `reference/x-algorithm.md`; every `Pn` in `reference/x-api.md`. List citers of any that don't.
 3. **Marker drift.** "as of Dnn" and "Dxx–Dnn" ranges in `research/` and `reviews/` against the highest `D` in `reviews/ui-direction.md`. Say which docs cite an older log.
 4. **Reference headers.** Each `reference/*.md` has `Status:` and `Checked:` lines. A `current` status older than 14 days is flagged.
-5. **Stale claims.** Grep for "not yet built", "still go through Grok", and other claims a later `D` overrides (check the row's text, do not guess). Draft folders in `drafts/` missing `FORMAT`, or claims in `CLAIMS.md` still marked `VERIFY`.
+5. **Stale claims.** Grep for "not yet built" and other claims a later `D` overrides (check the row's text, do not guess). Draft folders in `drafts/` missing `FORMAT`, or claims in `CLAIMS.md` still marked `VERIFY`.
 6. **Lessons.** Lesson ids (`L-nnn`) cited in `reviews/` or `shipped/` must exist in `loop/state.json` (read it, never write it).
 
 Report layout: a count line per check, then findings grouped by check. End with "Nothing to fix" when every check is clean. Then append `## [date] lint | reviews/lint-<date>.md | <n> findings` to `reviews/log.md`.

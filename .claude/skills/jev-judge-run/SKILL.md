@@ -15,14 +15,14 @@ Jev suits semantic reading of text: does a definition match a usage, is a term u
 
 ## Conflict questions (do two passages clash?)
 
-Measured 30 Sep; rules and results are in `research/jev-test/README.md`; the run script is `research/jev-test/conflict_judge.py` with its pairs in `conflict_items.json`. On a sentence reversed on the page Jev caught 18 or 19 of 19 built conflicts and flagged none of 20 consistent pairs, in every question form tried (Choice, Noul, opposite-polarity Noul, plain "do they contradict?", random option names). It missed conflicts that only appear when an agent does a task, in every form and with the task named, and it did not register the 3 fixed conflicts that survived a blind check.
+Measured 30 Sep; the results are in `research/jev-test/README.md` (sections "Experiment: do two instructions conflict?", "Experiments E0-E4", "Experiments T1-T3" and "Experiments T4-T7"); the run script is `research/jev-test/conflict_judge.py` with its pairs in `conflict_items.json`. Jev reliably catches a sentence reversed on the page and flags none of the consistent controls, in every question form tried. It misses conflicts that only appear when an agent does a task, in every form and with the task named, and it did not register the fixed conflicts that survived a blind check. Treat it as a first pass.
 
 1. **First pass only.** Check a changed sentence against its neighbours. A "followable" is no clearance: send every pair to a blind Codex, and settle a real conflict by what fresh agents do on a concrete free-text task.
-2. **Do not reword to rescue a miss.** Five forms scored alike on built pairs and alike on the real misses. Re-ask in the opposite polarity as a cheap check (the two answers summed to 0.95-1.0 on average, range 0.75-1.18) and send disagreement to the second rater.
-3. **Send the disputed sentence and who acts in it,** not the whole section. Cutting one pair to the sentence lifted it from 0.15 to 0.73; cutting another to a sentence without its subject dropped it from 0.33 to 0.12.
-4. **Read a Noul as a band:** below 0.3 no, above 0.7 yes, between goes to a second rater (10 of 14 real pairs landed between).
-5. **Controls are built, not labelled by you:** edit one term of a real sentence for the conflict, paraphrase it for the consistent pair, and keep a pair only where a blind second rater agrees with how it was made. Run leave-one-out on the control gap; the first run passed on one planted pair and failed it. Before/after pairs from fix commits count only where a blind rater calls the before a conflict and the after followable (3 of 8 did).
-6. **State no tell, no answer, no misleading name.** Show both passages under the same source label; add no note saying what the conflict is (a false note nudged consistent pairs up 0.13-0.17); name options after their meaning or with neutral strings (same answers), never a name that contradicts its description (it reversed the ranking, AUC 0.01). Pin each passage to a git revision so an old answer cannot belong to newer text.
+2. **Do not reword to rescue a miss.** The question forms scored alike on built pairs and alike on the real misses. Re-ask in the opposite polarity as a cheap check (the two answers should sum to about 1) and send disagreement to the second rater.
+3. **Send the disputed sentence and who acts in it,** not the whole section. Cutting a pair to the sentence can lift the score; cutting it to a sentence without its subject lowers it.
+4. **Read a Noul as a band:** below 0.3 no, above 0.7 yes, between goes to a second rater (most real pairs land between).
+5. **Controls are built, not labelled by you:** edit one term of a real sentence for the conflict, paraphrase it for the consistent pair, and keep a pair only where a blind second rater agrees with how it was made. Run leave-one-out on the control gap, because one planted pair can carry a pass. Before/after pairs from fix commits count only where a blind rater calls the before a conflict and the after followable; most do not qualify.
+6. **State no tell, no answer, no misleading name.** Show both passages under the same source label; add no note saying what the conflict is (a false note nudges consistent pairs toward conflict); name options after their meaning or with neutral strings (same answers), never a name that contradicts its description (it reverses the ranking). Pin each passage to a git revision so an old answer cannot belong to newer text.
 
 ## Before any request
 
@@ -51,7 +51,7 @@ Each step is done when its output exists.
 1. Calibration and control verdict first. If a control fails, stop and ignore that question's results; change no threshold or calibration term to pass.
 2. Label every cause you did not verify as unverified. When a set you labelled scores at the extreme against its label, re-read those lines before explaining the score away.
 3. Separate what Jev said from what you inferred.
-4. Send contested calls to Codex or Grok read-only (pre-authorised) as a second rater, blind: no labels and no verdict.
+4. Send contested calls to Codex read-only (pre-authorised) as a second rater, blind: no labels and no verdict.
 5. Count requests and cost from the saved answer files.
 6. Leave the research scripts uncommitted unless asked, and leave the target file (`CONTEXT.md`) untouched until the operator approves wording.
 
