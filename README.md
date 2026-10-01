@@ -1,6 +1,6 @@
 # thread-engine
 
-Makes @exitzerocode posts and learns which ones grow the account. You type slash commands in Grok or Claude Code, whichever you have open, and paste posts into X. The agent runs everything else. Your own numbers come from the X API with read-only keys; research into other people's posts goes through `scripts/x_read.py`, which calls Grok, so Claude Code needs Grok installed too until D88 (`reviews/factory-drop-grok-plan.md`) removes it.
+Makes @exitzerocode posts and learns which ones grow the account. You type slash commands in Claude Code and paste posts into X. The agent runs everything else. Your own numbers come from the X API with read-only keys; research into other people's posts goes through `scripts/x_read.py`, which reads X API recent search (about $0.05 a search).
 
 ## The cycle
 
@@ -42,7 +42,6 @@ The target is X's Original Content Rewards: 500 verified followers and 500,000 v
 - **Now and then:** check x.com/i/under_the_hood for any label on the account.
 - **Don't boost.** Boosted reach doesn't count and X's terms treat it as inflating views.
 - **Keep the pinned post link-free**, or linked only to a well-known site. A pin with a link X rates as low quality can hide all your posts from Home for a week.
-- **Grok balance (until D88):** `/next`'s research runs on Grok Build. If it says the balance ran out, top it up.
 
 ## What never changes
 
@@ -50,7 +49,7 @@ Only you approve a post. Nothing is posted for you. Every figure needs a source 
 
 ## One-time setup
 
-- **Commands and hooks:** both tools read `.claude/skills/` and `.claude/settings.json`. Grok needs this folder trusted (`/hooks-trust`); it already is on this Mac. Claude Code asks once to trust the project hooks.
+- **Commands and hooks:** Claude Code reads `.claude/skills/` and `.claude/settings.json`, and asks once to trust the project hooks.
 - **Daily job:** `ops/launchd/com.exitzerocode.thread-engine.snapshot.plist` runs the daily X read at 20:00 each day. Ask Claude Code to install it; it copies the file to `~/Library/LaunchAgents/` and loads it. Log: `~/Library/Logs/thread-engine-snapshot.log`.
 - **X API keys:** read-only keys live in this Mac's Keychain under `thread-engine-x`; they never go in the repo or a chat. In the X developer console keep the app on **Read** permission, a **$10 spending limit** and **auto-recharge off**. Expected spend is under $0.25 a day. If a run fails with a Keychain or credit error, unlock the Mac or top up credits; the next run catches up.
 

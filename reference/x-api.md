@@ -3,10 +3,10 @@
 Sources: https://docs.x.com/x-api (OpenAPI 2.168), https://docs.x.com/x-api/getting-started/pricing, https://docs.x.com/x-api/fundamentals/metrics
 Read: 2026-09-24. Live tests: 2026-09-24, pay-per-use app, OAuth 1.0a user context.
 Status: current
-Checked: 2026-09-24
+Checked: 2026-10-01
 Client: `scripts/x_api.py`. Keys: macOS Keychain, service `thread-engine-x`.
 
-This is what the X API can and cannot tell the loop about the account's own posts. Other people's posts and research still go through Grok (`scripts/x_read.py`). D88 (26 Sep 2026) drops Grok from the product; the factory keeps this path until `reviews/factory-drop-grok-plan.md` is done.
+This is what the X API can and cannot tell the loop about the account's own posts. Other people's posts and research go through `scripts/x_read.py`, which reads X API recent search (P18–P20). D88 (26 Sep 2026) dropped Grok.
 
 ## Verified facts
 
@@ -28,7 +28,11 @@ This is what the X API can and cannot tell the loop about the account's own post
 | P15 | The follower list can include each follower's `verified` flag at no extra cost (`user.fields=verified,verified_type`). On 24 Sep it counted 27 verified of 36; X's eligibility screen said 26. | Live test | The daily run records the count of verified followers (self handles excluded) toward the 500. X's screen is the authority; `/results` records it weekly. |
 | P16 | A post over 280 characters comes back with `text` cut at about 280 (X counts `→`, `▷` and emoji as 2) and the whole text in `note_tweet.text`, which has to be asked for in `tweet.fields`. Post 1 of PAID → FREE: 270 characters in `text`, 411 in `note_tweet`. | Live test, 24 Sep 2026 | `x_api.py` asks for `note_tweet` and uses its text everywhere, so `/posted` compares whole cards and the ledger keeps whole text. |
 | P17 | `GET /2/users/by/username/<handle>` returns an account's name, verified type, followers and `most_recent_tweet_id` (its time is in the id), at the $0.010 user rate. A handle that doesn't exist returns an error, not data. On 24 Sep `@Krita_Painting`, tagged in post 1, didn't exist. | Live test, 24 Sep 2026 | `x_api.py user <handle>` checks a handle before a post tags it: the right account, and posting recently. |
-| P14 | Looking up anyone's posts by id (`GET /2/tweets?ids=` with the author expanded) works on pay-per-use, about $0.005 a post plus $0.010 an author. An id X doesn't have is simply absent. A Grok-invented id (2102145678901234567) came back absent; a real one came back with its author. | Live test, 24 Sep 2026 | `x_read.py` checks every post Grok returns this way before anything uses it. |
+| P14 | Looking up anyone's posts by id (`GET /2/tweets?ids=` with the author expanded) works on pay-per-use, about $0.005 a post plus $0.010 an author. An id X doesn't have is simply absent. A Grok-invented id (2102145678901234567) came back absent; a real one came back with its author. | Live test, 24 Sep 2026 | `x_api.lookup` reads a post by id. `x_read.py` no longer needs it: search returns X's own posts. |
+| P18 | Recent search (`GET /2/tweets/search/recent`) works with the Keychain's OAuth 1.0a keys on pay-per-use. It returns at most the posts asked for (we ask 10), reaches back 7 days, and refuses an `end_time` closer than 10 seconds to now. Billing is per post returned, estimated at $0.005 a post plus $0.010 an author when `expansions=author_id` is used; the console fell $0.34 against a $0.455 estimate for the whole pilot, so per-step cost is an estimate. Rate limit 300 requests per 15 minutes per user. | Discovery pilot, 26 Sep 2026 (F1, F2, F10); X's docs for the 7-day reach | `x_api.search()` ends the window 30 seconds before now. `/next` demand searches are about $0.05 each, 2–3 queries a run. |
+| P19 | The query limit is 512 characters (X answers 400 "query length must be <= 512" at 513, 1,025 and 4,097). `-is:reply`, `min_likes:` and `min_replies:` are accepted. Website operators (`min_faves:`, `min_retweets:`, `-filter:`, `since:`, `until:`, `within_time:`) are not API syntax (X's docs; the pilot confirmed the API names above, not each website name). | Discovery pilot, 26 Sep 2026 (F6, F7); X's search-operator docs | `x_api.search()` refuses an over-length query or a website operator before sending. |
+| P20 | `sort_order=relevancy` reorders the same pool as `recency` (7 of 10 overlap). It ranks up high-engagement posts (top post 1,333 likes against 2) and older ones (median age 16.2 h against 12.8 h). In the pilot's demand test, 5 of the 9 good posts were replies and 7 of 9 had 0 likes, so `-is:reply` and `min_likes:` removed them. | Discovery pilot, 26 Sep 2026 (F8, one demand idea, one 24-hour window: direction, not a result) | Demand searches keep replies and set no engagement floor; Worth-joining searches may use `-is:reply` and `min_replies:`. |
+| P21 | The counts endpoint (`/2/tweets/counts/recent`) and the usage endpoint (`/2/usage/tweets`) answer 403 to these keys: they need OAuth 2.0 app-only. | Discovery pilot, 26 Sep 2026 (F4, F11) | Nothing here calls them; spend is read from the developer console. |
 
 ## X's analytics export has what the API doesn't
 

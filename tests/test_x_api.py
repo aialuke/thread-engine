@@ -154,6 +154,58 @@ class Reads(unittest.TestCase):
         self.assertEqual(x_api.lookup(c, ["2102145678901234567"]), [])
         self.assertEqual(x_api.lookup(c, []), [])
 
+    def test_search_sends_an_api_query_for_the_window_and_costs_posts_and_authors(self) -> None:
+        body = {"data": [{"id": "1", "author_id": "77", "text": "is there a free editor?"},
+                         {"id": "2", "author_id": "78", "text": "second"}],
+                "includes": {"users": [{"id": "77", "username": "asker"}, {"id": "78", "username": "other"}]}}
+        c, opener = client(FakeResponse(body))
+        found = x_api.search(c, '"is there a free" lang:en -is:retweet', hours=6, sort_order="relevancy", now=NOW)
+        self.assertEqual([(p["id"], p["author"]) for p in found], [("1", "asker"), ("2", "other")])
+        self.assertEqual(round(c.cost, 4), 0.03)   # 2 posts x 0.005 + 2 authors x 0.010
+        req = opener.requests[0]
+        self.assertEqual(req.get_method(), "GET")
+        self.assertEqual(urlsplit(req.full_url).path, "/2/tweets/search/recent")
+        query = parse_qs(urlsplit(req.full_url).query)
+        self.assertEqual(query["query"], ['"is there a free" lang:en -is:retweet'])
+        self.assertEqual((query["max_results"], query["sort_order"]), (["10"], ["relevancy"]))
+        self.assertEqual(query["end_time"], ["2026-09-24T11:59:30Z"])
+        self.assertEqual(query["start_time"], ["2026-09-24T05:59:30Z"])
+
+    def test_search_with_no_results_is_empty_and_free(self) -> None:
+        c, _ = client(FakeResponse({"meta": {"result_count": 0}}))
+        self.assertEqual(x_api.search(c, "nothing matches", now=NOW), [])
+        self.assertEqual(c.cost, 0.0)
+
+    def test_search_long_posts_come_back_whole(self) -> None:
+        whole = "row\n" * 100
+        c, opener = client(FakeResponse({"data": [{"id": "1", "author_id": "77", "text": whole[:270],
+                                                   "note_tweet": {"text": whole}}],
+                                         "includes": {"users": [{"id": "77", "username": "someone"}]}}))
+        self.assertEqual(x_api.search(c, "q", now=NOW)[0]["text"], whole)
+        query = parse_qs(urlsplit(opener.requests[0].full_url).query)
+        self.assertIn("note_tweet", query["tweet.fields"][0].split(","))
+
+    def test_search_refuses_bad_queries_before_sending(self) -> None:
+        bad = ["", "  ", "x" * 513, "free editor -filter:replies", "free min_faves:5", "(a OR b) since:2026-09-01",
+               "within_time:1d free"]
+        for query in bad:
+            with self.subTest(query=query[:30]):
+                c, opener = client()
+                with self.assertRaises(x_api.XApiError):
+                    x_api.search(c, query, now=NOW)
+                self.assertEqual(opener.requests, [])
+        c, opener = client(FakeResponse({}))
+        x_api.search(c, "x" * 512, now=NOW)   # exactly at the limit
+        self.assertEqual(len(opener.requests), 1)
+
+    def test_search_refuses_bad_windows_and_sorts(self) -> None:
+        for kwargs in ({"hours": 0}, {"hours": 168}, {"sort_order": "hot"}):
+            with self.subTest(**kwargs):
+                c, opener = client()
+                with self.assertRaises(x_api.XApiError):
+                    x_api.search(c, "q", now=NOW, **kwargs)
+                self.assertEqual(opener.requests, [])
+
     def test_long_posts_come_back_whole(self) -> None:
         whole = "PAID → FREE\n" + "row\n" * 100
         long_post = {"id": "1", "text": whole[:270], "note_tweet": {"text": whole}}

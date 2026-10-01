@@ -2,7 +2,7 @@
 
 Shipped gold. Posted copy. conversation `2102172499031253210`.
 
-Beat labels are structure, not lines to copy. Wording is what shipped. Card jokes and unsourced figures stay in this file. Promoted rules live in `.grok/skills/hidden-settings/SKILL.md`.
+Beat labels are structure, not lines to copy. Wording is what shipped. Card jokes and unsourced figures stay in this file. Promoted rules live in `.claude/skills/hidden-settings/SKILL.md`.
 
 <!-- neglect -->
 Most MacBooks get unboxed, signed into iCloud, and then never opened past Wi-Fi and display brightness.

@@ -128,7 +128,7 @@ class SnapshotPayload(LoopCase):
         self.ok("record-snapshot", "--json", self.payload({"root_id": root_id, "observed_at": hours(48)}))
         snap = json.loads((self.root / "ledger" / f"{root_id}.json").read_text())["snapshots"][0]
         self.assertEqual(snap, {
-            "observed_at": hours(48), "age_hours": 48.0, "kind": "valid", "source": "grok",
+            "observed_at": hours(48), "age_hours": 48.0, "kind": "valid", "source": "agent",
             "root": {m: None for m in ("views", "likes", "reposts", "quotes", "replies", "bookmarks")},
             "cards": [], "outside_replies": None, "outside_repliers": [], "repliers_complete": None,
             "followers": None, "raw_file": None,

@@ -59,10 +59,16 @@ class SkillChecks(unittest.TestCase):
                         self.assertTrue((REPO / ref).is_file(), f"{ref} does not exist")
 
     def test_no_grok_mentions_in_skills(self):
-        """D88 dropped Grok from the skills (7ce836d); the scripts still call it."""
+        """D88 dropped Grok; no skill file may bring it back."""
         for md in sorted(SKILLS.glob("*/*.md")):
             with self.subTest(file=f"{md.parent.name}/{md.name}"):
                 self.assertNotIn("grok", md.read_text(encoding="utf-8").lower())
+
+    def test_next_uses_api_search_syntax(self):
+        """x_read.py refuses website operators, so the skill's examples must not use them."""
+        text = (SKILLS / "next" / "SKILL.md").read_text(encoding="utf-8")
+        for operator in ("-filter:", "min_faves:", "min_retweets:", "within_time:"):
+            self.assertNotIn(operator, text)
 
 
 if __name__ == "__main__":

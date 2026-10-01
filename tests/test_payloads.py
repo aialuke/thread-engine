@@ -154,7 +154,7 @@ class SnapshotFromPayload(Refused):
     def test_shape_and_defaults(self) -> None:
         snap = self.build({"root": {"views": 5, "likes": 1}})
         self.assertEqual(snap["observed_at"], "2026-10-03T00:00:00Z")
-        self.assertEqual((snap["age_hours"], snap["kind"], snap["source"]), (48.0, "valid", "grok"))
+        self.assertEqual((snap["age_hours"], snap["kind"], snap["source"]), (48.0, "valid", "agent"))
         self.assertEqual(snap["missing"], ["reposts", "quotes", "replies", "bookmarks"])
         self.assertNotIn("organic", snap)
 

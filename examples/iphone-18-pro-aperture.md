@@ -2,7 +2,7 @@
 
 Shipped gold. Posted copy. conversation `2102272933087363155`.
 
-Posted wording, including the duplicate 3, the VERIFY lines, and the closer. Three rules from this ship live in `.grok/skills/hidden-settings/SKILL.md`: comparison hook, difference card, comparison closer. Notes: `shipped/iphone-18-pro-aperture/NOTES.md`.
+Posted wording, including the duplicate 3, the VERIFY lines, and the closer. Three rules from this ship live in `.claude/skills/hidden-settings/SKILL.md`: comparison hook, difference card, comparison closer. Notes: `shipped/iphone-18-pro-aperture/NOTES.md`.
 
 <!-- hook -->
 Matching up @apple's latest iPhone 18 Pro against the 17 Pro.

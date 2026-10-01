@@ -17,7 +17,7 @@ than read. Prints JSON with the items, calls made, items read and an estimated
 cost. backfill saves the raw responses under ledger/raw/api/ (gitignored, other
 people's data) and prints only counts.
 
-Other people's posts and research go through x_read.py (Grok), not here.
+Other people's posts and research go through x_read.py, which calls search() here.
 Facts behind the numbers below: reference/x-api.md.
 """
 
@@ -58,6 +58,13 @@ TWEET_FIELDS = ",".join(("created_at", "text", "note_tweet", "conversation_id", 
 MENTION_FIELDS = "created_at,author_id,conversation_id,in_reply_to_user_id,referenced_tweets"
 NONORGANIC_SHARE = 0.10
 HANDLE_RE = re.compile(r"[A-Za-z0-9_]{1,15}")
+# Recent search (reference/x-api.md): 512-character queries, 7 days back, end_time at least 10 s before now.
+SEARCH_QUERY_LIMIT = 512
+SEARCH_MAX_HOURS = 167
+SEARCH_END_LAG_SECONDS = 30
+# Operators that exist on x.com's search box but not in the API: the API rejects or ignores them.
+WEBSITE_OPERATOR_RE = re.compile(r"(?:^|[\s(\-])((?:min_faves|min_retweets|within_time|since|until|filter)):",
+                                 re.IGNORECASE)
 
 
 class XApiError(Exception):
@@ -262,6 +269,36 @@ def lookup(client: Client, ids: list[str]) -> list[dict]:
     params = {"ids": ",".join(ids), "tweet.fields": "created_at,author_id,public_metrics,text,note_tweet",
               "expansions": "author_id", "user.fields": "username"}
     body = client.request("GET", "/2/tweets", params, POST, partial_ok=True)
+    users = {u["id"]: u.get("username") for u in (body.get("includes") or {}).get("users", [])}
+    client.items += len(users)
+    client.cost += len(users) * USER
+    return [{**with_full_text(post), "author": users.get(post.get("author_id"))} for post in body.get("data") or []]
+
+
+def search(client: Client, query: str, hours: float = 24, sort_order: str = "recency",
+           now: datetime | None = None) -> list[dict]:
+    """Up to 10 of anyone's recent posts matching an X API v2 query, with the author's handle.
+    Not an owned read: about $0.005 a post and $0.010 an author. The window is the last `hours`
+    hours, ending SEARCH_END_LAG_SECONDS before now (X refuses an end_time too close to now)."""
+    query = query.strip()
+    if not query:
+        raise XApiError("empty search query")
+    if len(query) > SEARCH_QUERY_LIMIT:
+        raise XApiError(f"query is {len(query)} characters; X allows {SEARCH_QUERY_LIMIT}")
+    website = WEBSITE_OPERATOR_RE.search(query)
+    if website:
+        raise XApiError(f"{website.group(1)}: is website syntax and X's API refuses it; "
+                        "use API operators (min_replies:, -is:reply, lang:)")
+    if sort_order not in ("recency", "relevancy"):
+        raise XApiError(f"sort must be recency or relevancy, not {sort_order!r}")
+    if not 0 < hours <= SEARCH_MAX_HOURS:
+        raise XApiError(f"hours must be between 0 and {SEARCH_MAX_HOURS}: X search reaches back 7 days")
+    end = (now or datetime.now(timezone.utc)) - timedelta(seconds=SEARCH_END_LAG_SECONDS)
+    params = {"query": query, "max_results": "10", "sort_order": sort_order,
+              "start_time": iso(end - timedelta(hours=hours)), "end_time": iso(end),
+              "tweet.fields": "created_at,author_id,public_metrics,text,note_tweet,referenced_tweets",
+              "expansions": "author_id", "user.fields": "username"}
+    body = client.request("GET", "/2/tweets/search/recent", params, POST, partial_ok=True)
     users = {u["id"]: u.get("username") for u in (body.get("includes") or {}).get("users", [])}
     client.items += len(users)
     client.cost += len(users) * USER

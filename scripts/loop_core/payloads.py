@@ -159,7 +159,7 @@ def snapshot_from_payload(payload: dict, observed: datetime, hours: float, kind:
         "observed_at": iso(observed),
         "age_hours": round(hours, 1),
         "kind": kind,
-        "source": payload.get("source", "grok"),
+        "source": payload.get("source", "agent"),
         "root": root,
         "cards": payload.get("cards", []),
         "outside_replies": outside_count,

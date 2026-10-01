@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stdlib checks for draft.py and post_thread.py."""
+"""Stdlib checks for post_thread.py."""
 
 from __future__ import annotations
 
@@ -97,14 +97,6 @@ class ImportGate(unittest.TestCase):
         tops = _imported_tops(SCRIPTS / "post_thread.py")
         self.assertEqual(FORBIDDEN_TOP & tops, set())
 
-    def test_draft_has_no_http_imports(self) -> None:
-        tops = _imported_tops(SCRIPTS / "draft.py")
-        self.assertEqual(FORBIDDEN_TOP & tops, set())
-
-    def test_draft_does_not_import_subprocess(self) -> None:
-        tops = _imported_tops(SCRIPTS / "draft.py")
-        self.assertNotIn("subprocess", tops)
-
     def test_post_thread_does_not_read_environ(self) -> None:
         self.assertFalse(_reads_environ(SCRIPTS / "post_thread.py"))
 
@@ -120,7 +112,6 @@ class ScriptBehavior(unittest.TestCase):
             spec.loader.exec_module(mod)
             return mod
 
-        self.draft = load("draft")
         self.post = load("post_thread")
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
@@ -134,19 +125,6 @@ class ScriptBehavior(unittest.TestCase):
         with redirect_stdout(out), redirect_stderr(err):
             code = func(argv, **kwargs)
         return code, out.getvalue(), err.getvalue()
-
-    def test_draft_prints_grok_command(self) -> None:
-        code, out, err = self._run(self.draft.main, ["smart-tv"])
-        self.assertEqual(code, 0)
-        self.assertEqual(out, 'grok -p "/draft-thread smart-tv"\n')
-        self.assertEqual(err, "")
-        self.assertFalse((self.root / "drafts").exists())
-
-    def test_draft_rejects_bad_slug(self) -> None:
-        code, out, err = self._run(self.draft.main, ["Not A Slug"])
-        self.assertEqual(code, 1)
-        self.assertEqual(out, "")
-        self.assertIn("invalid slug", err)
 
     def test_post_refuses_without_approved(self) -> None:
         draft = self.root / "demo"

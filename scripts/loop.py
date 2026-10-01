@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Deterministic state for the learning loop. Grok calls this; the operator never does.
+"""Deterministic state for the learning loop. The agent calls this; the operator never does.
 
 Every command prints JSON on stdout. Errors print {"error": ...} on stderr and exit 1.
 Each command writes at most one data file, atomically, then re-renders the
