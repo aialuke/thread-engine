@@ -15,15 +15,15 @@ Decisions are cited as `Dnn` (`reviews/ui-direction.md`), algorithm facts as `An
 | Path | Kind | Date | Status |
 |---|---|---|---|
 | `research/x-rules.md` | synthesis, X's own rules for a drafting tool | 2026-09 | current |
-| `research/layer-1-switches-profiles.md` | synthesis, layer 1 | 2026-09-26 | current, Grok rows pre-date D88 (note at top) |
-| `research/layer-2-x-data-tiers.md` | synthesis, layer 2 | 2026-09-26 | current, cites D1–D87 |
-| `research/layer-3-engines.md` | synthesis, layer 3, no Grok | 2026-09-27 | current, cites D37–D104 |
+| `research/layer-1-switches-profiles.md` | synthesis, layer 1 | 2026-09-26 | snapshot (2026-09-26); Grok rows pre-date D88; not updated |
+| `research/layer-2-x-data-tiers.md` | synthesis, layer 2 | 2026-09-26 | snapshot (2026-09-26); cites D1–D87; not updated |
+| `research/layer-3-engines.md` | synthesis, layer 3, no Grok | 2026-09-27 | snapshot (2026-09-27); cites D37–D104; not updated |
 | `research/discovery-x-api-search-proposal.md` | proposal and decision (D88 path) | 2026-09-26 | orphan |
 | `research/jev-build-time-evaluation-2026-09-27.md` | proposal ("not evidence" for savings); its section "Judging text with Jev" records which question types are validated (cited by `jev-judge-run`) | 2026-09-27, section added 2026-09-30 | current |
 | `research/Jev cookbooks.md` | raw, vendor docs | 2026-09 | raw |
 | `research/jev-articles/` | raw, 6 vendor articles on Jev | 2026-09 | raw |
 | `research/jev-design-cards-reading/` | synthesis (`README.md`, `where-jev-succeeds.md`), snapshot (`votes-2026-09-28.md`), `readers/` = 5 literature-reader reports | 2026-09-28 | current |
-| `research/jev-test/` | the Jev experiment record (`README.md`) plus the judge scripts still in use (conflict, glossary, proof, placement, pstack routing); the Discovery-scoring code was retired 2026-10-01 | 2026-10-01 | current |
+| `research/jev-test/` | the Jev experiment record (`README.md`; scoring runbook removed 2026-10-01, results kept) plus the judge scripts still in use (conflict, glossary, proof, placement, pstack routing) | 2026-10-01 | current |
 
 ## reviews/ — decisions, audits, weekly reviews
 | Path | Kind | Status |

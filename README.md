@@ -5,7 +5,7 @@ Makes @exitzerocode posts and learns which ones grow the account. You type slash
 ## The cycle
 
 1. **`/next`** — catches up on results, then proposes one post (topic, format, what it tests, when to post) and 2–3 conversations worth a reply today. Say yes or change it. You write every reply yourself.
-2. **`/draft-thread <slug>`** — the agent researches, checks every path and claim, and writes the cards. It starts in Plan mode, so you see the plan first.
+2. **`/draft-thread <slug>`** — the agent researches, checks every path and claim, and writes the cards. Start that session in Plan mode so you see the plan first.
 3. **Read the cards.** Change anything you like.
 4. **`/approve <slug>`** — only you can do this. It approves the cards exactly as they are. If a card changes later, approve again.
 5. **`/ready <slug>`** — the agent checks the draft and puts card 1 on your clipboard. Paste it into X as a new post. Say `next` for each following card and post it as a reply to the one before.

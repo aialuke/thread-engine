@@ -140,7 +140,7 @@ Primary sources are linked beside the claims they support. Vendor examples are e
 
 ## Results: experiment 3, the B3 pull (28 September 2026)
 
-Directional only. There is no answer key: Jev, Codex `gpt-5.6-sol`, Claude `claude-opus-5-5` and Grok `grok-4.5` (billed `grok-4.5-build`) are peers, and "the panel" is the strict majority of the three LLM raters. Totals and rates only; no post text. Pre-registration, measures and commands: [`jev-test/README.md`](jev-test/README.md), Experiment 3.
+Directional only. There is no answer key: Jev, Codex `gpt-5.6-sol`, Claude `claude-opus-5-5` and Grok `grok-4.5` (billed `grok-4.5-build`) are peers, and "the panel" is the strict majority of the three LLM raters. Totals and rates only; no post text. The pre-registration and command list were removed from [`jev-test/README.md`](jev-test/README.md) on 2026-10-01 with the scoring code. This section is the result.
 
 ### The data
 

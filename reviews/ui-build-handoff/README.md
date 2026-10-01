@@ -36,7 +36,7 @@ Each is a MUST with its source. `decisions.md` §Invariants has the full list.
 
 | Level | Read | What you get |
 |---|---|---|
-| The system today | `system-today.md` | What runs where, every command and script, hooks, data stores, costs, tests |
+| The system on 25 Sep | `system-today.md` | Frozen snapshot of commands and scripts. The skills and the scripts are the factory |
 | Decisions | `decisions.md` | D1–D36 with what each means for the build, the rules the build can never break, what's deferred |
 | Open questions | `build-questions.md` | Constraints C1…, threat model, questions Q1… with options and trade-offs, a suggested order for the grilling |
 | Behaviour | `state-machine.md` | The post's life, posting steps, time states, working line, sheets and focus |

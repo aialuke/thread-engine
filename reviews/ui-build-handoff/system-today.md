@@ -1,5 +1,7 @@
 # thread-engine: the system as it exists today
 
+> **Frozen 2026-10-01.** This is the factory on 2026-09-25. It is not the current factory: the skills and the scripts are. Do not update this file until a UI build starts.
+
 Written for an Opus agent planning a button UI (iPhone first, then Mac) on top of this
 command-line system. Everything below is read from the repo at
 `/Users/lukemckenzie/src/thread-engine` as of 2026-09-25, plus operator notes explicitly
