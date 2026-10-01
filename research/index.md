@@ -33,7 +33,6 @@ Decisions are cited as `Dnn` (`reviews/ui-direction.md`), algorithm facts as `An
 | `reviews/factory-drop-grok-plan.md` | plan for D88; done 2026-10-01 except the operator's step 5 | snapshot |
 | `reviews/week-2026-W39.md` | weekly review (`/results`) | snapshot |
 | `reviews/audit-2026-09.md` | audit that chose the audience promise | snapshot |
-| `reviews/skills-audit-2026-10.md` | read-through of all 20 skills against skill-creator's guide, four proposed wording edits | snapshot |
 | `reviews/pstack-adoption.md` | adopt/adapt/skip of the pstack plugin, with a blind Codex review and outside-evidence addendum | snapshot |
 | `reviews/paid-free-session-2026-09.md` | how PAID → FREE was designed | snapshot |
 | `reviews/2026-09-22.md` | early review of the repo and account | snapshot, orphan |
