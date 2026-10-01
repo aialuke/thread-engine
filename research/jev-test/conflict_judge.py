@@ -42,7 +42,7 @@ ITEMS = {
     "CX2": ("conflict", ("ffea23c", "AGENTS.md", 20, 20), ("ffea23c", ".claude/skills/next/experiment-list.md", 19, 19)),
     "CX3": ("conflict", (None, "voice/exit-zero.md", 55, 55),
             ("literal", "When a reader raises a caveat, edit the live post to add it.")),
-    "CK1": ("consistent", (None, ".claude/skills/hidden-settings/SKILL.md", 41, 41), (None, ".claude/skills/format-build-log/SKILL.md", 31, 31)),
+    "CK1": ("consistent", (None, ".claude/skills/hidden-settings/SKILL.md", 40, 40), (None, ".claude/skills/format-build-log/SKILL.md", 31, 31)),
     "CK2": ("consistent", (None, "AGENTS.md", 8, 8), (None, "README.md", 8, 8)),
     "CK3": ("consistent", (None, "CONTEXT.md", 40, 41), (None, ".claude/skills/results/SKILL.md", 29, 29)),
     "F3": ("finding", (None, "reference/audience.md", 20, 20), (None, "voice/exit-zero.md", 40, 40)),
@@ -252,12 +252,12 @@ def passage(spec: tuple) -> dict:
     return {"source": path, "text": "\n".join(lines)}
 
 
-def card(item_id: str, wording: str, shape: str = "choice", note=False, trim: bool = False) -> dict:
+def card(item_id: str, wording: str, shape: str = "choice", note: bool | str = False, trim: bool = False) -> dict:
     _, a, b = spec(item_id)
     question = {"choice": {"type": "choice", **WORDINGS[wording]}, "noul": {"type": "noul", **NOUL},
                 "task": {"type": "choice", **TASK_QUESTION}, **EXTRA}[shape]
     check_question("conflict", question)
-    state = {"passage_A": passage(a), "passage_B": passage(TRIMS[item_id] if trim else b)}
+    state: dict[str, object] = {"passage_A": passage(a), "passage_B": passage(TRIMS[item_id] if trim else b)}
     if shape == "task":
         state["task"] = TASKS[item_id]  # T1 only: the 14 old pairs have task lines
     if note:
@@ -273,7 +273,7 @@ def count_requests() -> int:
     return sum(1 for _ in CALLS.open()) if CALLS.exists() else 0
 
 
-def ask(item_id: str, wording: str, fresh: bool, key: str, shape: str = "choice", note=False, trim: bool = False) -> dict:
+def ask(item_id: str, wording: str, fresh: bool, key: str, shape: str = "choice", note: bool | str = False, trim: bool = False) -> dict:
     body = card(item_id, wording, shape, note, trim)
     slot = CACHE / f"{digest(body)}.json"
     tries = sorted(CACHE.glob(f"{digest(body)}*.json"))

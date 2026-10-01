@@ -138,10 +138,10 @@
  {
   "id": "B18",
   "file": ".claude/skills/draft-thread/SKILL.md",
-  "line": 51,
-  "sentence": "Never create, edit or delete `APPROVED`.",
-  "same": "Do not create, change or remove the APPROVED file.",
-  "flip": "Create the APPROVED file once the operator agrees in chat."
+  "line": 52,
+  "sentence": "this run left `APPROVED` untouched.",
+  "same": "The run did not touch the APPROVED file.",
+  "flip": "The run created the APPROVED file."
  },
  {
   "id": "B19",

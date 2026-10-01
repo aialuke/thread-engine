@@ -48,8 +48,8 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`. Wit
 7. **Queue.** Set the row's `status` to `drafted` and `draft:` to the folder.
    Done: the row says `drafted` and `draft:` points to this folder.
 
-8. **Gate.** Never create, edit or delete `APPROVED`. A hook blocks it anyway.
-   Done: this run left `APPROVED` untouched. Revised cards need the operator's `/approve <slug>` again before `/ready`.
+8. **Gate.** Revised cards need the operator's `/approve <slug>` again before `/ready`.
+   Done: this run left `APPROVED` untouched.
 
 9. **Preview.** Print every card in order, separated by `---`, with each card's character count as X counts it (`python3 scripts/post_thread.py <folder> --count`; `→`, `▷` and emoji count 2). Then list leftover `VERIFY` rows and what `images.md` asks for. End with exactly:
    `Read the cards. If you change any, that's fine. When they're right, type /approve <slug>. Then /ready <slug>.`
