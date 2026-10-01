@@ -35,6 +35,7 @@ Decisions are cited as `Dnn` (`reviews/ui-direction.md`), algorithm facts as `An
 | `reviews/week-2026-W39.md` | weekly review (`/results`) | snapshot |
 | `reviews/audit-2026-09.md` | audit that chose the audience promise | snapshot |
 | `reviews/agent-conventions-audit-2026-09-30.md` | audit of instructions that could confuse or steer an agent, with the fixes | snapshot |
+| `reviews/skills-audit-2026-10.md` | read-through of all 20 skills against skill-creator's guide, four proposed wording edits | snapshot |
 | `reviews/rules-blind-review-and-closing-list-2026-09-30.md` | before/after tests of two global rules (blind review before options, closing Assumed/Overlooked list) | snapshot |
 | `reviews/pstack-adoption.md` | adopt/adapt/skip of the pstack plugin, with a blind Codex review and outside-evidence addendum | snapshot |
 | `reviews/pstack-playbooks.md`, `pstack-principles-guide.md`, `pstack-skills.md` | reader reports on pstack's playbooks, principles and guide, and other skills (vendor text, unverified) | snapshot |
