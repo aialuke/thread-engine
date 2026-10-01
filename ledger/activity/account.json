@@ -68,6 +68,16 @@
       "lost": 0,
       "attributed": {},
       "unattributed": 0
+    },
+    {
+      "date": "2026-10-01",
+      "at": "2026-10-01T10:00:05Z",
+      "followers": 36,
+      "verified_followers": 24,
+      "new": 0,
+      "lost": 1,
+      "attributed": {},
+      "unattributed": 0
     }
   ],
   "eligibility": [
