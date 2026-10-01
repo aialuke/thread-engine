@@ -1,6 +1,6 @@
 # thread-engine
 
-Makes @exitzerocode posts and learns which ones grow the account. You type slash commands in Claude Code and paste posts into X. The agent runs everything else. Your own numbers come from the X API with read-only keys; research into other people's posts goes through `scripts/x_read.py`, which reads X API recent search (about $0.05 a search).
+Makes @exitzerocode posts and learns which ones grow the account. You type slash commands in Claude Code and paste posts into X. The agent runs everything else. Your own numbers come from the X API with read-only keys; research into other people's posts goes through `scripts/x_read.py`, which reads X API recent search (up to about $0.15 a search).
 
 ## The cycle
 
