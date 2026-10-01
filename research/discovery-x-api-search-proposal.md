@@ -1,5 +1,7 @@
 # Discovery via X API search: decision and proposal (26 Sep 2026)
 
+> **2026-10-01:** the Discovery test folder (`research/discovery-test/`, including its gitignored `private/` data) was deleted after the Grok removal. The settled search facts now live in `reference/x-api.md` (P18–P21). References below to `research/discovery-test/` and `private/facts.md` are kept as the record of where the figures came from; the files are gone (the tracked ones are in git history before commit `ed781d5`).
+
 For the next session, which picks this up once the Discovery test is settled. It comes from the Discovery test pilot, run on 26 Sep (`research/discovery-test/plan.md`, `HANDOFF.md`). Raw data and the facts table are in `research/discovery-test/private/` (gitignored; `facts.md` holds every figure below with its call ids). This file quotes no one else's posts.
 
 **Decided 26 Sep (D88, `reviews/ui-direction.md`): Grok is dropped from the product.** So D-A1, D-A2 and D-A3 are settled: X API search is the source for every Discovery job. Stages 1 and 3 now test X API query design only (sorts, phrasings, spam control), not the source. D-C, D-D and D-E stay hypotheses.

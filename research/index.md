@@ -24,14 +24,13 @@ Decisions are cited as `Dnn` (`reviews/ui-direction.md`), algorithm facts as `An
 | `research/jev-articles/` | raw, 6 vendor articles on Jev | 2026-09 | raw |
 | `research/jev-design-cards-reading/` | synthesis (`README.md`, `where-jev-succeeds.md`), snapshot (`votes-2026-09-28.md`), `readers/` = 5 literature-reader reports | 2026-09-28 | current |
 | `research/jev-test/` | code, questions and synthetic data for the Jev tests (`README.md`) | 2026-09-28 | current |
-| `research/discovery-test/` | Grok-vs-X-API discovery test. Start at `HANDOFF.md`, `plan.md`, `grok-learnings.md`. Raw: `docs-*.md`, `community-grok-prompting.md`, `spam-desk-research.md`. Reviews: `codex-*-review.md`, `review-grok-report-*.md` (orphan). `private/` holds scores, not committed reading | 2026-09-26 | snapshot |
 
 ## reviews/ — decisions, audits, weekly reviews
 | Path | Kind | Status |
 |---|---|---|
 | `reviews/ui-direction.md` | decision-log, D1–D106 (as of 2026-09-28); the UI itself is only the mock in `ui/mock/` | current |
 | `reviews/ui-build-handoff/` | synthesis, build handoff pinned to mock v22 | snapshot (2026-09-25) |
-| `reviews/factory-drop-grok-plan.md` | plan for D88, nothing done yet | current |
+| `reviews/factory-drop-grok-plan.md` | plan for D88; done 2026-10-01 except the operator's step 5 | snapshot |
 | `reviews/week-2026-W39.md` | weekly review (`/results`) | snapshot |
 | `reviews/audit-2026-09.md` | audit that chose the audience promise | snapshot |
 | `reviews/skills-audit-2026-10.md` | read-through of all 20 skills against skill-creator's guide, four proposed wording edits | snapshot |

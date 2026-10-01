@@ -1,5 +1,7 @@
 # Factory: moving off Grok (plan, 26 Sep 2026)
 
+> **Done 2026-10-01** (commits `0800cb1`, `ed781d5`): steps 1–4 are in. `x_read.py` reads X API search, `grok_read.py` and `draft.py` are deleted, `/next` uses API syntax, `AGENTS.md`, `README.md` and `reference/x-api.md` are updated. `x_read.py thread` was dropped, not rebuilt (no caller). The hook guard, `settings.json`, the two operator-call lines and Grok as example content were left as the plan says. Step 5 (the operator stops using Grok as the command tool) is the operator's. The text below is the original plan.
+
 **Decision:** D88 (`reviews/ui-direction.md`). The operator dropped Grok entirely, for the product and for this factory. This file plans the factory's change. **Nothing here is done yet.** Until it is, the factory keeps working as it does today (Grok relay, commands typed in Grok or Claude Code), and `AGENTS.md` stays as it is. Changing the rules before the code would break `/next`.
 
 **Evidence and search rules:** `research/discovery-x-api-search-proposal.md` and `research/discovery-test/private/facts.md`. Relevant X API facts, confirmed on this account's pay-per-use keys:
