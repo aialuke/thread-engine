@@ -274,10 +274,10 @@ class Reads(unittest.TestCase):
             x_api.ROOT = Path(tmp)
             self.addCleanup(setattr, x_api, "ROOT", old)
             result = x_api.backfill(c, "2026-09-20T00:00:00Z", now=NOW)
-            raw_path = Path(tmp) / "ledger" / "raw" / "api" / "backfill-20260924T1200.json"
+            raw_path = Path(tmp) / "ledger" / "raw" / "api" / "backfill-20260924T120000.json"
             raw = json.loads(raw_path.read_text(encoding="utf-8"))
         self.assertEqual(result, {
-            "raw_file": "ledger/raw/api/backfill-20260924T1200.json",
+            "raw_file": "ledger/raw/api/backfill-20260924T120000.json",
             "items": 4,
             "kinds": {"original": 1, "quote": 1, "reply": 1, "repost": 1},
             "followers": 1,

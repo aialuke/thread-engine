@@ -41,6 +41,7 @@ def main() -> None:
         sys.exit(0)
     root = Path(event.get("workspaceRoot") or event.get("cwd") or ".").resolve()
     sys.path.insert(0, str(root / "scripts"))
+    import durable  # noqa: E402
     import post_thread  # noqa: E402
 
     slug = match.group(1)
@@ -56,9 +57,9 @@ def main() -> None:
         block(f"{draft.name} has no numbered cards. Nothing was approved.")
     digest = post_thread.cards_digest(cards)
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    (draft / "APPROVED").write_text(
+    durable.atomic_write(
+        draft / "APPROVED",
         f"cards-sha256: {digest}\napproved-at: {stamp}\napproved-by: operator, typed /approve\n",
-        encoding="utf-8",
     )
     block(
         f"Approved {draft.name}: {len(cards)} card(s) as they are now. "

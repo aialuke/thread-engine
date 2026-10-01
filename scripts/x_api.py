@@ -40,6 +40,7 @@ from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import durable
 from loop_core.errors import LoopError
 from loop_core.reads import FINAL_MAX_DAYS as ORGANIC_DAYS
 from loop_core.times import iso, parse_time as _parse_time
@@ -385,9 +386,9 @@ def backfill(client: Client, since: str, now: datetime | None = None) -> dict:
     items = timeline(client, since, now=now)
     data = {"fetched_at": iso(now), "since": since, "user_id": USER_ID,
             "me": me(client), "timeline": items, "followers": followers(client), "mentions": mentions(client)}
-    raw = ROOT / "ledger" / "raw" / "api" / f"backfill-{now.strftime('%Y%m%dT%H%M')}.json"
-    raw.parent.mkdir(parents=True, exist_ok=True)
-    raw.write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    raw = durable.write_new_text(
+        ROOT / "ledger" / "raw" / "api", f"backfill-{now.strftime('%Y%m%dT%H%M%S')}", ".json",
+        json.dumps(data, indent=1, ensure_ascii=False) + "\n")
     kinds: dict[str, int] = {}
     for item in items:
         kinds[kind(item)] = kinds.get(kind(item), 0) + 1
@@ -448,9 +449,9 @@ def main(argv: list[str] | None = None, client: Client | None = None) -> int:
             result = {"data": user(client, args.handle)}
         else:
             result = backfill(client, args.since)
-            with (ROOT / "ledger" / "runs.log").open("a", encoding="utf-8") as log:
-                log.write(f"{iso(datetime.now(timezone.utc))} x_api backfill ok api_items={client.items} "
-                          f"cost_usd={round(client.cost, 4)}\n")
+            durable.append_line(ROOT / "ledger" / "runs.log",
+                                f"{iso(datetime.now(timezone.utc))} x_api backfill ok api_items={client.items} "
+                                f"cost_usd={round(client.cost, 4)}")
     except XApiError as exc:
         print(json.dumps({"error": str(exc), **client.usage()}), file=sys.stderr)
         return 1

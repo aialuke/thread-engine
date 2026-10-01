@@ -20,6 +20,7 @@ _SCRIPTS = Path(__file__).resolve().parent
 if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
 
+import durable
 import formats
 
 CARD_RE = re.compile(r"^[0-9]{2}-.+\.md$")
@@ -381,7 +382,7 @@ def main(
         return refusal
 
     sheet = run_sheet(draft, found)
-    (draft / "POST.txt").write_text(sheet, encoding="utf-8")
+    durable.atomic_write(draft / "POST.txt", sheet)
 
     if args.copy is not None:
         card = found[args.copy - 1]

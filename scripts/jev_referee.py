@@ -28,6 +28,8 @@ from typing import NamedTuple
 
 import yaml
 
+import durable
+
 ROOT = Path(__file__).resolve().parent.parent
 THRESHOLDS = ROOT / "jev" / "thresholds.yaml"
 LOCAL_THRESHOLDS = ROOT / "jev" / "thresholds.local.yaml"
@@ -799,9 +801,8 @@ def save_prompt(event: dict, prompts: Path) -> None:
     if not session or not isinstance(text, str):
         return
     folder = prompts / session
-    folder.mkdir(parents=True, exist_ok=True)
     name = prompt_key(event) or "prompt.txt"
-    (folder / name).write_text(text, encoding="utf-8")
+    durable.atomic_write(folder / name, text)
 
 
 def _field_limit(policy: dict) -> int:
@@ -1080,13 +1081,18 @@ def question_record(questions: dict) -> dict:
 # ---------- receipts and hook output ----------
 
 
+def _same_receipt(old: dict, row: dict) -> bool:
+    """A retry writes nothing. A different outcome, even of the same call, is a new row."""
+    return {key: value for key, value in old.items() if key != "ts"} == {
+        key: value for key, value in row.items() if key != "ts"}
+
+
 def append_receipt(path: Path, row: dict, key: str | None) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
     text = json.dumps(row, ensure_ascii=False)
     if key and key in text:
         text = text.replace(key, "[redacted]")
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(text + "\n")
+        row = json.loads(text)
+    durable.append_json_line(path, row, _same_receipt)
 
 
 @dataclass(frozen=True)

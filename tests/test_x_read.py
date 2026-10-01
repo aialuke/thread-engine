@@ -88,6 +88,27 @@ class XRead(unittest.TestCase):
         self.assertEqual((code, out, log), (1, "", ""))
         self.assertIn("HTTP 401", err)
 
+    def test_a_saved_result_is_resumed_without_another_call(self) -> None:
+        opener = FakeOpener(FakeResponse(BODY))
+        client = x_api.Client(keys=KEYS, opener=opener, sleep=lambda _s: None)
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "runs.log"
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(x_read.main(["search", "q"], client=client, log_path=log), 0)
+            cache = next((Path(tmp) / "x-read-cache").glob("*.json"))
+            pending = cache.with_suffix(".pending")
+            pending.write_text("999999\n", encoding="utf-8")
+            log.write_text("", encoding="utf-8")
+            again = x_api.Client(keys=KEYS, opener=FakeOpener(), sleep=lambda _s: None)
+            out = io.StringIO()
+            with redirect_stdout(out):
+                code = x_read.main(["search", "q"], client=again, log_path=log)
+            self.assertEqual(code, 0)
+            self.assertEqual(again.opener.requests, [])
+            self.assertEqual(json.loads(out.getvalue())["posts"][0]["id"], "2102736605039776235")
+            self.assertIn("x_read search ok", log.read_text(encoding="utf-8"))
+            self.assertFalse(pending.exists())
+
     def test_thread_command_is_gone(self) -> None:
         with self.assertRaises(SystemExit), redirect_stderr(io.StringIO()):
             x_read.main(["thread", "2102194978269389269"])

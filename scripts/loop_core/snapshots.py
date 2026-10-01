@@ -1,7 +1,8 @@
 """Whether a Read may become a Snapshot: the ordered rules record-snapshot applies to a post's ledger.
 
 Plain values in, plain values out. The Payload is validated only after this admits the Read, so a
-repeat valid or Final read is skipped even when its Payload is malformed.
+repeat valid or Final read is skipped even when its Payload is malformed. A repeat early or late
+read is admitted; loop.py keeps one late snapshot, the latest.
 """
 
 from __future__ import annotations

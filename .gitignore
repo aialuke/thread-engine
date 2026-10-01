@@ -6,8 +6,12 @@ __pycache__/
 # Human approval markers are local state, never committed
 APPROVED
 
-# Loop scratch payloads
+# Loop scratch payloads, and the pid lock writers share
 loop/inbox/
+.write.lock
+
+# Saved x_read results, so a crashed search is not fetched twice
+ledger/x-read-cache/
 
 # X API raw responses and follower ids: other people's data, kept on this Mac only
 ledger/raw/api/

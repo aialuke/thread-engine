@@ -101,6 +101,14 @@ class PostsAndSnapshots(LoopCase):
         second = self.snap("1000000010", hours(40), 12)
         self.assertFalse(second["recorded"])
         self.assertEqual(self.snap("1000000010", hours(60.1), 14)["kind"], "late")
+        again = self.snap("1000000010", hours(70), 20)
+        self.assertEqual((again["recorded"], again["kind"]), (True, "late"))
+        older = self.snap("1000000010", hours(65), 9)
+        self.assertFalse(older["recorded"])
+        self.assertEqual(older["reason"], "later late snapshot already exists")
+        post = json.loads((self.root / "ledger" / "1000000010.json").read_text())
+        lates = [s for s in post["snapshots"] if s["kind"] == "late"]
+        self.assertEqual((len(lates), lates[0]["root"]["views"]), (1, 20))
 
     def test_due_missed_pending(self) -> None:
         self.post("1000000020", T0)
@@ -516,6 +524,10 @@ class ApiData(LoopCase):
         self.assertEqual(len(self.rows()), 1)
         self.activity("48h", hours(80), [self.item("9000000001", T0, impressions=999)])
         self.assertEqual(self.rows()["9000000001"]["reads"]["48h"]["organic"]["impressions"], 100)
+        self.activity("48h", hours(4), [self.item("9000000001", T0)], cursor={"read48_until": hours(1)})
+        self.assertEqual(self.rows()["9000000001"]["reads"]["48h"]["at"], hours(40))
+        state = json.loads((self.root / "loop" / "state.json").read_text())
+        self.assertEqual(state["api"]["read48_until"], hours(4))
         self.assertIn("unknown organic", self.fails("record-activity", "--json", self.payload(
             {"stage": "48h", "observed_at": hours(40), "items": [self.item("9000000002", T0, shares=3)]})))
 
@@ -626,6 +638,16 @@ class ApiData(LoopCase):
         self.assertIn("Verified followers from the daily read: 2 of 500", summary)
         self.assertIn("last 90 days: 900.", summary)  # the reply's 5,000 never counts
         self.assertIn("qualified at the last screen reading: 37%", summary)
+        again = self.ok("record-eligibility", "--verified-followers", "26", "--qualified-impressions", "337",
+                        now=hours(48))
+        self.assertFalse(again["recorded"])
+        self.assertEqual(again["at"], made["at"])
+        stored = json.loads((self.root / "ledger" / "activity" / "account.json").read_text())["eligibility"]
+        self.assertEqual(len(stored), 1)
+        later = self.ok("record-eligibility", "--verified-followers", "30", "--qualified-impressions", "400",
+                        now=hours(24 * 8))
+        self.assertNotIn("recorded", later)
+        self.assertEqual(len(json.loads((self.root / "ledger" / "activity" / "account.json").read_text())["eligibility"]), 2)
 
     def test_interactions_prune_old_people(self) -> None:
         self.ok("record-interactions", "--json", self.payload({
@@ -714,6 +736,11 @@ class Preferences(LoopCase):
         made = self.ok("add-preference", "--statement", "shorter titles",
                        "--evidence", "8000000000,8000000001,8000000002")
         self.assertEqual(made["status"], "adopted")
+        again = self.ok("add-preference", "--statement", "shorter titles",
+                        "--evidence", "8000000002,8000000000,8000000001")
+        self.assertEqual((again["lesson"], again["recorded"]), (made["lesson"], False))
+        state = json.loads((self.root / "loop" / "state.json").read_text())
+        self.assertEqual([lesson["id"] for lesson in state["lessons"]], [made["lesson"]])
 
 
 class Rules(LoopCase):
@@ -826,15 +853,52 @@ class Rules(LoopCase):
         self.assertEqual(self.ok("commit-data", "--message", "weekly review"),
                          {"committed": None, "reason": "nothing changed"})
         self.assertEqual(self.git("rev-parse", "HEAD").stdout.strip(), head)
-        (self.root / "reviews").mkdir()
+        (self.root / "reviews" / "ui-build-handoff").mkdir(parents=True)
         (self.root / "reviews" / "week.md").write_text("week\n", encoding="utf-8")
+        (self.root / "reviews" / "ui-build-handoff" / "notes.md").write_text("half\n", encoding="utf-8")
+        (self.root / "queue").mkdir()
+        (self.root / "queue" / "topics.yaml").write_text("topics\n", encoding="utf-8")
         (self.root / "notes.md").write_text("nope\n", encoding="utf-8")
-        committed = self.ok("commit-data", "--message", "weekly review 2026-W40")
+        self.assertEqual(self.ok("commit-data", "--message", "snapshots 2026-10-02"),
+                         {"committed": None, "reason": "nothing changed"})
+        committed = self.ok("commit-data", "--message", "weekly review 2026-W40", "--paths", "reviews/week.md")
         self.assertEqual(self.git("log", "-1", "--format=%s").stdout, "chore(data): weekly review 2026-W40\n")
         self.assertEqual(self.git("rev-parse", "HEAD").stdout.strip(), committed["committed"])
         self.assertEqual(self.git("show", "--name-only", "--format=", "HEAD").stdout.splitlines(),
                          ["reviews/week.md"])
         self.assertEqual(self.git("ls-files", "notes.md").stdout, "")
+        self.assertEqual(self.git("ls-files", "reviews/ui-build-handoff/notes.md").stdout, "")
+        self.assertEqual(self.git("ls-files", "queue/topics.yaml").stdout, "")
+
+    def test_commit_rule_adopts_a_commit_the_ledger_missed(self) -> None:
+        self.skill.write_text("v2\n", encoding="utf-8")
+        applied = self.ok("commit-rule", "--lesson", "L-001", "--files", self.rel, now=T0)
+        path = self.root / "loop" / "state.json"
+        state = json.loads(path.read_text())
+        state["rules"] = []
+        path.write_text(json.dumps(state))
+        again = self.ok("commit-rule", "--lesson", "L-001", "--files", self.rel, now=T0)
+        self.assertEqual((again["committed"], again["adopted"]), (applied["committed"], True))
+        rules = json.loads(path.read_text())["rules"]
+        self.assertEqual([rule["commit"] for rule in rules], [applied["committed"]])
+        third = self.ok("commit-rule", "--lesson", "L-001", "--files", self.rel, now=T0)
+        self.assertEqual(third["committed"], applied["committed"])
+        self.assertEqual(len(json.loads(path.read_text())["rules"]), 1)
+
+    def test_undo_adopts_a_revert_the_ledger_missed(self) -> None:
+        self.skill.write_text("v2\n", encoding="utf-8")
+        self.ok("commit-rule", "--lesson", "L-001", "--files", self.rel, now=T0)
+        undone = self.ok("undo", "--lesson", "L-001", now=T0)
+        path = self.root / "loop" / "state.json"
+        state = json.loads(path.read_text())
+        state["rules"][0]["undone"] = False
+        state["rules"][0]["revert_commit"] = None
+        path.write_text(json.dumps(state))
+        again = self.ok("undo", "--lesson", "L-001", now=T0)
+        self.assertEqual((again["revert_commit"], again["adopted"]), (undone["revert_commit"], True))
+        self.assertEqual(self.skill.read_text(), "v1\n")
+        rule = json.loads(path.read_text())["rules"][0]
+        self.assertEqual((rule["undone"], rule["revert_commit"]), (True, undone["revert_commit"]))
 
     def test_apply_does_not_sweep_other_files(self) -> None:
         other = self.root / "notes.md"

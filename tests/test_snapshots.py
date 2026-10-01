@@ -63,6 +63,9 @@ class Admit(unittest.TestCase):
     def test_a_late_snapshot_does_not_count_as_a_valid_duplicate(self) -> None:
         self.assertEqual(admit_snapshot(post("late"), 48, False), Admission("valid", None))
 
+    def test_a_second_late_read_is_admitted(self) -> None:
+        self.assertEqual(admit_snapshot(post("late"), 70, False), Admission("late", None))
+
 
 if __name__ == "__main__":
     unittest.main()

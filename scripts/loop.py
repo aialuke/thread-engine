@@ -23,15 +23,14 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import os
 import re
 import statistics
 import subprocess
 import sys
-import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import durable
 from loop_core.errors import LoopError, need
 from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEYS, activity_header, activity_items,
                                 cursor_updates, experiment_terms, experiment_texts, follower_inputs, follower_total,
@@ -44,7 +43,7 @@ from loop_core.experiments import (OPEN_STATES, evaluate_rounds, leave_experimen
 from loop_core.reads import (FINAL_MAX_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot,
                              due_bucket, final_at_risk, need_final_age, read_position, read_windows, snapshot_kind)
 from loop_core.snapshots import admit_snapshot
-from loop_core.times import iso, parse_time
+from loop_core.times import LOCAL_TZ, iso, parse_time
 
 DEFAULT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -69,20 +68,17 @@ def now_arg(value: str | None) -> datetime:
     return parse_time(value) if value else datetime.now(timezone.utc)
 
 
-def atomic_write(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            handle.write(text)
-        os.replace(tmp, path)
-    except BaseException:
-        Path(tmp).unlink(missing_ok=True)
-        raise
-
-
 def write_json(path: Path, data: dict) -> None:
-    atomic_write(path, json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+    durable.atomic_write(path, json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+
+
+def apply_cursors(api: dict, updates: dict[str, str]) -> None:
+    """Move each read cursor only forward. Replaying an older payload leaves the saved one."""
+    for key, value in updates.items():
+        current = api.get(key)
+        if current and parse_time(value) <= parse_time(current):
+            continue
+        api[key] = value
 
 
 def read_json(path: Path) -> dict:
@@ -278,7 +274,16 @@ def cmd_record_snapshot(repo: Repo, args) -> dict:
         return {"recorded": False, "reason": admission.skip, "root_id": root_id}
     kind = admission.kind
     snap = snapshot_from_payload(payload, observed, hours, kind, state["self_handles"])
-    post["snapshots"].append(snap)
+    if kind == "late":
+        # One late snapshot, the latest. A retry replaces it; an older replay leaves it.
+        existing = [s for s in post["snapshots"] if s["kind"] == "late"]
+        if existing and parse_time(existing[-1]["observed_at"]) > observed:
+            return {"recorded": False, "reason": "later late snapshot already exists", "root_id": root_id}
+        if existing == [snap]:
+            return {"recorded": False, "reason": "late snapshot already exists", "root_id": root_id}
+        post["snapshots"] = [s for s in post["snapshots"] if s["kind"] != "late"] + [snap]
+    else:
+        post["snapshots"].append(snap)
     repo.save_post(post)
     return {"recorded": True, "root_id": root_id, "kind": kind, "age_hours": snap["age_hours"],
             "missing": snap["missing"]}
@@ -305,7 +310,10 @@ def cmd_record_activity(repo: Repo, args) -> dict:
             need_final_age(hours)
         label = snapshot_kind(hours) if stage == "48h" else stage
         reads = row.setdefault("reads", {})
-        if stage == "48h" and reads.get("48h", {}).get("label") == "valid" and label != "valid":
+        prior = reads.get(stage)
+        if prior and parse_time(prior["at"]) > observed:
+            continue
+        if stage == "48h" and prior and prior.get("label") == "valid" and label != "valid":
             continue
         reads[stage] = {"at": iso(observed), "age_hours": round(hours, 1), "label": label,
                         "public": {k: (item.get("public") or {}).get(k) for k in PUBLIC_KEYS},
@@ -315,7 +323,7 @@ def cmd_record_activity(repo: Repo, args) -> dict:
         data["items"] = dict(sorted(data["items"].items(), key=lambda kv: kv[1]["created_at"]))
         write_json(repo.activity_dir / f"{month}.json", data)
     api = state.setdefault("api", {})
-    api.update(cursor_updates(payload))
+    apply_cursors(api, cursor_updates(payload))
     repo.save_state(state)
     return {"recorded": recorded, "stage": stage, "cursors": api}
 
@@ -429,13 +437,21 @@ def cmd_record_eligibility(repo: Repo, args) -> dict:
     for value, name in ((args.verified_followers, "--verified-followers"),
                         (args.qualified_impressions, "--qualified-impressions")):
         need(value.isdigit(), f"{name} must be a whole number")
-    at = iso(now_arg(args.now))
+    at = now_arg(args.now)
+    reading = {"at": iso(at), "verified_followers": int(args.verified_followers),
+               "qualified_impressions": int(args.qualified_impressions)}
     account = repo.account()
-    account.setdefault("eligibility", []).append({
-        "at": at, "verified_followers": int(args.verified_followers),
-        "qualified_impressions": int(args.qualified_impressions)})
+    year, week, _ = at.astimezone(LOCAL_TZ).isocalendar()
+    for existing in account.get("eligibility", []):
+        when = parse_time(existing["at"]).astimezone(LOCAL_TZ).isocalendar()
+        same_week = (when[0], when[1]) == (year, week)
+        same_numbers = (existing["verified_followers"], existing["qualified_impressions"]) == (
+            reading["verified_followers"], reading["qualified_impressions"])
+        if same_week and same_numbers:
+            return {**existing, "recorded": False}
+    account.setdefault("eligibility", []).append(reading)
     write_json(repo.account_path, account)
-    return account["eligibility"][-1]
+    return reading
 
 
 def cmd_set_lane(repo: Repo, args) -> dict:
@@ -624,12 +640,17 @@ def cmd_add_preference(repo: Repo, args) -> dict:
         need(any(e.get("class") == "preference" for e in post.get("edits", [])),
              f"{root_id} has no recorded preference edit")
     at = iso(now_arg(args.now))
+    statement = args.statement.strip()
+    posts = sorted(set(evidence))
+    for lesson in state["lessons"]:
+        if lesson.get("statement") == statement and sorted(lesson.get("evidence") or []) == posts:
+            return {"lesson": lesson["id"], "status": lesson["status"], "recorded": False}
     lesson = {
         "id": next_id("L", state["lessons"]),
         "experiment": None,
-        "statement": args.statement.strip(),
+        "statement": statement,
         "status": "adopted",
-        "evidence": sorted(set(evidence)),
+        "evidence": posts,
         "reference_facts": [],
         "source": "operator edits",
         "created_at": at,
@@ -648,6 +669,21 @@ def find_lesson(state: dict, lesson_id: str) -> dict:
     raise LoopError(f"no lesson {lesson_id}")
 
 
+def rule_commit_message(lesson: dict, state: dict) -> str:
+    return (f"feat(rules): apply {lesson['id']}\n\n{lesson['statement']}\n"
+            f"Evidence: {', '.join(lesson['evidence'])}\n{lesson_basis(lesson, state['experiments'])}")
+
+
+def head_commit(repo: Repo) -> tuple[str, str]:
+    sha = repo.git("rev-parse", "HEAD").strip()
+    return sha, repo.git("log", "-1", "--format=%B").strip()
+
+
+def remember_rule(state: dict, lesson: dict, sha: str, files: list[str], at: str) -> None:
+    state["rules"].append({"lesson": lesson["id"], "commit": sha, "files": files,
+                           "applied_at": at, "undone": False, "revert_commit": None})
+
+
 def cmd_commit_rule(repo: Repo, args) -> dict:
     state = repo.state()
     lesson = find_lesson(state, args.lesson)
@@ -659,14 +695,24 @@ def cmd_commit_rule(repo: Repo, args) -> dict:
         need(not name.startswith(("/", "..")), f"file {name} must be inside the repo")
         need(name.startswith((".claude/skills/", "voice/")), f"{name} is not a rule file")
     changed = repo.git("status", "--porcelain", "--", *files).strip()
-    need(bool(changed), "none of those files has changes to commit")
+    message = rule_commit_message(lesson, state)
+    if not changed:
+        existing = next((r for r in reversed(state["rules"])
+                         if r["lesson"] == lesson["id"] and not r["undone"]), None)
+        if existing is not None:
+            return {"committed": existing["commit"], "lesson": lesson["id"], "files": existing["files"],
+                    "adopted": True}
+        sha, body = head_commit(repo)
+        # The commit landed and the process died before rules[] was saved.
+        if body == message.strip() and not any(r["commit"] == sha for r in state["rules"]):
+            remember_rule(state, lesson, sha, files, iso(now_arg(args.now)))
+            repo.save_state(state)
+            return {"committed": sha, "lesson": lesson["id"], "files": files, "adopted": True}
+        need(False, "none of those files has changes to commit")
     repo.git("add", "--", *files)
-    message = (f"feat(rules): apply {lesson['id']}\n\n{lesson['statement']}\nEvidence: {', '.join(lesson['evidence'])}\n"
-               f"{lesson_basis(lesson, state['experiments'])}")
     repo.git("commit", "-m", message, "--", *files)
     sha = repo.git("rev-parse", "HEAD").strip()
-    state["rules"].append({"lesson": lesson["id"], "commit": sha, "files": files,
-                           "applied_at": iso(now_arg(args.now)), "undone": False, "revert_commit": None})
+    remember_rule(state, lesson, sha, files, iso(now_arg(args.now)))
     repo.save_state(state)
     return {"committed": sha, "lesson": lesson["id"], "files": files}
 
@@ -677,6 +723,13 @@ def cmd_undo(repo: Repo, args) -> dict:
     rule = next((r for r in reversed(state["rules"]) if r["lesson"] == lesson["id"] and not r["undone"]), None)
     if rule is None:
         raise LoopError(f"no applied rule for {lesson['id']}")
+    sha, body = head_commit(repo)
+    # The revert landed and the process died before undone was saved.
+    if f"This reverts commit {rule['commit']}" in body:
+        rule["undone"] = True
+        rule["revert_commit"] = sha
+        repo.save_state(state)
+        return {"reverted": rule["commit"], "revert_commit": sha, "lesson": lesson["id"], "adopted": True}
     dirty = repo.git("status", "--porcelain", "--", *rule["files"]).strip()
     need(not dirty, "those rule files have uncommitted edits; nothing was reverted")
     try:
@@ -690,9 +743,28 @@ def cmd_undo(repo: Repo, args) -> dict:
     return {"reverted": rule["commit"], "revert_commit": rule["revert_commit"], "lesson": lesson["id"]}
 
 
+DATA_PATHS = ("ledger", "loop", "experiments.md", "learnings.md")
+
+
+def commit_data_paths(repo: Repo, extra: str) -> list[str]:
+    """Loop-owned files, plus the files the caller names. reviews/, queue/ and reference/ stay out."""
+    paths = [p for p in DATA_PATHS if (repo.root / p).exists()]
+    root = repo.root.resolve()
+    for name in extra.split(","):
+        name = name.strip()
+        if not name:
+            continue
+        need(".." not in Path(name).parts and not name.startswith("/"), f"file {name} must be inside the repo")
+        target = (root / name).resolve()
+        need(target.is_relative_to(root), f"file {name} must be inside the repo")
+        need(target.is_file(), f"{name} is not a file")
+        paths.append(name)
+    return paths
+
+
 def cmd_commit_data(repo: Repo, args) -> dict:
-    paths = [p for p in ("ledger", "loop", "reviews", "experiments.md", "learnings.md", "queue", "reference")
-             if (repo.root / p).exists()]
+    paths = commit_data_paths(repo, getattr(args, "paths", "") or "")
+    need(bool(paths), "nothing to commit")
     repo.git("add", "--", *paths)
     staged = repo.git("diff", "--cached", "--name-only").strip()
     if not staged:
@@ -754,9 +826,9 @@ def render(repo: Repo, now: str | None) -> None:
     posts = repo.posts()
     rows = repo.activity()
     account = repo.account()
-    atomic_write(repo.ledger_dir / "SUMMARY.md", views.summary_text(posts, rows, account))
-    atomic_write(repo.root / "experiments.md", views.experiments_text(state))
-    atomic_write(repo.root / "learnings.md", views.learnings_text(state, at))
+    durable.atomic_write(repo.ledger_dir / "SUMMARY.md", views.summary_text(posts, rows, account))
+    durable.atomic_write(repo.root / "experiments.md", views.experiments_text(state))
+    durable.atomic_write(repo.root / "learnings.md", views.learnings_text(state, at))
 
 
 # ---------- cli ----------
@@ -837,19 +909,29 @@ def build_parser() -> argparse.ArgumentParser:
             sp.add_argument("--evidence", required=True, help="comma-separated post ids")
         if name == "commit-data":
             sp.add_argument("--message", required=True)
+            sp.add_argument("--paths", default="", help="extra files to commit, comma-separated")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     repo = Repo(args.root.resolve())
+    lock = None
     try:
+        if args.command not in READ_ONLY:
+            lock = durable.acquire_write_lock(repo.root)
         result = COMMANDS[args.command](repo, args)
         if args.command not in READ_ONLY:
             render(repo, args.now)
+    except durable.LockBusy as exc:
+        print(json.dumps({"error": str(exc)}), file=sys.stderr)
+        return 1
     except LoopError as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
         return 1
+    finally:
+        if lock is not None:
+            lock.release()
     print(json.dumps(result, indent=2, ensure_ascii=False))
     return 0
 

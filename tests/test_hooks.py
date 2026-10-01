@@ -92,6 +92,7 @@ class Approve(unittest.TestCase):
             (root / "scripts").mkdir()
             (root / "scripts" / "post_thread.py").write_text((REPO / "scripts" / "post_thread.py").read_text())
             (root / "scripts" / "formats.py").write_text((REPO / "scripts" / "formats.py").read_text())
+            (root / "scripts" / "durable.py").write_text((REPO / "scripts" / "durable.py").read_text())
             draft = root / "drafts" / "2026-10-01-demo"
             draft.mkdir(parents=True)
             (draft / "01-hook.md").write_text("A result.\n")

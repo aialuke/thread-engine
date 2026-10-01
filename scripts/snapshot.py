@@ -30,6 +30,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import durable  # noqa: E402
 import x_api  # noqa: E402
 from loop_core.reads import stage_label, window_label  # noqa: E402
 
@@ -46,8 +47,7 @@ def loop(*args: str) -> dict:
 
 def inbox(name: str, data: dict) -> str:
     path = ROOT / "loop" / "inbox" / name
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    durable.atomic_write(path, json.dumps(data, ensure_ascii=False))
     return str(path.relative_to(ROOT))
 
 
@@ -176,11 +176,22 @@ def process(observed: datetime, followers: list[dict], windows: list[tuple[str, 
 
 
 def log(line: str) -> None:
-    with (ROOT / "ledger" / "runs.log").open("a", encoding="utf-8") as handle:
-        handle.write(line + "\n")
+    durable.append_line(ROOT / "ledger" / "runs.log", line)
 
 
 def run(reader=None, now: datetime | None = None) -> int:
+    try:
+        lock = durable.acquire_write_lock(ROOT)
+    except durable.LockBusy as exc:
+        print(f"The daily run is already going ({exc}). Nothing was started.")
+        return 1
+    try:
+        return _run(reader, now)
+    finally:
+        lock.release()
+
+
+def _run(reader=None, now: datetime | None = None) -> int:
     # One whole-second clock for the run: loop.py builds the windows from it, and x_api.timeline checks each
     # window against it. iso() drops fractions, so a fractional clock would put the floor just outside the horizon.
     now = (now or datetime.now(timezone.utc)).replace(microsecond=0)
@@ -203,11 +214,10 @@ def run(reader=None, now: datetime | None = None) -> int:
     # Recording is not all-or-nothing: a failure here leaves earlier writes in place, so say so.
     stage = "raw-file"
     try:
-        raw = ROOT / "ledger" / "raw" / "api" / f"run-{now.strftime('%Y%m%dT%H%M')}.json"
-        raw.parent.mkdir(parents=True, exist_ok=True)
-        raw.write_text(json.dumps({"fetched_at": x_api.iso(now), "followers": followers, "read48": items48,
-                                   "final": final, "mentions": mentions}, indent=1, ensure_ascii=False) + "\n",
-                       encoding="utf-8")
+        raw = durable.write_new_text(
+            ROOT / "ledger" / "raw" / "api", f"run-{now.strftime('%Y%m%dT%H%M%S')}", ".json",
+            json.dumps({"fetched_at": x_api.iso(now), "followers": followers, "read48": items48,
+                        "final": final, "mentions": mentions}, indent=1, ensure_ascii=False) + "\n")
         stage = "record"
         lines = process(now, followers, windows, mentions, str(raw.relative_to(ROOT)), plan["self_handles"])
         stage = "usage"
@@ -231,6 +241,18 @@ def run(reader=None, now: datetime | None = None) -> int:
 
 def ingest(path: str) -> int:
     """Record a backfill file from x_api.py backfill: one 'backfill' read of every item, and the cursors."""
+    try:
+        lock = durable.acquire_write_lock(ROOT)
+    except durable.LockBusy as exc:
+        print(f"The daily run is already going ({exc}). Nothing was started.")
+        return 1
+    try:
+        return _ingest(path)
+    finally:
+        lock.release()
+
+
+def _ingest(path: str) -> int:
     raw = json.loads((ROOT / path).read_text(encoding="utf-8"))
     observed = x_api.parse_time(raw["fetched_at"])
     plan = loop("due-reads", "--backfill", "--fetched-at", raw["fetched_at"], "--since", raw["since"])

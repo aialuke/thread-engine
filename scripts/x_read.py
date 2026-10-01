@@ -10,16 +10,22 @@ website syntax such as `-filter:replies` or `min_faves:` is refused. The posts a
 own data (author, time, text and numbers), so no id check is needed. A value X did not
 return is null. Each call costs about $0.005 a post plus $0.010 an author (up to about
 $0.15) and is logged to ledger/runs.log.
+
+A search that saved its result and then died before the log line is resumed from that
+file on the next call in the same UTC hour. The posts are not fetched again.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import durable
 import x_api
 
 LIMIT = 10
@@ -33,6 +39,66 @@ def shape(post: dict) -> dict:
             "metrics": x_api.public_counts(post.get("public_metrics"))}
 
 
+def _search_key(query: str, hours: float, sort: str, now: datetime) -> str:
+    raw = f"{query}\n{hours}\n{sort}\n{now.strftime('%Y%m%dT%H')}"
+    return hashlib.sha256(raw.encode()).hexdigest()[:20]
+
+
+def _resume(result_path: Path, pending_path: Path, log_path: Path) -> dict | None:
+    """The saved result of a search that died after the fetch, or None when there is nothing to resume."""
+    if not (result_path.is_file() and pending_path.is_file()):
+        return None
+    try:
+        saved = json.loads(result_path.read_text(encoding="utf-8"))
+        output = saved["output"]
+        line = saved["log_line"]
+    except (OSError, json.JSONDecodeError, KeyError):
+        return None
+    existing = log_path.read_text(encoding="utf-8") if log_path.is_file() else ""
+    if line not in existing:
+        durable.append_line(log_path, line)
+    pending_path.unlink(missing_ok=True)
+    return output
+
+
+def _search(client: x_api.Client, query: str, hours: float, sort: str, now: datetime,
+            log_path: Path) -> tuple[int, dict | None]:
+    folder = log_path.parent / "x-read-cache"
+    key = _search_key(query, hours, sort, now)
+    result_path = folder / f"{key}.json"
+    pending_path = folder / f"{key}.pending"
+    resumed = _resume(result_path, pending_path, log_path)
+    if resumed is not None:
+        return 0, resumed
+    if pending_path.is_file():
+        try:
+            holder = int(pending_path.read_text(encoding="utf-8").strip())
+        except (OSError, ValueError):
+            holder = None
+        if holder is not None and holder != os.getpid() and durable.pid_alive(holder):
+            print(json.dumps({"error": f"a search for this query is already running (pid {holder})"}),
+                  file=sys.stderr)
+            return 1, None
+        pending_path.unlink(missing_ok=True)
+    folder.mkdir(parents=True, exist_ok=True)
+    pending_path.write_text(f"{os.getpid()}\n", encoding="utf-8")
+    try:
+        posts = x_api.search(client, query, hours=hours, sort_order=sort)
+    except x_api.XApiError as exc:
+        pending_path.unlink(missing_ok=True)
+        print(json.dumps({"error": str(exc), **client.usage()}), file=sys.stderr)
+        return 1, None
+    usage = client.usage()
+    output = {"query": query, "limit": LIMIT, "hours": hours, "sort": sort,
+              "posts": [shape(p) for p in posts], "cost_usd": usage["cost_usd"]}
+    line = (f"{x_api.iso(now)} x_read search ok api_items={usage['items_read']} "
+            f"cost_usd={usage['cost_usd']}")
+    durable.atomic_write(result_path, json.dumps({"log_line": line, "output": output}, ensure_ascii=False))
+    durable.append_line(log_path, line)
+    pending_path.unlink(missing_ok=True)
+    return 0, output
+
+
 def main(argv: list[str] | None = None, client: x_api.Client | None = None,
          log_path: Path = RUNS_LOG) -> int:
     parser = argparse.ArgumentParser(description="Read other people's posts from X API recent search.")
@@ -44,18 +110,10 @@ def main(argv: list[str] | None = None, client: x_api.Client | None = None,
     args = parser.parse_args(argv)
     client = client or x_api.Client()
     now = datetime.now(timezone.utc)
-    try:
-        posts = x_api.search(client, args.query, hours=args.hours, sort_order=args.sort)
-    except x_api.XApiError as exc:
-        print(json.dumps({"error": str(exc), **client.usage()}), file=sys.stderr)
-        return 1
-    usage = client.usage()
-    stamp = x_api.iso(now)
-    with log_path.open("a", encoding="utf-8") as log:
-        log.write(f"{stamp} x_read search ok api_items={usage['items_read']} cost_usd={usage['cost_usd']}\n")
-    print(json.dumps({"query": args.query, "limit": LIMIT, "hours": args.hours, "sort": args.sort,
-                      "posts": [shape(p) for p in posts], "cost_usd": usage["cost_usd"]},
-                     indent=2, ensure_ascii=False))
+    code, output = _search(client, args.query, args.hours, args.sort, now, log_path)
+    if code != 0 or output is None:
+        return code
+    print(json.dumps(output, indent=2, ensure_ascii=False))
     return 0
 
 

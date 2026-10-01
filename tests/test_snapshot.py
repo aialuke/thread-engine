@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from contextlib import redirect_stdout
 from datetime import datetime, timedelta, timezone
@@ -83,6 +84,7 @@ class DailyRun(unittest.TestCase):
         self.root = Path(self.tmp.name)
         (self.root / "scripts").mkdir()
         shutil.copy(REPO / "scripts" / "loop.py", self.root / "scripts" / "loop.py")
+        shutil.copy(REPO / "scripts" / "durable.py", self.root / "scripts" / "durable.py")
         shutil.copy(REPO / "scripts" / "formats.py", self.root / "scripts" / "formats.py")
         shutil.copytree(REPO / "scripts" / "loop_core", self.root / "scripts" / "loop_core",
                         ignore=shutil.ignore_patterns("__pycache__"))
@@ -147,6 +149,24 @@ class DailyRun(unittest.TestCase):
         day = json.loads((self.root / "ledger" / "activity" / "account.json").read_text())["days"][-1]
         self.assertEqual(day["verified_followers"], 1)  # the operator's own second account doesn't count
         self.assertIn("Verified followers: 1 of the 500", out)
+
+    def test_a_live_lock_starts_nothing(self) -> None:
+        proc = subprocess.Popen(
+            [sys.executable, "-c",
+             "import os, time\nfrom pathlib import Path\n"
+             "Path('.write.lock').write_text(str(os.getpid()) + '\\n')\n"
+             "time.sleep(30)\n"],
+            cwd=self.root)
+        self.addCleanup(lambda: (proc.kill(), proc.wait()))
+        lock = self.root / ".write.lock"
+        for _ in range(50):
+            if lock.is_file():
+                break
+            time.sleep(0.02)
+        code, out = self.run_once(FakeReader(FOLLOWERS, self.items))
+        self.assertEqual(code, 1)
+        self.assertIn("already going", out)
+        self.assertFalse((self.root / "ledger" / "runs.log").exists())
 
     def test_failed_read_records_nothing_and_moves_no_cursor(self) -> None:
         code, out = self.run_once(FakeReader(FOLLOWERS, self.items, fail=True))

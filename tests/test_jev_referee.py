@@ -191,6 +191,13 @@ class HardRules(unittest.TestCase):
         self.assertEqual(self.side.http_calls, 0)
         self.assertEqual(self.side.key_calls, 0)
 
+    def test_a_repeated_hard_rule_writes_one_receipt(self) -> None:
+        event = shell("rm -rf /", workspaceRoot=str(self.tmp))
+        given = deps(self.tmp, self.side)
+        run(event, given)
+        run(event, given)
+        self.assertEqual(len(receipts(self.tmp)), 1)
+
     def test_wipe_is_denied_in_shadow_even_after_cd(self) -> None:
         self.deny("cd /tmp && rm -rf .", "rm -rf of workspace")
         self.deny("rm -rf /", "rm -rf of workspace")
