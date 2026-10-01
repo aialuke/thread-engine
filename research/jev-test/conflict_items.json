@@ -98,7 +98,7 @@
  {
   "id": "B13",
   "file": ".claude/skills/format-tool-swap/SKILL.md",
-  "line": 88,
+  "line": 85,
   "sentence": "no two shout-outs share wording",
   "same": "Each shout-out is worded differently from every other.",
   "flip": "Shout-outs reuse the same wording."
@@ -129,8 +129,8 @@
  },
  {
   "id": "B17",
-  "file": ".claude/skills/format-tool-swap/SKILL.md",
-  "line": 108,
+  "file": ".claude/skills/format-tool-swap/background.md",
+  "line": 13,
   "sentence": "one PAID → FREE parent every other day",
   "same": "A PAID → FREE post goes up on alternate days.",
   "flip": "A PAID → FREE post goes up every day."

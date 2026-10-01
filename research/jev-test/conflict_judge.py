@@ -112,8 +112,8 @@ SWAP = ".claude/skills/format-tool-swap/SKILL.md"
 TRIMS = {
     "CX1": ("sentence", ".claude/skills/posted/SKILL.md", 13,
             "Save the output to `ledger/raw/<root id>-posted.txt` (it holds only the account's own posts)."),
-    "F10": ("sentence", SWAP, 90, "- **Ends at the thank-you.** The card carries nothing about the next post."),
-    "F5": ("lines", SWAP, [84, 87]),
+    "F10": ("sentence", SWAP, 87, "- **Ends at the thank-you.** The card carries nothing about the next post."),
+    "F5": ("lines", SWAP, [81, 84]),
 }
 
 
