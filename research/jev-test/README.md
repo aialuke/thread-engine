@@ -1,5 +1,8 @@
 # Jev build-phase test
 
+> **2026-10-01: Discovery scoring code retired.** `research/discovery-test/` (its corpora, labels and harness) was deleted after the Grok removal, so the pipeline that scored Discovery posts with Jev could no longer run. Removed: `jev.py`, `raters.py`, `arms.py`, `labelling.py`, `extract_subagent.py`, their tests, `questions.json`, `questions-reworded.json`, `thresholds.json` and `synthetic.jsonl` (all in git history before the commit that adds this note). Still here and working: `conflict_judge.py`, `glossary_check.py`, `glossary_judge.py`, `placement_judge.py`, `proof_judge.py`, `pstack_routing.py`, `conflict_items.json` and `test_conflict.py`. The sections below record what the experiments found; commands that name the removed files, and paths under `discovery-test/`, are history. The product referee's own questions are `jev/questions.json`, not these.
+
+
 Does Jev, TypeSafe's typed-judgement model, earn a place as a cheap, repeatable judge while we tune Discovery search and filtering? This is build-phase research only. Nothing in the factory (`scripts/`, skills, hooks, `ledger/`, `loop/`) uses it. The case for testing, and its limits, are in [`../jev-build-time-evaluation-2026-09-27.md`](../jev-build-time-evaluation-2026-09-27.md).
 
 ## Setup (operator, once)

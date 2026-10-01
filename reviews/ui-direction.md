@@ -1,5 +1,7 @@
 # UI direction: decision log
 
+> **2026-10-01:** `research/discovery-test/` was deleted after the Grok removal (D88); its settled X API facts are in `reference/x-api.md` P18–P21. Citations to its files in the entries below are history.
+
 A running record of decisions about a Thread Engine interface: what was decided, why, and what was rejected. Each round of the mock builds on this. Nothing here is built yet: only the mock in `ui/mock/` exists. The log runs to D106 (as of 2026-09-28).
 
 Mock: https://claude.ai/artifact/8zaBcxWAknJaXWkReQQPqg (private until the operator shares it).

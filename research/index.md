@@ -23,7 +23,7 @@ Decisions are cited as `Dnn` (`reviews/ui-direction.md`), algorithm facts as `An
 | `research/Jev cookbooks.md` | raw, vendor docs | 2026-09 | raw |
 | `research/jev-articles/` | raw, 6 vendor articles on Jev | 2026-09 | raw |
 | `research/jev-design-cards-reading/` | synthesis (`README.md`, `where-jev-succeeds.md`), snapshot (`votes-2026-09-28.md`), `readers/` = 5 literature-reader reports | 2026-09-28 | current |
-| `research/jev-test/` | code, questions and synthetic data for the Jev tests (`README.md`) | 2026-09-28 | current |
+| `research/jev-test/` | the Jev experiment record (`README.md`) plus the judge scripts still in use (conflict, glossary, proof, placement, pstack routing); the Discovery-scoring code was retired 2026-10-01 | 2026-10-01 | current |
 
 ## reviews/ — decisions, audits, weekly reviews
 | Path | Kind | Status |

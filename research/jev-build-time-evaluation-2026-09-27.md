@@ -1,5 +1,7 @@
 # Jev for build-time research and tuning
 
+> **2026-10-01:** the Discovery test folder and the Jev scoring code it fed were deleted (see `research/jev-test/README.md`). File paths below are the record of where each figure came from.
+
 Research date: 27 September 2026. Status of the sections up to "Decision to revisit after evaluation": an assessment and proposed evaluation, written before any Jev call. Later sections record results from 28 and 30 September 2026.
 
 ## Recommendation
