@@ -34,7 +34,6 @@ import x_api  # noqa: E402
 from loop_core.reads import stage_label, window_label  # noqa: E402
 
 ROOT = x_api.ROOT
-NONORGANIC_SHARE = x_api.NONORGANIC_SHARE
 
 
 def loop(*args: str) -> dict:
@@ -161,7 +160,7 @@ def process(observed: datetime, followers: list[dict], windows: list[tuple[str, 
                 payload["stage"] = "final"
             loop("record-snapshot", "--json", inbox(f"snap-{item['id']}.json", payload))
             share = x_api.nonorganic_share(item)
-            if share is not None and share > NONORGANIC_SHARE and not post.get("nonorganic"):
+            if share is not None and share > x_api.NONORGANIC_SHARE and not post.get("nonorganic"):
                 loop("mark-nonorganic", "--root-id", item["id"], "--reason",
                      f"{round(share * 100)}% of {row['public']['impressions']} impressions non-organic at the {stage} read")
                 lines.append(f"Marked {item['id']} non-organic: {round(share * 100)}% of its reach was not organic.")

@@ -41,8 +41,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from loop_core.errors import LoopError
-from loop_core.times import iso as _iso
-from loop_core.times import parse_time as _parse_time
+from loop_core.reads import FINAL_MAX_DAYS as ORGANIC_DAYS
+from loop_core.times import iso, parse_time as _parse_time
 
 ROOT = Path(__file__).resolve().parent.parent
 API = "https://api.x.com"
@@ -50,7 +50,6 @@ SERVICE = "thread-engine-x"
 KEY_NAMES = ("consumer_key", "consumer_secret", "access_token", "access_token_secret")
 HANDLE = "exitzerocode"
 USER_ID = "1994313953191833600"
-ORGANIC_DAYS = 29       # X keeps organic metrics for 30 days; stay a day inside
 MAX_PAGES = 50
 RETRY_SECONDS = 20
 # Estimated USD per item returned (reference/x-api.md, pricing read 2026-09-24).
@@ -81,10 +80,6 @@ def parse_time(value: str) -> datetime:
         return _parse_time(value)
     except LoopError as exc:
         raise XApiError(str(exc)) from exc
-
-
-def iso(stamp: datetime) -> str:
-    return _iso(stamp)
 
 
 # X's metric names, and the plain names the ledger stores. One map for every reader of a post.
@@ -293,10 +288,7 @@ def lookup(client: Client, ids: list[str]) -> list[dict]:
     params = {"ids": ",".join(ids), "tweet.fields": "created_at,author_id,public_metrics,text,note_tweet",
               "expansions": "author_id", "user.fields": "username"}
     body = client.request("GET", "/2/tweets", params, POST, partial_ok=True)
-    users = {u["id"]: u.get("username") for u in (body.get("includes") or {}).get("users", [])}
-    client.items += len(users)
-    client.cost += len(users) * USER
-    return [{**with_full_text(post), "author": users.get(post.get("author_id"))} for post in body.get("data") or []]
+    return _posts_with_authors(client, body)
 
 
 def search(client: Client, query: str, hours: float = 24, sort_order: str = "recency",
@@ -323,10 +315,7 @@ def search(client: Client, query: str, hours: float = 24, sort_order: str = "rec
               "tweet.fields": "created_at,author_id,public_metrics,text,note_tweet,referenced_tweets",
               "expansions": "author_id", "user.fields": "username"}
     body = client.request("GET", "/2/tweets/search/recent", params, POST, partial_ok=True)
-    users = {u["id"]: u.get("username") for u in (body.get("includes") or {}).get("users", [])}
-    client.items += len(users)
-    client.cost += len(users) * USER
-    return [{**with_full_text(post), "author": users.get(post.get("author_id"))} for post in body.get("data") or []]
+    return _posts_with_authors(client, body)
 
 
 def user(client: Client, handle: str) -> dict:
@@ -361,6 +350,14 @@ def with_full_text(item: dict) -> dict:
     if item.get("note_tweet"):
         item = {**item, "text": full_text(item)}
     return item
+
+
+def _posts_with_authors(client: Client, body: dict) -> list[dict]:
+    """Posts from a response that expanded author_id. Each included author is billed."""
+    users = {u["id"]: u.get("username") for u in (body.get("includes") or {}).get("users", [])}
+    client.items += len(users)
+    client.cost += len(users) * USER
+    return [{**with_full_text(post), "author": users.get(post.get("author_id"))} for post in body.get("data") or []]
 
 
 def kind(item: dict) -> str:

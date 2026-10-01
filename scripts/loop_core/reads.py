@@ -14,7 +14,7 @@ from loop_core.errors import need
 SNAPSHOT_MIN_H = 36.0
 SNAPSHOT_MAX_H = 60.0
 FINAL_MIN_DAYS = 26
-FINAL_MAX_DAYS = 29  # X drops organic numbers at 30 days; matches x_api.ORGANIC_DAYS (a test checks)
+FINAL_MAX_DAYS = 29  # X drops organic numbers at 30 days; stay a day inside. The timeline horizon uses this.
 FINAL_WARN_H = FINAL_MAX_DAYS * 24 - 48  # a post without a Final read is at risk for its last 48 hours
 
 

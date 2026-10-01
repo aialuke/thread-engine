@@ -907,11 +907,6 @@ class ReadWindowRules(LoopCase):
             data = {"stage": "final", "observed_at": hours(24 * days), "items": [item]}
             self.assertEqual(self.ok("record-activity", "--json", self.payload(data))["recorded"], 1)
 
-    def test_final_max_days_matches_the_x_organic_horizon(self) -> None:
-        import x_api
-        from loop_core import reads
-        self.assertEqual(reads.FINAL_MAX_DAYS, x_api.ORGANIC_DAYS)
-
     def test_a_valid_snapshot_is_refused_once_the_post_is_missed(self) -> None:
         self.post("4000000030", T0)
         self.assertEqual(self.ok("mark-missed", now=hours(61))["marked_missed"], ["4000000030"])

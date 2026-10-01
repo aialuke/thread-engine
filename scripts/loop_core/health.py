@@ -9,13 +9,11 @@ from __future__ import annotations
 
 import re
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 from loop_core.errors import LoopError
-from loop_core.times import parse_time
+from loop_core.times import LOCAL_TZ, parse_time
 
 STALE_RUN_H = 26  # the job runs every 24 hours; two hours of grace for a Mac that woke late
-LOCAL_TZ = ZoneInfo("Australia/Brisbane")
 FAILED_DETAIL = re.compile(r"(?:stage=(?P<stage>\S+) )?error=(?P<error>.*)")
 
 
