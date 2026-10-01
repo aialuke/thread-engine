@@ -36,10 +36,6 @@ def last_runs(lines: list[str]) -> dict:
 
 
 def warnings(now: datetime, runs: dict, finals_at_risk: list[tuple[str, datetime]]) -> list[str]:
-    """Plain-English warnings, in the order stale run, failed run, Final reads at risk. Empty when all is well.
-
-    `finals_at_risk` is (root_id, cutoff) for each post with no Final read that is inside its last 48 hours.
-    """
     out = []
     last_ok, last = runs["last_ok"], runs["last"]
     if last_ok is None:

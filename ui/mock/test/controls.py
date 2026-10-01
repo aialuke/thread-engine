@@ -1,8 +1,5 @@
 """List every interactive control and every template binding in the mock, and check the handoff inventory covers them.
 
-    python3 ui/mock/test/controls.py                 # print controls as JSON
-    python3 ui/mock/test/controls.py --check FILE    # exit 1 if FILE (inventory.yaml) misses a handler binding
-
 A control is a <button>, <a>, <input>, <textarea> or an element with a role of radio, tab or switch.
 Its screen is the innermost screen <sc-if> around it (isToday, isPost, ... or a sheet's show flag).
 """

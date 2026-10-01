@@ -4,9 +4,6 @@
 Shadow mode logs the would-be decision and lets the tool run. Hard rules deny
 even then. The TypeSafe key is read from the Keychain inside this process and
 is never printed, logged, or written into a receipt or the request state.
-
-    python3 scripts/jev_referee.py            # hook: JSON on stdin
-    python3 scripts/jev_referee.py --dry-run  # three canned forks, real key
 """
 
 from __future__ import annotations
@@ -60,7 +57,7 @@ OPERATORS = re.compile(r"\s*(?:&&|\|\||;|\|)\s*")
 
 
 class PolicyError(Exception):
-    """The local threshold file tried to loosen a rule."""
+    pass
 
 
 class CallFailed(Exception):
@@ -121,9 +118,6 @@ def workspace_of(event: dict) -> str:
     return str(event.get("workspaceRoot") or event.get("cwd") or Path.cwd())
 
 
-# ---------- policy ----------
-
-
 def _get(tree: dict, path: tuple[str, ...]):
     cursor = tree
     for part in path:
@@ -168,7 +162,6 @@ def _loosen(direction: str, base: float, local: float) -> bool:
 
 
 def _tighten(merged: dict, local: dict) -> None:
-    """Apply each TIGHTER number from the local file; a number that would loosen the policy is an error."""
     for path, direction in TIGHTER.items():
         value = _get(local, path)
         if value is None:
@@ -182,7 +175,6 @@ def _tighten(merged: dict, local: dict) -> None:
 
 
 def _drop_only(base: dict, local: dict, merged: dict, path: tuple[str, ...], noun: str) -> None:
-    """A local list may only remove entries from the committed one."""
     value = _get(local, path)
     if value is None:
         return
@@ -193,7 +185,6 @@ def _drop_only(base: dict, local: dict, merged: dict, path: tuple[str, ...], nou
 
 
 def merge_policy(base: dict, local: dict | None) -> dict:
-    """Apply a local file. Loosening, or a key this file does not know, is an error."""
     merged = json.loads(json.dumps(base))
     merged["model"] = PINNED_MODEL
     if not local:
@@ -230,12 +221,8 @@ def load_questions(path: Path = QUESTIONS) -> dict:
 
 
 def load_base_policy(base_path: Path = THRESHOLDS) -> dict:
-    """Committed thresholds, with the model pin forced. Ignores a bad local file."""
     base = yaml.safe_load(base_path.read_text(encoding="utf-8"))
     return merge_policy(base, None)
-
-
-# ---------- command parsing ----------
 
 
 def command_pieces(command: str) -> list[list[str]]:
@@ -516,7 +503,6 @@ def _scan_shell(text: str, cwd: str, workspace: str, depth: int) -> str | None:
 
 
 def hard_rule(command: str, workspace: str) -> str | None:
-    """A reason code, or None. This does not ask Jev."""
     start = _lexical(workspace) if workspace else ""
     return _scan_shell(command, start, start, 0)
 
@@ -586,7 +572,6 @@ def _commit_args(command: str) -> list[str] | None:
 
 
 def parse_commit(args: list[str]) -> tuple[str | None, bool]:
-    """(message, include_unstaged). Message is None when the command has no -m."""
     parts: list[str] = []
     include = False
     index = 0
@@ -676,11 +661,7 @@ def edit_is_deletion(old: str, new: str, policy: dict) -> bool:
     return removed >= rule["min_removed_feature_lines"] and removed > rule["removed_over_added"] * added
 
 
-# ---------- classification ----------
-
-
 def classify(event: dict, policy: dict) -> str | None:
-    """spawn, commit, delete, or None. None means this tool is not a fork."""
     name = tool_name(event)
     incoming = tool_input(event)
     if name in SPAWN_TOOLS or name == "commit":
@@ -721,9 +702,6 @@ def _read_existing(path: str, event: dict, policy: dict) -> str | None:
         return candidate.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return None
-
-
-# ---------- state ----------
 
 
 def _clip(text: str, limit: int) -> str:
@@ -978,9 +956,6 @@ def within_budget(state: dict, questions: dict, policy: dict) -> bool:
     return _token_len(request, chars) <= tokens["max_request"]
 
 
-# ---------- Jev ----------
-
-
 def read_key(runner=subprocess.run) -> str:
     result = runner(
         ["security", "find-generic-password", "-s", KEYCHAIN_SERVICE, "-a", KEYCHAIN_ACCOUNT, "-w"],
@@ -1039,7 +1014,6 @@ def answers_usable(fork: str, questions: dict, answers: dict) -> bool:
 
 
 def apply_policy(fork: str, answers: dict, policy: dict) -> tuple[bool, str]:
-    """(would_allow, one line). would_allow is whether this tool should run."""
     if fork == "spawn":
         choice = answers[SPAWN_CHOICE]
         option = str(choice["choice"])
@@ -1078,9 +1052,6 @@ def question_record(questions: dict) -> dict:
     return {key: question.get("instructions", "") for key, question in questions.items()}
 
 
-# ---------- receipts and hook output ----------
-
-
 def _same_receipt(old: dict, row: dict) -> bool:
     """A retry writes nothing. A different outcome, even of the same call, is a new row."""
     return {key: value for key, value in old.items() if key != "ts"} == {
@@ -1097,7 +1068,6 @@ def append_receipt(path: Path, row: dict, key: str | None) -> None:
 
 @dataclass(frozen=True)
 class Outcome:
-    """What a request came to: the verdict, whether it was let through, and why it was skipped."""
     would: bool
     did: bool
     reason: str | None
@@ -1145,8 +1115,6 @@ HARD_LINES = {
 
 @dataclass
 class Deps:
-    """What dispatch may be handed instead of reading the machine. None uses the real source."""
-
     policy: dict | None = None
     questions: dict | None = None
     key: str | None = None
@@ -1164,7 +1132,6 @@ def _deps(given: dict | Deps | None) -> Deps:
 
 
 def _config(deps: Deps) -> tuple[dict, dict] | None:
-    """(policy, questions), or None when a config file cannot be read."""
     try:
         policy = deps.policy if deps.policy is not None else load_policy()
         questions = deps.questions if deps.questions is not None else load_questions()
@@ -1176,7 +1143,6 @@ def _config(deps: Deps) -> tuple[dict, dict] | None:
 
 
 def _early_skip(fork: str, event: dict, command: str, policy: dict, runner) -> tuple[str, dict] | None:
-    """(reason, state) for a request the policy waves through before any prompt lookup, else None."""
     if fork == "commit" and command and commit_is_skippable(command, policy, workspace_of(event), runner):
         return "trivial_commit", {"command": command}
     if fork == "delete" and command and delete_is_junk(command, policy):
@@ -1196,7 +1162,7 @@ class Verdict(NamedTuple):
 
 
 def _ask_jev(fork: str, state: dict, fork_questions: dict, policy: dict, deps: Deps) -> Verdict:
-    """Ask Jev, and fall back to "would allow" with the failure as the reason when the call cannot be used.
+    """Ask Jev. A failed call is not an allow. Shadow mode still lets the tool run.
 
     The size check runs once, after the key is redacted.
     """
@@ -1213,7 +1179,7 @@ def _ask_jev(fork: str, state: dict, fork_questions: dict, policy: dict, deps: D
         would, line = apply_policy(fork, got, policy)
         return Verdict(state, key, would, line, None, got)
     except CallFailed as exc:
-        return Verdict(state, key, True, "", exc.reason, {})
+        return Verdict(state, key, False, exc.reason, exc.reason, {})
 
 
 def dispatch(event: dict, deps: dict | Deps | None = None) -> int:
@@ -1228,7 +1194,7 @@ def dispatch(event: dict, deps: dict | Deps | None = None) -> int:
     rule = hard_rule(command, workspace_of(event)) if command else None
     config = _config(deps)
     if config is None:
-        return _deny(HARD_LINES[rule]) if rule else 0
+        return _deny(HARD_LINES[rule] if rule else "unreadable referee policy")
     policy, questions = config
 
     if rule:
@@ -1306,7 +1272,7 @@ def dry_run() -> int:
         fork_questions = questions[fork]
         answers: dict = {}
         reason = failed
-        would = True
+        would = False
         redacted = redact_key(state, key) if key else state
         if key and within_budget(redacted, fork_questions, policy):
             try:
@@ -1353,9 +1319,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         event = json.load(sys.stdin)
     except json.JSONDecodeError:
-        return 0
+        return _deny("unreadable hook input")
     if not isinstance(event, dict):
-        return 0
+        return _deny("unreadable hook input")
     return dispatch(event)
 
 

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Checks for scripts/x_api.py with a fake opener. No network, no Keychain."""
-
 from __future__ import annotations
 
 import io
@@ -40,8 +38,6 @@ class FakeResponse:
 
 
 class FakeOpener:
-    """Replies in order; an int reply raises that HTTP status."""
-
     def __init__(self, *replies) -> None:
         self.replies, self.requests = list(replies), []
 
@@ -171,6 +167,7 @@ class Reads(unittest.TestCase):
         self.assertEqual((query["max_results"], query["sort_order"]), (["10"], ["relevancy"]))
         self.assertEqual(query["end_time"], ["2026-09-24T11:59:30Z"])
         self.assertEqual(query["start_time"], ["2026-09-24T05:59:30Z"])
+        self.assertIn("verified", query["user.fields"][0].split(","))
 
     def test_search_with_no_results_is_empty_and_free(self) -> None:
         c, _ = client(FakeResponse({"meta": {"result_count": 0}}))
@@ -196,7 +193,7 @@ class Reads(unittest.TestCase):
                     x_api.search(c, query, now=NOW)
                 self.assertEqual(opener.requests, [])
         c, opener = client(FakeResponse({}))
-        x_api.search(c, "x" * 512, now=NOW)   # exactly at the limit
+        x_api.search(c, "x" * 512, now=NOW)
         self.assertEqual(len(opener.requests), 1)
 
     def test_search_refuses_bad_windows_and_sorts(self) -> None:

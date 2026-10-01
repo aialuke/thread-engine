@@ -2,7 +2,7 @@
 """Write a post run sheet for an approved draft, and copy one card at a time.
 
 The numbered cards are the posts. This script does not rewrite them.
-v1 does not call the X API. --dry-run is the default and matches a plain run.
+--dry-run is the default and matches a plain run.
 """
 
 from __future__ import annotations
@@ -299,14 +299,14 @@ def copy_message(draft: Path, found: list[Path], number: int) -> str:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Write POST.txt for an approved draft. v1 does not call the X API."
+        description="Write POST.txt for an approved draft."
     )
     parser.add_argument("draft", type=Path, help="Path to a draft folder")
     parser.add_argument(
         "--dry-run",
         action=argparse.BooleanOptionalAction,
         default=True,
-        help="Write the run sheet and do not post (default). v1 has no post path.",
+        help="Write the run sheet and do not post (default).",
     )
     parser.add_argument(
         "--json",
@@ -329,7 +329,6 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def request_refusal(args: argparse.Namespace, draft: Path, found: list) -> int | None:
-    """The exit code for a request the gate refuses once the draft is approved, else None."""
     if args.copy is not None and not 1 <= args.copy <= len(found):
         print(f"REFUSED: no post {args.copy}", file=sys.stderr)
         return 1

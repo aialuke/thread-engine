@@ -28,7 +28,6 @@ def snapshot_kind(hours: float) -> str:
 
 
 def best_snapshot(post: dict) -> dict | None:
-    """The 48h Snapshot if there is one, else the latest late one."""
     snaps = post.get("snapshots", [])
     for kind in ("valid", "late"):
         chosen = [s for s in snaps if s["kind"] == kind]
@@ -59,12 +58,10 @@ def due_stage(hours: float, retrospective: bool) -> str | None:
 
 
 def window_label() -> str:
-    """The 48h window as prose, e.g. "36–60 hour". The generated views quote it instead of restating it."""
     return f"{SNAPSHOT_MIN_H:g}–{SNAPSHOT_MAX_H:g} hour"
 
 
 def stage_label(stage: str) -> str:
-    """The Daily run's sentence for a read stage. The bounds are the window constants."""
     if stage == "48h":
         return f"{window_label()} read"
     if stage == "final":
@@ -75,7 +72,6 @@ def stage_label(stage: str) -> str:
 
 
 def past_window(hours: float) -> bool:
-    """True once the 48h window has closed."""
     return hours > SNAPSHOT_MAX_H
 
 
@@ -137,17 +133,14 @@ def snapshot_cell(post: dict) -> str:
 
 
 def in_final_window(hours: float) -> bool:
-    """True for a post old enough for its Final read and young enough for X to still return organic numbers."""
     return FINAL_MIN_DAYS * 24 <= hours <= FINAL_MAX_DAYS * 24
 
 
 def final_at_risk(hours: float) -> bool:
-    """True for a post inside the Final window's last 48 hours: it has one or two daily runs left to be read."""
     return FINAL_WARN_H <= hours <= FINAL_MAX_DAYS * 24
 
 
 def need_final_age(hours: float) -> None:
-    """Refuse a Final read of a post outside the Final window."""
     need(in_final_window(hours), f"a final read needs a post {FINAL_MIN_DAYS} to {FINAL_MAX_DAYS} days old")
 
 

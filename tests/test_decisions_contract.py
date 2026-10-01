@@ -21,7 +21,7 @@ from unittest import mock
 from test_loop import REPO, T0, LoopCase, hours
 
 from loop_core import experiments  # noqa: E402
-import loop  # noqa: E402  (after test_loop: it puts scripts/ on the path)
+import loop  # noqa: E402
 
 LOOP = REPO / "scripts" / "loop.py"
 ROOT_METRICS = {"views": 1, "likes": 0, "reposts": 0, "quotes": 0, "replies": 0, "bookmarks": 0}
@@ -43,7 +43,6 @@ class RawCase(LoopCase):
         return {str(f.relative_to(self.root)): f.read_bytes() for f in files if f.exists()}
 
     def refusal(self, *argv: str, now: str | None = None) -> str:
-        """The exact stderr error of a refused command; the persisted files must not change."""
         before = self.tree()
         code, out, err = self.raw(*argv, now=now)
         self.assertEqual((code, out), (1, ""), err)
@@ -51,7 +50,6 @@ class RawCase(LoopCase):
         return json.loads(err)["error"]
 
     def soft(self, *argv: str, now: str | None = None) -> dict:
-        """A soft return: exit 0, stderr empty, no ledger or state bytes change."""
         before = self.tree()
         code, out, err = self.raw(*argv, now=now)
         self.assertEqual((code, err), (0, ""), out)
@@ -295,11 +293,14 @@ class ExperimentSetup(RawCase):
 
 class Evaluate(ExperimentSetup):
     def test_no_open_experiment_returns_before_the_ledger_or_the_clock(self) -> None:
-        with mock.patch.object(loop.Repo, "posts", side_effect=AssertionError("ledger read")), \
-                mock.patch.object(loop, "render"):
-            code, out, err = self.raw("evaluate", now="not a time")
-        self.assertEqual((code, err), (0, ""))
-        self.assertEqual(json.loads(out), {"evaluated": False, "reason": "no open experiment"})
+        class Args:
+            @property
+            def now(self):
+                raise AssertionError("clock read")
+
+        with mock.patch.object(loop.Repo, "posts", side_effect=AssertionError("ledger read")):
+            got = loop.cmd_evaluate(loop.Repo(self.root), Args())
+        self.assertEqual(got, {"evaluated": False, "reason": "no open experiment"})
 
     def test_a_ledger_failure_beats_a_bad_clock(self) -> None:
         self.open()

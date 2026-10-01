@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Checks for scripts/loop_core/payloads.py: called directly, no repo, no CLI."""
-
 from __future__ import annotations
 
 import sys
@@ -217,7 +215,7 @@ class InteractionInputs(Refused):
     def test_entries_are_read_only_as_they_are_asked_for(self) -> None:
         good = {"author_id": "9", "id": "m", "conversation_id": 1, "created_at": T0}
         _, mentions, _, _ = payloads.interaction_inputs({"observed_at": T0, "mentions": [good, {"author_id": "8"}]})
-        self.assertEqual(next(mentions)[:3], ("9", "1", "m"))  # the bad second entry has not been read yet
+        self.assertEqual(next(mentions)[:3], ("9", "1", "m"))
         with self.assertRaises(LoopError):
             next(mentions)
 

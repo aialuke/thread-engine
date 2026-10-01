@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""The Jev referee, with no network. Jev is a fake opener."""
-
 from __future__ import annotations
 
 import contextlib
@@ -66,8 +64,6 @@ def completed(text: str) -> subprocess.CompletedProcess:
 
 
 class Side:
-    """Git, Keychain and HTTP stand-ins. Each records a call and can raise."""
-
     def __init__(self) -> None:
         self.git_calls: list[list[str]] = []
         self.key_calls = 0
@@ -159,13 +155,11 @@ class EarlyExit(unittest.TestCase):
 
     def _tmp(self) -> str:
         import tempfile
-        self.addCleanup(lambda: None)
         directory = tempfile.mkdtemp()
         self.addCleanup(lambda: __import__("shutil").rmtree(directory, ignore_errors=True))
         return directory
 
     def test_small_replacement_is_not_a_delete(self) -> None:
-        """A same-size rewrite is not a deletion. Moving ten lines down to one import is."""
         old = "def kept():\n    return 1\n"
         new = "def kept():\n    return 2\n"
         self.assertFalse(referee.edit_is_deletion(old, new, policy()))
@@ -448,15 +442,25 @@ class SkipAndForks(unittest.TestCase):
 
         code, out, _err = run(event, deps(self.tmp, key_runner=no_key))
         self.assertEqual(out, "")
-        self.assertEqual(receipts(self.tmp)[-1]["skipped_reason"], "missing_key")
-        self.assertTrue(receipts(self.tmp)[-1]["did_allow"])
+        row = receipts(self.tmp)[-1]
+        self.assertEqual(row["skipped_reason"], "missing_key")
+        self.assertEqual((row["would_allow"], row["did_allow"]), (False, True))
+
+        chosen = policy()
+        chosen["mode"] = "active"
+        code, out, _err = run(event, deps(self.tmp, policy=chosen, key_runner=no_key))
+        self.assertEqual(code, 2)
+        self.assertIn("missing_key", out)
+        self.assertFalse(receipts(self.tmp)[-1]["did_allow"])
 
         def time_out(_request, timeout):
             raise TimeoutError
 
         code, out, _err = run(event, deps(self.tmp, opener=time_out, key="test-key"))
         self.assertEqual(out, "")
-        self.assertEqual(receipts(self.tmp)[-1]["skipped_reason"], "timeout")
+        row = receipts(self.tmp)[-1]
+        self.assertEqual(row["skipped_reason"], "timeout")
+        self.assertFalse(row["would_allow"])
 
     def test_secret_does_not_leave_the_process(self) -> None:
         secret = "super-secret-key-value"
@@ -495,7 +499,6 @@ class SkipAndForks(unittest.TestCase):
 
 class DryRun(unittest.TestCase):
     def test_dry_run_writes_one_complete_receipt_per_fork_without_a_key(self) -> None:
-        """--dry-run builds receipts too; a changed receipt shape must not break it unnoticed."""
         import shutil
         import tempfile
         tmp = Path(tempfile.mkdtemp())

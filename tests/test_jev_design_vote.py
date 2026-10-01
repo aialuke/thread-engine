@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""The design-card vote, with no network. Jev is a fake opener, the Keychain a fake runner."""
-
 from __future__ import annotations
 
 import contextlib

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Checks for scripts/loop.py. Stdlib only. Git tests use a throwaway repo."""
-
 from __future__ import annotations
 
 import io
@@ -514,7 +512,7 @@ class ApiData(LoopCase):
         self.assertEqual(len(got), 1, got)
         self.assertIn("9700000001", got[0])
         self.write_runs(f"{hours(599)} snapshot ok read48=0")
-        self.assertEqual(self.ok("status", now=hours(600))["health"], {"warnings": []})  # 647h: not yet at risk
+        self.assertEqual(self.ok("status", now=hours(600))["health"], {"warnings": []})
 
     def test_activity_rows_labels_and_cursor(self) -> None:
         made = self.activity("48h", hours(40), [self.item("9000000001", T0)], cursor={"read48_until": hours(4)})
@@ -936,8 +934,6 @@ EXPERIMENTS_GOLDEN = HEAD + (
 
 
 class ReadWindowRules(LoopCase):
-    """Pins the 48h and Final read rules so they can move without changing."""
-
     def kind_at(self, root_id: str, h: float) -> str:
         return self.snap(root_id, hours(h), 5)["kind"]
 
@@ -1056,7 +1052,6 @@ class ReadWindowRules(LoopCase):
 
 
 def loop_sources(scripts: Path) -> list[Path]:
-    """loop.py and every module it loads from loop_core."""
     return [scripts / "loop.py", *sorted((scripts / "loop_core").rglob("*.py"))]
 
 
@@ -1072,7 +1067,6 @@ class Isolation(unittest.TestCase):
         self.assertEqual(self.offences(sources), (set(), []))
 
     def test_loop_core_writes_no_files(self) -> None:
-        """loop.py is the only writer; loop_core modules stay pure."""
         from test_scripts import _writes_files
         core = sorted((REPO / "scripts" / "loop_core").rglob("*.py"))
         self.assertGreater(len(core), 1)

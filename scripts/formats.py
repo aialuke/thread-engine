@@ -94,7 +94,6 @@ ROOT_CHECKS = {
 
 
 def root_reasons(name: str, spec: DraftFormat, text: str, length: int) -> list[str]:
-    """Refusals for this format's root: the cap, then each named root check."""
     reasons: list[str] = []
     if spec.root_limit is not None and length > spec.root_limit:
         reasons.append(f"REFUSED: 01-hook.md is {length} characters as X counts them; "
@@ -105,7 +104,6 @@ def root_reasons(name: str, spec: DraftFormat, text: str, length: int) -> list[s
 
 
 def card_count_reason(name: str, spec: DraftFormat, count: int) -> str | None:
-    """A draft with more cards than the format allows. None when the count is inside the bound."""
     if spec.max_cards is not None and count > spec.max_cards:
         noun = "card" if spec.max_cards == 1 else "cards"
         return f"REFUSED: {name} allows at most {spec.max_cards} {noun}; this draft has {count}"
@@ -113,7 +111,6 @@ def card_count_reason(name: str, spec: DraftFormat, count: int) -> str | None:
 
 
 def after_root_note(spec: DraftFormat, count: int) -> str | None:
-    """The note after card 1, when this format has one and the draft has a later card."""
     if spec.after_root and count > 1:
         return spec.after_root
     return None

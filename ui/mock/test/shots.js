@@ -1,4 +1,3 @@
-// node shots.js <page> <scheme> <outdir>
 const { chromium } = require('playwright-core'); const fs=require('fs');
 (async()=>{ const [pg, scheme, dir]=process.argv.slice(2); fs.mkdirSync(dir,{recursive:true});
  const b=await chromium.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true});

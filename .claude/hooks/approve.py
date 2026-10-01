@@ -72,7 +72,7 @@ if __name__ == "__main__":
         main()
     except SystemExit:
         raise
-    except Exception as exc:  # fail closed and visibly: tell the operator, approve nothing
+    except Exception as exc:
         import traceback
         detail = " | ".join(traceback.format_exception_only(type(exc), exc)).strip()
         block(f"Approval failed, nothing was approved: {detail}")

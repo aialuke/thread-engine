@@ -5,9 +5,6 @@
     python3 research/jev-test/proof_judge.py run [prefix]   # send (or only cards whose name starts with prefix: the pilot)
     python3 research/jev-test/proof_judge.py report         # calibration verdict first, then the Proof verdict
 
-This is the record of the Proof run, not a template. The procedure is the jev-judge-run skill, and this script predates
-some of its steps (blind sense clustering, neutral question wording, controls that use the judged question's wording).
-Labels are mine, made from truncated grep lines and kept exactly as run; the README lists where they were wrong.
 Jev only votes; every threshold lives in report().
 """
 
@@ -121,7 +118,6 @@ def hook_card(rep: int, parenthetical: bool = False) -> dict:
 
 
 def neutral_card(base: dict) -> dict:
-    """The same snippets as a proof card, asked without naming 'proof line' in the question (README, wording follow-up)."""
     q = {"one_sense": {"type": "noul", "criteria": NOUL, "instructions":
          "Do all of `snippets` use the word 'proof' in one and the same sense?"}}
     check_question("one_sense", q["one_sense"])
@@ -275,7 +271,7 @@ def cmd_report() -> int:
         return 1
     print("term/card            one_sense  span   cloze  impl   self   faithful")
     for name in sorted(r):
-        if r[name][0][0]["_meta"]["kind"] in ("ctl-hook", "neutral"):  # one-question cards, reported below
+        if r[name][0][0]["_meta"]["kind"] in ("ctl-hook", "neutral"):
             continue
         o, cl = col(name, one), col(name, cloze_acc)
         print(f"{name:20} {mean(o):.2f}      {span(o):.2f}   {mean(cl):.2f}   {mean(col(name, impl)):.2f}   "

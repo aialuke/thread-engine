@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Checks for scripts/x_read.py with a fake X API client. No network, no Keychain."""
-
 from __future__ import annotations
 
 import io
@@ -30,14 +28,14 @@ BODY = {"data": [{"id": "2102736605039776235", "author_id": "77", "created_at": 
 
 
 class XRead(unittest.TestCase):
-    def call(self, argv, *replies):
+    def call(self, argv, *replies, now=None):
         opener = FakeOpener(*replies)
         client = x_api.Client(keys=KEYS, opener=opener, sleep=lambda s: None)
         out, err = io.StringIO(), io.StringIO()
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / "runs.log"
             with redirect_stdout(out), redirect_stderr(err):
-                code = x_read.main(argv, client=client, log_path=log)
+                code = x_read.main(argv, client=client, log_path=log, now=now)
             text = log.read_text(encoding="utf-8") if log.exists() else ""
         return code, out.getvalue(), err.getvalue(), text, opener
 
@@ -48,7 +46,7 @@ class XRead(unittest.TestCase):
         self.assertEqual((data["query"], data["limit"], data["sort"], data["cost_usd"]),
                          ('"is there a free" lang:en', 10, "recency", 0.015))
         post = data["posts"][0]
-        self.assertEqual((post["id"], post["author"], post["verified"]), ("2102736605039776235", "asker", True))
+        self.assertEqual((post["id"], post["author"], post["verified"]), ("2102736605039776235", "asker", None))
         self.assertEqual(post["metrics"], {"impressions": 1200, "likes": 30, "replies": 4, "reposts": 2,
                                            "quotes": 1, "bookmarks": 7})
         self.assertNotIn("dropped", data)
@@ -61,13 +59,21 @@ class XRead(unittest.TestCase):
         _, out, _, _, _ = self.call(["search", "q"], FakeResponse(body))
         post = json.loads(out)["posts"][0]
         self.assertIsNone(post["created_at"])
+        self.assertIsNone(post["verified"])
         self.assertEqual(set(post["metrics"].values()), {None})
 
+    def test_verified_is_the_author_flag_x_returned(self) -> None:
+        body = {"data": [{"id": "1", "author_id": "77", "text": "hi"}],
+                "includes": {"users": [{"id": "77", "username": "a", "verified": False}]}}
+        _, out, _, _, opener = self.call(["search", "q"], FakeResponse(body))
+        self.assertIs(json.loads(out)["posts"][0]["verified"], False)
+        fields = parse_qs(urlsplit(opener.requests[0].full_url).query)["user.fields"][0].split(",")
+        self.assertIn("verified", fields)
+
     def test_options_reach_the_request(self) -> None:
-        before = datetime.now(timezone.utc)
+        now = datetime(2026, 10, 1, 12, 0, tzinfo=timezone.utc)
         code, out, _, _, opener = self.call(
-            ["search", "q", "--hours", "6", "--sort", "relevancy"], FakeResponse({}))
-        after = datetime.now(timezone.utc)
+            ["search", "q", "--hours", "6", "--sort", "relevancy"], FakeResponse({}), now=now)
         data = json.loads(out)
         self.assertEqual((code, data["hours"], data["sort"]), (0, 6, "relevancy"))
         query = parse_qs(urlsplit(opener.requests[0].full_url).query)
@@ -75,8 +81,7 @@ class XRead(unittest.TestCase):
         start = x_api.parse_time(query["start_time"][0])
         end = x_api.parse_time(query["end_time"][0])
         self.assertEqual(end - start, timedelta(hours=6))
-        self.assertGreaterEqual(end, before - timedelta(seconds=31))
-        self.assertLessEqual(end, after - timedelta(seconds=29))
+        self.assertEqual(end, now - timedelta(seconds=x_api.SEARCH_END_LAG_SECONDS))
 
     def test_website_syntax_is_refused_without_a_call_or_a_log_line(self) -> None:
         code, out, err, log, opener = self.call(["search", "free editor -filter:replies"])

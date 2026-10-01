@@ -69,7 +69,6 @@ def lesson_is_stale(lesson: dict, at: datetime) -> bool:
 
 
 def newly_stale(lesson: dict, at: datetime, last_review: datetime | None) -> bool:
-    """True when the lesson is stale now and was not stale at the previous review."""
     if not lesson_is_stale(lesson, at):
         return False
     if last_review is None:
@@ -78,7 +77,6 @@ def newly_stale(lesson: dict, at: datetime, last_review: datetime | None) -> boo
 
 
 def rule_application(rules: list[dict], lesson_id: str) -> str:
-    """none, applied, or reverted, from the latest rules entry for this lesson."""
     latest = next((rule for rule in reversed(rules) if rule.get("lesson") == lesson_id), None)
     if latest is None:
         return "none"
@@ -113,7 +111,6 @@ def membership(experiment: object, arm: object) -> Membership | None:
 
 
 def require_membership(post: dict) -> Membership:
-    """The post's membership. The message names which side of the pair is wrong."""
     member = membership(post.get("experiment"), post.get("arm", "none"))
     if member is not None:
         return member
@@ -134,7 +131,6 @@ def edit_leaves(edit: dict) -> bool:
 
 
 def leave_experiment(post: dict) -> bool:
-    """Apply a leaving edit. True when this call cleared a membership."""
     if not any(edit_leaves(edit) for edit in post.get("edits") or []):
         return False
     if membership(post.get("experiment"), post.get("arm", "none")) == OUTSIDE:
@@ -144,7 +140,6 @@ def leave_experiment(post: dict) -> bool:
 
 
 def lesson_basis(lesson: dict, experiments: list[dict]) -> str | None:
-    """What an adopted Lesson rests on, in one sentence for the operator. None for a Lesson that is not adopted."""
     if lesson_outcome(lesson) != "adopted":
         return None
     if lesson.get("experiment") is None:
@@ -203,11 +198,6 @@ def evaluate_rounds(state: dict, ready: list[tuple[str, float]], at: str,
 
 
 def next_slot(state: dict, started: datetime, posts: list[dict], at: datetime) -> dict:
-    """The next Slot: explore or exploit, from the time since `started` and the posts made since then.
-
-    Every other post alternates for the first 28 days, then one in three explores. Retrospective posts and
-    posts from before `started` do not count.
-    """
     live = [p for p in posts if not p["retrospective"] and parse_time(p["posted_at"]) >= started]
     count = len(live)
     alternating = at - started < timedelta(days=EXPLORE_ALTERNATE_DAYS)

@@ -1,24 +1,4 @@
 #!/usr/bin/env python3
-"""Daily X API read of the account's own posts. Run by the launchd job and by /next.
-
-Each run reads, through scripts/x_api.py (owned reads, see reference/x-api.md),
-the windows `loop.py due-reads` hands back (see CONTEXT.md for Read, 48h read
-and Final read):
-- every post, reply and quote that has turned 36 hours old since the last run
-  (its 36-60 hour read; later than 60 hours is labelled late);
-- every item that has turned 26 days old: the final read, before X drops
-  organic numbers at 30 days;
-- follower ids, and mentions since the last run.
-
-loop.py owns those thresholds and the read cursors; this script holds none.
-Everything is recorded through loop.py. A failed read records nothing and moves
-no cursor, so the next good run picks the same items up. Raw responses go to
-ledger/raw/api/ (gitignored). Prints plain English.
-
-    python3 scripts/snapshot.py
-    python3 scripts/snapshot.py --ingest ledger/raw/api/backfill-<stamp>.json
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -77,8 +57,6 @@ def snapshot_root(public: dict) -> dict:
 
 
 class ApiReader:
-    """The three reads the daily run needs, over one x_api client."""
-
     def __init__(self, client: x_api.Client | None = None) -> None:
         self.client = client or x_api.Client()
 
@@ -97,10 +75,6 @@ class ApiReader:
 
 def process(observed: datetime, followers: list[dict], windows: list[tuple[str, list[dict], dict]],
             mentions: list[dict], raw_file: str, self_handles: list[str]) -> list[str]:
-    """Record one run's reads through loop.py. Returns plain-English lines.
-
-    self_handles comes from the due-reads answer the run already asked for.
-    """
     at = x_api.iso(observed)
     handles = {handle.lower() for handle in self_handles}
     self_ids = {x_api.USER_ID} | {f["id"] for f in followers if (f.get("username") or "").lower() in handles}
@@ -229,8 +203,8 @@ def _run(reader=None, now: datetime | None = None) -> int:
     except Exception as exc:
         try:
             log(f"{x_api.iso(now)} snapshot failed stage={stage} error={str(exc)[:160]!r}")
-        except OSError:
-            pass
+        except OSError as log_error:
+            print(f"The failure could not be written to the run log: {log_error}.", file=sys.stderr)
         print(f"The snapshot failed while at stage {stage}: {exc}. "
               "Some records may be partly written. Run /next to see it.")
         return 1
@@ -240,7 +214,6 @@ def _run(reader=None, now: datetime | None = None) -> int:
 
 
 def ingest(path: str) -> int:
-    """Record a backfill file from x_api.py backfill: one 'backfill' read of every item, and the cursors."""
     try:
         lock = durable.acquire_write_lock(ROOT)
     except durable.LockBusy as exc:

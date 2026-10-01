@@ -19,6 +19,8 @@ import random
 import re
 import subprocess
 import sys
+import time
+import urllib.request
 from collections import Counter
 from pathlib import Path
 
@@ -34,7 +36,6 @@ SNIPPETS = 8
 WINDOW = 160
 TIMEOUT = 60.0
 SEED = 20260930
-ONLY: list[str] = []  # `run <term>` sends just that card
 
 EXCLUDE_DIRS = {".git", "private", "ledger", "receipts", "drafts", "shipped", "__pycache__", "node_modules",
                 "jev-articles", "jev-test", "graft"}
@@ -60,7 +61,6 @@ CANDIDATES = {
     "Shout-out": (r"shout-?out", ["credit", "tag", "mention"],
                   "An optional one-line credit to a maker's handle in a Card.", "candidate"),
 }
-# Hand-audited on 2026-09-30 by reading 8 usages of each (plan: ~/.claude/plans/zazzy-hopping-milner.md).
 CLEAN = {  # one sense throughout the sampled usages
     "Cohort": r"\bcohort\b",
     "Roster": r"\broster\b",
@@ -77,7 +77,7 @@ EXPLORATORY = {  # real overloads found in v1; reported, outside the pass rule
     "Slot": r"\bslots?\b",
     "Arm": r"\barms?\b",
 }
-GENERAL = {  # general programming terms: should score low on "specific"
+GENERAL = {
     "regex": (r"\bregex\b", "A pattern written in a compact notation for matching text."),
     "endpoint": (r"\bendpoints?\b", "A URL a client calls to use one function of a web service."),
     "JSON": (r"\bjson\b", "A text format for structured data."),
@@ -91,9 +91,6 @@ SCORE_LEVELS = [
     "Significant: an agent would draft, record or classify a post differently (Format, Lane, Arm, Edit class), changing which posts an Experiment counts.",
     "Severe: an agent would score, threshold or adopt a Lesson on the wrong numbers, or breach a rule the loop may never change (Approval, Truth budget).",
 ]
-
-
-# ---------- glossary ----------
 
 
 def parse_glossary() -> dict[str, dict]:
@@ -115,9 +112,6 @@ def parse_glossary() -> dict[str, dict]:
 
 def first_sentence(text: str) -> str:
     return re.split(r"(?<=[.])\s", text, maxsplit=1)[0]
-
-
-# ---------- snippets ----------
 
 
 def project_files() -> list[Path]:
@@ -165,8 +159,6 @@ def gather(pattern: str, files: list[Path], rng: random.Random) -> list[dict]:
         round_ += 1
     return picked
 
-
-# ---------- cards ----------
 
 NOUL = {"true": "Yes.", "false": "No."}
 
@@ -253,13 +245,13 @@ def cmd_build() -> int:
     return 0
 
 
-def cmd_run() -> int:
+def cmd_run(only: list[str] | None = None) -> int:
     (OUT / "answers").mkdir(parents=True, exist_ok=True)
     key = read_key(subprocess.run)
     total = Counter()
     for path in sorted((OUT / "cards").glob("*.json")):
         target = OUT / "answers" / path.name
-        if ONLY and path.stem not in ONLY:
+        if only and path.stem not in only:
             continue
         if target.exists():
             print(f"cached  {path.stem}")
@@ -267,7 +259,6 @@ def cmd_run() -> int:
         card = json.loads(path.read_text(encoding="utf-8"))
         body = {k: card[k] for k in ("model", "state", "questions")}
         try:
-            import time, urllib.request
             payload = check_answers(body, post(body, key, TIMEOUT, urllib.request.urlopen, time.sleep))
         except (CallFailed, CardRefused) as exc:
             print(f"FAILED  {path.stem}: {getattr(exc, 'reason', exc)}", file=sys.stderr)
@@ -283,9 +274,6 @@ def cmd_run() -> int:
     return 0
 
 
-# ---------- report ----------
-
-
 def load_results() -> list[dict]:
     rows = []
     for path in sorted((OUT / "cards").glob("*.json")):
@@ -296,11 +284,6 @@ def load_results() -> list[dict]:
         answers = json.loads(ans.read_text(encoding="utf-8"))["answers"]
         rows.append(summarise(card, answers))
     return rows
-
-
-def expected_score(answer: dict) -> float:
-    probs = answer["probabilities"]
-    return sum((int(k) if str(k).isdigit() else i + 1) * p for i, (k, p) in enumerate(probs.items())) if probs else 0.0
 
 
 def summarise(card: dict, a: dict) -> dict:
@@ -375,9 +358,11 @@ def cmd_report() -> int:
 
 if __name__ == "__main__":
     cmds = {"build": cmd_build, "run": cmd_run, "report": cmd_report}
-    if sys.argv[1:2] == ["run"] and len(sys.argv) == 3:  # pilot: run only the named card
-        ONLY.append(slug(sys.argv[2]))
-    if len(sys.argv) < 2 or sys.argv[1] not in cmds:
+    argv = sys.argv[1:]
+    only = [slug(argv[1])] if len(argv) == 2 and argv[0] == "run" else None
+    if only is not None:
+        argv = argv[:1]
+    if len(argv) != 1 or argv[0] not in cmds:
         print(__doc__)
         sys.exit(1)
-    sys.exit(cmds[sys.argv[1]]())
+    sys.exit(cmd_run(only) if argv[0] == "run" else cmds[argv[0]]())

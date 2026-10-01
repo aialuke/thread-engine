@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Static checks for .claude/skills: frontmatter, names, size, script references."""
-
 from __future__ import annotations
 
 import re

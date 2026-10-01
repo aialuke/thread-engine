@@ -56,13 +56,10 @@ ITEMS = {
 }
 PILOT = ["CX1", "CK1"]
 
-# E1: pairs built by construction from conflict_items.json. Each base gives a consistent pair
-# (original sentence, faithful paraphrase) and a conflict pair (original sentence, paraphrase with one term flipped).
 ITEMS_FILE = Path(__file__).resolve().parent / "conflict_items.json"
 KEPT_FILE = OUT / "kept.json"
 BUILT: dict[str, tuple] = {}
 
-# E3: one sentence stating the practical consequence of each pair Jev called followable.
 NOTES = {
     "F10": "The shout-out card is a reply that ends at the thank-you, and the closing-question rule says to end a post with a question.",
     "F11": "If the session is not in Plan mode, passage B tells the agent to continue, while passage A says non-trivial work starts in Plan mode.",
@@ -107,7 +104,6 @@ TASK_QUESTION = {
     },
 }
 FALSE_NOTE = "Passage A tells the agent to do something that passage B forbids, so the agent cannot follow both."
-# T3: passage B cut to the disputed sentence(s).
 SWAP = ".claude/skills/format-tool-swap/SKILL.md"
 TRIMS = {
     "CX1": ("sentence", ".claude/skills/posted/SKILL.md", 13,
@@ -117,16 +113,12 @@ TRIMS = {
 }
 
 
-# T4-T6: extra question shapes. p_break() reads each shape's answer as P(the passages conflict).
 _DESC = {"both": "The agent can follow both at once.", "break": "Following one means breaking the other.",
          "silent": "The passages do not bear on each other."}
-_INTRO = ("Passage A and passage B are both instructions to an AI agent that drafts social posts in this "
-          "repository. Decide whether one agent could follow both in the same task without breaking either. "
-          "Judge only what the passages say.")  # identical to WORDINGS["A"]
 EXTRA = {
-    "names_random": {"type": "choice", "instructions": _INTRO,
+    "names_random": {"type": "choice", "instructions": "",
                      "criteria": {"k7": _DESC["both"], "q2": _DESC["break"], "m9": _DESC["silent"]}},
-    "names_swapped": {"type": "choice", "instructions": _INTRO,
+    "names_swapped": {"type": "choice", "instructions": "",
                       "criteria": {"cannot_both_be_followed": _DESC["both"], "both_followable": _DESC["break"],
                                    "silent": _DESC["silent"]}},
     "always": {"type": "noul",
@@ -157,7 +149,6 @@ def p_break(shape: str, answer: dict) -> float:
     return probs[CONFLICT]
 
 
-# T7: passages before and after the text that fixed them. The "after" side is pinned to e52e931.
 _N, _S = "e52e931", ".claude/skills/next/experiment-list.md"
 _POSTED = ".claude/skills/posted/SKILL.md"
 _SWAP2 = ".claude/skills/format-tool-swap/SKILL.md"
@@ -171,7 +162,6 @@ FIX_BASES = {
     "H7": (("260bd45", "voice/exit-zero.md", 34, 34), (_N, "voice/exit-zero.md", 34, 34), (_N, _SWAP2, 84, 90)),
     "H8": (("ffea23c", ".claude/skills/jev-card/SKILL.md", 10, 10), (_N, ".claude/skills/jev-card/SKILL.md", 10, 10), (_N, "CONTEXT.md", 69, 71)),
 }
-# Passage B for the pairs whose other side also changed: (before B, after B).
 FIX_B = {
     "H2": (("ffea23c", _S, 19, 19), (_N, _S, 19, 19)),
     "H3": (("ffea23c", ".claude/skills/results/SKILL.md", 29, 29), (_N, ".claude/skills/results/SKILL.md", 29, 29)),
@@ -225,6 +215,8 @@ WORDINGS = {
         },
     },
 }
+for _shape in ("names_random", "names_swapped"):
+    EXTRA[_shape]["instructions"] = WORDINGS["A"]["instructions"]
 
 
 def passage(spec: tuple) -> dict:
@@ -259,7 +251,7 @@ def card(item_id: str, wording: str, shape: str = "choice", note: bool | str = F
     check_question("conflict", question)
     state: dict[str, object] = {"passage_A": passage(a), "passage_B": passage(TRIMS[item_id] if trim else b)}
     if shape == "task":
-        state["task"] = TASKS[item_id]  # T1 only: the 14 old pairs have task lines
+        state["task"] = TASKS[item_id]
     if note:
         state["note"] = FALSE_NOTE if note == "false" else NOTES[item_id]
     return {"model": PINNED_MODEL, "state": state, "questions": {"conflict": question}}
@@ -292,7 +284,6 @@ def ask(item_id: str, wording: str, fresh: bool, key: str, shape: str = "choice"
 
 
 def scores(item_id: str, wording: str, shape: str = "choice", note=False, trim: bool = False) -> list[dict]:
-    """Every saved answer for this item, wording, shape, note and trim: chosen option and P(conflict)."""
     body = card(item_id, wording, shape, note, trim)
     out = []
     for path in sorted(CACHE.glob(f"{digest(body)}*.json")):
@@ -309,7 +300,6 @@ def mean(values: list[float]) -> float:
 
 
 def verdict(p: dict[str, dict[str, float]]) -> dict:
-    """p[wording][item_id] = probability of CONFLICT. Pure: the pass rule in README.md."""
     ids = {kind: [i for i, v in ITEMS.items() if v[0] == kind] for kind in ("conflict", "consistent", "finding")}
     gaps = {w: mean([p[w][i] for i in ids["conflict"]]) - mean([p[w][i] for i in ids["consistent"]]) for w in p}
     valid = all(g >= MIN_GAP for g in gaps.values())
@@ -320,7 +310,6 @@ def verdict(p: dict[str, dict[str, float]]) -> dict:
 
 
 def loo(p: dict[str, dict[str, float]], ids: dict[str, list[str]]) -> list[dict]:
-    """E0. The control gap in each wording when each control is dropped in turn."""
     out = []
     for drop in ids["conflict"] + ids["consistent"]:
         gap = {}
@@ -339,7 +328,6 @@ def auc(pos: list[float], neg: list[float]) -> float:
 
 
 def rates(conflict: list[float], consistent: list[float], threshold: float = 0.5) -> dict:
-    """E1. Share of kept conflicts flagged, share of kept consistent pairs flagged, and the AUC."""
     return {"sensitivity": sum(x >= threshold for x in conflict) / len(conflict),
             "false_alarm": sum(x >= threshold for x in consistent) / len(consistent),
             "auc": auc(conflict, consistent)}
@@ -418,7 +406,6 @@ def mean_p(item_id: str, wording: str, shape: str) -> float:
 
 
 def cmd_compare(args: list[str]) -> None:
-    """compare SHAPE_X SHAPE_Y: mean absolute gap of P(conflict) on the built kept pairs and on the 14 real pairs."""
     x, y = args[0], args[1]
     kept = kept_ids()
     built = kept["conflict"] + kept["consistent"]
@@ -433,14 +420,13 @@ def cmd_complement() -> None:
     for label, ids in (("built kept", kept["conflict"] + kept["consistent"]), ("14 real", list(ITEMS))):
         sums = []
         for i in ids:
-            a = scores(i, "A", "noul")[0]["conflict"] if False else mean_p(i, "A", "noul")
+            a = mean_p(i, "A", "noul")
             b = 1.0 - mean_p(i, "A", "always")  # P(true | always obey)
             sums.append(a + b)
         print(f"{label}: sum of the two answers mean {mean(sums):.3f} min {min(sums):.2f} max {max(sums):.2f}")
 
 
 def cmd_fixcheck(args: list[str]) -> None:
-    """T7: does the conflict probability fall from the before text to the after text?"""
     shape = args[args.index("--shape") + 1] if "--shape" in args else "choice"
     kept = json.loads(FIX_KEPT_FILE.read_text())
     drops = []

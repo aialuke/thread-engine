@@ -70,7 +70,6 @@ def mutate(obj, path, value, delete=False):
 
 class WrongTypedFields(LoopCase):
     def fresh(self, command: str) -> None:
-        """A new repo holding whatever the command needs to reach its payload checks."""
         self.tmp.cleanup()
         self.setUp()
         # A follower day after the base payloads' items, so what a command stores is also read back by the
@@ -107,7 +106,7 @@ class WrongTypedFields(LoopCase):
                     self.fresh(command)
                     try:
                         code, err = self.run_case(command, mutate(base, path, value, delete))
-                    except Exception as exc:  # anything but a LoopError is the bug
+                    except Exception as exc:
                         escaped.append(f"{command} {'.'.join(map(str, path)) or '<payload>'} "
                                        f"{'deleted' if delete else repr(value)}: {type(exc).__name__}: {exc}")
                         continue
@@ -116,7 +115,6 @@ class WrongTypedFields(LoopCase):
         self.assertEqual(escaped, [], f"{len(escaped)} escaped:\n" + "\n".join(escaped[:20]))
 
     def tree(self) -> dict[str, bytes]:
-        """The files a refused command could have written. Payload files are the test's own input."""
         paths = [self.root / "experiments.md", self.root / "learnings.md"]
         for folder in ("ledger", "loop"):
             root = self.root / folder

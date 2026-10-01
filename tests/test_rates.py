@@ -1,5 +1,3 @@
-"""The organic rates an Experiment can be scored on: pure functions, no ledger."""
-
 import sys
 import unittest
 from pathlib import Path

@@ -20,14 +20,14 @@ import re
 import sys
 from pathlib import PurePosixPath
 
-MARKER = "APPROVE" + "D"
-APPROVE_CMD = "/appro" + "ve"
+MARKER = "APPROVED"
+APPROVE_CMD = "/approve"
 
 # Tools that cannot change files. Subagent tools are included because their own
 # tool calls pass through this hook too.
 NO_WRITE = {
-    "read_file", "grep", "list_dir", "spawn_subagent",                     # Grok
-    "Read", "Grep", "Glob", "LS", "ListDir", "WebFetch", "WebSearch",       # Claude Code
+    "read_file", "grep", "list_dir", "spawn_subagent",
+    "Read", "Grep", "Glob", "LS", "ListDir", "WebFetch", "WebSearch",
     "Agent", "Task", "Skill", "ToolSearch", "TodoWrite", "AskUserQuestion",
 }
 SHELL = {"run_terminal_command", "Bash"}
@@ -35,7 +35,7 @@ LOOP_STATE = re.compile(r"(^|/)(loop/state\.json|ledger/[0-9]+\.json|ledger/SUMM
                         r"|ledger/activity/[^/]+|loop/followers/[^/]+)$")
 SHELL_KEYCHAIN = re.compile(r"\bsecurity\s+(find-(generic|internet)-password|dump-keychain)\b")
 SHELL_MARKER_WRITE = re.compile(
-    rf"/{MARKER}\b"                                                   # any path ending in the marker
+    rf"/{MARKER}\b"
     rf"|\b(touch|tee|cp|mv|rm|ln|install|truncate)\b[^;&|\n]*\b{MARKER}\b"
     rf"|>{{1,2}}\s*\S*\b{MARKER}\b")
 # An agent CLI invoked with a prompt that starts with the approve command,
@@ -51,7 +51,6 @@ def deny(reason: str) -> None:
 
 
 def path_values(value) -> list[str]:
-    """Every string in the tool input that looks like a single path."""
     if isinstance(value, dict):
         return [p for v in value.values() for p in path_values(v)]
     if isinstance(value, list):
@@ -65,7 +64,7 @@ def main() -> None:
     try:
         event = json.load(sys.stdin)
     except json.JSONDecodeError:
-        sys.exit(0)
+        deny("unreadable hook input")
     tool = str(event.get("toolName") or event.get("tool_name") or "")
     if tool in NO_WRITE or tool.startswith(("x_", "web_")):
         sys.exit(0)

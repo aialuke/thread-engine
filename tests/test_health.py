@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Checks for scripts/loop_core/health.py, the daily-run warnings, and reads.final_at_risk. Stdlib only."""
-
 from __future__ import annotations
 
 import sys

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Checks for scripts/snapshot.py with a fake X reader. No network, no Keychain."""
-
 from __future__ import annotations
 
 import io
@@ -229,7 +227,7 @@ class DailyRun(unittest.TestCase):
 
     def test_cursor_older_than_the_floor_is_clamped_to_it(self) -> None:
         self.run_once(FakeReader(FOLLOWERS, self.items))
-        later = NOW + timedelta(days=5)  # the saved final_until is now 31 days old
+        later = NOW + timedelta(days=5)
         reader = FakeReader(FOLLOWERS, self.items)
         code, out = self.run_once(reader, now=later)
         self.assertEqual(code, 0, out)

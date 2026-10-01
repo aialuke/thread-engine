@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Checks for scripts/loop_core/experiments.py, the Experiment rules, on plain dicts. Stdlib only."""
-
 from __future__ import annotations
 
 import copy

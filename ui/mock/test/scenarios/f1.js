@@ -22,7 +22,6 @@ ta().dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true})); aw
 out.push('   Esc keeps draft: closed='+(T.dialogs().length===0)); T.click('Change something'); await wait(300);
 out.push('   reopen shows unsaved='+ta().value.includes('UNSAVED')+' note='+T.has(/unsaved changes are still here/));
 T.click('Cancel'); await wait(200); T.click('Change something'); await wait(300); out.push('   Cancel discards: '+!ta().value.includes('UNSAVED')); T.click('Cancel'); await wait(200);
-// M1 hold cancel paths
 let b=T.find('Hold to approve'); T.pe(b,'pointerdown'); await wait(300); T.pe(b,'pointercancel'); await wait(1400);
 out.push('#2 pointercancel approves? '+T.has(/Approved at/));
 b=T.find('Hold to approve'); b.focus(); b.dispatchEvent(new KeyboardEvent('keydown',{key:' ',bubbles:true})); await wait(200); b.blur(); await wait(1400);

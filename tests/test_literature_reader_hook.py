@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""The literature-reader Write hook: reports only, never an existing repo file."""
-
 from __future__ import annotations
 
 import json

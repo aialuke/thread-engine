@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Checks for scripts/loop_core/reads.py, the Read-window rules. Stdlib only."""
-
 from __future__ import annotations
 
 import sys

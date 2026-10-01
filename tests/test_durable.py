@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Checks for scripts/durable.py. Stdlib only."""
-
 from __future__ import annotations
 
 import os
@@ -33,6 +31,14 @@ class Writes(unittest.TestCase):
             durable.atomic_write(target, "ok\n")
             self.assertEqual(target.read_text(encoding="utf-8"), "ok\n")
             self.assertFalse(stale.exists())
+
+    def test_a_corrupt_line_stops_the_append(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "rows.jsonl"
+            path.write_text("{not json}\n", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                durable.append_json_line(path, {"id": 1}, lambda old, row: old == row)
+            self.assertEqual(path.read_text(encoding="utf-8"), "{not json}\n")
 
     def test_a_stale_lock_is_replaced_and_a_live_one_is_kept(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

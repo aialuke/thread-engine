@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Read other people's posts from X and print JSON. For skills running anywhere,
-including Claude Code, which has no X tools.
+"""Read other people's posts from X and print JSON. For skills running anywhere.
 
     python3 scripts/x_read.py search "<X API v2 search query>" [--hours 24] [--sort recency|relevancy]
 
@@ -33,9 +32,8 @@ RUNS_LOG = x_api.ROOT / "ledger" / "runs.log"
 
 
 def shape(post: dict) -> dict:
-    """One post as the skills read it. Metrics use the same names as an activity row."""
     return {"id": post.get("id"), "author": post.get("author"), "created_at": post.get("created_at"),
-            "text": post.get("text"), "verified": True,
+            "text": post.get("text"), "verified": post.get("verified"),
             "metrics": x_api.public_counts(post.get("public_metrics"))}
 
 
@@ -83,7 +81,7 @@ def _search(client: x_api.Client, query: str, hours: float, sort: str, now: date
     folder.mkdir(parents=True, exist_ok=True)
     pending_path.write_text(f"{os.getpid()}\n", encoding="utf-8")
     try:
-        posts = x_api.search(client, query, hours=hours, sort_order=sort)
+        posts = x_api.search(client, query, hours=hours, sort_order=sort, now=now)
     except x_api.XApiError as exc:
         pending_path.unlink(missing_ok=True)
         print(json.dumps({"error": str(exc), **client.usage()}), file=sys.stderr)
@@ -100,7 +98,7 @@ def _search(client: x_api.Client, query: str, hours: float, sort: str, now: date
 
 
 def main(argv: list[str] | None = None, client: x_api.Client | None = None,
-         log_path: Path = RUNS_LOG) -> int:
+         log_path: Path = RUNS_LOG, now: datetime | None = None) -> int:
     parser = argparse.ArgumentParser(description="Read other people's posts from X API recent search.")
     sub = parser.add_subparsers(dest="command", required=True)
     sp = sub.add_parser("search")
@@ -109,7 +107,7 @@ def main(argv: list[str] | None = None, client: x_api.Client | None = None,
     sp.add_argument("--sort", choices=("recency", "relevancy"), default="recency")
     args = parser.parse_args(argv)
     client = client or x_api.Client()
-    now = datetime.now(timezone.utc)
+    now = now or datetime.now(timezone.utc)
     code, output = _search(client, args.query, args.hours, args.sort, now, log_path)
     if code != 0 or output is None:
         return code

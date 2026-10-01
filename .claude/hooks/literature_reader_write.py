@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-"""PreToolUse hook for the literature-reader subagent's Write tool.
-
-The reader may write one thing: its report. A write is allowed only to a
-Markdown file inside a session scratchpad directory, or to a new Markdown file
-under research/ in this repo. Existing repo files are never overwritten.
-Everything else is refused with exit 2, whose stderr Claude Code shows the agent.
-"""
-
 from __future__ import annotations
 
 import json
@@ -16,7 +8,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent.parent
 RESEARCH = (REPO / "research").resolve()
-TMP_ROOTS = (Path("/tmp").resolve(), Path("/private/tmp"))
+TMP_ROOTS = (Path("/tmp").resolve(),)
 
 
 def refuse(reason: str) -> int:

@@ -284,7 +284,6 @@ class FollowersPayload(Cli):
         self.assertEqual(self.fails("record-followers", "--json", self.payload({})), BAD_TIME.format(""))
 
     def test_missing_ids_is_refused_and_nothing_is_written(self) -> None:
-        # Was: recorded zero followers, so the next real list would be credited as all-new followers.
         self.assertEqual(self.fails("record-followers", "--json", self.payload({"observed_at": T0})),
                          "record-followers: ids required (a missing list would record zero followers)")
         self.assertEqual(self.files(), [])
@@ -361,7 +360,6 @@ class ExperimentPayload(LoopCase):
             given[field] = "  "
             with self.subTest(field=field):
                 self.assertEqual(self.refused({**base, **given}), f"{field} required")
-        # cohort problems win over missing text
         self.assertEqual(self.refused({"primary": "bookmarks", "cohort": ids[:2]}),
                          "cohort needs at least 3 posts")
 

@@ -1,4 +1,3 @@
-# Generates the <x-dc> body markup for the iPhone mock (Main.dc.html).
 MONO = "'IBM Plex Mono', monospace"
 SERIF = "'Instrument Serif', Georgia, serif"
 SANS = "'IBM Plex Sans', system-ui, sans-serif"

@@ -1,4 +1,3 @@
-# Builds the MacBook mock's <x-dc> body from the same pieces as the iPhone.
 import importlib.util, re
 spec = importlib.util.spec_from_file_location('bb', __file__.replace('build_mac.py', 'build_body.py'))
 bb = importlib.util.module_from_spec(spec); spec.loader.exec_module(bb)
@@ -10,7 +9,6 @@ def fix(s):
 def no_avatar(s):
     return s.replace(bb.AV, '')
 
-# --- Today: split the phone block into the header (full width on Mac) and the rest
 today = bb.TODAY
 hdr_start = today.index('<div style="display: flex; flex-direction: column; gap: 8px">')
 hdr_end = today.index('</div>\n</div>', today.index('{{healthLine}}')) + len('</div>\n</div>')
@@ -18,7 +16,6 @@ today_rest = today[:hdr_start] + today[hdr_end:]
 today_rest = today_rest.replace('<sc-if value="{{isToday}}" hint-placeholder-val="{{ true }}">\n', '', 1)
 today_rest = today_rest[:today_rest.rindex('</sc-if>')]
 today_rest = re.sub(r'<button onClick="\{\{goPost\}\}" style="flex-shrink: 0; min-height: 44px;[^>]*>Preview</button>\n', '', today_rest)
-# the health alert stays in the full-width header
 alert_start = today_rest.index('<sc-if value="{{healthBad}}"')
 alert_end = today_rest.index('</sc-if>', alert_start) + len('</sc-if>')
 health_alert = today_rest[alert_start:alert_end]
@@ -31,7 +28,6 @@ MAC_HEADER = f'''<div style="display: flex; flex-direction: column; gap: 8px">
 </div>
 {health_alert}'''
 
-# --- the cards and the posting steps sit in the right column
 post = bb.POST
 post = post.replace('<sc-if value="{{isPost}}" hint-placeholder-val="{{ false }}">\n', '', 1)
 post = post[:post.rindex('</sc-if>')]
@@ -62,7 +58,6 @@ HOME = f'''<sc-if value="{{{{isHome}}}}" hint-placeholder-val="{{{{ true }}}}">
 </sc-if>'''
 
 def narrow(block, width=820):
-    # single-column pages read better at a comfortable measure
     first = block.index('>\n') + 2
     return block[:first] + f'<div style="max-width: {width}px; display: flex; flex-direction: column; gap: 20px">\n' + block[first:block.rindex('</sc-if>')] + '</div>\n</sc-if>'
 

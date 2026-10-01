@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 class LockBusy(Exception):
-    """Another live process holds the write lock."""
+    pass
 
 
 def pid_alive(pid: int) -> bool:
@@ -121,8 +121,8 @@ def append_json_line(path: Path, row: dict, same) -> bool:
                     continue
                 try:
                     old = json.loads(existing)
-                except json.JSONDecodeError:
-                    continue
+                except json.JSONDecodeError as exc:
+                    raise ValueError(f"{path} has a line that is not JSON") from exc
                 if same(old, row):
                     return False
             handle.seek(0, os.SEEK_END)

@@ -101,11 +101,8 @@ def organic_counts(metrics: dict | None) -> dict:
     if not metrics:
         return {name: None for _, name in _ORGANIC_FIELDS} | {"url_clicks": None}
     counts = {name: metrics.get(field) for field, name in _ORGANIC_FIELDS}
-    counts["url_clicks"] = metrics.get("url_link_clicks", 0)
+    counts["url_clicks"] = metrics.get("url_link_clicks")
     return counts
-
-
-# ---------- keys and signing ----------
 
 
 def keychain(name: str, runner: Callable[..., subprocess.CompletedProcess] = subprocess.run) -> str:
@@ -131,7 +128,6 @@ def pct(value) -> str:
 
 
 def oauth_header(method: str, url: str, params: dict, keys: dict, nonce: str, timestamp: int) -> str:
-    """OAuth 1.0a HMAC-SHA1 user-context header."""
     oauth = {"oauth_consumer_key": keys["consumer_key"], "oauth_nonce": nonce,
              "oauth_signature_method": "HMAC-SHA1", "oauth_timestamp": str(timestamp),
              "oauth_token": keys["access_token"], "oauth_version": "1.0"}
@@ -140,9 +136,6 @@ def oauth_header(method: str, url: str, params: dict, keys: dict, nonce: str, ti
     key = f"{pct(keys['consumer_secret'])}&{pct(keys['access_token_secret'])}"
     oauth["oauth_signature"] = base64.b64encode(hmac.new(key.encode(), base.encode(), hashlib.sha1).digest()).decode()
     return "OAuth " + ", ".join(f'{pct(k)}="{pct(v)}"' for k, v in sorted(oauth.items()))
-
-
-# ---------- client ----------
 
 
 class Client:
@@ -226,16 +219,12 @@ class Client:
                 "missing_access_header": self.no_access_header}
 
 
-# ---------- reads ----------
-
-
 def me(client: Client) -> dict:
     fields = "created_at,description,pinned_tweet_id,public_metrics"
     return client.request("GET", "/2/users/me", {"user.fields": fields}, USER)["data"]
 
 
 def timeline(client: Client, start: str, end: str | None = None, now: datetime | None = None) -> list[dict]:
-    """Every post, reply and quote in [start, end), with organic metrics. Owned read."""
     now = now or datetime.now(timezone.utc)
     begin = parse_time(start)
     if begin < now - timedelta(days=ORGANIC_DAYS):
@@ -267,7 +256,6 @@ def posted_at(post_id: str) -> datetime:
 
 
 def thread(client: Client, root_id: str, now: datetime | None = None) -> dict:
-    """The account's own root post and its thread cards, read from the timeline around the post's time."""
     if not root_id.isdigit():
         raise XApiError(f"bad post id {root_id!r}")
     start = posted_at(root_id) - timedelta(minutes=1)
@@ -294,9 +282,6 @@ def lookup(client: Client, ids: list[str]) -> list[dict]:
 
 def search(client: Client, query: str, hours: float = 24, sort_order: str = "recency",
            now: datetime | None = None) -> list[dict]:
-    """Up to 10 of anyone's recent posts matching an X API v2 query, with the author's handle.
-    Not an owned read: about $0.005 a post and $0.010 an author. The window is the last `hours`
-    hours, ending SEARCH_END_LAG_SECONDS before now (X refuses an end_time too close to now)."""
     query = query.strip()
     if not query:
         raise XApiError("empty search query")
@@ -314,14 +299,12 @@ def search(client: Client, query: str, hours: float = 24, sort_order: str = "rec
     params = {"query": query, "max_results": "10", "sort_order": sort_order,
               "start_time": iso(end - timedelta(hours=hours)), "end_time": iso(end),
               "tweet.fields": "created_at,author_id,public_metrics,text,note_tweet,referenced_tweets",
-              "expansions": "author_id", "user.fields": "username"}
+              "expansions": "author_id", "user.fields": "username,verified"}
     body = client.request("GET", "/2/tweets/search/recent", params, POST, partial_ok=True)
     return _posts_with_authors(client, body)
 
 
 def user(client: Client, handle: str) -> dict:
-    """One account by handle: who it is and when it last posted, to check a handle before tagging it.
-    Not an owned read: about $0.010."""
     handle = handle.removeprefix("@")
     if not HANDLE_RE.fullmatch(handle):
         raise XApiError(f"bad handle {handle!r}")
@@ -339,9 +322,6 @@ def user(client: Client, handle: str) -> dict:
             "latest_post_at": iso(posted_at(latest)) if latest and latest.isdigit() else None}
 
 
-# ---------- item helpers ----------
-
-
 def full_text(item: dict) -> str:
     """The whole post: X cuts `text` at about 280 characters and puts the rest in note_tweet."""
     return (item.get("note_tweet") or {}).get("text") or item.get("text", "")
@@ -355,10 +335,17 @@ def with_full_text(item: dict) -> dict:
 
 def _posts_with_authors(client: Client, body: dict) -> list[dict]:
     """Posts from a response that expanded author_id. Each included author is billed."""
-    users = {u["id"]: u.get("username") for u in (body.get("includes") or {}).get("users", [])}
+    users = {u["id"]: u for u in (body.get("includes") or {}).get("users", [])}
     client.items += len(users)
     client.cost += len(users) * USER
-    return [{**with_full_text(post), "author": users.get(post.get("author_id"))} for post in body.get("data") or []]
+    rows = []
+    for post in body.get("data") or []:
+        user = users.get(post.get("author_id")) or {}
+        row = {**with_full_text(post), "author": user.get("username")}
+        if "verified" in user:
+            row["verified"] = bool(user["verified"])
+        rows.append(row)
+    return rows
 
 
 def kind(item: dict) -> str:
@@ -403,9 +390,6 @@ def backfill(client: Client, since: str, now: datetime | None = None) -> dict:
     return {"raw_file": str(raw.relative_to(ROOT)), "items": len(items), "kinds": kinds,
             "followers": len(data["followers"]), "mentions": len(data["mentions"]),
             "nonorganic": flagged}
-
-
-# ---------- cli ----------
 
 
 def build_parser() -> argparse.ArgumentParser:

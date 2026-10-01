@@ -115,7 +115,6 @@ def _probability(value) -> bool:
 
 
 def check_answers(card: dict, payload) -> dict:
-    """Every question answered, in its own type, with an option the card offered."""
     if not isinstance(payload, dict) or not isinstance(payload.get("answers"), dict):
         raise CallFailed("bad_response")
     answers = payload["answers"]

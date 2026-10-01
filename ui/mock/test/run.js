@@ -1,5 +1,3 @@
-// Usage: node run.js <page> <scenario.js> [dark|light] [shot-prefix]
-// Opens http://127.0.0.1:8765/<page> in headless Chrome, injects t.js, runs the scenario body (async, has T and wait), prints its return.
 const { chromium } = require('playwright-core');
 const fs = require('fs');
 (async () => {

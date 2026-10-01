@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Checks for the two hooks, with Grok-shaped and Claude-shaped payloads."""
-
 from __future__ import annotations
 
 import json
@@ -77,6 +75,12 @@ class Guard(unittest.TestCase):
         self.assert_allowed(grok("search_replace", {"file_path": ".claude/skills/format-settings/checklist.md",
                                                     "new_string": "- [ ] APPROVED is absent"}))
 
+    def test_unreadable_input_is_denied(self) -> None:
+        result = subprocess.run([sys.executable, str(GUARD)], input="{",
+                                capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unreadable hook input", result.stderr)
+
     def test_normal_work_allowed(self) -> None:
         self.assert_allowed(claude("Bash", {"command": "python3 scripts/loop.py status"}))
         self.assert_allowed(claude("Bash", {"command": "python3 scripts/post_thread.py drafts/2026-09-22-smart-tv"}))
@@ -96,8 +100,8 @@ class Approve(unittest.TestCase):
             draft = root / "drafts" / "2026-10-01-demo"
             draft.mkdir(parents=True)
             (draft / "01-hook.md").write_text("A result.\n")
-            for event in ({"prompt": "/approve demo", "workspaceRoot": tmp},    # Grok
-                          {"prompt": "/approve demo", "cwd": tmp}):             # Claude Code
+            for event in ({"prompt": "/approve demo", "workspaceRoot": tmp},
+                          {"prompt": "/approve demo", "cwd": tmp}):
                 result = run(APPROVE, event)
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(json.loads(result.stdout)["decision"], "block")

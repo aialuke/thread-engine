@@ -187,7 +187,6 @@ def snapshot_from_payload(payload: dict, observed: datetime, hours: float, kind:
 
 @guarded("record-activity")
 def activity_header(payload: dict) -> tuple[str, datetime]:
-    """The stage and observation time of a record-activity Payload."""
     stage = payload.get("stage")
     need(stage in READ_STAGES, f"stage must be one of {sorted(READ_STAGES)}")
     return stage, parse_time(payload.get("observed_at", ""))
@@ -244,7 +243,7 @@ def newer_since_id(since: object, saved: object) -> str | None:
     """The mentions cursor to keep: `since` when it is set and beats the `saved` one, else None.
 
     With no cursor saved, `since` must read as a whole number, so a bad first one is refused before it is saved.
-    Once one is saved, `since` is compared as `int(since)`, as it always was.
+    Once one is saved, `since` is compared as `int(since)`.
     """
     if not since:
         return None
@@ -282,7 +281,6 @@ def follower_total(payload: dict, ids: list[str]) -> object:
 
 @guarded("record-followers")
 def verified_count(payload: dict) -> int | None:
-    """The verified-follower count, or None when the Payload has none."""
     if payload.get("verified") is None:
         return None
     check_count(payload["verified"], "verified")
@@ -291,7 +289,6 @@ def verified_count(payload: dict) -> int | None:
 
 @guarded("open-experiment")
 def experiment_terms(payload: dict) -> tuple[str, float, list[str]]:
-    """The measure, the effect to beat and the cohort of an open-experiment Payload."""
     metric = str(payload.get("primary") or "")
     need(metric in SCORABLE, f"primary must be one of {SCORABLE}")
     need(metric not in UNSCORABLE, f"primary {metric!r} cannot be scored: {UNSCORABLE.get(metric, '')}")
@@ -309,7 +306,6 @@ def experiment_terms(payload: dict) -> tuple[str, float, list[str]]:
 
 @guarded("open-experiment")
 def experiment_texts(payload: dict) -> dict:
-    """The question, the two arms and any reference facts of an open-experiment Payload. The three texts are required."""
     for field in ("question", "treatment", "control"):
         need(isinstance(payload.get(field), str) and payload[field].strip(), f"{field} required")
     facts = payload.get("reference_facts", [])
@@ -332,7 +328,6 @@ def snapshot_observed(payload: dict) -> datetime:
 
 @guarded("record-snapshot")
 def snapshot_is_final(payload: dict) -> bool:
-    """True when the Payload says its Read is a Final read."""
     return payload.get("stage") == "final"
 
 

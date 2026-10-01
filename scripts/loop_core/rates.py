@@ -27,7 +27,6 @@ def per_thousand(actions: int | None, organic: dict | None) -> float | None:
 
 
 def engagement_rate(organic: dict | None) -> float | None:
-    """Organic likes plus reposts per 1,000 organic impressions."""
     organic = organic or {}
     likes, reposts = organic.get("likes"), organic.get("reposts")
     if likes is None or reposts is None:
@@ -36,12 +35,10 @@ def engagement_rate(organic: dict | None) -> float | None:
 
 
 def visit_rate(organic: dict | None) -> float | None:
-    """Organic profile visits per 1,000 organic impressions."""
     return per_thousand((organic or {}).get("profile_visits"), organic)
 
 
 def rate(primary: str, organic: dict | None) -> float | None:
-    """The named primary's value for one organic observation; None for anything else or when it is missing."""
     if primary == "engagement_rate":
         return engagement_rate(organic)
     if primary == "visit_rate":
@@ -50,7 +47,6 @@ def rate(primary: str, organic: dict | None) -> float | None:
 
 
 def above_floor(organic: dict | None) -> bool:
-    """True when the observation has at least MIN_IMPRESSIONS organic impressions."""
     impressions = (organic or {}).get("impressions")
     return impressions is not None and impressions >= MIN_IMPRESSIONS
 
@@ -68,7 +64,6 @@ class PrimaryScore(NamedTuple):
 
 
 def score_primary(snap: dict | None, metric: str) -> PrimaryScore:
-    """The one rule for a Snapshot and a primary. Cohort admission and round scoring both call this."""
     if snap is None:
         return PrimaryScore(None, False)
     if metric not in PRIMARIES:

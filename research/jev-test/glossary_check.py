@@ -56,10 +56,11 @@ def gather(pattern: str, fs, seed: str) -> list[dict]:
             if len(line.split()) < g.MIN_WORDS:
                 continue
             bare = re.sub(r"`[^`]*`", " ", line)  # a match inside backticks is an identifier or path
-            m = rx.search(bare)
+            if not rx.search(bare):
+                continue
+            m = rx.search(line)
             if not m:
                 continue
-            m = rx.search(line) or m
             by_file.setdefault(str(p.relative_to(g.ROOT)), []).append(
                 {"path": f"{p.relative_to(g.ROOT)}:{i + 1}", "text": line[max(0, m.start() - g.WINDOW):m.end() + g.WINDOW].strip()})
     rng = random.Random(seed)

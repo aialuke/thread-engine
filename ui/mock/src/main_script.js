@@ -60,7 +60,6 @@ const RPOSTS = [
   { when: 'Thu 24', title: 'OpenAI breach take', lane: 'other', views: 4, visits: 0, follows: 0 },
   { when: 'Thu 24', title: 'Connect post 2 (retired format)', lane: 'other', views: 2, visits: 0, follows: 0 }
 ];
-// Last 11 originals in posting order, for the on-topic share (5 on, 6 off).
 const SHARE = ['main', 'main', 'main', 'other', 'main', 'other', 'main', 'other', 'other', 'other', 'other'];
 const RTOPICS = [
   { t: 'Australian government breach', visits: 15, follows: 1, views: 6680 },
@@ -228,7 +227,6 @@ function brisDay(ms) {
 }
 function brisMidnight(ms) { return Math.floor((ms + BRIS) / DAY) * DAY - BRIS; }
 function sameBrisDay(a, b) { return brisMidnight(a) === brisMidnight(b); }
-// The next 06:00 at least 30 minutes away.
 function nextSlot(now) { let t = brisMidnight(now) + 6 * HOUR; while (t <= now + 30 * 60000) t += DAY; return t; }
 // The first 20:00 daily check once the post is 36 hours old (scripts/snapshot.py, ops/launchd).
 function firstRead(posted) { const t = posted + 36 * HOUR; let r = brisMidnight(t) + 20 * HOUR; if (r < t) r += DAY; return r; }
@@ -257,7 +255,6 @@ class Component extends DCLogic {
   later(fn) { setTimeout(fn, 60); }
   cancelHold() { if (!this.holdTimer) return; clearInterval(this.holdTimer); this.holdTimer = null; this.setState({ hold: 0 }); }
   shown(sel) { return [...document.querySelectorAll(sel)].filter((e) => e.offsetParent !== null || getComputedStyle(e).position === 'fixed'); }
-  // Sheets: focus moves in on open and back to what opened them on close.
   openSheet(patch, label, first) {
     this.returnFocus = document.activeElement;
     this.setState(patch);
@@ -278,7 +275,6 @@ class Component extends DCLogic {
   finishAsk(cur) { const a = cur.asking || {}; return { asking: null, chat: cur.chat.concat([{ role: 'bot', text: a.a || FALLBACK }]) }; }
   askCortex(context) {
     this.returnFocus = document.activeElement;
-    // On the Mac's Cortex page the chat is already docked, so only the question's subject changes.
     if (DEVICE === 'mac' && this.st().screen === 'cortex') this.setState({ context: context });
     else this.setState({ chatOpen: true, context: context });
     this.later(() => { const ins = this.shown('.te-root input[aria-label="Ask Cortex"]'); const i = ins[ins.length - 1]; if (i) i.focus(); });
@@ -309,7 +305,6 @@ class Component extends DCLogic {
     const busy = !!(s.thinking || s.drafting);
     const cardText = s.cardBase + (s.cardTake ? '\n\n' + s.cardTake : '');
 
-    // --- time, relative to now and this post's slot
     const slot = s.slotMs, slotEnd = slot + HOUR, slotHM = hhmm(slot);
     const toGo = slot - now, late = now > slot, missed = now > slotEnd;
     const dayWord = sameBrisDay(now, slot) ? 'Today' : (sameBrisDay(now + DAY, slot) ? 'Tomorrow' : brisShort(slot));
@@ -339,7 +334,6 @@ class Component extends DCLogic {
         color: done ? 'var(--ink)' : cur ? 'var(--blue)' : 'var(--muted)', weight: cur ? '600' : '400' };
     });
 
-    // On the Mac the cards sit beside Today, so reading them means bringing them into view.
     const focusCards = () => {
       this.setState({ screen: 'today', prevScreen: s.screen, source: null });
       this.later(() => { const el = document.querySelector('.te-root [data-te-cards]'); if (el) { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); el.focus({ preventScroll: true }); } });
@@ -373,7 +367,6 @@ class Component extends DCLogic {
       primaryHint = 'The first full read comes with the daily check on ' + brisShort(firstRead(s.foundMs || now)) + ' at 20:00.'; primaryAction = go('results');
     }
 
-    // --- hold to approve (pointer and keyboard); any interruption cancels it
     const approveNow = () => {
       const cur = this.st();
       this.setState({ hold: 0, stage: 3, approvedAt: hhmm(Date.now()), approvedText: cur.cardBase + (cur.cardTake ? '\n\n' + cur.cardTake : ''), editedAfter: false, savedNote: false });
@@ -389,7 +382,6 @@ class Component extends DCLogic {
     };
     const holdEnd = () => this.cancelHold();
 
-    // --- card preview from the actual card text, with the fold computed
     const lines = cardText.split('\n');
     let run = 0, foldAt = -1;
     lines.forEach((ln, i) => { run += xLength(ln) + (i ? 1 : 0); if (foldAt < 0 && run > 280) foldAt = i; });
@@ -404,7 +396,6 @@ class Component extends DCLogic {
     const takeTrim = s.takeText.trim();
     const draftCount = xLength(s.draftText + (takeTrim ? '\n\n' + takeTrim : ''));
 
-    // --- posting
     const waitLeft = s.posted1 ? (s.waitSkipped ? 0 : Math.max(0, Math.ceil((s.foundMs + WAIT_MS - now) / 1000))) : WAIT_MS / 1000;
     const s1Active = s.stage >= 4, s2Active = s.posted1, s3Active = s.posted1 && waitLeft === 0, s4Active = s.copied2 || s.skipShout;
     const stepVals = (k, on) => { const o = {}; o[k + 'Off'] = on ? 'false' : 'true'; o[k + 'Badge'] = on ? 'var(--btn)' : 'var(--faint)'; o[k + 'Head'] = on ? 'var(--ink)' : 'var(--muted)'; return o; };
@@ -414,12 +405,10 @@ class Component extends DCLogic {
     const backTo = (stage) => () => this.setState({ stage: stage, screen: DEVICE === 'mac' ? 'today' : 'post', copyState: 'none', finding: false, notFound: false,
       approvedAt: stage === 2 ? '' : s.approvedAt, approvedText: stage === 2 ? '' : s.approvedText });
 
-    // --- replies
     const waitingLeft = WAITING.filter((w) => !s.dismissed[w.id]);
     const mark = (id, how) => () => { const cur = this.st(); const d = Object.assign({}, cur.dismissed); if (how) d[id] = how; else delete d[id]; this.setState({ dismissed: d }); };
     const nWait = waitingLeft.length;
 
-    // --- chat
     const askQ = (sg) => {
       const cur = this.st();
       if (cur.asking) return;
@@ -430,7 +419,6 @@ class Component extends DCLogic {
     const ctxSet = { post: SUGGESTIONS_POST, results: SUGGESTIONS_RESULTS, reply: SUGGESTIONS_REPLY, proposal: SUGGESTIONS };
     const ctxLabel = { post: 'the next post', results: 'this week’s results', reply: 'a reply waiting for you', proposal: 'the proposed build log' };
 
-    // --- theme
     const th = s.theme || this.props.theme || 'system';
     let sysDark = false;
     try { sysDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch (e) {}
@@ -497,7 +485,6 @@ class Component extends DCLogic {
       primaryDisabled: primaryDisabled, primaryOpacity: primaryDisabled ? '0.45' : '1',
       showEarlyAnyway: showEarlyAnyway, startEarly: startReady,
       thinkingReady: s.thinking === 'ready', showPrimary: s.thinking !== 'ready',
-      // Posting goes ahead only if the post is still approved and the cards are the ones approved.
       doneReady: () => {
         const cur = this.st();
         const text = cur.cardBase + (cur.cardTake ? '\n\n' + cur.cardTake : '');

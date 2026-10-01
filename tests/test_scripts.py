@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Stdlib checks for post_thread.py."""
-
 from __future__ import annotations
 
 import ast
@@ -56,7 +54,6 @@ IO_IMPORTS = {"subprocess", "shutil", "tempfile"}
 
 
 def _writes_files(path: Path) -> bool:
-    """True when the module writes or deletes files, opens one for writing, or imports a way to."""
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     for node in ast.walk(tree):
         if isinstance(node, ast.Attribute) and node.attr in WRITE_CALLS:
@@ -475,7 +472,7 @@ class FormatAndApproval(unittest.TestCase):
             self.assertEqual(code, expected, (fmt, err))
 
     def test_root_over_600_refused_where_the_format_caps_it(self) -> None:
-        long_root = "A result. " * 61  # 610 characters
+        long_root = "A result. " * 61
         for fmt, expected in (("settings", 1), ("single-tip", 1), ("build-log", 1), ("tool-verdict", 1),
                               ("comparison", 0), ("tool-swap", 1)):
             text = long_root.strip() + "\n"

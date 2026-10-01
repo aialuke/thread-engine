@@ -61,9 +61,6 @@ EXPORT_COLUMNS = {"Impressions": "impressions", "Likes": "likes", "Replies": "re
 LESSON_RE = re.compile(r"^L-[0-9]{3}$")
 
 
-# ---------- time and io ----------
-
-
 def now_arg(value: str | None) -> datetime:
     return parse_time(value) if value else datetime.now(timezone.utc)
 
@@ -90,16 +87,12 @@ def read_json(path: Path) -> dict:
         raise LoopError(f"{path} is not valid JSON: {exc}") from exc
 
 
-# ---------- repository ----------
-
-
 class Repo:
     def __init__(self, root: Path) -> None:
         self.root = root
         self.state_path = root / "loop" / "state.json"
         self.ledger_dir = root / "ledger"
 
-    # state
 
     def state(self) -> dict:
         if not self.state_path.is_file():
@@ -109,7 +102,6 @@ class Repo:
     def save_state(self, state: dict) -> None:
         write_json(self.state_path, state)
 
-    # ledger
 
     def post_path(self, root_id: str) -> Path:
         if not POST_ID_RE.fullmatch(root_id):
@@ -128,7 +120,6 @@ class Repo:
     def save_post(self, post: dict) -> None:
         write_json(self.post_path(post["root_id"]), post)
 
-    # X API data
 
     @property
     def activity_dir(self) -> Path:
@@ -165,14 +156,8 @@ class Repo:
         return result.stdout
 
 
-# ---------- helpers ----------
-
-
 def age_hours(post: dict, at: datetime) -> float:
     return (at - parse_time(post["posted_at"])).total_seconds() / 3600
-
-
-# ---------- commands ----------
 
 
 def cmd_init(repo: Repo, args) -> dict:
@@ -361,7 +346,6 @@ def cmd_record_export(repo: Repo, args) -> dict:
 
 
 def _note_person(people: dict, user_id: str, item_id: str, at: str, how: str) -> None:
-    """Keep each account's most recent interaction with us."""
     seen = people.get(user_id)
     if seen is None or parse_time(at) >= parse_time(seen["at"]):
         people[user_id] = {"item": item_id, "at": iso(parse_time(at)), "how": how}
@@ -432,7 +416,6 @@ def cmd_record_followers(repo: Repo, args) -> dict:
 
 
 def cmd_record_eligibility(repo: Repo, args) -> dict:
-    """The two numbers on X's Original Content Rewards eligibility screen, as the operator reads them."""
     repo.state()
     for value, name in ((args.verified_followers, "--verified-followers"),
                         (args.qualified_impressions, "--qualified-impressions")):
@@ -479,7 +462,6 @@ def cmd_mark_nonorganic(repo: Repo, args) -> dict:
 
 
 def cmd_set_repliers_complete(repo: Repo, args) -> dict:
-    """Correct whether a post's reply-author list was complete. Logged on the post."""
     need(args.value in {"true", "false"}, "--value must be true or false")
     need(bool(args.reason.strip()), "--reason required")
     post = repo.post(args.root_id)
@@ -630,7 +612,6 @@ def cmd_set_reference(repo: Repo, args) -> dict:
 
 
 def cmd_add_preference(repo: Repo, args) -> dict:
-    """An operator edit repeated on three or more posts becomes an adopted lesson."""
     state = repo.state()
     need(bool(args.statement.strip()), "--statement required")
     evidence = [e for e in args.evidence.split(",") if e]
@@ -774,7 +755,6 @@ def cmd_commit_data(repo: Repo, args) -> dict:
 
 
 def daily_run_health(repo: Repo, at: datetime) -> dict:
-    """Warnings from ledger/runs.log and the ledger: a stale or failed Daily run, a Final read about to be lost. Reads only."""
     log = repo.root / "ledger" / "runs.log"
     lines = log.read_text(encoding="utf-8").splitlines() if log.is_file() else []
     rows = repo.activity()
@@ -815,9 +795,6 @@ def cmd_validate(repo: Repo, args) -> dict:
     return {"posts": count, "problems": problems}
 
 
-# ---------- readable views ----------
-
-
 def render(repo: Repo, now: str | None) -> None:
     if not repo.state_path.is_file():
         return
@@ -829,9 +806,6 @@ def render(repo: Repo, now: str | None) -> None:
     durable.atomic_write(repo.ledger_dir / "SUMMARY.md", views.summary_text(posts, rows, account))
     durable.atomic_write(repo.root / "experiments.md", views.experiments_text(state))
     durable.atomic_write(repo.root / "learnings.md", views.learnings_text(state, at))
-
-
-# ---------- cli ----------
 
 
 COMMANDS = {
