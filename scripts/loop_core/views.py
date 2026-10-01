@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+from typing import NamedTuple
 
 from loop_core import rates
 from loop_core.experiments import lesson_basis, lesson_is_stale, lesson_outcome, rule_application
@@ -34,11 +35,23 @@ def fmt(value) -> str:
     return "–" if value is None else (f"{value:g}" if isinstance(value, float) else str(value))
 
 
-MIN_RATE_IMPRESSIONS = 50
+class Shown(NamedTuple):
+    """The two observations one summary row is allowed to show.
+
+    snapshot: the 48h Snapshot, else the latest late one. Views, bookmarks, outside replies, the Snapshot column.
+    activity: the 48h activity read, else the backfill. Organic, non-organic, visits. A Final read is not shown here.
+    """
+
+    snapshot: dict | None
+    activity: dict | None
+
+
+def shown(post: dict, row: dict | None) -> Shown:
+    return Shown(best_snapshot(post), best_read(row))
 
 
 def best_read(row: dict | None) -> dict | None:
-    """An item's organic read to show: the 36-60h one, else the backfill."""
+    """An activity row's read for a summary cell: the 36-60h one, else the backfill. Not the Final read."""
     if not row:
         return None
     reads = row.get("reads", {})
@@ -79,7 +92,7 @@ ELIGIBILITY_IMPRESSIONS = 500_000
 
 
 def latest_organic(row: dict) -> int:
-    """The highest organic impressions any read of this item saw (X's numbers only grow)."""
+    """The highest organic impressions any read saw, including a Final read. The eligibility upper bound, not a summary cell."""
     reads = row.get("reads", {})
     seen = [(reads.get("export") or {}).get("impressions")]
     seen += [(reads.get(stage) or {}).get("organic", {}).get("impressions") for stage in ("final", "48h", "backfill")]
@@ -142,7 +155,9 @@ def account_lines(rows: dict[str, dict], days: list[dict]) -> list[str]:
         impressions = sum(o.get("impressions") or 0 for o in reads)
         visited = sum(o.get("profile_visits") or 0 for o in reads)
         likes = sum(o.get("likes") or 0 for o in reads)
-        rate = f"{visited * 1000 / impressions:.1f}" if impressions >= MIN_RATE_IMPRESSIONS else "–"
+        organic = {"impressions": impressions, "profile_visits": visited}
+        scored = rates.visit_rate(organic)
+        rate = f"{scored:.1f}" if scored is not None and rates.above_floor(organic) else "–"
         exported = [r["reads"]["export"]["new_follows"] for r in group if "export" in r.get("reads", {})]
         follows = str(sum(exported)) if exported else "–"
         lines.append(f"| {kind.replace('_', ' ')} | {len(group)} | {impressions} | {visited} | {likes} | {rate} | {follows} |\n")
@@ -170,9 +185,9 @@ def summary_text(posts: list[dict], rows: dict[str, dict], account: dict) -> str
              "Outside replies | Follows | Snapshot |\n",
              "|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|\n"]
     for post in posts:
-        snap = best_snapshot(post)
+        observation = shown(post, rows.get(post["root_id"]))
+        snap, read = observation.snapshot, observation.activity
         root = snap["root"] if snap else {}
-        read = best_read(rows.get(post["root_id"]))
         organic = (read or {}).get("organic", {})
         where = f"{snap['kind']} {snap['age_hours']:g}h" if snap else ("missed" if post["missed"] else "pending")
         exp = f"{post['experiment']} {post['arm']}" if post.get("experiment") else ("retro" if post["retrospective"] else "–")

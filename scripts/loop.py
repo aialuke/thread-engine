@@ -175,22 +175,6 @@ def age_hours(post: dict, at: datetime) -> float:
     return (at - parse_time(post["posted_at"])).total_seconds() / 3600
 
 
-def primary_value(snap: dict | None, metric: str) -> float | None:
-    """A Snapshot's value for an Experiment's primary: a rate from its organic read, else a root count."""
-    if snap is None:
-        return None
-    if metric in rates.PRIMARIES:
-        return rates.rate(metric, snap.get("organic"))
-    return snap.get("root", {}).get(metric)
-
-
-def cohort_admits(snap: dict | None, metric: str) -> bool:
-    """Whether a cohort post's Snapshot can be scored on this primary. A rate also needs the impression floor."""
-    if primary_value(snap, metric) is None:
-        return False
-    return metric not in rates.PRIMARIES or rates.above_floor(snap.get("organic"))
-
-
 # ---------- commands ----------
 
 
@@ -267,19 +251,22 @@ def cmd_due_reads(repo: Repo, args) -> dict:
     Not `due`, which lists ledger posts awaiting a snapshot. Writes nothing: record-activity moves the cursors.
     The organic-metrics horizon is X's, so the caller passes it in (--horizon-days).
     """
+    state = repo.state()
+    handles = state["self_handles"]
     if args.backfill:
         need(args.fetched_at and args.since, "--backfill needs --fetched-at and --since")
         cursor = backfill_cursor(parse_time(args.fetched_at), parse_time(args.since))
-        return {"stage": "backfill", "cursor": {key: iso(at) for key, at in cursor.items()}}
+        return {"stage": "backfill", "self_handles": handles,
+                "cursor": {key: iso(at) for key, at in cursor.items()}}
     need(args.horizon_days is not None, "--horizon-days is required: X's organic-metrics horizon in days")
     # Whole seconds: iso() drops fractions, so a fractional clock would put the floor outside the horizon.
     now = now_arg(args.now).replace(microsecond=0)
-    api = repo.state().get("api", {})
+    api = state.get("api", {})
     saved = {key: parse_time(api[key]) if api.get(key) else None for key in ("read48_until", "final_until")}
     windows = [{**w, "start": iso(w["start"]), "end": iso(w["end"]),
                 "cursor": {key: iso(at) for key, at in w["cursor"].items()}}
                for w in read_windows(now, saved, args.horizon_days)]
-    return {"now": iso(now), "windows": windows}
+    return {"now": iso(now), "windows": windows, "self_handles": handles}
 
 
 def cmd_record_snapshot(repo: Repo, args) -> dict:
@@ -527,10 +514,10 @@ def cmd_open_experiment(repo: Repo, args) -> dict:
         need(not post.get("nonorganic"),
              f"{root_id} is marked non-organic ({(post.get('nonorganic') or {}).get('reason')}); it cannot be in a cohort")
         snap = best_snapshot(post)
-        value = primary_value(snap, metric)
-        if cohort_admits(snap, metric):
-            values.append(value)
-            used.append({"root_id": root_id, "value": value, "kind": snap["kind"]})
+        score = rates.score_primary(snap, metric)
+        if score.value is not None and not score.below_floor:
+            values.append(score.value)
+            used.append({"root_id": root_id, "value": score.value, "kind": snap["kind"]})
     if metric in rates.PRIMARIES:
         need(len(values) >= MIN_COHORT, f"only {len(values)} cohort posts have {'an' if metric[0] in 'aeiou' else 'a'} {metric} "
                                         f"snapshot with {rates.MIN_IMPRESSIONS} or more organic impressions")
@@ -577,12 +564,12 @@ def cmd_evaluate(repo: Repo, args) -> dict:
             continue
         if post["root_id"] in consumed or post.get("nonorganic"):
             continue
-        snap = valid_snapshot(post)
-        value = primary_value(snap, exp["primary"])
-        if value is not None and exp["primary"] in rates.PRIMARIES and not rates.above_floor(snap.get("organic")):
-            value, notes[post["root_id"]] = 0.0, "below_floor"
-        if value is not None:
-            ready.append((post["root_id"], value))
+        score = rates.score_primary(valid_snapshot(post), exp["primary"])
+        if score.value is None:
+            continue
+        if score.below_floor:
+            notes[post["root_id"]] = "below_floor"
+        ready.append((post["root_id"], score.value))
     at = iso(now_arg(args.now))
     state, result = evaluate_rounds(state, ready, at, notes)
     repo.save_state(state)

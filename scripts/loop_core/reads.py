@@ -62,6 +62,17 @@ def window_label() -> str:
     return f"{SNAPSHOT_MIN_H:g}–{SNAPSHOT_MAX_H:g} hour"
 
 
+def stage_label(stage: str) -> str:
+    """The Daily run's sentence for a read stage. The bounds are the window constants."""
+    if stage == "48h":
+        return f"{window_label()} read"
+    if stage == "final":
+        return f"final {FINAL_MIN_DAYS}–{FINAL_MAX_DAYS} day read"
+    if stage == "backfill":
+        return "backfill"
+    raise ValueError(f"unknown read stage {stage!r}")
+
+
 def past_window(hours: float) -> bool:
     """True once the 48h window has closed."""
     return hours > SNAPSHOT_MAX_H

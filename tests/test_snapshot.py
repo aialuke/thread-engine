@@ -132,6 +132,8 @@ class DailyRun(unittest.TestCase):
         self.assertIn("95%", self.ledger("1000000004")["nonorganic"]["reason"])
         self.assertIsNone(self.ledger("1000000001").get("nonorganic"))
         rows = self.activity()
+        self.assertEqual(snap["root"]["views"], rows["1000000001"]["reads"]["48h"]["public"]["impressions"])
+        self.assertEqual(snap["cards"][0]["views"], rows["1000000002"]["reads"]["48h"]["public"]["impressions"])
         self.assertEqual(sorted(rows), ["1000000001", "1000000002", "1000000003", "1000000004"])
         self.assertEqual(rows["1000000003"]["reads"]["48h"]["label"], "valid")
         self.assertNotIn("someone", rows["1000000003"]["text"])

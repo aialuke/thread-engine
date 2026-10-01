@@ -27,13 +27,10 @@ RUNS_LOG = x_api.ROOT / "ledger" / "runs.log"
 
 
 def shape(post: dict) -> dict:
-    """One post as the skills read it: X's fields under plain names."""
-    m = post.get("public_metrics") or {}
+    """One post as the skills read it. Metrics use the same names as an activity row."""
     return {"id": post.get("id"), "author": post.get("author"), "created_at": post.get("created_at"),
             "text": post.get("text"), "verified": True,
-            "metrics": {"views": m.get("impression_count"), "likes": m.get("like_count"),
-                        "reposts": m.get("retweet_count"), "quotes": m.get("quote_count"),
-                        "replies": m.get("reply_count"), "bookmarks": m.get("bookmark_count")}}
+            "metrics": x_api.public_counts(post.get("public_metrics"))}
 
 
 def main(argv: list[str] | None = None, client: x_api.Client | None = None,

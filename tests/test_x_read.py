@@ -49,8 +49,8 @@ class XRead(unittest.TestCase):
                          ('"is there a free" lang:en', 10, "recency", 0.015))
         post = data["posts"][0]
         self.assertEqual((post["id"], post["author"], post["verified"]), ("2102736605039776235", "asker", True))
-        self.assertEqual(post["metrics"], {"views": 1200, "likes": 30, "reposts": 2, "quotes": 1,
-                                           "replies": 4, "bookmarks": 7})
+        self.assertEqual(post["metrics"], {"impressions": 1200, "likes": 30, "replies": 4, "reposts": 2,
+                                           "quotes": 1, "bookmarks": 7})
         self.assertNotIn("dropped", data)
         self.assertEqual(len(opener.requests), 1)
         self.assertRegex(log, r"x_read search ok api_items=2 cost_usd=0\.015\n$")

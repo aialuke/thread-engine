@@ -20,6 +20,7 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
@@ -1136,11 +1137,31 @@ HARD_LINES = {
 }
 
 
-def _config(deps: dict) -> tuple[dict, dict] | None:
+@dataclass
+class Deps:
+    """What dispatch may be handed instead of reading the machine. None uses the real source."""
+
+    policy: dict | None = None
+    questions: dict | None = None
+    key: str | None = None
+    key_runner: Callable | None = None
+    opener: Callable | None = None
+    git: Callable | None = None
+    prompts: Path | None = None
+    receipts: Path | None = None
+
+
+def _deps(given: dict | Deps | None) -> Deps:
+    if isinstance(given, Deps):
+        return given
+    return Deps(**(given or {}))
+
+
+def _config(deps: Deps) -> tuple[dict, dict] | None:
     """(policy, questions), or None when a config file cannot be read."""
     try:
-        policy = deps["policy"] if "policy" in deps else load_policy()
-        questions = deps["questions"] if "questions" in deps else load_questions()
+        policy = deps.policy if deps.policy is not None else load_policy()
+        questions = deps.questions if deps.questions is not None else load_questions()
     except PolicyError:
         return load_base_policy(), load_questions()
     except (OSError, yaml.YAMLError, json.JSONDecodeError):
@@ -1168,15 +1189,18 @@ class Verdict(NamedTuple):
     answers: dict
 
 
-def _ask_jev(fork: str, state: dict, fork_questions: dict, policy: dict, deps: dict) -> Verdict:
-    """Ask Jev, and fall back to "would allow" with the failure as the reason when the call cannot be used."""
+def _ask_jev(fork: str, state: dict, fork_questions: dict, policy: dict, deps: Deps) -> Verdict:
+    """Ask Jev, and fall back to "would allow" with the failure as the reason when the call cannot be used.
+
+    The size check runs once, after the key is redacted.
+    """
     key = None
     try:
-        key = deps["key"] if "key" in deps else read_key(deps.get("key_runner", subprocess.run))
+        key = deps.key if deps.key is not None else read_key(deps.key_runner or subprocess.run)
         state = redact_key(state, key)
         if not within_budget(state, fork_questions, policy):
             raise CallFailed("state_too_large")
-        payload = post_jev(state, fork_questions, policy, key, deps.get("opener", urllib.request.urlopen))
+        payload = post_jev(state, fork_questions, policy, key, deps.opener or urllib.request.urlopen)
         got = payload["answers"]
         if not answers_usable(fork, fork_questions, got):
             raise CallFailed("api_error")
@@ -1186,10 +1210,10 @@ def _ask_jev(fork: str, state: dict, fork_questions: dict, policy: dict, deps: d
         return Verdict(state, key, True, "", exc.reason, {})
 
 
-def dispatch(event: dict, deps: dict | None = None) -> int:
-    deps = deps or {}
-    prompts = Path(deps.get("prompts", PROMPTS))
-    receipts = Path(deps.get("receipts", RECEIPTS))
+def dispatch(event: dict, deps: dict | Deps | None = None) -> int:
+    deps = _deps(deps)
+    prompts = Path(deps.prompts or PROMPTS)
+    receipts = Path(deps.receipts or RECEIPTS)
     if not tool_name(event) and "prompt" in event:
         save_prompt(event, prompts)
         return 0
@@ -1217,7 +1241,7 @@ def dispatch(event: dict, deps: dict | None = None) -> int:
         ), None)
         return _allow()
 
-    runner = deps.get("git")
+    runner = deps.git
     early = _early_skip(fork, event, command, policy, runner)
     if early:
         return skip(early[1], early[0])
@@ -1228,9 +1252,6 @@ def dispatch(event: dict, deps: dict | None = None) -> int:
 
     state = build_state(fork, event, request, policy, runner)
     fork_questions = questions[fork]
-    if not within_budget(state, fork_questions, policy):
-        return skip(state, "state_too_large", question_record(fork_questions))
-
     verdict = _ask_jev(fork, state, fork_questions, policy, deps)
     active = policy.get("mode") == "active"
     did = verdict.would if active else True
@@ -1280,9 +1301,10 @@ def dry_run() -> int:
         answers: dict = {}
         reason = failed
         would = True
-        if key and within_budget(state, fork_questions, policy):
+        redacted = redact_key(state, key) if key else state
+        if key and within_budget(redacted, fork_questions, policy):
             try:
-                payload = post_jev(redact_key(state, key), fork_questions, policy, key, opener)
+                payload = post_jev(redacted, fork_questions, policy, key, opener)
                 answers = payload.get("answers") or {}
                 if answers_usable(fork, fork_questions, answers):
                     would, _line = apply_policy(fork, answers, policy)

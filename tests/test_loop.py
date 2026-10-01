@@ -556,7 +556,7 @@ class ApiData(LoopCase):
 
     def test_due_reads_backfill_returns_the_cursor_pair(self) -> None:
         out = self.ok("due-reads", "--backfill", "--fetched-at", hours(24 * 10), "--since", T0)
-        self.assertEqual(out, {"stage": "backfill",
+        self.assertEqual(out, {"stage": "backfill", "self_handles": ["exitzerocode", "awakenluke"],
                                "cursor": {"read48_until": hours(24 * 10 - 36), "final_until": T0}})
 
     def test_due_reads_writes_nothing(self) -> None:

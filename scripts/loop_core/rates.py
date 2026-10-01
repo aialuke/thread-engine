@@ -8,6 +8,7 @@ out of engagement because a root's replies count the account's own thread cards 
 from __future__ import annotations
 
 import statistics
+from typing import NamedTuple
 
 MIN_IMPRESSIONS = 50
 PRIMARIES = ("engagement_rate", "visit_rate")
@@ -50,6 +51,32 @@ def above_floor(organic: dict | None) -> bool:
     """True when the observation has at least MIN_IMPRESSIONS organic impressions."""
     impressions = (organic or {}).get("impressions")
     return impressions is not None and impressions >= MIN_IMPRESSIONS
+
+
+class PrimaryScore(NamedTuple):
+    """How one Snapshot scores on a primary.
+
+    value is None when the post is left out: no Snapshot, or a count that was not measured.
+    below_floor is True when a rate was measured but organic impressions are under MIN_IMPRESSIONS.
+    A cohort leaves that post out. A round counts it as a miss, and value is then 0.
+    """
+
+    value: float | None
+    below_floor: bool
+
+
+def score_primary(snap: dict | None, metric: str) -> PrimaryScore:
+    """The one rule for a Snapshot and a primary. Cohort admission and round scoring both call this."""
+    if snap is None:
+        return PrimaryScore(None, False)
+    if metric not in PRIMARIES:
+        return PrimaryScore(snap.get("root", {}).get(metric), False)
+    value = rate(metric, snap.get("organic"))
+    if value is None:
+        return PrimaryScore(None, False)
+    if not above_floor(snap.get("organic")):
+        return PrimaryScore(0.0, True)
+    return PrimaryScore(value, False)
 
 
 def visit_screen(visits: list[int]) -> str | None:

@@ -40,6 +40,10 @@ from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from loop_core.errors import LoopError
+from loop_core.times import iso as _iso
+from loop_core.times import parse_time as _parse_time
+
 ROOT = Path(__file__).resolve().parent.parent
 API = "https://api.x.com"
 SERVICE = "thread-engine-x"
@@ -72,17 +76,37 @@ class XApiError(Exception):
 
 
 def parse_time(value: str) -> datetime:
+    """The loop's timestamp parse. A bad value is an XApiError so callers of this client see one exception."""
     try:
-        stamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError as exc:
-        raise XApiError(f"bad time {value!r}; use ISO 8601 with a timezone") from exc
-    if stamp.tzinfo is None:
-        raise XApiError(f"time {value!r} has no timezone")
-    return stamp.astimezone(timezone.utc)
+        return _parse_time(value)
+    except LoopError as exc:
+        raise XApiError(str(exc)) from exc
 
 
 def iso(stamp: datetime) -> str:
-    return stamp.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return _iso(stamp)
+
+
+# X's metric names, and the plain names the ledger stores. One map for every reader of a post.
+_PUBLIC_FIELDS = (("impression_count", "impressions"), ("like_count", "likes"), ("reply_count", "replies"),
+                  ("retweet_count", "reposts"), ("quote_count", "quotes"), ("bookmark_count", "bookmarks"))
+_ORGANIC_FIELDS = (("impression_count", "impressions"), ("like_count", "likes"), ("reply_count", "replies"),
+                   ("retweet_count", "reposts"), ("user_profile_clicks", "profile_visits"))
+
+
+def public_counts(metrics: dict | None) -> dict:
+    """X public_metrics under the ledger's names. A missing metric is null, not zero."""
+    metrics = metrics or {}
+    return {name: metrics.get(field) for field, name in _PUBLIC_FIELDS}
+
+
+def organic_counts(metrics: dict | None) -> dict:
+    """X organic_metrics under the ledger's names. No organic block at all leaves every value null."""
+    if not metrics:
+        return {name: None for _, name in _ORGANIC_FIELDS} | {"url_clicks": None}
+    counts = {name: metrics.get(field) for field, name in _ORGANIC_FIELDS}
+    counts["url_clicks"] = metrics.get("url_link_clicks", 0)
+    return counts
 
 
 # ---------- keys and signing ----------
@@ -352,8 +376,8 @@ def kind(item: dict) -> str:
 
 
 def nonorganic_share(item: dict) -> float | None:
-    public = (item.get("public_metrics") or {}).get("impression_count")
-    organic = (item.get("organic_metrics") or {}).get("impression_count")
+    public = public_counts(item.get("public_metrics")).get("impressions")
+    organic = organic_counts(item.get("organic_metrics")).get("impressions")
     if not public or organic is None:
         return None
     return max(0.0, (public - organic) / public)
@@ -374,8 +398,10 @@ def backfill(client: Client, since: str, now: datetime | None = None) -> dict:
     for item in items:
         share = nonorganic_share(item)
         if kind(item) in {"original", "quote"} and share is not None and share > NONORGANIC_SHARE:
-            flagged.append({"id": item["id"], "public": item["public_metrics"]["impression_count"],
-                            "organic": item["organic_metrics"]["impression_count"], "share": round(share, 3)})
+            flagged.append({"id": item["id"],
+                            "public": public_counts(item.get("public_metrics"))["impressions"],
+                            "organic": organic_counts(item.get("organic_metrics"))["impressions"],
+                            "share": round(share, 3)})
     return {"raw_file": str(raw.relative_to(ROOT)), "items": len(items), "kinds": kinds,
             "followers": len(data["followers"]), "mentions": len(data["mentions"]),
             "nonorganic": flagged}

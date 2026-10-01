@@ -31,6 +31,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import x_api  # noqa: E402
+from loop_core.reads import stage_label, window_label  # noqa: E402
 
 ROOT = x_api.ROOT
 NONORGANIC_SHARE = x_api.NONORGANIC_SHARE
@@ -57,8 +58,6 @@ def stamp(value: str) -> str:
 
 
 def normalize(item: dict) -> dict:
-    public = item.get("public_metrics") or {}
-    organic = item.get("organic_metrics") or {}
     return {
         "id": item["id"],
         "kind": x_api.kind(item),
@@ -67,14 +66,15 @@ def normalize(item: dict) -> dict:
         "topics": sorted({a["entity"]["name"] for a in item.get("context_annotations") or []}),
         # The account's own words; other accounts' handles are not kept.
         "text": re.sub(r"@\w+", "@_", x_api.full_text(item)),
-        "public": {"impressions": public.get("impression_count"), "likes": public.get("like_count"),
-                   "replies": public.get("reply_count"), "reposts": public.get("retweet_count"),
-                   "quotes": public.get("quote_count"), "bookmarks": public.get("bookmark_count")},
-        "organic": {"impressions": organic.get("impression_count"), "likes": organic.get("like_count"),
-                    "replies": organic.get("reply_count"), "reposts": organic.get("retweet_count"),
-                    "profile_visits": organic.get("user_profile_clicks"),
-                    "url_clicks": organic.get("url_link_clicks", 0) if organic else None},
+        "public": x_api.public_counts(item.get("public_metrics")),
+        "organic": x_api.organic_counts(item.get("organic_metrics")),
     }
+
+
+def snapshot_root(public: dict) -> dict:
+    """A Snapshot's root counts. Activity stores the impression count as impressions; a Snapshot stores it as views."""
+    return {"views": public.get("impressions"), "likes": public.get("likes"), "reposts": public.get("reposts"),
+            "quotes": public.get("quotes"), "replies": public.get("replies"), "bookmarks": public.get("bookmarks")}
 
 
 class ApiReader:
@@ -97,11 +97,14 @@ class ApiReader:
 
 
 def process(observed: datetime, followers: list[dict], windows: list[tuple[str, list[dict], dict]],
-            mentions: list[dict], raw_file: str) -> list[str]:
-    """Record one run's reads through loop.py. Returns plain-English lines."""
+            mentions: list[dict], raw_file: str, self_handles: list[str]) -> list[str]:
+    """Record one run's reads through loop.py. Returns plain-English lines.
+
+    self_handles comes from the due-reads answer the run already asked for.
+    """
     at = x_api.iso(observed)
-    self_handles = set(json.loads((ROOT / "loop" / "state.json").read_text())["self_handles"])
-    self_ids = {x_api.USER_ID} | {f["id"] for f in followers if (f.get("username") or "").lower() in self_handles}
+    handles = {handle.lower() for handle in self_handles}
+    self_ids = {x_api.USER_ID} | {f["id"] for f in followers if (f.get("username") or "").lower() in handles}
     lines = []
 
     fetched = [i for _, items, _ in windows for i in items if x_api.kind(i) != "repost"]
@@ -130,29 +133,30 @@ def process(observed: datetime, followers: list[dict], windows: list[tuple[str, 
     ledger = {p.stem for p in (ROOT / "ledger").glob("*.json")}
     for stage, items, cursor in windows:
         items = [i for i in items if x_api.kind(i) != "repost"]
-        by_id = {i["id"]: i for i in items}
+        normalized = {i["id"]: normalize(i) for i in items}
         for item in sorted(items, key=lambda i: i["created_at"]):
             if x_api.kind(item) not in {"original", "quote"}:
                 continue
             if item["id"] not in ledger:
                 cards = [{"id": c["id"], "text": x_api.full_text(c)} for c in items
                          if x_api.kind(c) == "thread_card" and c.get("conversation_id") == item["id"]]
+                cards = sorted(cards, key=lambda c: int(c["id"]))
                 loop("record-post", "--json", inbox(f"post-{item['id']}.json", {
                     "root_id": item["id"], "slug": f"x-{item['id']}", "format": "other", "lane": "other",
                     "posted_at": stamp(item["created_at"]), "retrospective": True, "made_in_repo": False,
-                    "auto": True, "cards": sorted(cards, key=lambda c: int(c["id"]))}))
+                    "auto": True, "cards": cards}))
                 ledger.add(item["id"])
                 lines.append(f"Recorded {item['id']} automatically: posted outside the repo, lane 'other' until reviewed.")
-            post = json.loads((ROOT / "ledger" / f"{item['id']}.json").read_text())
-            row = normalize(item)
+                post = {"cards": cards}
+            else:
+                post = json.loads((ROOT / "ledger" / f"{item['id']}.json").read_text())
+            row = normalized[item["id"]]
             payload = {"root_id": item["id"], "observed_at": at, "source": "api", "raw_file": raw_file,
-                       "root": {"views": row["public"]["impressions"], "likes": row["public"]["likes"],
-                                "reposts": row["public"]["reposts"], "quotes": row["public"]["quotes"],
-                                "replies": row["public"]["replies"], "bookmarks": row["public"]["bookmarks"]},
+                       "root": snapshot_root(row["public"]),
                        "organic": row["organic"], "outside_replies": outside.get(item["id"], 0),
                        "repliers_complete": True, "followers": follow["followers"],
-                       "cards": [{"id": c["id"], "views": (by_id[c["id"]].get("public_metrics") or {}).get("impression_count")}
-                                 for c in post.get("cards", []) if c["id"] in by_id]}
+                       "cards": [{"id": c["id"], "views": snapshot_root(normalized[c["id"]]["public"])["views"]}
+                                 for c in post.get("cards", []) if c["id"] in normalized]}
             if stage == "final":
                 payload["stage"] = "final"
             loop("record-snapshot", "--json", inbox(f"snap-{item['id']}.json", payload))
@@ -162,11 +166,11 @@ def process(observed: datetime, followers: list[dict], windows: list[tuple[str, 
                      f"{round(share * 100)}% of {row['public']['impressions']} impressions non-organic at the {stage} read")
                 lines.append(f"Marked {item['id']} non-organic: {round(share * 100)}% of its reach was not organic.")
         made = loop("record-activity", "--json", inbox(f"activity-{stage}.json", {
-            "stage": stage, "observed_at": at, "items": [normalize(i) for i in items], "cursor": cursor}))
-        label = {"48h": "36–60 hour read", "final": "final 26–29 day read", "backfill": "backfill"}[stage]
+            "stage": stage, "observed_at": at, "items": [normalized[i["id"]] for i in items], "cursor": cursor}))
+        label = stage_label(stage)
         lines.append(f"{label}: {made['recorded']} posts, replies and quotes.")
     for root_id in loop("mark-missed")["marked_missed"]:
-        lines.append(f"Missed {root_id}: its 36–60 hour window closed without a snapshot.")
+        lines.append(f"Missed {root_id}: its {window_label()} window closed without a snapshot.")
     for event in loop("evaluate").get("events", []):
         lines.append(f"Experiment moved from {event['from']} to {event['to']} ({event['result']}).")
     return lines
@@ -206,7 +210,7 @@ def run(reader=None, now: datetime | None = None) -> int:
                                    "final": final, "mentions": mentions}, indent=1, ensure_ascii=False) + "\n",
                        encoding="utf-8")
         stage = "record"
-        lines = process(now, followers, windows, mentions, str(raw.relative_to(ROOT)))
+        lines = process(now, followers, windows, mentions, str(raw.relative_to(ROOT)), plan["self_handles"])
         stage = "usage"
         usage = reader.usage()
         log(f"{x_api.iso(now)} snapshot ok read48={len(items48)} final={len(final)} followers={len(followers)} "
@@ -231,7 +235,8 @@ def ingest(path: str) -> int:
     raw = json.loads((ROOT / path).read_text(encoding="utf-8"))
     observed = x_api.parse_time(raw["fetched_at"])
     plan = loop("due-reads", "--backfill", "--fetched-at", raw["fetched_at"], "--since", raw["since"])
-    lines = process(observed, raw["followers"], [("backfill", raw["timeline"], plan["cursor"])], raw["mentions"], path)
+    lines = process(observed, raw["followers"], [("backfill", raw["timeline"], plan["cursor"])],
+                    raw["mentions"], path, plan["self_handles"])
     log(f"{x_api.iso(datetime.now(timezone.utc))} snapshot ingest {path} items={len(raw['timeline'])}")
     loop("commit-data", "--message", f"ingest {Path(path).name}")
     print("\n".join(lines))

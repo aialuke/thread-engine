@@ -44,6 +44,24 @@ class Rates(unittest.TestCase):
         self.assertFalse(rates.above_floor(organic(None)))
 
 
+class ScorePrimary(unittest.TestCase):
+    def test_a_rate_under_the_floor_is_a_forced_miss(self) -> None:
+        snap = {"organic": organic(49, likes=5)}
+        self.assertEqual(rates.score_primary(snap, "engagement_rate"), rates.PrimaryScore(0.0, True))
+
+    def test_a_rate_at_the_floor_is_the_rate(self) -> None:
+        snap = {"organic": organic(50, likes=5)}
+        self.assertEqual(rates.score_primary(snap, "engagement_rate"), rates.PrimaryScore(100.0, False))
+
+    def test_a_missing_rate_is_left_out(self) -> None:
+        self.assertEqual(rates.score_primary(None, "engagement_rate"), rates.PrimaryScore(None, False))
+        self.assertEqual(rates.score_primary({"organic": {}}, "visit_rate"), rates.PrimaryScore(None, False))
+
+    def test_a_root_count_is_not_subject_to_the_floor(self) -> None:
+        snap = {"root": {"bookmarks": 3}, "organic": organic(1)}
+        self.assertEqual(rates.score_primary(snap, "bookmarks"), rates.PrimaryScore(3, False))
+
+
 class VisitScreen(unittest.TestCase):
     def test_a_cohort_with_enough_spread_passes(self) -> None:
         self.assertIsNone(rates.visit_screen([1, 1, 2, 1, 3, 0]))
