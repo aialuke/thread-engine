@@ -49,9 +49,3 @@ Each line holds until its exit condition; skills point here instead of restating
 - Analysis and audits go in `reviews/`; cited research goes in `research/` after the operator says yes. Not `docs/` or `claudedocs/`.
 - Conventional commits. `loop.py` commits data (`chore(data)`) and applied rules (`feat(rules)`).
 - `APPROVED` files are git-ignored. Never commit secrets or X tokens.
-
-## Agent skills
-
-- Issues live in GitHub Issues (`aialuke/thread-engine`) via `gh`; see `docs/agents/issue-tracker.md`.
-- Triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`; see `docs/agents/triage-labels.md`.
-- Domain docs: one `CONTEXT.md` and `docs/adr/` at the repo root; see `docs/agents/domain.md`.
