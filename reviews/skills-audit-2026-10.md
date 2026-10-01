@@ -19,8 +19,8 @@ An earlier skill review the same day (`reviews/log.md`, 2026-10-01 `fix`) alread
 Ranked by value. "Do" means a small edit I would make on a yes.
 
 1. **Do not run the description optimizer.** It targets triggering, and only five skills trigger by description. Their descriptions already name the operator's phrasing. It costs a lot of usage (`claude -p`, three runs per query) for no expected gain.
-2. **`hidden-settings` has a dead argument.** Its frontmatter says `argument-hint: "[hook|card|closer|emoji]"`, but the body never uses an argument. Do: drop the hint. It also says "Comparison threads use `format-comparison`" twice; do: keep one.
-3. **`format-tool-swap` has a list that renders wrong.** In "Research and fact-check", the line starting `"Settled" choices below are editorial` is indented as a sub-bullet of "A swap with no official page…". It is a separate rule. Do: unindent it.
+2. **`hidden-settings` has an unused argument hint.** Its frontmatter says `argument-hint: "[hook|card|closer|emoji]"`, but the body never uses an argument. Harmless, and the hint only shows in autocomplete. (The first draft of this audit also called its two "Comparison threads use…" lines a duplicate. They are not: one is the `when-to-use` routing line and one points the reader at the contract. Both stay.)
+3. **`format-tool-swap` has one stray bullet, not a rendering bug.** In "Research and fact-check" the line starting `"Settled" choices below are editorial` is a lone top-level bullet after a paragraph (line 79). The first draft called it a mis-indented sub-bullet, which was wrong. It is a separate rule sitting in the verify section; moving it is optional.
 4. **Rules restated from `AGENTS.md`.**
    - `draft-thread` step 8 repeats "Never create, edit or delete `APPROVED`". Do: keep only the consequence ("Revised cards need `/approve` again before `/ready`").
    - `apply` step 3 repeats the loop's never-change list. Do: point at "What the loop may never change" in `AGENTS.md`. Keep the `APPROVED` and gate names, since `apply` is the one skill allowed to write skill files.
@@ -34,13 +34,15 @@ Ranked by value. "Do" means a small edit I would make on a yes.
 
 `approve` (the hook design depends on its exact text and `tests/test_hooks.py` checks its frontmatter), `ready`, `snapshot`, `undo-rule`, `lint`, `posted`, `draft-thread`'s step structure, `verify-settings`, and the five format skills not named above. They are short, say why, and have clear "Done:" lines.
 
-## Proposed edits (each needs the operator's yes)
+## Proposed edits, after a second check (2026-10-01)
 
-| # | Edit | Files |
-|---|------|-------|
-| A | Drop unused `argument-hint`; keep one "comparison" pointer | `hidden-settings/SKILL.md` |
-| B | Unindent the "Settled choices" rule | `format-tool-swap/SKILL.md` |
-| C | Trim the `APPROVED` restatement to its consequence | `draft-thread/SKILL.md` |
-| D | Point `apply` step 3 at the `AGENTS.md` never-change list | `apply/SKILL.md` |
+I re-read each edit site. Only A and C hold up, and both are marginal.
 
-All four are wording only. None changes what a skill does, so none needs an eval. `python3 -m unittest discover -s tests` should still pass afterwards.
+| # | Edit | Verdict |
+|---|------|---------|
+| A | Drop the unused `argument-hint` on `hidden-settings` | True but trivial. Optional. |
+| B | Unindent the "Settled choices" rule | **Dropped.** The bullet is not indented; the claim was wrong. |
+| C | Trim the `APPROVED` sentence in `draft-thread` step 8 to its consequence | True (it repeats `AGENTS.md`) but the sentence also says a hook blocks it, which is useful. Optional. |
+| D | Point `apply` step 3 at the `AGENTS.md` never-change list | **Dropped.** `apply` is the one skill allowed to write skill files, and its local reminder is a deliberate guard. Its list also differs from `AGENTS.md`'s (it adds `AGENTS.md` itself). A pointer would weaken it. |
+
+Net: no edit is needed. The 20 skills stay as they are unless the operator wants A or C for tidiness.
