@@ -8,7 +8,7 @@ Decisions are cited as `Dnn` (`reviews/ui-direction.md`), algorithm facts as `An
 | Path | Kind | Status |
 |---|---|---|
 | `reference/x-algorithm.md` | synthesis, A1–A22, blob SHAs, refreshed by `/next` | current (checked 2026-09-24) |
-| `reference/x-api.md` | synthesis, what the X API can read, prices, privacy | current; Grok wording pre-dates D88 |
+| `reference/x-api.md` | synthesis, what the X API can read, prices, privacy, search facts P18–P21 | current (checked 2026-10-01) |
 | `reference/audience.md` | synthesis, audience promise and lanes (operator's choice) | current; names Grok, see D88 |
 
 ## research/ — product and platform research
