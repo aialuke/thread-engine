@@ -85,6 +85,10 @@ def validate_post(post: dict) -> None:
     need(post.get("draft") is None or isinstance(post.get("draft"), str), "draft must be text or null")
     for edit in post.get("edits", []):
         need(edit.get("class") in EDIT_CLASSES, f"edit class must be one of {sorted(EDIT_CLASSES)}")
+        leaves = edit.get("leaves", False)
+        need(leaves is True or leaves is False, "leaves must be true or false")
+        need(leaves is False or edit.get("class") == "violation",
+             "only a violation can also leave the experiment")
     check_count(post.get("production_minutes"), "production_minutes")
     mark = post.get("nonorganic")
     need(mark is None or (isinstance(mark, dict) and isinstance(mark.get("reason"), str)),

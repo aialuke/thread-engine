@@ -55,6 +55,9 @@ class PostPayload(LoopCase):
             ({"cards": [{"id": "1000000009", "text": 3}]}, "card text must be text"),
             ({"edits": [{"class": "z"}]},
              "edit class must be one of ['correction', 'deviation', 'preference', 'violation']"),
+            ({"edits": [{"class": "violation", "leaves": "yes"}]}, "leaves must be true or false"),
+            ({"edits": [{"class": "preference", "leaves": True}]},
+             "only a violation can also leave the experiment"),
             ({"production_minutes": -1}, NONNEG.format("production_minutes")),
             ({"production_minutes": True}, NONNEG.format("production_minutes")),
         ]

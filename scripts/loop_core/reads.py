@@ -8,6 +8,7 @@ Every threshold lives here. Plain values in, plain values out: no files, no cloc
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+from typing import NamedTuple
 
 from loop_core.errors import need
 
@@ -76,6 +77,63 @@ def stage_label(stage: str) -> str:
 def past_window(hours: float) -> bool:
     """True once the 48h window has closed."""
     return hours > SNAPSHOT_MAX_H
+
+
+class ReadPosition(NamedTuple):
+    """Where a root's 48h read stands. A Final read is a separate observation.
+
+    valid: a snapshot from inside the window is stored.
+    marked: the missed flag is set, and there is no valid snapshot.
+    late: a late snapshot is stored, and the post is not marked missed.
+    omitted: retrospective, past the window, with nothing usable stored.
+    missed: past the window, not retrospective, nothing usable stored, not yet marked.
+    due: inside the window, no valid snapshot.
+    pending: before the window, no valid snapshot.
+    """
+
+    name: str
+
+
+def read_position(post: dict, hours: float) -> ReadPosition:
+    """The 48h position from the snapshots, the missed flag, and the age. Checked in that order."""
+    if valid_snapshot(post):
+        return ReadPosition("valid")
+    if post.get("missed"):
+        return ReadPosition("marked")
+    if best_snapshot(post):
+        return ReadPosition("late")
+    if post.get("retrospective") and past_window(hours):
+        return ReadPosition("omitted")
+    return ReadPosition(due_stage(hours, False) or "pending")
+
+
+_DUE_BUCKET = {
+    "valid": None,
+    "marked": None,
+    "late": "missed",
+    "omitted": None,
+    "missed": "missed",
+    "due": "due",
+    "pending": "pending",
+}
+
+
+def due_bucket(post: dict, hours: float) -> str | None:
+    """Which `due` list holds this post, or None when `due` leaves it out."""
+    return _DUE_BUCKET[read_position(post, hours).name]
+
+
+def snapshot_cell(post: dict) -> str:
+    """The summary Snapshot cell: the best snapshot, else the missed flag, else pending.
+
+    An unmarked miss stays pending until mark-missed writes the flag.
+    """
+    snap = best_snapshot(post)
+    if snap:
+        return f"{snap['kind']} {snap['age_hours']:g}h"
+    if post.get("missed"):
+        return "missed"
+    return "pending"
 
 
 def in_final_window(hours: float) -> bool:

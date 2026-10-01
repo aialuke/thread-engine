@@ -31,6 +31,39 @@ class Stages(unittest.TestCase):
         self.assertEqual([reads.in_final_window(h) for h in (24 * 26 - 0.01, 24 * 26, 24 * 29, 24 * 29 + 0.01)],
                          [False, True, True, False])
 
+    def test_read_position_checks_snapshot_then_flag_then_age(self) -> None:
+        def name(hours: float, **post: object) -> str:
+            base: dict = {"snapshots": [], "missed": False, "retrospective": False}
+            base.update(post)
+            return reads.read_position(base, hours).name
+
+        valid = {"snapshots": [{"kind": "valid"}]}
+        late = {"snapshots": [{"kind": "late"}]}
+        self.assertEqual(name(10, **valid, missed=True), "valid")
+        self.assertEqual(name(80, missed=True, **late), "marked")
+        self.assertEqual(name(80, **late), "late")
+        self.assertEqual(name(80, retrospective=True), "omitted")
+        self.assertEqual(name(80), "missed")
+        self.assertEqual(name(40), "due")
+        self.assertEqual(name(10), "pending")
+        self.assertEqual(name(40, retrospective=True), "due")
+
+    def test_due_lists_and_mark_missed_follow_the_position(self) -> None:
+        bare = {"snapshots": [], "missed": False, "retrospective": False}
+        late = {"snapshots": [{"kind": "late"}], "missed": False, "retrospective": False}
+        retro = {"snapshots": [], "missed": False, "retrospective": True}
+        marked = {"snapshots": [], "missed": True, "retrospective": False}
+        self.assertEqual(reads.due_bucket(bare, 80), "missed")
+        self.assertEqual(reads.read_position(bare, 80).name, "missed")
+        self.assertEqual(reads.due_bucket(late, 80), "missed")
+        self.assertEqual(reads.read_position(late, 80).name, "late")
+        self.assertIsNone(reads.due_bucket(retro, 80))
+        self.assertIsNone(reads.due_bucket(marked, 80))
+        self.assertEqual(reads.snapshot_cell({"snapshots": [{"kind": "late", "age_hours": 90}], "missed": True}),
+                         "late 90h")
+        self.assertEqual(reads.snapshot_cell({"snapshots": [], "missed": True}), "missed")
+        self.assertEqual(reads.snapshot_cell({"snapshots": [], "missed": False}), "pending")
+
     def test_best_snapshot_prefers_first_valid_else_last_late(self) -> None:
         late = [{"kind": "late", "n": 1}, {"kind": "late", "n": 2}, {"kind": "early", "n": 3}]
         self.assertEqual(reads.best_snapshot({"snapshots": late})["n"], 2)

@@ -229,6 +229,16 @@ class RecordPostRules(RawCase):
         self.assertEqual((post["experiment"], post["arm"]), (None, "none"))
         self.assertEqual(post["edits"][0]["class"], "deviation")
 
+    def test_a_violation_that_leaves_drops_the_membership(self) -> None:
+        self.put_experiment("testing")
+        got = self.ok("record-post", "--json", self.payload_for(
+            experiment="E-001", arm="treatment",
+            edits=[{"class": "violation", "leaves": True, "note": "shorter root"}]))
+        self.assertEqual(got, {"recorded": True, "root_id": self.ID, "left_experiment": True})
+        post = json.loads(self.ledger_path(self.ID).read_text())
+        self.assertEqual((post["experiment"], post["arm"]), (None, "none"))
+        self.assertEqual((post["edits"][0]["class"], post["edits"][0]["leaves"]), ("violation", True))
+
     def test_a_posted_record_replaces_an_auto_post_and_keeps_its_history(self) -> None:
         self.post(self.ID, T0, auto=True, retrospective=True, made_in_repo=False, lane="other", format="other")
         self.snap(self.ID, hours(40), 50)

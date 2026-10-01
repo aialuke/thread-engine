@@ -1,5 +1,5 @@
 """The Experiment rules: which states are open, how a Round moves an Experiment, what a closed one teaches,
-which Slot comes next.
+which Slot comes next, and whether a post is in an experiment.
 
 Vocabulary is CONTEXT.md's. Plain dicts in, plain dicts out: no files, no clock, no argparse. The
 caller (loop.py) reads the ledger and the clock, and saves the state this returns.
@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import copy
 from datetime import datetime, timedelta
+from typing import NamedTuple
 
+from loop_core.errors import LoopError
 from loop_core.times import parse_time
 
 EXPLORE_ALTERNATE_DAYS = 28
@@ -83,18 +85,61 @@ def rule_application(rules: list[dict], lesson_id: str) -> str:
     return "reverted" if latest.get("undone") else "applied"
 
 
-def leave_experiment(post: dict) -> bool:
-    """A deviation edit puts the post outside the experiment. True when this call cleared a membership.
+class Membership(NamedTuple):
+    """Outside an experiment, or in one on treatment or control.
 
-    Outside is no experiment and arm none. In is an experiment id with arm treatment or control.
-    A violation that is also a deviation is stored as violation, so this does not see it.
+    The ledger still stores this as experiment and arm. place() is the only writer of that pair.
     """
-    if not any(edit.get("class") == "deviation" for edit in post.get("edits") or []):
+
+    experiment: str | None
+    arm: str
+
+    def place(self, post: dict) -> None:
+        post["experiment"] = self.experiment
+        post["arm"] = self.arm
+
+
+OUTSIDE = Membership(None, "none")
+IN_ARMS = frozenset({"treatment", "control"})
+
+
+def membership(experiment: object, arm: object) -> Membership | None:
+    """The pair, or None when the two fields disagree. None is not a membership."""
+    if experiment is None and arm == "none":
+        return OUTSIDE
+    if isinstance(experiment, str) and arm in IN_ARMS:
+        return Membership(experiment, arm)
+    return None
+
+
+def require_membership(post: dict) -> Membership:
+    """The post's membership. The message names which side of the pair is wrong."""
+    member = membership(post.get("experiment"), post.get("arm", "none"))
+    if member is not None:
+        return member
+    if post.get("experiment") is not None:
+        raise LoopError("a post in an experiment needs arm treatment or control")
+    raise LoopError("arm set without an experiment")
+
+
+def edit_leaves(edit: dict) -> bool:
+    """Whether recording this edit drops the post out of its experiment.
+
+    A deviation always does. A violation does when leaves is true: the class stays violation,
+    and the deviation's effect still applies.
+    """
+    if edit.get("class") == "deviation":
+        return True
+    return edit.get("class") == "violation" and edit.get("leaves") is True
+
+
+def leave_experiment(post: dict) -> bool:
+    """Apply a leaving edit. True when this call cleared a membership."""
+    if not any(edit_leaves(edit) for edit in post.get("edits") or []):
         return False
-    if post.get("experiment") is None and post.get("arm", "none") == "none":
+    if membership(post.get("experiment"), post.get("arm", "none")) == OUTSIDE:
         return False
-    post["experiment"] = None
-    post["arm"] = "none"
+    OUTSIDE.place(post)
     return True
 
 

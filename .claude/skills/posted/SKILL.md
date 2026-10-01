@@ -28,7 +28,7 @@ argument-hint: "<link to the first post>"
     "production_minutes": null, "edits": [{"class": "preference", "card": "01-hook.md", "note": "…"}],
     "draft": "drafts/…"}
    ```
-   `cards` lists the author's replies after the root, not the root itself. If the operator doesn't know the minutes, leave `production_minutes` null. A `deviation` edit makes `record-post` clear `experiment` and set `arm` to `none` (`left_experiment` in the answer); say the post will not count. A difference that is both a violation and a deviation is stored as `violation`, so set `experiment` to null and `arm` to `none` yourself.
+   `cards` lists the author's replies after the root, not the root itself. If the operator doesn't know the minutes, leave `production_minutes` null. A `deviation` edit makes `record-post` clear `experiment` and set `arm` to `none` (`left_experiment` in the answer); say the post will not count. A difference that is both a violation and a deviation is stored as `violation` with `"leaves": true`, and `record-post` clears the experiment the same way.
 7. Run `python3 scripts/loop.py record-post --json loop/inbox/post-<root id>.json`. Continue only on `recorded: true`. If the daily run already recorded the post on its own (its record has `auto: true`), this record replaces it and keeps its reads. On "already recorded", set the queue row as in step 8 if it still says `drafted`, say so, and stop.
 8. Set the queue row `status: posted`, `root_id: <id>`.
 9. Tell the operator: when its snapshot is due (36 to 60 hours after posting; the daily job takes it), and list any `violation` found, since violations are never learned as preferences.

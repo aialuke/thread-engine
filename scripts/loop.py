@@ -39,9 +39,10 @@ from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEY
                                 snapshot_observed, snapshot_root_id, validate_post, verified_count)
 from loop_core import health, rates, views
 from loop_core.experiments import (OPEN_STATES, evaluate_rounds, leave_experiment, lesson_basis, lesson_is_stale,
-                                   lesson_outcome, newly_stale, next_id, next_slot, open_experiment)
-from loop_core.reads import (FINAL_MAX_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage,
-                             final_at_risk, need_final_age, past_window, read_windows, snapshot_kind, valid_snapshot)
+                                   lesson_outcome, membership, newly_stale, next_id, next_slot, open_experiment,
+                                   require_membership)
+from loop_core.reads import (FINAL_MAX_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot,
+                             due_bucket, final_at_risk, need_final_age, read_position, read_windows, snapshot_kind)
 from loop_core.snapshots import admit_snapshot
 from loop_core.times import iso, parse_time
 
@@ -212,15 +213,14 @@ def cmd_record_post(repo: Repo, args) -> dict:
                 post[key] = existing[key]
     left = leave_experiment(post)
     state = repo.state()
-    if post["experiment"] is not None:
+    if post.get("experiment") is not None:
         exp = next((e for e in state["experiments"] if e["id"] == post["experiment"]), None)
         if exp is None:
             raise LoopError(f"no experiment {post['experiment']}")
         need(exp["status"] in OPEN_STATES, f"experiment {exp['id']} is closed")
-        need(post["arm"] != "none", "a post in an experiment needs arm treatment or control")
+    member = require_membership(post)
+    if member.experiment is not None:
         need(not post["retrospective"], "retrospective posts cannot join an experiment")
-    else:
-        need(post["arm"] == "none", "arm set without an experiment")
     repo.save_post(post)
     recorded = {"recorded": True, "root_id": post["root_id"]}
     if left:
@@ -230,18 +230,15 @@ def cmd_record_post(repo: Repo, args) -> dict:
 
 def cmd_due(repo: Repo, args) -> dict:
     at = now_arg(args.now)
-    due, missed, pending = [], [], []
+    lists: dict[str, list] = {"due": [], "missed": [], "pending": []}
     for post in repo.posts():
-        if post["missed"] or valid_snapshot(post):
-            continue
         hours = age_hours(post, at)
-        stage = due_stage(hours, post["retrospective"])
-        if stage is None:
+        bucket = due_bucket(post, hours)
+        if bucket is None:
             continue
-        row = {"root_id": post["root_id"], "slug": post["slug"], "age_hours": round(hours, 1),
-               "card_ids": [c["id"] for c in post.get("cards", [])]}
-        {"pending": pending, "due": due, "missed": missed}[stage].append(row)
-    return {"due": due, "missed": missed, "pending": pending,
+        lists[bucket].append({"root_id": post["root_id"], "slug": post["slug"], "age_hours": round(hours, 1),
+                              "card_ids": [c["id"] for c in post.get("cards", [])]})
+    return {"due": lists["due"], "missed": lists["missed"], "pending": lists["pending"],
             "window_hours": [SNAPSHOT_MIN_H, SNAPSHOT_MAX_H]}
 
 
@@ -489,12 +486,11 @@ def cmd_mark_missed(repo: Repo, args) -> dict:
     at = now_arg(args.now)
     marked = []
     for post in repo.posts():
-        if post["missed"] or valid_snapshot(post) or best_snapshot(post):
+        if read_position(post, age_hours(post, at)).name != "missed":
             continue
-        if past_window(age_hours(post, at)):
-            post["missed"] = True
-            repo.save_post(post)
-            marked.append(post["root_id"])
+        post["missed"] = True
+        repo.save_post(post)
+        marked.append(post["root_id"])
     return {"marked_missed": marked}
 
 
@@ -511,13 +507,12 @@ def cmd_open_experiment(repo: Repo, args) -> dict:
     values, used = [], []
     for root_id in cohort:
         post = repo.post(root_id)
-        need(not post.get("nonorganic"),
-             f"{root_id} is marked non-organic ({(post.get('nonorganic') or {}).get('reason')}); it cannot be in a cohort")
-        snap = best_snapshot(post)
-        score = rates.score_primary(snap, metric)
-        if score.value is not None and not score.below_floor:
-            values.append(score.value)
-            used.append({"root_id": root_id, "value": score.value, "kind": snap["kind"]})
+        scored = rates.score_for(post, metric, rates.COHORT)
+        if scored.outcome == "nonorganic":
+            raise LoopError(f"{root_id} is marked non-organic ({scored.reason}); it cannot be in a cohort")
+        if scored.outcome == "scored":
+            values.append(scored.value)
+            used.append({"root_id": root_id, "value": scored.value, "kind": scored.snap_kind})
     if metric in rates.PRIMARIES:
         need(len(values) >= MIN_COHORT, f"only {len(values)} cohort posts have {'an' if metric[0] in 'aeiou' else 'a'} {metric} "
                                         f"snapshot with {rates.MIN_IMPRESSIONS} or more organic impressions")
@@ -560,16 +555,17 @@ def cmd_evaluate(repo: Repo, args) -> dict:
     consumed = {pid for rnd in exp["rounds"] for pid in rnd["posts"]}
     ready, notes = [], {}
     for post in repo.posts():
-        if post.get("experiment") != exp["id"] or post.get("arm") != "treatment":
+        member = membership(post.get("experiment"), post.get("arm", "none"))
+        if member is None or member.experiment != exp["id"] or member.arm != "treatment":
             continue
-        if post["root_id"] in consumed or post.get("nonorganic"):
+        if post["root_id"] in consumed:
             continue
-        score = rates.score_primary(valid_snapshot(post), exp["primary"])
-        if score.value is None:
-            continue
-        if score.below_floor:
+        scored = rates.score_for(post, exp["primary"], rates.ROUND)
+        if scored.outcome == "below_floor":
             notes[post["root_id"]] = "below_floor"
-        ready.append((post["root_id"], score.value))
+        elif scored.outcome != "scored":
+            continue
+        ready.append((post["root_id"], scored.value))
     at = iso(now_arg(args.now))
     state, result = evaluate_rounds(state, ready, at, notes)
     repo.save_state(state)

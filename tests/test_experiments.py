@@ -246,6 +246,21 @@ class LessonFreshness(unittest.TestCase):
         self.assertFalse(experiments.leave_experiment(kept))
         self.assertEqual(kept["arm"], "treatment")
 
+    def test_a_violation_leaves_only_when_the_edit_says_so(self) -> None:
+        post = {"experiment": "E-001", "arm": "control", "edits": [{"class": "violation", "leaves": True}]}
+        self.assertTrue(experiments.leave_experiment(post))
+        self.assertEqual((post["experiment"], post["arm"]), (None, "none"))
+        self.assertEqual(post["edits"][0]["class"], "violation")
+
+    def test_membership_is_outside_or_in_on_one_arm(self) -> None:
+        self.assertEqual(experiments.membership(None, "none"), experiments.OUTSIDE)
+        self.assertEqual(experiments.membership("E-001", "treatment"), experiments.Membership("E-001", "treatment"))
+        self.assertIsNone(experiments.membership("E-001", "none"))
+        self.assertIsNone(experiments.membership(None, "control"))
+        post = {"experiment": "E-001", "arm": "treatment"}
+        experiments.OUTSIDE.place(post)
+        self.assertEqual((post["experiment"], post["arm"]), (None, "none"))
+
 
 if __name__ == "__main__":
     unittest.main()

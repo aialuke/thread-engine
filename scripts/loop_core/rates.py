@@ -10,6 +10,8 @@ from __future__ import annotations
 import statistics
 from typing import NamedTuple
 
+from loop_core.reads import best_snapshot, valid_snapshot
+
 MIN_IMPRESSIONS = 50
 PRIMARIES = ("engagement_rate", "visit_rate")
 MIN_VISIT_POSTS = 5
@@ -77,6 +79,39 @@ def score_primary(snap: dict | None, metric: str) -> PrimaryScore:
     if not above_floor(snap.get("organic")):
         return PrimaryScore(0.0, True)
     return PrimaryScore(value, False)
+
+
+COHORT = "cohort"
+ROUND = "round"
+_SNAPSHOT_FOR = {COHORT: best_snapshot, ROUND: valid_snapshot}
+
+
+class Scored(NamedTuple):
+    """One post read for a cohort or a round.
+
+    outcome is nonorganic (reason set; a cohort refuses, a round skips), unmeasured (both skip),
+    below_floor (value 0; a cohort skips, a round counts a miss), or scored.
+    A cohort reads the best snapshot. A round reads only a valid one.
+    """
+
+    outcome: str
+    value: float | None
+    snap_kind: str | None
+    reason: str | None
+
+
+def score_for(post: dict, metric: str, purpose: str) -> Scored:
+    """How this post scores for `purpose` (cohort or round). Non-organic is decided once, here."""
+    if post.get("nonorganic"):
+        return Scored("nonorganic", None, None, (post.get("nonorganic") or {}).get("reason"))
+    snap = _SNAPSHOT_FOR[purpose](post)
+    score = score_primary(snap, metric)
+    kind = snap["kind"] if snap else None
+    if score.value is None:
+        return Scored("unmeasured", None, kind, None)
+    if score.below_floor:
+        return Scored("below_floor", score.value, kind, None)
+    return Scored("scored", score.value, kind, None)
 
 
 def visit_screen(visits: list[int]) -> str | None:

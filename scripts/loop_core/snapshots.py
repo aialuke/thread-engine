@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import NamedTuple
 
 from loop_core.errors import need
-from loop_core.reads import need_final_age, snapshot_kind, valid_snapshot
+from loop_core.reads import need_final_age, read_position, snapshot_kind
 
 
 class Admission(NamedTuple):
@@ -32,7 +32,8 @@ def admit_snapshot(post: dict, hours: float, is_final: bool) -> Admission:
         kind = "final"
         if any(s["kind"] == "final" for s in post["snapshots"]):
             return Admission(None, "final read already exists")
-    if kind == "valid" and valid_snapshot(post):
+    position = read_position(post, hours)
+    if kind == "valid" and position.name == "valid":
         return Admission(None, "valid snapshot already exists")
-    need(not (kind == "valid" and post["missed"]), "post already marked missed")
+    need(not (kind == "valid" and position.name == "marked"), "post already marked missed")
     return Admission(kind, None)

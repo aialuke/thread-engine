@@ -119,6 +119,8 @@ class PostsAndSnapshots(LoopCase):
         due = self.ok("due", now=hours(40))
         self.assertEqual([r["root_id"] for r in due["due"]], ["1000000030"])
         self.assertEqual(due["missed"], [])
+        self.assertEqual(self.ok("mark-missed", now=hours(40))["marked_missed"], [])
+        self.assertFalse(json.loads((self.root / "ledger" / "1000000031.json").read_text())["missed"])
         self.assertEqual(self.snap("1000000030", hours(40), 100)["kind"], "valid")
 
     def test_outside_replies_exclude_own_handles(self) -> None:

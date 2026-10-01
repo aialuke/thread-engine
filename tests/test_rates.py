@@ -79,5 +79,28 @@ class VisitScreen(unittest.TestCase):
         self.assertIsNone(rates.visit_screen([5, 1, 1, 1, 1, 1]))
 
 
+def snap(kind: str, impressions: int, likes: int = 10) -> dict:
+    return {"kind": kind, "root": {"bookmarks": likes}, "organic": organic(impressions, likes=likes)}
+
+
+class ScoreFor(unittest.TestCase):
+    def test_a_cohort_can_use_a_late_snapshot_and_a_round_cannot(self) -> None:
+        post = {"snapshots": [snap("late", 1000)]}
+        cohort = rates.score_for(post, "engagement_rate", rates.COHORT)
+        rnd = rates.score_for(post, "engagement_rate", rates.ROUND)
+        self.assertEqual((cohort.outcome, cohort.snap_kind), ("scored", "late"))
+        self.assertEqual(rnd.outcome, "unmeasured")
+
+    def test_nonorganic_is_excluded_once(self) -> None:
+        post = {"nonorganic": {"reason": "boosted"}, "snapshots": [snap("valid", 1000)]}
+        got = rates.score_for(post, "bookmarks", rates.ROUND)
+        self.assertEqual((got.outcome, got.reason), ("nonorganic", "boosted"))
+
+    def test_below_floor_is_measured_and_counts_as_a_miss(self) -> None:
+        post = {"snapshots": [snap("valid", 10)]}
+        got = rates.score_for(post, "engagement_rate", rates.COHORT)
+        self.assertEqual((got.outcome, got.value), ("below_floor", 0.0))
+
+
 if __name__ == "__main__":
     unittest.main()
