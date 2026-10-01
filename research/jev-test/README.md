@@ -561,3 +561,11 @@ Rules fixed before any request. Pairs P53 = the 14 real pairs plus the 39 kept b
 - **T6, plain contradict probe: rate rule passes, real-pair rule fails.** Built pairs: sensitivity 0.95, false alarm 0.00, AUC 1.00. On CX3, CX1, F5, F6, F10 it scored at least 0.5 on 2 (CX3, F6), the same as T1; CK1-CK3 stayed under 0.2. The gap to the E2 Noul on the 14 real pairs was 0.213.
 - **T7, natural experiment: no question sees the fix.** Blind Codex labelled the before and after texts of 8 fix commits; only 3 stayed as before-conflict, after-followable (ledger/raw, own test, closing question). The other 5 (lessons, lane, plan mode, card count, user/operator) were read as followable before the fix, so five of the Pass 1 "contradictions" are not conflicts by a blind reading. On the 3 kept pairs, the conflict probability fell by 0.15 or more on 1 (Choice: +0.18, +0.14, -0.07), 0 (E2 Noul), 0 (always) and 0 (probe); the rule needed all 3. Three pairs is a small test.
 - **Reading (inference):** for a sentence reversed on the page, Jev's answer did not depend on the question form (Choice, Noul, opposite-polarity Noul, plain probe, random option names), and for the conflicts that need an agent's task no form fixed the miss. A misleading option name does steer it. So more rewording is unlikely to help; the limit is what Jev reads, not how we ask.
+
+## 1 Oct: routing run (pstack review scope), unvalidated use
+
+`pstack_routing.py`: 20 requests, 6 task descriptions, Choice over models and agent types, options asked in both orders. Routing is outside the validated question types, so no score is evidence. Sent: task descriptions only. Answers in `private/pstack-routing/`.
+
+- Controls: mechanical rename picked haiku-4.5 (0.44, 0.46); novel architecture picked opus-5.5 (0.72, 0.69). Direction right, margins small.
+- Read tasks T1-T3: model opus-5.5 in 5 of 6 (probabilities 0.39-0.52, sonnet 0.27-0.39 close behind); agent type literature-reader in 4 of 6 but flipped with option order on T1 (general-purpose 0.41 fwd, literature-reader 0.55 rev) and on T3 fwd (0.40 vs 0.34).
+- Synthesis T4: sonnet-5.5 (0.67, 0.73), general-purpose (0.84, 0.79), stable under reordering.

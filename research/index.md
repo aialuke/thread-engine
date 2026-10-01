@@ -36,6 +36,8 @@ Decisions are cited as `Dnn` (`reviews/ui-direction.md`), algorithm facts as `An
 | `reviews/audit-2026-09.md` | audit that chose the audience promise | snapshot |
 | `reviews/agent-conventions-audit-2026-09-30.md` | audit of instructions that could confuse or steer an agent, with the fixes | snapshot |
 | `reviews/rules-blind-review-and-closing-list-2026-09-30.md` | before/after tests of two global rules (blind review before options, closing Assumed/Overlooked list) | snapshot |
+| `reviews/pstack-adoption.md` | adopt/adapt/skip of the pstack plugin, with a blind Codex review and outside-evidence addendum | snapshot |
+| `reviews/pstack-playbooks.md`, `pstack-principles-guide.md`, `pstack-skills.md` | reader reports on pstack's playbooks, principles and guide, and other skills (vendor text, unverified) | snapshot |
 | `reviews/paid-free-session-2026-09.md` | how PAID → FREE was designed | snapshot |
 | `reviews/2026-09-22.md` | early review of the repo and account | snapshot, orphan |
 | `reviews/ui-review-2026-09-24.md`, `ui-review-2026-09-25.md` | adversarial and code/browser reviews of the mock | snapshot, orphan |
