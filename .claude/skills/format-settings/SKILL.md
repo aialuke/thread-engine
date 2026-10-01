@@ -1,9 +1,10 @@
 ---
 name: format-settings
 description: >
-  Settings format (multi-post Hidden Settings thread): points at the
-  settings contract and lists its research, fact-check, image and
-  checklist rules.
+  Settings format for a multi-post thread: research, fact-check, images,
+  and the checklist. Beat order, cards, closer, and the emoji budget are
+  hidden-settings. Use when draft-thread's format is settings.
+disable-model-invocation: true
 user-invocable: false
 ---
 

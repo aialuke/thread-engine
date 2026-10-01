@@ -42,17 +42,17 @@ ITEMS = {
     "CX2": ("conflict", ("ffea23c", "AGENTS.md", 20, 20), ("ffea23c", ".claude/skills/next/experiment-list.md", 19, 19)),
     "CX3": ("conflict", (None, "voice/exit-zero.md", 55, 55),
             ("literal", "When a reader raises a caveat, edit the live post to add it.")),
-    "CK1": ("consistent", (None, ".claude/skills/hidden-settings/SKILL.md", 40, 40), (None, ".claude/skills/format-build-log/SKILL.md", 31, 31)),
+    "CK1": ("consistent", (None, ".claude/skills/hidden-settings/SKILL.md", 43, 43), (None, ".claude/skills/format-build-log/SKILL.md", 34, 34)),
     "CK2": ("consistent", (None, "AGENTS.md", 8, 8), (None, "README.md", 8, 8)),
     "CK3": ("consistent", (None, "CONTEXT.md", 40, 41), (None, ".claude/skills/results/SKILL.md", 29, 29)),
     "F3": ("finding", (None, "reference/audience.md", 20, 20), (None, "voice/exit-zero.md", 40, 40)),
-    "F4": ("finding", (None, ".claude/skills/format-tool-swap/checklist.md", 16, 16), (None, ".claude/skills/draft-thread/SKILL.md", 51, 52)),
-    "F5": ("finding", (None, "voice/exit-zero.md", 52, 52), (None, ".claude/skills/format-tool-swap/SKILL.md", 84, 90)),
-    "F6": ("finding", ("260bd45", "voice/exit-zero.md", 16, 16), (None, ".claude/skills/format-tool-swap/SKILL.md", 62, 62)),
-    "F7": ("finding", (None, ".claude/skills/verify-settings/SKILL.md", 55, 56), (None, ".claude/skills/verify-settings/SKILL.md", 60, 60)),
-    "F8": ("finding", (None, ".claude/skills/draft-thread/SKILL.md", 31, 31), (None, "CONTEXT.md", 148, 150)),
-    "F10": ("finding", ("260bd45", "voice/exit-zero.md", 34, 34), (None, ".claude/skills/format-tool-swap/SKILL.md", 84, 90)),
-    "F11": ("finding", (None, "AGENTS.md", 8, 8), (None, ".claude/skills/draft-thread/SKILL.md", 16, 16)),
+    "F4": ("finding", (None, ".claude/skills/format-tool-swap/checklist.md", 16, 16), (None, ".claude/skills/draft-thread/SKILL.md", 53, 54)),
+    "F5": ("finding", (None, "voice/exit-zero.md", 52, 52), (None, ".claude/skills/format-tool-swap/SKILL.md", 88, 94)),
+    "F6": ("finding", ("260bd45", "voice/exit-zero.md", 16, 16), (None, ".claude/skills/format-tool-swap/SKILL.md", 66, 66)),
+    "F7": ("finding", (None, ".claude/skills/verify-settings/SKILL.md", 58, 59), (None, ".claude/skills/verify-settings/SKILL.md", 63, 63)),
+    "F8": ("finding", (None, ".claude/skills/draft-thread/SKILL.md", 33, 33), (None, "CONTEXT.md", 148, 150)),
+    "F10": ("finding", ("260bd45", "voice/exit-zero.md", 34, 34), (None, ".claude/skills/format-tool-swap/SKILL.md", 88, 94)),
+    "F11": ("finding", (None, "AGENTS.md", 8, 8), (None, ".claude/skills/draft-thread/SKILL.md", 18, 18)),
 }
 PILOT = ["CX1", "CK1"]
 
@@ -112,8 +112,8 @@ SWAP = ".claude/skills/format-tool-swap/SKILL.md"
 TRIMS = {
     "CX1": ("sentence", ".claude/skills/posted/SKILL.md", 13,
             "Save the output to `ledger/raw/<root id>-posted.txt` (it holds only the account's own posts)."),
-    "F10": ("sentence", SWAP, 87, "- **Ends at the thank-you.** The card carries nothing about the next post."),
-    "F5": ("lines", SWAP, [81, 84]),
+    "F10": ("sentence", SWAP, 91, "- **Ends at the thank-you.** The card carries nothing about the next post."),
+    "F5": ("lines", SWAP, [85, 88]),
 }
 
 

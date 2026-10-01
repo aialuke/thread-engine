@@ -2,7 +2,9 @@
 name: format-build-log
 description: >
   Build-log format: one standalone post on what the pipeline did, with
-  real proof attached, how, and what broke.
+  real proof attached, how, and what broke. Use for a build-in-public
+  update, what the pipeline did today, or /format-build-log.
+disable-model-invocation: true
 when-to-use: Use for a build-in-public update, what the pipeline did today, or /format-build-log.
 ---
 
@@ -27,8 +29,9 @@ No real proof, no build log. Offer a different format instead.
 2. **How**: one or two sentences on the step or tool that made it work.
 3. **Broke**: one honest line on what didn't work or what's next.
 4. **Proof**: the attachment. The text points at it without overselling it.
+5. **Question**: one real question, per `voice/exit-zero.md` → Asking for engagement.
 
-Under 280 characters when possible, never over 600. The root stands alone.
+Under 280 characters when possible, never over 600. The cap is the build-log `root_limit` in `scripts/formats.py`. The root stands alone.
 
 Optional: one self-reply card with the detail a builder would ask for (the prompt, the numbers, the agent setup). Never more than one card.
 

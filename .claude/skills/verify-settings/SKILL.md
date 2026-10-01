@@ -1,8 +1,11 @@
 ---
 name: verify-settings
 description: >
-  Verify candidate or existing draft claims and changed Settings paths.
-  Writes PATHS.md or CLAIMS.md; unconfirmed rows stay VERIFY.
+  Verifies candidate or existing draft claims and changed Settings paths.
+  Writes PATHS.md or CLAIMS.md; unconfirmed rows stay VERIFY. Use before
+  a draft is marked ready, when a Settings path might have changed, or
+  /verify-settings.
+disable-model-invocation: true
 when-to-use: >
   Use before a draft is marked ready, when a Settings path might have
   changed, or /verify-settings.

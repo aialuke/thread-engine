@@ -16,6 +16,12 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
+_SCRIPTS = Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+
+import formats
+
 CARD_RE = re.compile(r"^[0-9]{2}-.+\.md$")
 IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 CODE_RE = re.compile(r"`([^`]+)`")
@@ -27,26 +33,14 @@ LONG_POST = (
 )
 LEAD_NUMBER_RE = re.compile(r"^(?:Setting\s+(\d+)\b|(\d+)\.\s)")
 VERIFY_RE = re.compile(r"\bVERIFY\b")
-FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "build-log", "tool-verdict"}
-# Formats whose skill caps the root at 600 characters (a stranger sees only the root, algorithm facts A1-A2).
-ROOT_LIMIT_FORMATS = {"settings", "single-tip", "build-log", "tool-verdict", "tool-swap"}
-ROOT_LIMIT = 600
-SHORT_LIMIT = 280
+FORMATS = set(formats.DRAFT_FORMATS)
+ROOT_LIMIT = formats.ROOT_LIMIT
+SHORT_LIMIT = formats.SHORT_LIMIT
 # X's weighted length (twitter-text v3): these code points count 1, every other one 2 (so → ▷ and emoji
 # count 2), and a link counts 23. X cut post 1 of PAID → FREE at 277 by this count, 270 by Python's.
 X_ONE_WEIGHT = ((0, 4351), (8192, 8205), (8208, 8223), (8242, 8247))
 URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
 X_URL_LENGTH = 23
-# The PAID → FREE series header (.claude/skills/format-tool-swap/SKILL.md). Every tool-swap root opens with it.
-SWAP_LABEL = "PAID → FREE"
-SWAP_WORDS = ("creator", "productivity", "developer", "privacy", "system", "storage", "diagram", "finance",
-              "local AI", "self-hosting", "support")
-SWAP_STEM_RE = re.compile(r"Finding free (?:" + "|".join(re.escape(w) for w in SWAP_WORDS)
-                          + r") tools that actually hold up\.")
-HANDLE_RE = re.compile(r"(?<![\w@])@\w{1,15}")
-HASHTAG_RE = re.compile(r"(?<![\w&#])#[^\W\d]\w*")
-PART_RE = re.compile(r"^\s*(\d{1,2})/(\d{1,2})\b|\b(\d{1,2})/(\d{1,2})\s*$", re.MULTILINE)
-SHOUTOUT_WAIT = "Wait 10–20 minutes after card 1, then post card 2 as a reply (the shout-out)."
 DIGEST_RE = re.compile(r"^cards-sha256:\s*([0-9a-f]{64})\s*$", re.MULTILINE)
 THOUGHTS_RE = re.compile(r"your thoughts", re.IGNORECASE)
 # X's Original Content Rewards rules: "Do not solicit engagements: repeatedly instructing users to engage
@@ -72,34 +66,6 @@ def x_length(text: str) -> int:
     rest = URL_RE.sub("", text)
     weight = sum(1 if any(lo <= ord(ch) <= hi for lo, hi in X_ONE_WEIGHT) else 2 for ch in rest)
     return weight + X_URL_LENGTH * len(links)
-
-
-def thread_part(text: str) -> str | None:
-    """A thread counter like 1/5 at the start or end of a line; 24/7 is not one."""
-    for match in PART_RE.finditer(text):
-        first, total = (match.group(1), match.group(2)) if match.group(1) else (match.group(3), match.group(4))
-        if 1 <= int(first) <= int(total) and int(total) > 1:
-            return match.group(0).strip()
-    return None
-
-
-def swap_root_refusals(text: str) -> list[str]:
-    reasons: list[str] = []
-    lines = text.splitlines()
-    header_ok = (len(lines) >= 2 and lines[0].strip() == SWAP_LABEL and bool(SWAP_STEM_RE.fullmatch(lines[1].strip())))
-    if not header_ok:
-        reasons.append(f"REFUSED: a tool-swap root opens with the series header: '{SWAP_LABEL}', then "
-                       f"'Finding free <word> tools that actually hold up.' with <word> one of: {', '.join(SWAP_WORDS)}")
-    handle = HANDLE_RE.search(text)
-    if handle:
-        reasons.append(f"REFUSED: {handle.group(0)} in the tool-swap root; handles go in the shout-out card only")
-    tag = HASHTAG_RE.search(text)
-    if tag:
-        reasons.append(f"REFUSED: hashtag {tag.group(0)} in the tool-swap root")
-    part = thread_part(text)
-    if part:
-        reasons.append(f"REFUSED: thread counter {part!r} in the tool-swap root")
-    return reasons
 
 
 def _add_hint(hints: list[str], seen: set[str], raw: str) -> None:
@@ -181,17 +147,17 @@ def card_refusals(draft: Path, found: list[Path]) -> list[str]:
     reasons: list[str] = []
     numbers: dict[str, str] = {}
     fmt = draft_format(draft)
-    if fmt not in FORMATS:
+    spec = formats.DRAFT_FORMATS.get(fmt)
+    if spec is None:
         reasons.append(f"REFUSED: unknown FORMAT {fmt!r}; expected one of {', '.join(sorted(FORMATS))}")
+    else:
+        count = formats.card_count_reason(fmt, spec, len(found))
+        if count:
+            reasons.append(count)
     for card in found:
         text = tweet_text(card)
-        if fmt == "settings" and card.name == "01-hook.md" and setup_day_open(text):
-            reasons.append("REFUSED: hook opens on the setup-day line")
-        if fmt in ROOT_LIMIT_FORMATS and card.name == "01-hook.md" and x_length(text) > ROOT_LIMIT:
-            reasons.append(f"REFUSED: 01-hook.md is {x_length(text)} characters as X counts them; "
-                           f"the {fmt} format caps the root at {ROOT_LIMIT}")
-        if fmt == "tool-swap" and card.name == "01-hook.md":
-            reasons.extend(swap_root_refusals(text))
+        if spec is not None and card.name == "01-hook.md":
+            reasons.extend(formats.root_reasons(fmt, spec, text, x_length(text)))
         if VERIFY_RE.search(text):
             reasons.append(f"REFUSED: VERIFY in {card.name}")
         if "💬" in text:
@@ -232,10 +198,6 @@ def first_line(text: str) -> str:
         if stripped:
             return stripped
     return ""
-
-
-def setup_day_open(text: str) -> bool:
-    return first_line(text).startswith("Most ")
 
 
 def cards(draft: Path) -> list[Path]:
@@ -279,23 +241,26 @@ def run_sheet(draft: Path, found: list[Path]) -> str:
         rows.append(row)
     if over_short_limit:
         lines.append(LONG_POST)
-    if draft_format(draft) == "tool-swap" and len(found) > 1:
-        lines.append(SHOUTOUT_WAIT)
+    spec = formats.DRAFT_FORMATS.get(draft_format(draft))
+    note = formats.after_root_note(spec, len(found)) if spec else None
+    if note:
+        lines.append(note)
     lines.append("")
     lines.extend(rows)
     return "\n".join(lines) + "\n"
 
 
 def count_sheet(draft: Path, found: list[Path]) -> str:
-    fmt = draft_format(draft)
+    name = draft_format(draft)
+    spec = formats.DRAFT_FORMATS.get(name)
     rows = ["Characters as X counts them (→, ▷ and emoji count 2; a link counts 23)."]
     for card in found:
         length = x_length(tweet_text(card))
         notes = []
         if length > SHORT_LIMIT:
             notes.append("over 280: a free account can't post it, and the feed shows the start then 'Show more'")
-        if fmt in ROOT_LIMIT_FORMATS and card.name == "01-hook.md" and length > ROOT_LIMIT:
-            notes.append(f"over the {fmt} root cap of {ROOT_LIMIT}")
+        if spec is not None and spec.root_limit is not None and card.name == "01-hook.md" and length > spec.root_limit:
+            notes.append(f"over the {name} root cap of {spec.root_limit}")
         rows.append(f"{length}  {card.name}" + (f"  ({'; '.join(notes)})" if notes else ""))
     return "\n".join(rows) + "\n"
 
@@ -320,8 +285,10 @@ def copy_message(draft: Path, found: list[Path], number: int) -> str:
         opening = first_line(text)
         if opening:
             rows.append("open: " + opening)
-    if number == 1 and len(found) > 1 and draft_format(draft) == "tool-swap":
-        rows.append("wait: " + SHOUTOUT_WAIT)
+    spec = formats.DRAFT_FORMATS.get(draft_format(draft))
+    note = formats.after_root_note(spec, len(found)) if spec and number == 1 else None
+    if note:
+        rows.append("wait: " + note)
     if number < len(found):
         rows.append(f"next: python3 scripts/post_thread.py {draft} --copy {number + 1}")
     else:
@@ -329,12 +296,7 @@ def copy_message(draft: Path, found: list[Path], number: int) -> str:
     return "\n".join(rows) + "\n"
 
 
-def main(
-    argv: list[str] | None = None,
-    *,
-    copy_text: Callable[[bytes], None] = copy_utf8,
-    reveal: Callable[[Path], None] = reveal_in_finder,
-) -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Write POST.txt for an approved draft. v1 does not call the X API."
     )
@@ -362,6 +324,34 @@ def main(
         metavar="N",
         help="Copy post N to the clipboard. Reads the card, not POST.txt.",
     )
+    return parser
+
+
+def request_refusal(args: argparse.Namespace, draft: Path, found: list) -> int | None:
+    """The exit code for a request the gate refuses once the draft is approved, else None."""
+    if args.copy is not None and not 1 <= args.copy <= len(found):
+        print(f"REFUSED: no post {args.copy}", file=sys.stderr)
+        return 1
+    refused = card_refusals(draft, found)
+    stale = approval_refusal(draft, found)
+    if stale:
+        refused.insert(0, stale)
+    if refused:
+        print("\n".join(refused), file=sys.stderr)
+        return 1
+    if not args.dry_run:
+        print("v1 does not call the X API", file=sys.stderr)
+        return 1
+    return None
+
+
+def main(
+    argv: list[str] | None = None,
+    *,
+    copy_text: Callable[[bytes], None] = copy_utf8,
+    reveal: Callable[[Path], None] = reveal_in_finder,
+) -> int:
+    parser = build_parser()
     args = parser.parse_args(argv)
 
     draft = args.draft
@@ -386,32 +376,9 @@ def main(
         print(f"REFUSED: no numbered cards in {draft}", file=sys.stderr)
         return 1
 
-    # v2, only after APPROVED is present and --no-dry-run is passed.
-    # Token stays out of the repo: token = os.environ["X_BEARER"]
-    # (user-context token; never a file in this repo).
-    # For each media hint: POST https://api.x.com/2/media/upload
-    #   (large files: /2/media/upload/initialize, then /{id}/append, then /{id}/finalize).
-    #   Keep data.id.
-    # First tweet: POST https://api.x.com/2/tweets
-    #   {"text", "media": {"media_ids": [...]}}
-    # Each later tweet, in card order: POST https://api.x.com/2/tweets
-    #   {"text", "reply": {"in_reply_to_tweet_id": previous_id}, "media": {"media_ids": [...]}}
-    # v1 does not call any of this.
-    if args.copy is not None and not 1 <= args.copy <= len(found):
-        print(f"REFUSED: no post {args.copy}", file=sys.stderr)
-        return 1
-
-    refused = card_refusals(draft, found)
-    stale = approval_refusal(draft, found)
-    if stale:
-        refused.insert(0, stale)
-    if refused:
-        print("\n".join(refused), file=sys.stderr)
-        return 1
-
-    if not args.dry_run:
-        print("v1 does not call the X API", file=sys.stderr)
-        return 1
+    refusal = request_refusal(args, draft, found)
+    if refusal is not None:
+        return refusal
 
     sheet = run_sheet(draft, found)
     (draft / "POST.txt").write_text(sheet, encoding="utf-8")

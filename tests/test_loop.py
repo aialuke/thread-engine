@@ -409,6 +409,27 @@ class Experiments(LoopCase):
         self.assertFalse(self.ok("review-due", now=hours(24))["review_due"])
         self.assertTrue(self.ok("review-due", now=hours(24 * 7))["review_due"])
 
+    def test_a_stale_lesson_keeps_adopted(self) -> None:
+        path = self.root / "loop" / "state.json"
+        state = json.loads(path.read_text())
+        old = hours(-24 * 50)
+        state["lessons"] = [{
+            "id": "L-001", "experiment": None, "statement": "short", "status": "adopted",
+            "evidence": ["1", "2", "3"], "reference_facts": [], "created_at": old, "last_evidence_at": old,
+        }, {
+            "id": "L-002", "experiment": None, "statement": "fresh", "status": "adopted",
+            "evidence": ["4"], "reference_facts": [], "created_at": T0, "last_evidence_at": T0,
+        }]
+        path.write_text(json.dumps(state))
+        got = self.ok("mark-reviewed", now=T0)
+        self.assertEqual(got["newly_stale"], ["L-001"])
+        saved = json.loads(path.read_text())
+        self.assertEqual([lesson["status"] for lesson in saved["lessons"]], ["adopted", "adopted"])
+        self.assertEqual(self.ok("status", now=T0)["stale_lessons"], ["L-001"])
+        self.assertEqual(self.ok("mark-reviewed", now=hours(1))["newly_stale"], [])
+        self.assertIn("| L-001 | adopted | stale | none |", (self.root / "learnings.md").read_text())
+        self.assertIn("| L-002 | adopted | current | none |", (self.root / "learnings.md").read_text())
+
     def test_lane_share(self) -> None:
         self.post("7000000001", hours(1))
         self.post("7000000002", hours(2), lane="other")
@@ -671,10 +692,10 @@ class Rules(LoopCase):
         state = json.loads(state_path.read_text())
         state["lessons"].append({"id": "L-001", "experiment": "E-001", "statement": "short roots",
                                  "status": "adopted", "evidence": ["1"], "reference_facts": [],
-                                 "created_at": T0, "last_evidence_at": T0, "rule_state": "none"})
+                                 "created_at": T0, "last_evidence_at": T0})
         state["lessons"].append({"id": "L-002", "experiment": "E-002", "statement": "no",
                                  "status": "no_effect", "evidence": ["2"], "reference_facts": [],
-                                 "created_at": T0, "last_evidence_at": T0, "rule_state": "none"})
+                                 "created_at": T0, "last_evidence_at": T0})
         state_path.write_text(json.dumps(state))
         self.rel = ".claude/skills/format-single-tip/SKILL.md"
 
@@ -686,7 +707,8 @@ class Rules(LoopCase):
         self.assertEqual(undone["reverted"], applied["committed"])
         self.assertEqual(self.skill.read_text(), "v1\n")
         state = json.loads((self.root / "loop" / "state.json").read_text())
-        self.assertEqual(state["lessons"][0]["rule_state"], "reverted")
+        self.assertTrue(state["rules"][0]["undone"])
+        self.assertIn("| L-001 | adopted | current | reverted |", (self.root / "learnings.md").read_text())
 
     def test_learnings_show_the_basis_of_an_adopted_lesson_only(self) -> None:
         self.ok("mark-reviewed", now=T0)
@@ -703,6 +725,18 @@ class Rules(LoopCase):
                               text=True, check=True).stdout
         self.assertIn("Provisional: experiment E-001 is not in the ledger", body)
         self.assertIn("Evidence: 1", body)
+
+    def test_a_stale_adopted_lesson_can_still_change_a_rule(self) -> None:
+        path = self.root / "loop" / "state.json"
+        state = json.loads(path.read_text())
+        state["lessons"][0]["last_evidence_at"] = hours(-24 * 50)
+        path.write_text(json.dumps(state))
+        self.ok("mark-reviewed", now=T0)
+        self.skill.write_text("v2\n", encoding="utf-8")
+        applied = self.ok("commit-rule", "--lesson", "L-001", "--files", self.rel, now=T0)
+        self.assertEqual(len(applied["committed"]), 40)
+        self.assertEqual(json.loads(path.read_text())["lessons"][0]["status"], "adopted")
+        self.assertIn("| L-001 | adopted | stale | applied |", (self.root / "learnings.md").read_text())
 
     def test_only_adopted_lessons_apply(self) -> None:
         self.skill.write_text("v2\n", encoding="utf-8")

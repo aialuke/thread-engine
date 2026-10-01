@@ -220,6 +220,15 @@ class RecordPostRules(RawCase):
         self.assertEqual(self.refusal("record-post", "--json", self.payload_for(arm="treatment")),
                          "arm set without an experiment")
 
+    def test_a_deviation_edit_leaves_the_experiment(self) -> None:
+        self.put_experiment("testing")
+        got = self.ok("record-post", "--json", self.payload_for(
+            experiment="E-001", arm="treatment", edits=[{"class": "deviation", "note": "dropped a card"}]))
+        self.assertEqual(got, {"recorded": True, "root_id": self.ID, "left_experiment": True})
+        post = json.loads(self.ledger_path(self.ID).read_text())
+        self.assertEqual((post["experiment"], post["arm"]), (None, "none"))
+        self.assertEqual(post["edits"][0]["class"], "deviation")
+
     def test_a_posted_record_replaces_an_auto_post_and_keeps_its_history(self) -> None:
         self.post(self.ID, T0, auto=True, retrospective=True, made_in_repo=False, lane="other", format="other")
         self.snap(self.ID, hours(40), 50)
@@ -323,7 +332,7 @@ class Evaluate(ExperimentSetup):
         self.assertEqual(state["lessons"], [{
             "id": "L-001", "experiment": "E-001", "statement": "standalone post", "status": "adopted",
             "evidence": first + second, "reference_facts": [], "created_at": hours(300),
-            "last_evidence_at": hours(300), "rule_state": "none"}])
+            "last_evidence_at": hours(300)}])
 
     def test_no_posts_passing_closes_as_no_effect(self) -> None:
         self.open()

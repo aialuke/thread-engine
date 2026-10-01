@@ -8,7 +8,7 @@
 
 ## Root
 - [ ] Sentence 1 names the product and the result
-- [ ] Root is under 600 characters and works without the cards
+- [ ] Root is under 600 characters (`scripts/formats.py`) and works without the cards
 - [ ] Hook satisfies every beat under Hook beat order (`hidden-settings/SKILL.md`), in order; a later-result snap names when it shows
 
 ## Cards and closer

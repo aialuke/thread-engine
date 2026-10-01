@@ -2,7 +2,9 @@
 name: format-single-tip
 description: >
   Single-tip format: one standalone post with one setting or tip and its
-  whole payoff. No thread.
+  whole payoff. No thread. Use for a single standalone tip post, or
+  /format-single-tip.
+disable-model-invocation: true
 when-to-use: Use for a single standalone tip post, or /format-single-tip.
 ---
 
@@ -17,8 +19,9 @@ One post. No replies from the account. It is eligible for the small-author lift 
 3. **Path** — the exact path from `PATHS.md`, or the exact action.
 4. **Payoff** — what the reader notices next time.
 5. **Skip line** — when the menu can be missing.
+6. **Question** — one real question, per `voice/exit-zero.md` → Asking for engagement.
 
-Under 280 characters when possible, so it fits a free account. Never over 600.
+Under 280 characters when possible, so it fits a free account. Never over 600, the single-tip root cap in `scripts/formats.py`.
 
 ## Research and fact-check
 

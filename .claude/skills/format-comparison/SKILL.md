@@ -2,7 +2,9 @@
 name: format-comparison
 description: >
   Comparison format: new product against the one it replaces. Comparison
-  hook, difference cards, comparison closer.
+  hook, difference cards, comparison closer. Use for a product comparison
+  thread, or /format-comparison.
+disable-model-invocation: true
 when-to-use: Use for a product comparison thread, or /format-comparison.
 ---
 

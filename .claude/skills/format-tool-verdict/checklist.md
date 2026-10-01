@@ -5,8 +5,9 @@
 - [ ] Sentence 1 names the winner and the task it won
 - [ ] One evidence line per tool
 - [ ] A limit line: task, runs, date and model versions
+- [ ] Ends on one real question naming a fork, not a request to reply, like or share
 - [ ] No "best" beyond the tested task
-- [ ] Under 280 characters if possible, never over 600
+- [ ] Under 280 characters if possible, never over 600 (`scripts/formats.py`)
 - [ ] At most one self-reply card
 - [ ] voice/exit-zero.md banned phrases and farm tells cut
 - [ ] APPROVED is absent. The operator approves by typing /approve <slug>

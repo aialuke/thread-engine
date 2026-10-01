@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import re
+import sys
 import unittest
 from pathlib import Path
 
@@ -11,6 +12,7 @@ REPO = Path(__file__).resolve().parent.parent
 SKILLS = REPO / ".claude" / "skills"
 MAX_LINES = 500
 SCRIPT_REF = re.compile(r"scripts/[A-Za-z0-9_/]+\.py")
+LIMIT_REF = re.compile(r"(?:under|over|at most)[ -](\d{3})[ -]characters?|never over (\d{3})", re.I)
 
 
 def skill_files() -> list[Path]:
@@ -69,6 +71,21 @@ class SkillChecks(unittest.TestCase):
         text = (SKILLS / "next" / "SKILL.md").read_text(encoding="utf-8")
         for operator in ("-filter:", "min_faves:", "min_retweets:", "within_time:"):
             self.assertNotIn(operator, text)
+
+    def test_stated_character_limits_match_the_gate(self):
+        """The gate's constants are the source; skills restate them, so a changed limit fails here."""
+        sys.path.insert(0, str(REPO / "scripts"))
+        import post_thread
+
+        allowed = {post_thread.ROOT_LIMIT, post_thread.SHORT_LIMIT}
+        files = 0
+        for md in sorted(SKILLS.glob("*/*.md")):
+            stated = {int(n) for pair in LIMIT_REF.findall(md.read_text(encoding="utf-8")) for n in pair if n}
+            if stated:
+                files += 1
+            with self.subTest(file=f"{md.parent.name}/{md.name}"):
+                self.assertLessEqual(stated, allowed)
+        self.assertGreaterEqual(files, 6, "the limit pattern no longer finds the skills that state it")
 
 
 if __name__ == "__main__":

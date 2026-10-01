@@ -1,9 +1,11 @@
 ---
 name: draft-thread
 description: >
-  Draft one post or thread into drafts/YYYY-MM-DD-slug/ in the format its
+  Drafts one post or thread into drafts/YYYY-MM-DD-slug/ in the format its
   queue row names: research and verify, write the cards, print a preview.
-  Approval is the operator's typed /approve.
+  Approval is the operator's typed /approve. Use when the operator says
+  draft a thread, draft the next post, write the hook, or /draft-thread.
+disable-model-invocation: true
 when-to-use: >
   Use when the operator says draft a thread, draft the next post, write
   the hook, or /draft-thread.
@@ -27,7 +29,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`. Wit
 2. **Topic.** Find the queue row. Note `format`, `lane`, `experiment`, `arm`, `treatment`, and `hypothesis` if present. A row with no `format` is `settings`. Resolve the folder `drafts/YYYY-MM-DD-slug/` (today's date in Australia/Brisbane); reuse it if it exists.
    Done: slug, folder, format and, if set, the experiment arm are written down.
 
-3. **Format.** Read `.claude/skills/format-<format>/SKILL.md`, its contract and checklist, and each reference whose stated condition applies to this draft. A settings row also reads `.claude/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening and length from the format, because the shipped roots predate the result-first, under-600-character rule. Take the closer from the format too: the gold's closing lines ("Reply with…", 💬) predate the gate, which refuses them.
+3. **Format.** Read `.claude/skills/format-<format>/SKILL.md`, its contract and checklist, and each reference whose stated condition applies to this draft. A settings row also reads `.claude/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening, length and closer from the format (`hidden-settings` says why the gold differs).
    If the row is a `treatment` or `control` arm, the arm's description wins over the format's defaults (for example post count). Never change anything else about the post, so the test stays clean.
    Done: the applicable shape, research and verification mode, image rule and checklist are identified, including any arm override.
 
@@ -39,7 +41,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`. Wit
 
 6. **Files.** In the draft folder:
    - `FORMAT` — one word: `settings`, `comparison`, `tool-swap`, `single-tip`, `build-log`, or `tool-verdict`
-   - `01-hook.md` and further consecutive `NN-<name>.md` cards as the format's shape says. A single-tip has only `01-hook.md`; a build-log, tool-verdict or tool-swap has at most one card after it (a tool-swap's is the maker shout-out, `02-shoutout.md`).
+   - `01-hook.md` and further consecutive `NN-<name>.md` cards as the format's shape says. A single-tip has only `01-hook.md`; a build-log, tool-verdict or tool-swap has at most one card after it (a tool-swap's is the maker shout-out, `02-shoutout.md`). Those bounds are `max_cards` in `scripts/formats.py`; the gate refuses a draft outside them.
    - `REPLIES.md` for a tool-swap: talking points from `CLAIMS.md` (`voice/exit-zero.md` → Replies)
    - `images.md` — what to attach, following the format's image rule. Write `Attach: none` when nothing is attached.
    - `CHECKLIST.md` — copy of `.claude/skills/format-<format>/checklist.md`, boxes ticked where done

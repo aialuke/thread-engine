@@ -20,8 +20,10 @@ import subprocess
 import sys
 import urllib.error
 import urllib.request
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
+from typing import NamedTuple
 
 import yaml
 
@@ -162,6 +164,31 @@ def _loosen(direction: str, base: float, local: float) -> bool:
     return local < base if direction == "max" else local > base
 
 
+def _tighten(merged: dict, local: dict) -> None:
+    """Apply each TIGHTER number from the local file; a number that would loosen the policy is an error."""
+    for path, direction in TIGHTER.items():
+        value = _get(local, path)
+        if value is None:
+            continue
+        current = _get(merged, path)
+        if not isinstance(value, (int, float)) or isinstance(value, bool):
+            raise PolicyError(f"{'.'.join(path)} must be a number")
+        if _loosen(direction, float(current), float(value)):
+            raise PolicyError(f"{'.'.join(path)} would loosen {current} to {value}")
+        _set(merged, path, value)
+
+
+def _drop_only(base: dict, local: dict, merged: dict, path: tuple[str, ...], noun: str) -> None:
+    """A local list may only remove entries from the committed one."""
+    value = _get(local, path)
+    if value is None:
+        return
+    allowed = list(_get(base, path))
+    if not isinstance(value, list) or any(item not in allowed for item in value):
+        raise PolicyError(f"{path[-1]} can only drop {noun}")
+    _set(merged, path, value)
+
+
 def merge_policy(base: dict, local: dict | None) -> dict:
     """Apply a local file. Loosening, or a key this file does not know, is an error."""
     merged = json.loads(json.dumps(base))
@@ -177,28 +204,9 @@ def merge_policy(base: dict, local: dict | None) -> dict:
         merged["mode"] = local["mode"]
     if "model" in local and local["model"] != PINNED_MODEL:
         merged["model"] = PINNED_MODEL
-    for path, direction in TIGHTER.items():
-        value = _get(local, path)
-        if value is None:
-            continue
-        current = _get(merged, path)
-        if not isinstance(value, (int, float)) or isinstance(value, bool):
-            raise PolicyError(f"{'.'.join(path)} must be a number")
-        if _loosen(direction, float(current), float(value)):
-            raise PolicyError(f"{'.'.join(path)} would loosen {current} to {value}")
-        _set(merged, path, value)
-    prefixes = _get(local, ("skip", "commit", "message_prefixes"))
-    if prefixes is not None:
-        base_prefixes = list(_get(base, ("skip", "commit", "message_prefixes")))
-        if not isinstance(prefixes, list) or any(p not in base_prefixes for p in prefixes):
-            raise PolicyError("message_prefixes can only drop a prefix")
-        _set(merged, ("skip", "commit", "message_prefixes"), prefixes)
-    dirs = _get(local, ("skip", "delete_dirs"))
-    if dirs is not None:
-        base_dirs = list(_get(base, ("skip", "delete_dirs")))
-        if not isinstance(dirs, list) or any(d not in base_dirs for d in dirs):
-            raise PolicyError("delete_dirs can only drop a directory")
-        _set(merged, ("skip", "delete_dirs"), dirs)
+    _tighten(merged, local)
+    _drop_only(base, local, merged, ("skip", "commit", "message_prefixes"), "a prefix")
+    _drop_only(base, local, merged, ("skip", "delete_dirs"), "a directory")
     if "policy_version" in local:
         if not isinstance(local["policy_version"], int) or local["policy_version"] < base["policy_version"]:
             raise PolicyError("policy_version cannot go backwards")
@@ -363,8 +371,13 @@ def _split_ops(text: str) -> list[tuple[str, str]]:
     return [(op, segment) for op, segment in pieces if segment]
 
 
-def _drop_sudo(argv: list[str]) -> list[str]:
-    takes = {"-u", "-g", "-U", "-h", "-p", "-C", "-D", "-r", "-t", "-T", "--user", "--group", "--host", "--prompt", "--chdir"}
+SUDO_TAKES = frozenset({"-u", "-g", "-U", "-h", "-p", "-C", "-D", "-r", "-t", "-T",
+                        "--user", "--group", "--host", "--prompt", "--chdir"})
+ENV_TAKES = frozenset({"-u", "--unset", "-C", "--chdir", "-S", "--split-string"})
+
+
+def _after_options(argv: list[str], takes: frozenset[str] = frozenset(), skip_assignments: bool = False) -> list[str]:
+    """argv past a wrapper's own options. `--` ends them, a flag in `takes` also eats its value."""
     index = 1
     while index < len(argv):
         token = argv[index]
@@ -372,45 +385,23 @@ def _drop_sudo(argv: list[str]) -> list[str]:
             return argv[index + 1:]
         if token in takes:
             index += 2
-            continue
-        if token.startswith("-"):
+        elif token.startswith("-") or (skip_assignments and "=" in token):
             index += 1
-            continue
-        return argv[index:]
+        else:
+            return argv[index:]
     return []
+
+
+def _drop_sudo(argv: list[str]) -> list[str]:
+    return _after_options(argv, SUDO_TAKES)
 
 
 def _drop_command(argv: list[str]) -> list[str]:
-    index = 1
-    while index < len(argv):
-        token = argv[index]
-        if token == "--":
-            return argv[index + 1:]
-        if token.startswith("-"):
-            index += 1
-            continue
-        return argv[index:]
-    return []
+    return _after_options(argv)
 
 
 def _drop_env(argv: list[str]) -> list[str]:
-    takes = {"-u", "--unset", "-C", "--chdir", "-S", "--split-string"}
-    index = 1
-    while index < len(argv):
-        token = argv[index]
-        if token == "--":
-            return argv[index + 1:]
-        if token in takes:
-            index += 2
-            continue
-        if token.startswith("-"):
-            index += 1
-            continue
-        if "=" in token:
-            index += 1
-            continue
-        return argv[index:]
-    return []
+    return _after_options(argv, ENV_TAKES, skip_assignments=True)
 
 
 def _strip_wrappers(argv: list[str]) -> list[str]:
@@ -1097,7 +1088,17 @@ def append_receipt(path: Path, row: dict, key: str | None) -> None:
         handle.write(text + "\n")
 
 
-def _receipt(fork: str, event: dict, policy: dict, state, questions, answers, would: bool, did: bool, reason) -> dict:
+@dataclass(frozen=True)
+class Outcome:
+    """What a request came to: the verdict, whether it was let through, and why it was skipped."""
+    would: bool
+    did: bool
+    reason: str | None
+    questions: dict = field(default_factory=dict)
+    answers: dict = field(default_factory=dict)
+
+
+def _receipt(fork: str, event: dict, policy: dict, state, outcome: Outcome) -> dict:
     return {
         "ts": now_iso(),
         "fork": fork,
@@ -1106,12 +1107,12 @@ def _receipt(fork: str, event: dict, policy: dict, state, questions, answers, wo
         "tool": tool_name(event),
         "state_hash": state_hash(state),
         "state_token_estimate": _token_len(state, policy["tokens"]["chars_per_token"]),
-        "questions": questions,
-        "answers": answers,
+        "questions": outcome.questions,
+        "answers": outcome.answers,
         "policy_version": policy["policy_version"],
-        "would_allow": would,
-        "did_allow": did,
-        "skipped_reason": reason,
+        "would_allow": outcome.would,
+        "did_allow": outcome.did,
+        "skipped_reason": outcome.reason,
     }
 
 
@@ -1135,72 +1136,40 @@ HARD_LINES = {
 }
 
 
-def dispatch(event: dict, deps: dict | None = None) -> int:
-    deps = deps or {}
-    prompts = Path(deps.get("prompts", PROMPTS))
-    receipts = Path(deps.get("receipts", RECEIPTS))
-    if not tool_name(event) and "prompt" in event:
-        save_prompt(event, prompts)
-        return 0
-
-    command = str(tool_input(event).get("command", "")) if tool_name(event) in SHELL_TOOLS else ""
-    rule = hard_rule(command, workspace_of(event)) if command else None
+def _config(deps: dict) -> tuple[dict, dict] | None:
+    """(policy, questions), or None when a config file cannot be read."""
     try:
         policy = deps["policy"] if "policy" in deps else load_policy()
         questions = deps["questions"] if "questions" in deps else load_questions()
     except PolicyError:
-        policy = load_base_policy()
-        questions = load_questions()
+        return load_base_policy(), load_questions()
     except (OSError, yaml.YAMLError, json.JSONDecodeError):
-        if rule:
-            return _deny(HARD_LINES[rule])
-        return 0
+        return None
+    return policy, questions
 
-    if rule:
-        line = HARD_LINES[rule]
-        append_receipt(receipts, _receipt(
-            "hard", event, policy, {"command": command}, {}, {}, False, False, rule,
-        ), None)
-        return _deny(line)
 
-    fork = classify(event, policy)
-    if fork is None:
-        return 0
-
-    runner = deps.get("git")
+def _early_skip(fork: str, event: dict, command: str, policy: dict, runner) -> tuple[str, dict] | None:
+    """(reason, state) for a request the policy waves through before any prompt lookup, else None."""
     if fork == "commit" and command and commit_is_skippable(command, policy, workspace_of(event), runner):
-        append_receipt(receipts, _receipt(
-            fork, event, policy, {"command": command}, {}, {}, True, True, "trivial_commit",
-        ), None)
-        return _allow()
+        return "trivial_commit", {"command": command}
     if fork == "delete" and command and delete_is_junk(command, policy):
-        append_receipt(receipts, _receipt(
-            fork, event, policy, {"command": command}, {}, {}, True, True, "junk_delete",
-        ), None)
-        return _allow()
-
+        return "junk_delete", {"command": command}
     if bad_id(event):
-        append_receipt(receipts, _receipt(
-            fork, event, policy, {"user_request": ""}, {}, {}, True, True, "bad_id",
-        ), None)
-        return _allow()
+        return "bad_id", {"user_request": ""}
+    return None
 
-    request = read_prompt(event, prompts)
-    if request is None:
-        state = {"user_request": ""}
-        append_receipt(receipts, _receipt(
-            fork, event, policy, state, {}, {}, True, True, "missing_session",
-        ), None)
-        return _allow()
 
-    state = build_state(fork, event, request, policy, runner)
-    fork_questions = questions[fork]
-    if not within_budget(state, fork_questions, policy):
-        append_receipt(receipts, _receipt(
-            fork, event, policy, state, question_record(fork_questions), {}, True, True, "state_too_large",
-        ), None)
-        return _allow()
+class Verdict(NamedTuple):
+    state: dict
+    key: str | None
+    would: bool
+    line: str
+    reason: str | None
+    answers: dict
 
+
+def _ask_jev(fork: str, state: dict, fork_questions: dict, policy: dict, deps: dict) -> Verdict:
+    """Ask Jev, and fall back to "would allow" with the failure as the reason when the call cannot be used."""
     key = None
     try:
         key = deps["key"] if "key" in deps else read_key(deps.get("key_runner", subprocess.run))
@@ -1212,20 +1181,65 @@ def dispatch(event: dict, deps: dict | None = None) -> int:
         if not answers_usable(fork, fork_questions, got):
             raise CallFailed("api_error")
         would, line = apply_policy(fork, got, policy)
-        reason = None
-        answers = got
+        return Verdict(state, key, would, line, None, got)
     except CallFailed as exc:
-        would, line, reason, answers = True, "", exc.reason, {}
-        if exc.reason == "state_too_large":
-            line = ""
+        return Verdict(state, key, True, "", exc.reason, {})
 
-    did = would if policy.get("mode") == "active" else True
+
+def dispatch(event: dict, deps: dict | None = None) -> int:
+    deps = deps or {}
+    prompts = Path(deps.get("prompts", PROMPTS))
+    receipts = Path(deps.get("receipts", RECEIPTS))
+    if not tool_name(event) and "prompt" in event:
+        save_prompt(event, prompts)
+        return 0
+
+    command = str(tool_input(event).get("command", "")) if tool_name(event) in SHELL_TOOLS else ""
+    rule = hard_rule(command, workspace_of(event)) if command else None
+    config = _config(deps)
+    if config is None:
+        return _deny(HARD_LINES[rule]) if rule else 0
+    policy, questions = config
+
+    if rule:
+        append_receipt(receipts, _receipt(
+            "hard", event, policy, {"command": command}, Outcome(False, False, rule),
+        ), None)
+        return _deny(HARD_LINES[rule])
+
+    fork = classify(event, policy)
+    if fork is None:
+        return 0
+
+    def skip(state, reason, question_rows=None):
+        append_receipt(receipts, _receipt(
+            fork, event, policy, state, Outcome(True, True, reason, question_rows or {}),
+        ), None)
+        return _allow()
+
+    runner = deps.get("git")
+    early = _early_skip(fork, event, command, policy, runner)
+    if early:
+        return skip(early[1], early[0])
+
+    request = read_prompt(event, prompts)
+    if request is None:
+        return skip({"user_request": ""}, "missing_session")
+
+    state = build_state(fork, event, request, policy, runner)
+    fork_questions = questions[fork]
+    if not within_budget(state, fork_questions, policy):
+        return skip(state, "state_too_large", question_record(fork_questions))
+
+    verdict = _ask_jev(fork, state, fork_questions, policy, deps)
+    active = policy.get("mode") == "active"
+    did = verdict.would if active else True
     append_receipt(receipts, _receipt(
-        fork, event, policy, state, question_record(fork_questions),
-        answers, would, did, reason,
-    ), key)
-    if policy.get("mode") == "active" and not would:
-        return _deny(line)
+        fork, event, policy, verdict.state,
+        Outcome(verdict.would, did, verdict.reason, question_record(fork_questions), verdict.answers),
+    ), verdict.key)
+    if active and not verdict.would:
+        return _deny(verdict.line)
     return _allow()
 
 
@@ -1280,8 +1294,8 @@ def dry_run() -> int:
                 reason = exc.reason
         elif key:
             reason = "state_too_large"
-        row = _receipt(fork, {"toolName": "dry_run"}, policy, state,
-                       question_record(fork_questions) if not reason else {}, answers, would, True, reason)
+        outcome = Outcome(would, True, reason, question_record(fork_questions) if not reason else {}, answers)
+        row = _receipt(fork, {"toolName": "dry_run"}, policy, state, outcome)
         append_receipt(RECEIPTS, row, key)
         written += 1
     leaked = _key_in_tree(key) if key else False

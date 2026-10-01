@@ -75,8 +75,12 @@ class LessonBasis(unittest.TestCase):
                          "Provisional: 3 operator edits (a, b, c). Not measured against anything.")
 
     def test_only_adopted_lessons_have_a_basis(self) -> None:
-        for status in ("stale", "no_effect", "not_replicated"):
+        for status in ("no_effect", "not_replicated"):
             self.assertIsNone(experiments.lesson_basis(self.measured(status=status), [self.rounds(3, 3)]))
+
+    def test_a_stored_stale_status_is_still_an_adopted_outcome(self) -> None:
+        self.assertEqual(experiments.lesson_outcome({"status": "stale"}), "adopted")
+        self.assertIsNotNone(experiments.lesson_basis(self.measured(status="stale"), [self.rounds(3, 3)]))
 
     def test_a_missing_experiment_is_said_not_guessed(self) -> None:
         self.assertEqual(experiments.lesson_basis(self.measured(), []),
@@ -127,7 +131,7 @@ class Evaluate(unittest.TestCase):
         self.assertEqual(new["lessons"], [{
             "id": "L-001", "experiment": "E-001", "statement": "standalone post", "status": "adopted",
             "evidence": [f"p{i}" for i in range(6)], "reference_facts": ["f"], "created_at": AT,
-            "last_evidence_at": AT, "rule_state": "none"}])
+            "last_evidence_at": AT}])
 
     def test_posts_left_over_once_the_experiment_closes_are_dropped(self) -> None:
         new, answer = experiments.evaluate_rounds(state(experiment()), ready(1, 1, 1, 999, 999, 999, 999), AT)
@@ -209,6 +213,44 @@ class NextSlot(unittest.TestCase):
         posts = made(-1, 0, 5) + made(2, retrospective=True)
         got = experiments.next_slot(state(), START, posts, START + timedelta(days=1))
         self.assertEqual(got["posts_since_start"], 2)
+
+
+class LessonFreshness(unittest.TestCase):
+    def lesson(self, **extra) -> dict:
+        base = {"id": "L-001", "status": "adopted", "last_evidence_at": AT}
+        base.update(extra)
+        return base
+
+    def at(self, days: float) -> datetime:
+        return datetime(2026, 11, 1, tzinfo=timezone.utc) + timedelta(days=days)
+
+    def test_freshness_does_not_replace_the_outcome(self) -> None:
+        lesson = self.lesson()
+        self.assertFalse(experiments.lesson_is_stale(lesson, self.at(42)))
+        self.assertTrue(experiments.lesson_is_stale(lesson, self.at(42) + timedelta(seconds=1)))
+        self.assertEqual(lesson["status"], "adopted")
+        self.assertFalse(experiments.lesson_is_stale(self.lesson(status="no_effect"), self.at(100)))
+
+    def test_newly_stale_is_the_crossing_since_the_last_review(self) -> None:
+        lesson = self.lesson()
+        self.assertTrue(experiments.newly_stale(lesson, self.at(50), None))
+        reviewed = self.at(43)
+        self.assertFalse(experiments.newly_stale(lesson, self.at(50), reviewed))
+        self.assertTrue(experiments.newly_stale(lesson, self.at(50), self.at(40)))
+
+    def test_rule_application_is_the_latest_rules_entry(self) -> None:
+        rules = [{"lesson": "L-001", "undone": True}, {"lesson": "L-001", "undone": False}]
+        self.assertEqual(experiments.rule_application(rules, "L-001"), "applied")
+        self.assertEqual(experiments.rule_application(rules[:1], "L-001"), "reverted")
+        self.assertEqual(experiments.rule_application([], "L-001"), "none")
+
+    def test_a_deviation_edit_leaves_the_experiment(self) -> None:
+        post = {"experiment": "E-001", "arm": "treatment", "edits": [{"class": "deviation"}]}
+        self.assertTrue(experiments.leave_experiment(post))
+        self.assertEqual((post["experiment"], post["arm"]), (None, "none"))
+        kept = {"experiment": "E-001", "arm": "treatment", "edits": [{"class": "violation"}]}
+        self.assertFalse(experiments.leave_experiment(kept))
+        self.assertEqual(kept["arm"], "treatment")
 
 
 if __name__ == "__main__":

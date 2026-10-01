@@ -499,5 +499,33 @@ class SkipAndForks(unittest.TestCase):
         }
 
 
+class DryRun(unittest.TestCase):
+    def test_dry_run_writes_one_complete_receipt_per_fork_without_a_key(self) -> None:
+        """--dry-run builds receipts too; a changed receipt shape must not break it unnoticed."""
+        import shutil
+        import tempfile
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(lambda: shutil.rmtree(tmp, ignore_errors=True))
+        saved = (referee.RECEIPTS, referee.read_key)
+        self.addCleanup(lambda: (setattr(referee, "RECEIPTS", saved[0]), setattr(referee, "read_key", saved[1])))
+
+        def no_key(*_args, **_kwargs):
+            raise referee.CallFailed("keychain_missing")
+
+        referee.RECEIPTS = tmp / "decisions.jsonl"
+        referee.read_key = no_key
+        with contextlib.redirect_stdout(io.StringIO()):
+            referee.dry_run()
+        rows = receipts(tmp)
+        self.assertEqual([row["fork"] for row in rows], ["spawn", "commit", "delete"])
+        for row in rows:
+            self.assertEqual(
+                set(row),
+                {"ts", "fork", "model", "mode", "tool", "state_hash", "state_token_estimate", "questions",
+                 "answers", "policy_version", "would_allow", "did_allow", "skipped_reason"},
+            )
+            self.assertEqual((row["tool"], row["skipped_reason"]), ("dry_run", "keychain_missing"))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -8,7 +8,7 @@ readable views (experiments.md, learnings.md, ledger/SUMMARY.md).
 No network access. Git is used only by commit-rule, undo and commit-data.
 The Read-window rules (36-60h, 26 days, missed, due-reads windows) live in loop_core/reads.py.
 Whether a Read becomes a Snapshot (the ordered refusals and skips) lives in loop_core/snapshots.py.
-How a Round moves an Experiment and what a closed one teaches lives in loop_core/experiments.py.
+How a Round moves an Experiment, what a closed one teaches, when a Lesson is stale, and which rules entry is in force live in loop_core/experiments.py.
 What each Payload must look like (validation, defaults, keys) lives in loop_core/payloads.py.
 
 X API data (from snapshot.py) lands in three places:
@@ -31,26 +31,23 @@ import sys
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 from loop_core.errors import LoopError, need
 from loop_core.payloads import (MIN_COHORT, ORGANIC_KEYS, POST_ID_RE, PUBLIC_KEYS, activity_header, activity_items,
                                 cursor_updates, experiment_terms, experiment_texts, follower_inputs, follower_total,
                                 interaction_inputs, newer_since_id, post_from_payload, snapshot_from_payload, snapshot_is_final,
                                 snapshot_observed, snapshot_root_id, validate_post, verified_count)
-from loop_core import health, rates
-from loop_core.experiments import OPEN_STATES, evaluate_rounds, lesson_basis, next_id, next_slot, open_experiment
+from loop_core import health, rates, views
+from loop_core.experiments import (OPEN_STATES, evaluate_rounds, leave_experiment, lesson_basis, lesson_is_stale,
+                                   lesson_outcome, newly_stale, next_id, next_slot, open_experiment)
 from loop_core.reads import (FINAL_MAX_DAYS, SNAPSHOT_MAX_H, SNAPSHOT_MIN_H, backfill_cursor, best_snapshot, due_stage,
-                             final_at_risk, need_final_age, past_window, read_windows, snapshot_kind, valid_snapshot,
-                             window_label)
+                             final_at_risk, need_final_age, past_window, read_windows, snapshot_kind, valid_snapshot)
 from loop_core.snapshots import admit_snapshot
 from loop_core.times import iso, parse_time
 
 DEFAULT_ROOT = Path(__file__).resolve().parent.parent
-LOCAL_TZ = ZoneInfo("Australia/Brisbane")
 
 REVIEW_EVERY_DAYS = 7
-STALE_AFTER_DAYS = 42
 LANE_WINDOW = 15
 FOLLOWER_FILES_KEPT = 2
 INTERACTION_DAYS = 7
@@ -65,10 +62,6 @@ LESSON_RE = re.compile(r"^L-[0-9]{3}$")
 
 
 # ---------- time and io ----------
-
-
-def local(stamp_iso: str) -> str:
-    return parse_time(stamp_iso).astimezone(LOCAL_TZ).strftime("%a %d %b %H:%M")
 
 
 def now_arg(value: str | None) -> datetime:
@@ -233,6 +226,7 @@ def cmd_record_post(repo: Repo, args) -> dict:
         for key in ("snapshots", "missed", "nonorganic", "amendments"):
             if key in existing:
                 post[key] = existing[key]
+    left = leave_experiment(post)
     state = repo.state()
     if post["experiment"] is not None:
         exp = next((e for e in state["experiments"] if e["id"] == post["experiment"]), None)
@@ -244,7 +238,10 @@ def cmd_record_post(repo: Repo, args) -> dict:
     else:
         need(post["arm"] == "none", "arm set without an experiment")
     repo.save_post(post)
-    return {"recorded": True, "root_id": post["root_id"]}
+    recorded = {"recorded": True, "root_id": post["root_id"]}
+    if left:
+        recorded["left_experiment"] = True
+    return recorded
 
 
 def cmd_due(repo: Repo, args) -> dict:
@@ -518,14 +515,6 @@ def post_visits(post: dict) -> int:
     return (best_snapshot(post) or {}).get("organic", {}).get("profile_visits") or 0
 
 
-def primary_label(metric: str) -> str:
-    """How the generated Experiments view names a primary."""
-    if metric in rates.PRIMARIES:
-        what = "likes plus reposts" if metric == "engagement_rate" else "profile visits"
-        return f"organic {what} per 1,000 organic impressions ({metric})"
-    return f"root {metric}"
-
-
 def cmd_open_experiment(repo: Repo, args) -> dict:
     state = repo.state()
     need(open_experiment(state) is None, "an experiment is already open; one at a time")
@@ -624,11 +613,8 @@ def cmd_review_due(repo: Repo, args) -> dict:
 def cmd_mark_reviewed(repo: Repo, args) -> dict:
     state = repo.state()
     at = now_arg(args.now)
-    stale = []
-    for lesson in state["lessons"]:
-        if lesson["status"] == "adopted" and at - parse_time(lesson["last_evidence_at"]) > timedelta(days=STALE_AFTER_DAYS):
-            lesson["status"] = "stale"
-            stale.append(lesson["id"])
+    last = parse_time(state["last_review_at"]) if state["last_review_at"] else None
+    stale = [lesson["id"] for lesson in state["lessons"] if newly_stale(lesson, at, last)]
     state["last_review_at"] = iso(at)
     repo.save_state(state)
     return {"reviewed_at": state["last_review_at"], "newly_stale": stale}
@@ -664,7 +650,6 @@ def cmd_add_preference(repo: Repo, args) -> dict:
         "source": "operator edits",
         "created_at": at,
         "last_evidence_at": at,
-        "rule_state": "none",
     }
     state["lessons"].append(lesson)
     repo.save_state(state)
@@ -682,7 +667,8 @@ def find_lesson(state: dict, lesson_id: str) -> dict:
 def cmd_commit_rule(repo: Repo, args) -> dict:
     state = repo.state()
     lesson = find_lesson(state, args.lesson)
-    need(lesson["status"] == "adopted", f"{lesson['id']} is {lesson['status']}; only adopted lessons change rules")
+    need(lesson_outcome(lesson) == "adopted",
+         f"{lesson['id']} is {lesson_outcome(lesson)}; only adopted lessons change rules")
     files = [f for f in args.files.split(",") if f]
     need(bool(files), "--files required")
     for name in files:
@@ -697,7 +683,6 @@ def cmd_commit_rule(repo: Repo, args) -> dict:
     sha = repo.git("rev-parse", "HEAD").strip()
     state["rules"].append({"lesson": lesson["id"], "commit": sha, "files": files,
                            "applied_at": iso(now_arg(args.now)), "undone": False, "revert_commit": None})
-    lesson["rule_state"] = "applied"
     repo.save_state(state)
     return {"committed": sha, "lesson": lesson["id"], "files": files}
 
@@ -717,7 +702,6 @@ def cmd_undo(repo: Repo, args) -> dict:
         raise LoopError(f"revert of {rule['commit'][:8]} conflicted with a later change; nothing was reverted")
     rule["undone"] = True
     rule["revert_commit"] = repo.git("rev-parse", "HEAD").strip()
-    lesson["rule_state"] = "reverted"
     repo.save_state(state)
     return {"reverted": rule["commit"], "revert_commit": rule["revert_commit"], "lesson": lesson["id"]}
 
@@ -756,7 +740,7 @@ def cmd_status(repo: Repo, args) -> dict:
         "reference": state["reference"],
         "api": state.get("api", {}),
         "health": daily_run_health(repo, now_arg(args.now)),
-        "stale_lessons": [l["id"] for l in state["lessons"] if l["status"] == "stale"],
+        "stale_lessons": [l["id"] for l in state["lessons"] if lesson_is_stale(l, now_arg(args.now))],
     }
 
 
@@ -778,206 +762,17 @@ def cmd_validate(repo: Repo, args) -> dict:
 # ---------- readable views ----------
 
 
-def fmt_replies(snap: dict | None) -> str:
-    if snap is None or snap.get("outside_replies") is None:
-        return "–"
-    prefix = "≥" if snap.get("repliers_complete") is False else ""
-    return f"{prefix}{snap['outside_replies']}"
-
-
-def fmt(value) -> str:
-    return "–" if value is None else (f"{value:g}" if isinstance(value, float) else str(value))
-
-
-MIN_RATE_IMPRESSIONS = 50
-
-
-def best_read(row: dict | None) -> dict | None:
-    """An item's organic read to show: the 36-60h one, else the backfill."""
-    if not row:
-        return None
-    reads = row.get("reads", {})
-    return reads.get("48h") or reads.get("backfill")
-
-
-def nonorganic_pct(read: dict | None) -> str:
-    public = (read or {}).get("public", {}).get("impressions")
-    organic = (read or {}).get("organic", {}).get("impressions")
-    if not public or organic is None:
-        return "–"
-    return f"{max(0, public - organic) * 100 // public}%"
-
-
-def credited_follows(root_id: str, rows: dict[str, dict], days: list[dict]) -> int:
-    """Follows credited to a post, its thread cards, or replies in its conversation."""
-    total = 0
-    for day in days:
-        for item, count in day.get("attributed", {}).items():
-            if item == root_id or rows.get(item, {}).get("conversation_id") == root_id:
-                total += count
-    return total
-
-
-def follows_cell(root_id: str, rows: dict[str, dict], days: list[dict]) -> str:
-    """X's exported follows for the post and its thread cards when known; else the credited lower bound."""
-    group = [r for r in rows.values() if r["id"] == root_id or
-             (r.get("conversation_id") == root_id and r.get("kind") == "thread_card")]
-    exported = [r["reads"]["export"]["new_follows"] for r in group if "export" in r.get("reads", {})]
-    if exported:
-        return str(sum(exported))
-    credited = credited_follows(root_id, rows, days)
-    return f"≥{credited}" if credited else "–"
-
-
-ELIGIBILITY_FOLLOWERS = 500
-ELIGIBILITY_IMPRESSIONS = 500_000
-
-
-def latest_organic(row: dict) -> int:
-    """The highest organic impressions any read of this item saw (X's numbers only grow)."""
-    reads = row.get("reads", {})
-    seen = [(reads.get("export") or {}).get("impressions")]
-    seen += [(reads.get(stage) or {}).get("organic", {}).get("impressions") for stage in ("final", "48h", "backfill")]
-    return max([v for v in seen if isinstance(v, int)], default=0)
-
-
-def eligibility_lines(rows: dict[str, dict], account: dict) -> list[str]:
-    days, screens = account.get("days", []), account.get("eligibility", [])
-    if not days and not screens:
-        return []
-    anchor = max([parse_time(d["at"]) for d in days] + [parse_time(s["at"]) for s in screens])
-    window = [r for r in rows.values() if r["kind"] in {"original", "quote"}
-              and anchor - timedelta(days=90) < parse_time(r["created_at"]) <= anchor]
-    proxy = sum(latest_organic(r) for r in window)
-    verified = next((d["verified_followers"] for d in reversed(days) if "verified_followers" in d), None)
-    lines = ["\n## Original Content Rewards\n\n",
-             f"Needs {ELIGIBILITY_FOLLOWERS} verified followers and {ELIGIBILITY_IMPRESSIONS:,} verified Home Timeline "
-             "impressions on originals in 90 days (no replies, no boosted reach).\n\n"]
-    if screens:
-        last = screens[-1]
-        lines.append(f"- X's eligibility screen, read {last['at'][:10]}: {last['verified_followers']} verified followers, "
-                     f"{last['qualified_impressions']:,} qualified impressions.\n")
-    if verified is not None:
-        lines.append(f"- Verified followers from the daily read: {verified} of {ELIGIBILITY_FOLLOWERS}.\n")
-    lines.append(f"- Organic impressions on originals and quotes, last 90 days: {proxy:,}. This counts every viewer "
-                 "on every surface, so it is an upper bound; X counts only Premium viewers on the Home feed.\n")
-    if screens and proxy:
-        lines.append(f"- Share that qualified at the last screen reading: {screens[-1]['qualified_impressions'] * 100 // proxy}%"
-                     " (the two readings may be from different days).\n")
-    return lines
-
-
-def account_lines(rows: dict[str, dict], days: list[dict]) -> list[str]:
-    if not days:
-        return []
-    anchor = parse_time(days[-1]["at"])
-    week = [d for d in days if parse_time(d["at"]) > anchor - timedelta(days=7)]
-    new = sum(d.get("new") or 0 for d in week)
-    lost = sum(d.get("lost") or 0 for d in week)
-    credited = sum(sum(d.get("attributed", {}).values()) for d in week)
-    recent = [r for r in rows.values() if anchor - timedelta(days=7) < parse_time(r["created_at"]) <= anchor]
-    compared = [d for d in week if not d.get("baseline")]
-    lines = ["\n## Account\n\n", f"Followers: {days[-1]['followers']} on {days[-1]['date']}. "]
-    if not compared:
-        lines.append("This is the first count; follower changes and credit start from the next day's read.\n\n")
-    else:
-        lines.append(f"In the 7 days to then: {new} new, {lost} lost; {credited} of the new credited to a post "
-                     f"or reply they engaged with (a lower bound).\n\n")
-    visits = sum((best_read(r) or {}).get("organic", {}).get("profile_visits") or 0 for r in recent)
-    if visits and compared:
-        lines.append(f"Follows per profile visit, items from those 7 days: {new} / {visits}.\n\n")
-    lines += ["| Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 | New follows (X export) |\n",
-              "|---|---:|---:|---:|---:|---:|---:|\n"]
-    topics: dict[str, int] = {}
-    for kind in ("original", "quote", "reply", "thread_card"):
-        group = [r for r in recent if r["kind"] == kind]
-        reads = [best_read(r)["organic"] for r in group if best_read(r)]
-        if not group:
-            continue
-        impressions = sum(o.get("impressions") or 0 for o in reads)
-        visited = sum(o.get("profile_visits") or 0 for o in reads)
-        likes = sum(o.get("likes") or 0 for o in reads)
-        rate = f"{visited * 1000 / impressions:.1f}" if impressions >= MIN_RATE_IMPRESSIONS else "–"
-        exported = [r["reads"]["export"]["new_follows"] for r in group if "export" in r.get("reads", {})]
-        follows = str(sum(exported)) if exported else "–"
-        lines.append(f"| {kind.replace('_', ' ')} | {len(group)} | {impressions} | {visited} | {likes} | {rate} | {follows} |\n")
-    for r in recent:
-        organic = (best_read(r) or {}).get("organic", {}).get("impressions") or 0
-        for topic in r.get("topics", []):
-            topics[topic] = topics.get(topic, 0) + organic
-    top = sorted(topics.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
-    if top:
-        lines.append("\nTop topics by organic impressions (X's own labels, a proxy): "
-                     + ", ".join(f"{name} ({count})" for name, count in top) + ".\n")
-    return lines
-
-
-def render(repo: Repo) -> None:
+def render(repo: Repo, now: str | None) -> None:
     if not repo.state_path.is_file():
         return
+    at = now_arg(now)
     state = repo.state()
     posts = repo.posts()
     rows = repo.activity()
-    days = repo.account()["days"]
-    window = window_label()
-    head = "<!-- Generated by scripts/loop.py. Do not edit; it is rewritten after every loop command. -->\n\n"
-
-    lines = [head, "# Ledger summary\n\n",
-             f"Times are Australia/Brisbane. Views and Snapshot come from the {window} snapshot, else the latest late one. "
-             f"Organic, Non-organic and Visits come from the X API read at {window}s, else the September backfill. "
-             "Follows are from X's analytics export (the post and its thread cards) when one has been recorded; "
-             "≥n is the lower bound from matching new followers to who engaged. "
-             "A leading ≥ means X search returned fewer reply authors than the reply count.\n\n",
-             "| Posted | Slug | Format | Lane | Experiment | Views | Organic | Non-organic | Visits | Bookmarks | "
-             "Outside replies | Follows | Snapshot |\n",
-             "|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|\n"]
-    for post in posts:
-        snap = best_snapshot(post)
-        root = snap["root"] if snap else {}
-        read = best_read(rows.get(post["root_id"]))
-        organic = (read or {}).get("organic", {})
-        where = f"{snap['kind']} {snap['age_hours']:g}h" if snap else ("missed" if post["missed"] else "pending")
-        exp = f"{post['experiment']} {post['arm']}" if post.get("experiment") else ("retro" if post["retrospective"] else "–")
-        if post.get("nonorganic"):
-            exp += ", non-organic"
-        lines.append(f"| {local(post['posted_at'])} | {post['slug']} | {post['format']} | {post['lane']} | {exp} | "
-                     f"{fmt(root.get('views'))} | {fmt(organic.get('impressions'))} | {nonorganic_pct(read)} | "
-                     f"{fmt(organic.get('profile_visits'))} | {fmt(root.get('bookmarks'))} | "
-                     f"{fmt_replies(snap)} | {follows_cell(post['root_id'], rows, days)} | {where} |\n")
-    lines += eligibility_lines(rows, repo.account())
-    lines += account_lines(rows, days)
-    atomic_write(repo.ledger_dir / "SUMMARY.md", "".join(lines))
-
-    lines = [head, "# Experiments\n\n", "One runs at a time. Rules are fixed when it opens.\n\n"]
-    if not state["experiments"]:
-        lines.append("None yet.\n")
-    for exp in reversed(state["experiments"]):
-        lines.append(f"## {exp['id']}: {exp['question']}\n\n")
-        lines.append(f"- **Status:** {exp['status']}\n")
-        lines.append(f"- **Treatment:** {exp['treatment']}\n")
-        lines.append(f"- **Compared with:** {exp['control']}\n")
-        lines.append(f"- **Primary outcome:** {primary_label(exp['primary'])} at the {window} snapshot\n")
-        lines.append(f"- **Bar to beat:** {fmt(exp['threshold'])} ({exp['effect']:g} × cohort median {fmt(exp['cohort_median'])})\n")
-        lines.append(f"- **Cohort, frozen {exp['opened_at'][:10]}:** "
-                     + ", ".join(f"{c['root_id']} ({c['value']}, {c['kind']})" for c in exp["cohort"]) + "\n")
-        for i, rnd in enumerate(exp["rounds"], start=1):
-            below = [pid for pid, note in rnd.get("notes", {}).items() if note == "below_floor"]
-            lines.append(f"- **Round {i}:** {rnd['passes']} of {len(rnd['posts'])} beat the bar "
-                         f"({', '.join(map(str, rnd['values']))}), {rnd['result']}"
-                         + (f"; below_floor, counted as a miss: {', '.join(below)}" if below else "") + "\n")
-        lines.append("\n")
-    atomic_write(repo.root / "experiments.md", "".join(lines))
-
-    lines = [head, "# Learnings\n\n",
-             "A lesson changes the drafting rules only when it is `adopted` and the operator types `/apply`.\n\n",
-             "| Lesson | Status | Rule | Claim | Evidence | Last evidence | Basis |\n", "|---|---|---|---|---|---|---|\n"]
-    for lesson in state["lessons"]:
-        lines.append(f"| {lesson['id']} | {lesson['status']} | {lesson['rule_state']} | {lesson['statement']} | "
-                     f"{', '.join(lesson['evidence'])} | {lesson['last_evidence_at'][:10]} | "
-                     f"{lesson_basis(lesson, state['experiments']) or '–'} |\n")
-    if not state["lessons"]:
-        lines.append("| – | – | – | No lessons yet | – | – | – |\n")
-    atomic_write(repo.root / "learnings.md", "".join(lines))
+    account = repo.account()
+    atomic_write(repo.ledger_dir / "SUMMARY.md", views.summary_text(posts, rows, account))
+    atomic_write(repo.root / "experiments.md", views.experiments_text(state))
+    atomic_write(repo.root / "learnings.md", views.learnings_text(state, at))
 
 
 # ---------- cli ----------
@@ -1067,7 +862,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         result = COMMANDS[args.command](repo, args)
         if args.command not in READ_ONLY:
-            render(repo)
+            render(repo, args.now)
     except LoopError as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
         return 1

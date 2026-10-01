@@ -572,6 +572,23 @@ class FormatAndApproval(unittest.TestCase):
             self.assertEqual(code, 1, text)
             self.assertIn("banned phrase", err)
 
+    def test_card_bounds_come_from_the_format(self) -> None:
+        cases = (("single-tip", 2, 1), ("tool-swap", 3, 1), ("build-log", 2, 0), ("comparison", 4, 0))
+        for fmt, count, expected in cases:
+            draft = self.root / f"bounds-{fmt}-{count}"
+            draft.mkdir()
+            (draft / "FORMAT").write_text(fmt + "\n", encoding="utf-8")
+            for n in range(1, count + 1):
+                text = f"Card {n}.\n"
+                if fmt == "tool-swap" and n == 1:
+                    text = SWAP_HEADER + "\n\n" + text
+                (draft / f"{n:02d}-card.md").write_text(text, encoding="utf-8")
+            self._approve(draft)
+            code, _out, err = self._run(self.post.main, [str(draft)])
+            self.assertEqual(code, expected, (fmt, count, err))
+            if expected:
+                self.assertIn("allows at most", err)
+
     def test_tool_swap_run_sheet_and_copy_say_to_wait_for_the_shoutout(self) -> None:
         draft = self.root / "swap"
         draft.mkdir()

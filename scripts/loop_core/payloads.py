@@ -12,11 +12,10 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime
 
+from formats import LEDGER_FORMATS as FORMATS
 from loop_core.errors import LoopError, need
 from loop_core.rates import PRIMARIES
 from loop_core.times import iso, parse_time
-
-FORMATS = {"settings", "comparison", "tool-swap", "single-tip", "build-log", "tool-verdict", "other"}
 ARMS = {"treatment", "control", "none"}
 EDIT_CLASSES = {"preference", "correction", "deviation", "violation"}
 METRICS = ("views", "likes", "reposts", "quotes", "replies", "bookmarks")

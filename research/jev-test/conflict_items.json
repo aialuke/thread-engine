@@ -82,7 +82,7 @@
  {
   "id": "B11",
   "file": ".claude/skills/format-build-log/SKILL.md",
-  "line": 31,
+  "line": 34,
   "sentence": "Under 280 characters when possible, never over 600.",
   "same": "Aim for under 280 characters, and stay at or below 600.",
   "flip": "Aim for under 280 characters, and go over 600 when it helps."
@@ -90,7 +90,7 @@
  {
   "id": "B12",
   "file": ".claude/skills/format-comparison/SKILL.md",
-  "line": 32,
+  "line": 34,
   "sentence": "One difference per post.",
   "same": "Each post carries a single difference.",
   "flip": "Each post carries several differences."
@@ -98,7 +98,7 @@
  {
   "id": "B13",
   "file": ".claude/skills/format-tool-swap/SKILL.md",
-  "line": 85,
+  "line": 89,
   "sentence": "no two shout-outs share wording",
   "same": "Each shout-out is worded differently from every other.",
   "flip": "Shout-outs reuse the same wording."
@@ -106,7 +106,7 @@
  {
   "id": "B14",
   "file": ".claude/skills/format-tool-swap/SKILL.md",
-  "line": 64,
+  "line": 68,
   "sentence": "Offer it once per draft, never as a condition.",
   "same": "A test should be offered a single time per draft, and never made a condition.",
   "flip": "A test should be offered repeatedly per draft, and made a condition."
@@ -114,7 +114,7 @@
  {
   "id": "B15",
   "file": ".claude/skills/format-tool-swap/SKILL.md",
-  "line": 55,
+  "line": 59,
   "sentence": "Name the job the free tool does, never \"replaces\" or a promised 1:1 swap.",
   "same": "Describe the job the free tool does, without saying it replaces the paid one or promising a 1:1 swap.",
   "flip": "Say the free tool replaces the paid one, and promise a 1:1 swap."
@@ -122,7 +122,7 @@
  {
   "id": "B16",
   "file": ".claude/skills/format-tool-swap/SKILL.md",
-  "line": 51,
+  "line": 55,
   "sentence": "Say \"open source\" only when `CLAIMS.md` shows it.",
   "same": "Call a tool open source only when the CLAIMS.md rows show it.",
   "flip": "Call a tool open source whether or not the CLAIMS.md rows show it."
@@ -138,7 +138,7 @@
  {
   "id": "B18",
   "file": ".claude/skills/draft-thread/SKILL.md",
-  "line": 52,
+  "line": 54,
   "sentence": "this run left `APPROVED` untouched.",
   "same": "The run did not touch the APPROVED file.",
   "flip": "The run created the APPROVED file."

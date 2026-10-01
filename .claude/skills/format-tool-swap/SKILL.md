@@ -3,7 +3,9 @@ name: format-tool-swap
 description: >
   PAID → FREE series: a fixed two-line header, then 2 to 5 swaps from one
   roster category, each a named paid tool, a free tool, and one sourced
-  proof line. Optional one-handle maker shout-out.
+  proof line. Optional one-handle maker shout-out. Use for a PAID → FREE
+  post, a paid-to-free swap list, free alternatives, or /format-tool-swap.
+disable-model-invocation: true
 when-to-use: Use for a PAID → FREE post, a paid-to-free swap list, free alternatives, or /format-tool-swap.
 ---
 
@@ -35,12 +37,14 @@ Paid product → Free tool
   | Finance | finance |
   | Local AI | local AI |
   | Self-Hosting | self-hosting |
-  | Product Analytics & Support | support (revisit before that post: PostHog is analytics) |
+  | Product Analytics & Support | support |
+
+The word for Product Analytics is support until the operator names another. PostHog is analytics.
 
 - **Rows.**
   - 2 to 5 swaps, all from one category. Each is `Paid → Free`, then `▷ ` and one proof line.
   - Strongest rows first: the feed shows the start of a long post and hides the rest behind "Show more".
-  - At most 600 characters as X counts them (`→` and `▷` count 2). Check with `python3 scripts/post_thread.py <folder> --count`.
+  - At most 600 characters as X counts them (`→` and `▷` count 2). That 600 is tool-swap's `root_limit` in `scripts/formats.py`. Check with `python3 scripts/post_thread.py <folder> --count`.
 - **A single.** One swap with up to three `▷` lines, only for a tool held back for one: OBS, Krita, KeePassXC, Pi-hole.
 - **Paid side.**
   - One named product per row, never a description ("Paid chat apps", "Paid VPN mesh").
@@ -86,7 +90,7 @@ A swap with no official page for its task is cut, not softened.
 - **Posted 10–20 minutes after the root,** as a reply to it. The run sheet and `/ready` say so, and `/posted` waits until it's live.
 - **Ends at the thank-you.** The card carries nothing about the next post.
 
-Check every handle with `python3 scripts/x_api.py user <handle>` in the post's own verify run; accounts change. The handles checked on 24 Sep 2026 are in `shipped/paid-to-free-tools/NOTES.md`.
+Check every handle with `python3 scripts/x_api.py user <handle>` in the post's own verify run; accounts change. Earlier checks are in `shipped/paid-to-free-tools/NOTES.md`.
 
 ## REPLIES.md
 

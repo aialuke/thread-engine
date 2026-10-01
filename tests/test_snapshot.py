@@ -83,6 +83,7 @@ class DailyRun(unittest.TestCase):
         self.root = Path(self.tmp.name)
         (self.root / "scripts").mkdir()
         shutil.copy(REPO / "scripts" / "loop.py", self.root / "scripts" / "loop.py")
+        shutil.copy(REPO / "scripts" / "formats.py", self.root / "scripts" / "formats.py")
         shutil.copytree(REPO / "scripts" / "loop_core", self.root / "scripts" / "loop_core",
                         ignore=shutil.ignore_patterns("__pycache__"))
         shutil.copy(REPO / ".gitignore", self.root / ".gitignore")

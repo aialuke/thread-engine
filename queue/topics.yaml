@@ -1,7 +1,7 @@
 # status: queued | planned | drafted | posted | shipped
 # /next writes planned rows with: format, lane, experiment, arm, treatment,
 # hypothesis, post_at, leads. /draft-thread reads them. /posted sets posted + root_id.
-# format: settings | comparison | tool-swap | single-tip | build-log | tool-verdict (missing = settings)
+# format: the draft names in scripts/formats.py (missing = settings). Ledger posts may also be `other`.
 # lane: main | other (see reference/audience.md)
 # category: tool-swap only; the PAID → FREE category word (.claude/skills/format-tool-swap/SKILL.md)
 

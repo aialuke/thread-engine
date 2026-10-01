@@ -90,7 +90,7 @@ A post recorded after the fact rather than when it went live. If its 48h window 
 _Avoid_: backdated post, late post
 
 **Edit**:
-One difference between a posted Card's live text and the Draft's Card, in either direction, so an added or removed Card counts. Recorded by `/posted` in exactly one of four classes. A **preference** is wording, length, order or emphasis with nothing factual changed; three posts showing the same kind make it a candidate Lesson. A **correction** is a fact the operator fixed. A **deviation** is a change that leaves the post no longer following its Experiment's Arm, so the post drops out of that Experiment. A **violation** breaks the voice rules, a Gate refusal or the Truth budget; it is never learned as a preference, and it is reported so the Gate can gain a refusal. A change that is both a violation and a deviation is a violation, and the deviation's effect on the Experiment still applies.
+One difference between a posted Card's live text and the Draft's Card, in either direction, so an added or removed Card counts. Recorded by `/posted` in exactly one of four classes. A **preference** is wording, length, order or emphasis with nothing factual changed; three posts showing the same kind make it a candidate Lesson. A **correction** is a fact the operator fixed. A **deviation** is a change that leaves the post no longer following its Experiment's Arm. Recording it drops the post out of that Experiment. A **violation** breaks the voice rules, a Gate refusal or the Truth budget; it is never learned as a preference, and it is reported so the Gate can gain a refusal. A change that is both a violation and a deviation is a violation, and the deviation's effect on the Experiment still applies.
 _Avoid_: change, diff
 
 ### Measuring

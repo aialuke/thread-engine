@@ -1,8 +1,11 @@
 ---
 name: hidden-settings
 description: >
-  Settings-thread format contract: hook beat order, card micro-structure,
-  closer, emoji budget. Shared voice is voice/exit-zero.md.
+  Settings-thread beat order, card structure, closer, and emoji budget.
+  Research, fact-check, and images are format-settings. Writing is
+  /draft-thread. Use for hook beats, card structure, closer rules, or
+  /hidden-settings. Comparison threads use /format-comparison.
+disable-model-invocation: true
 when-to-use: >
   Use for settings-thread format, hook beats, emoji budget, card
   structure, closer rules, or /hidden-settings. Comparison threads use
@@ -37,7 +40,7 @@ Settings threads. Required, this order:
 
 ## Root post
 
-For You shows one post per conversation, and a stranger can only be shown the root (`reference/x-algorithm.md` A1, A2). The root carries the result on its own. Keep the hook under 600 characters: scene and expert may share a sentence, and the no-list may be two or three lines.
+For You shows one post per conversation, and a stranger can only be shown the root (`reference/x-algorithm.md` A1, A2). The root carries the result on its own. Keep the hook under 600 characters, the settings root cap in `scripts/formats.py`: scene and expert may share a sentence, and the no-list may be two or three lines.
 
 N is the number of setting cards, 3 to 7, and it is the number in the snap, the promise and the setting-card count. The thread has N + 2 posts: root, N setting cards, closer. When the queue row names an experiment arm, the arm's post count wins.
 

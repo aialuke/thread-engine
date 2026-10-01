@@ -9,7 +9,7 @@ Local factory for @exitzerocode X posts, with a learning loop: compelling conten
 - One topic per draft folder.
 - Every path and claim is sourced. Unverified ones are VERIFY and stay out of cards.
 - The account posts by hand only. Never post, schedule, or call an X write API.
-- The account's own numbers come from `scripts/x_api.py` (read-only keys in the Keychain; the keys never enter a session). Other people's posts and research come from `scripts/x_read.py` (X API recent search). It is the one route to X evidence: cite a post only from its output. The global `grok-delegation` route for X evidence does not apply in this repo.
+- The account's own numbers come from `scripts/x_api.py` (read-only keys in the Keychain; the keys never enter a session). Other people's posts and research come from `scripts/x_read.py` (X API recent search). It is the one route to X evidence: cite a post only from its output. Two lookups stay on `scripts/x_api.py`: `mentions` (replies to the account; their text stays out of reviews) and `user <handle>` (a maker's profile; no post is cited). The global `grok-delegation` route for X evidence does not apply in this repo.
 - `APPROVED` is created only by the operator's typed `/approve <slug>` (a hook does it; another hook blocks every agent attempt). Never create, edit or delete it. When a draft needs approval, tell the operator to type `/approve <slug>`.
 - Before writing a post, reply or quote, or advising on posting, replying, promotion or maker outreach, read `voice/exit-zero.md`. Before judging a post's lane or audience fit, read `reference/audience.md`. The draft and loop skills already do this.
 - Knowledge lookup: read `research/index.md` first, then only the pages it names. Save a multi-source cited answer to `research/<date>-<slug>.md` (quote-or-drop citations, an index line, a `reviews/log.md` line) only after the operator says yes. The parent agent indexes literature-reader reports; the reader never edits the index.
@@ -24,6 +24,7 @@ Approval (`/approve`), the truth budget, fail-closed fact-checks, the shared gat
 Each line holds until its exit condition; skills point here instead of restating it.
 
 - Experiments are paused until 2026-10-08, two weeks of organic X API data from 2026-09-24 (`reviews/audit-2026-09.md`). `/next` proposes posts with no experiment arm. On or after that date `/next` asks the operator whether to lift the pause; the operator's yes rewrites this line to "Experiments are running since <date>".
+- Formats are on trial until 2026-10-08: `/next` and `/results` report the `main` and `other` lane share against the target in `reference/audience.md` and do not refuse an `other` post for a low share. The operator's yes to lifting the experiment pause ends the trial; rewrite this line then.
 - The `main` lane covers tech broadly since 2026-09-24, until the operator narrows it to building (`reference/audience.md`).
 
 ## Layout

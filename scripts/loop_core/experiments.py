@@ -14,6 +14,7 @@ from loop_core.times import parse_time
 
 EXPLORE_ALTERNATE_DAYS = 28
 OPEN_STATES = {"testing", "promising", "unclear"}
+STALE_AFTER_DAYS = 42
 TRANSITIONS = {
     ("testing", "pass"): "promising",
     ("testing", "mixed"): "unclear",
@@ -49,9 +50,57 @@ def round_result(passes: int, size: int) -> str:
     return "fail"
 
 
+def lesson_outcome(lesson: dict) -> str:
+    """The close result: adopted, not_replicated, or no_effect. A stored status of stale is the old overwrite; the outcome was adopted."""
+    if lesson.get("status") == "stale":
+        return "adopted"
+    return lesson["status"]
+
+
+def lesson_is_stale(lesson: dict, at: datetime) -> bool:
+    """An adopted lesson whose last evidence is more than STALE_AFTER_DAYS old. The outcome stays adopted."""
+    if lesson.get("status") == "stale":
+        return True
+    if lesson_outcome(lesson) != "adopted":
+        return False
+    return at - parse_time(lesson["last_evidence_at"]) > timedelta(days=STALE_AFTER_DAYS)
+
+
+def newly_stale(lesson: dict, at: datetime, last_review: datetime | None) -> bool:
+    """True when the lesson is stale now and was not stale at the previous review."""
+    if not lesson_is_stale(lesson, at):
+        return False
+    if last_review is None:
+        return True
+    return parse_time(lesson["last_evidence_at"]) + timedelta(days=STALE_AFTER_DAYS) > last_review
+
+
+def rule_application(rules: list[dict], lesson_id: str) -> str:
+    """none, applied, or reverted, from the latest rules entry for this lesson."""
+    latest = next((rule for rule in reversed(rules) if rule.get("lesson") == lesson_id), None)
+    if latest is None:
+        return "none"
+    return "reverted" if latest.get("undone") else "applied"
+
+
+def leave_experiment(post: dict) -> bool:
+    """A deviation edit puts the post outside the experiment. True when this call cleared a membership.
+
+    Outside is no experiment and arm none. In is an experiment id with arm treatment or control.
+    A violation that is also a deviation is stored as violation, so this does not see it.
+    """
+    if not any(edit.get("class") == "deviation" for edit in post.get("edits") or []):
+        return False
+    if post.get("experiment") is None and post.get("arm", "none") == "none":
+        return False
+    post["experiment"] = None
+    post["arm"] = "none"
+    return True
+
+
 def lesson_basis(lesson: dict, experiments: list[dict]) -> str | None:
     """What an adopted Lesson rests on, in one sentence for the operator. None for a Lesson that is not adopted."""
-    if lesson["status"] != "adopted":
+    if lesson_outcome(lesson) != "adopted":
         return None
     if lesson.get("experiment") is None:
         edits = lesson["evidence"]
@@ -102,7 +151,6 @@ def evaluate_rounds(state: dict, ready: list[tuple[str, float]], at: str,
                 "reference_facts": exp.get("reference_facts", []),
                 "created_at": at,
                 "last_evidence_at": at,
-                "rule_state": "none",
             })
     waiting = exp["size"] - len(ready) if exp["status"] in OPEN_STATES else 0
     return state, {"evaluated": True, "experiment": exp["id"], "status": exp["status"],
@@ -127,7 +175,7 @@ def next_slot(state: dict, started: datetime, posts: list[dict], at: datetime) -
         slot["arm"] = "treatment" if exp else None
         slot["action"] = "post the treatment" if exp else "open an experiment first"
     else:
-        adopted = [l for l in state["lessons"] if l["status"] == "adopted"]
+        adopted = [l for l in state["lessons"] if lesson_outcome(l) == "adopted"]
         slot["experiment"] = exp["id"] if exp else None
         slot["arm"] = "control" if exp else None
         slot["action"] = "post the current best approach"

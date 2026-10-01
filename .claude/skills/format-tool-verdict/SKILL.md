@@ -2,7 +2,9 @@
 name: format-tool-verdict
 description: >
   Tool-verdict format: which tool won a real task the operator ran, the
-  test, the evidence, and where the result stops.
+  test, the evidence, and where the result stops. Use for a verdict from
+  real use of two or more AI tools on the same task, or /format-tool-verdict.
+disable-model-invocation: true
 when-to-use: Use for a verdict from real use of two or more AI tools on the same task, or /format-tool-verdict.
 ---
 
@@ -20,8 +22,9 @@ From the operator's actual runs. Ask: which tools, which task, same input to eac
 2. **Test**: the task and how it was run: same input, how many runs.
 3. **Evidence**: 2 to 4 short lines, one per tool, each with what it did (a count, a catch, a miss).
 4. **Limit**: where the result stops (one task, n runs, the date and model versions), or where a losing tool still wins.
+5. **Question**: one real question, per `voice/exit-zero.md` → Asking for engagement.
 
-Under 280 characters when possible, never over 600. The root stands alone.
+Under 280 characters when possible, never over 600, the tool-verdict root cap in `scripts/formats.py`. The root stands alone.
 
 Optional: one self-reply card with the raw numbers or a screenshot of the outputs side by side. Never more than one card.
 
