@@ -1,20 +1,20 @@
 # Router QoS — 6 settings
 
-Shipped gold, compressed. conversation `2101603601143803913`. Full transcript wins. Beat labels are structure, not lines to copy.
+Shipped gold, compressed. conversation `2101603601143803913`. Full transcript wins on beats and cards. The closer follows Closer rules in `.claude/skills/hidden-settings/SKILL.md`. The posted closer is the comment under it. Beat labels are structure, not lines to copy.
 
 <!-- neglect -->
 Gateway plugged in on install day. Admin page never opened again.
 
 <!-- scene -->
-Family on a $90/month “premium speed” plan. Evening Zoom froze. 4K buffered.
+Family on a $90/month "premium speed" plan. Evening Zoom froze. 4K buffered.
 
 <!-- expert -->
 IT-guy. Ten minutes in the admin panel.
 
 <!-- no-list -->
-– Didn’t upgrade the plan.
-– Didn’t buy a new router.
-– Didn’t call the ISP.
+– Didn't upgrade the plan.
+– Didn't buy a new router.
+– Didn't call the ISP.
 
 <!-- snap -->
 6 settings. Same gateway. Same plan. Zoom and 4K held.
@@ -78,4 +78,5 @@ Same gateway. Same plan. Different evenings.
 Ten minutes. No speed-tier upgrade.
 
 <!-- cta -->
-Reply with the gateway model or ISP so the next reply can name the menu you actually have.
+Which gateway is yours? The menus differ, and 3 of these 6 matter most on each.
+<!-- posted closer, the gate refuses it: Reply with the gateway model or ISP so the next reply can name the menu you actually have. -->

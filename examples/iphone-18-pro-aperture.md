@@ -1,8 +1,8 @@
 # iPhone 18 Pro vs 17 Pro — four differences
 
-Shipped gold. Posted copy. conversation `2102272933087363155`.
+Shipped gold. Posted copy, except the closer. conversation `2102272933087363155`.
 
-Posted wording, including the duplicate 3, the VERIFY lines, and the closer. Three rules from this ship live in `.claude/skills/hidden-settings/SKILL.md`: comparison hook, difference card, comparison closer. Notes: `shipped/iphone-18-pro-aperture/NOTES.md`.
+Posted wording, including the duplicate 3 and the VERIFY lines. The closer is the current question from `.claude/skills/format-comparison/SKILL.md`. The posted closer is the comment under it. Notes: `shipped/iphone-18-pro-aperture/NOTES.md`.
 
 <!-- hook -->
 Matching up @apple's latest iPhone 18 Pro against the 17 Pro.
@@ -85,4 +85,5 @@ The full pass
 ✓ Improved battery life = up to 6 hours longer than the 17 Pro.
 
 <!-- cta -->
-💬 Reply with your thoughts on this years release!
+Still on a 17 Pro?
+<!-- posted closer, the gate refuses it: 💬 Reply with your thoughts on this years release! -->

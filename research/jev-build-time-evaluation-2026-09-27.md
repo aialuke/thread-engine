@@ -6,7 +6,7 @@ Research date: 27 September 2026. Status of the sections up to "Decision to revi
 
 ## Recommendation
 
-**Evaluate Jev as a development-time judge for Discovery search and filtering.** Its potential value is making repeated semantic evaluation cheap enough to compare query recipes, filters, weights, and thresholds against independently reviewed examples. Code should perform optimisation and measurement; the operator's judgments should anchor what “useful” means.
+**Evaluate Jev as a development-time judge for Discovery search and filtering.** Its potential value is making repeated semantic evaluation cheap enough to compare query recipes, filters, weights, and thresholds against independently reviewed examples. Code should perform optimisation and measurement; the operator's judgments should anchor what "useful" means.
 
 The strongest first test is whether Jev can help evaluate the existing Demand, Worth joining, and Tool research experiments. Predicting engagement or choosing account strategy is a much weaker starting point: the account has little outcome data, and relevance is not growth.
 
@@ -29,7 +29,7 @@ Jev should be tested inside this framework, rather than introducing a competing 
 
 ## What is distinctive about Jev
 
-Jev takes text or structured context and bounded questions. Choice selects among options; Score evaluates ordered rubric levels; Noul estimates whether a proposition holds. Several questions can be evaluated independently in one request. This fits repeated questions such as “does this post describe a concrete problem?” better than an open-ended request to design a search strategy. [Official introduction](https://docs.typesafe.ai/introduction)
+Jev takes text or structured context and bounded questions. Choice selects among options; Score evaluates ordered rubric levels; Noul estimates whether a proposition holds. Several questions can be evaluated independently in one request. This fits repeated questions such as "does this post describe a concrete problem?" better than an open-ended request to design a search strategy. [Official introduction](https://docs.typesafe.ai/introduction)
 
 Choice and Score return distributions plus a confidence statistic derived from those distributions. Noul has no separate confidence field. Confidence describes how concentrated an answer is; it is not independently measured accuracy on our task. Domain-specific evaluation must determine useful thresholds. [Confidence](https://docs.typesafe.ai/confidence)
 
@@ -75,7 +75,7 @@ For Discovery, candidate questions could distinguish an explicit request from pr
 
 The [official reranking example](https://docs.typesafe.ai/cookbooks/rerank_typesafe) scores query–candidate pairs after initial retrieval. Reranking can improve ordering but cannot recover candidates omitted by retrieval.
 
-Our query experiments should therefore measure both what each query finds and how useful the final shortlist is. Score the deduplicated union of compared queries, retaining every sighting. That permits coverage comparisons within this pool; it does not measure recall across all of X. Include an absolute “none useful” outcome so selecting the best of a poor shortlist is not scored as success.
+Our query experiments should therefore measure both what each query finds and how useful the final shortlist is. Score the deduplicated union of compared queries, retaining every sighting. That permits coverage comparisons within this pool; it does not measure recall across all of X. Include an absolute "none useful" outcome so selecting the best of a poor shortlist is not scored as success.
 
 Also assess **shortlist diversity**. Three relevant posts from the same conversation may offer only one useful opportunity. Report distinct useful conversations alongside top-three relevance; use exact conversation IDs where available and independently checked semantic duplication judgments where necessary. For Demand and Tool research, define diversity around distinct needs or evidence as appropriate to the job. Do not add irrelevant results merely to make a shortlist look varied.
 
@@ -123,7 +123,7 @@ Additional project risks and responses:
 - **Optimising for the judge:** if Jev creates both the labels and the success verdict, improvements may only reflect its preferences. Independent labels and an untouched final set are essential.
 - **Adaptive overfitting:** repeated query, rubric, and weight searches can exploit validation noise. Limit candidate complexity and trial count, record every trial, and do not repeatedly tune against the final set. A marginal winner that is unstable under sensitivity checks is not a reliable default.
 - **Confounding and missing outcomes:** topic, timing, account growth, and distribution affect engagement. Neither semantic labels nor scarce observations establish which content caused follows.
-- **Job and niche drift:** evaluate tech and comedy, and the three Discovery jobs, separately. A single global “spam” or “good post” score can erase useful distinctions.
+- **Job and niche drift:** evaluate tech and comedy, and the three Discovery jobs, separately. A single global "spam" or "good post" score can erase useful distinctions.
 - **Unsupported identity judgments:** text can show promotional patterns; it cannot prove that an author is a bot or a genuine person. Keep unobservable identity claims out of reference labels.
 - **Data handling:** the repo's [privacy rules](../reference/x-api.md#privacy) keep follower IDs and raw API responses local. The spam research plan also specifies a private-data deletion deadline, extended by the operator on 27 September 2026 to 26 March 2027 (180 days). Provider non-training statements do not override those constraints. Synthetic examples are the current default; real-content evaluation remains deferred pending the operator's explicit policy decision. This document grants no permission to export data.
 - **No model authority over gates:** Jev must not replace approval, fact verification, X read-only restrictions, or deterministic experiment scoring. Any proposed loop rule adoption still follows the existing `/apply` process.
@@ -132,9 +132,9 @@ Additional project risks and responses:
 
 Adopt Jev for build-time evaluation only if it clears one of the two routes specified before the pilot: an independently assessed quality improvement large enough to justify its cost, or an effort/cost reduction with quality inside the agreed tolerance. Both routes must preserve the existing job-specific acceptance criteria. Report uncertainty and sensitivity alongside the result; nominally better scores alone are insufficient.
 
-The minimum worthwhile improvement and resource limits remain **decisions to make before running the pilot**, not established findings. If the budget ends before the required evidence exists, conclude “inconclusive”; if the completed comparison misses the agreed bar, do not adopt. Any extension needs a new explicit scope and must not reuse an exposed final set as an untouched test.
+The minimum worthwhile improvement and resource limits remain **decisions to make before running the pilot**, not established findings. If the budget ends before the required evidence exists, conclude "inconclusive"; if the completed comparison misses the agreed bar, do not adopt. Any extension needs a new explicit scope and must not reuse an exposed final set as an untouched test.
 
-Publish the comparison even if the answer is “not useful at this scale.” The useful deliverable is a better-supported search or filtering decision, not a Jev integration for its own sake.
+Publish the comparison even if the answer is "not useful at this scale." The useful deliverable is a better-supported search or filtering decision, not a Jev integration for its own sake.
 
 Primary sources are linked beside the claims they support. Vendor examples are evidence of available techniques; every thread-engine application and expected benefit remains a proposal until tested locally.
 

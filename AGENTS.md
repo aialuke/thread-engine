@@ -1,6 +1,6 @@
 # thread-engine
 
-Local factory for @exitzerocode X posts, with a learning loop: compelling content → engagement → account growth. Drafts are the product; the loop measures what works and feeds it back into the drafting rules. Posting stays manual.
+Local factory for @exitzerocode X posts. The loop measures which posts grow the account and writes that into the drafting rules. Drafts are the product. Posting stays manual.
 
 ## Operating rules
 

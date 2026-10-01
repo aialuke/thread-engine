@@ -3,7 +3,7 @@
 Checked: 2026-09-22
 Models: 2024–2026 4K TVs, AU. Samsung Tizen, LG webOS 22–26, Sony Google TV / BRAVIA, Hisense VIDAA.
 
-Unconfirmed (VERIFY, cut from cards): LG Live Plus path, Sony Samba Interactive TV, Hisense HDMI format, Hisense Google TV / Roku motion labels, Sharpness “set to 0”.
+Unconfirmed (VERIFY, cut from cards): LG Live Plus path, Sony Samba Interactive TV, Hisense HDMI format, Hisense Google TV / Roku motion labels, Sharpness "set to 0".
 
 Scene money: JB Hi-Fi Samsung 65" S90H OLED [2026] $3,244 on 2026-09-22. https://www.jbhifi.com.au/collections/deals-on-tvs-and-soundbars
 

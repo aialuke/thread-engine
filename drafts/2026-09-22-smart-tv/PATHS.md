@@ -25,10 +25,10 @@ Scene money (hook only, not a setting): JB Hi-Fi listed a Samsung 65" S90H OLED 
 | Sharpness (Samsung) | All Settings → Picture → Expert Settings → Sharpness | https://www.samsung.com/us/support/answer/ANS10006970/ | 2026-09-22 | high | Control named. No official target number. Action: turn down until edge ringing is gone. |
 | Sharpness (LG) | All Settings → Picture (Picture Mode Settings) → Sharpness | https://www.lg.com/us/support/help-library/lg-tv-the-best-picture-settings-for-your-lg-tv--20150577528034 | 2026-09-22 | high | Control named. Do not copy lighting-table numbers into the card. Turn down. FMM locks sharpening Off (UHD Alliance). |
 | Sharpness (Sony) | Settings → Display & Sound → Picture → Clarity | https://helpguide.sony.net/tv/jusltn1/v1/en-003/01-03-09_01.html | 2026-09-22 | high | Clarity = picture clarity / roughness. Conservative: turn down. |
-| Sharpness (Hisense VIDAA) | Settings → Picture → Picture Mode Settings → Sharpness | https://www.hisense.com.my/wp-content/uploads/2025/07/B_92707_9655_U901_EUAUCO_E-Manual_pdf_large_UK-eng_20250416.pdf | 2026-09-22 | medium | Named in Picture Mode Settings. No official “set to 0”. |
+| Sharpness (Hisense VIDAA) | Settings → Picture → Picture Mode Settings → Sharpness | https://www.hisense.com.my/wp-content/uploads/2025/07/B_92707_9655_U901_EUAUCO_E-Manual_pdf_large_UK-eng_20250416.pdf | 2026-09-22 | medium | Named in Picture Mode Settings. No official "set to 0". |
 | Colour tone (Samsung) | All Settings → Picture → Expert Settings → Color Tone → Warm2 | https://www.samsung.com/us/support/answer/ANS10006970/ | 2026-09-22 | high | Official names Cool, Standard, Warm1, Warm2. Cool/Standard only in Dynamic. Skip if already FILMMAKER MODE (UHD Alliance D65). |
 | Colour tone (LG) | Picture → Advanced Settings → Color → Color Temperature → Warm | http://kr.eguide.lgappstv.com/manual/w25/w25_t46/engb.html | 2026-09-22 | medium | Control exists; Warm vs Warm50 vs numeric scale varies by year. Conservative: Warmest available that is still labelled Warm. Skip if FILMMAKER MODE. |
-| Colour tone (Sony) | Picture → Adv. color temperature | https://helpguide.sony.net/tv/jusltn1/v1/en-003/01-03-09_01.html | 2026-09-22 | medium | Named. No official “Warm2” label. Cinema already aims film. Skip if Cinema/Professional looks right. |
+| Colour tone (Sony) | Picture → Adv. color temperature | https://helpguide.sony.net/tv/jusltn1/v1/en-003/01-03-09_01.html | 2026-09-22 | medium | Named. No official "Warm2" label. Cinema already aims film. Skip if Cinema/Professional looks right. |
 | Colour tone (Hisense) | Picture Mode Settings → Colour / colour temperature | https://www.hisense.com.my/wp-content/uploads/2025/07/B_92707_9655_U901_EUAUCO_E-Manual_pdf_large_UK-eng_20250416.pdf | 2026-09-22 | medium | Skip if FILMMAKER. |
 | HDMI enhanced (Samsung) | All Settings → General & Privacy → External Device Manager → Input Signal Plus → HDMI port On. Older name: HDMI UHD Color. Off = no HDR from the device. Screen may flicker when toggling. | https://downloadcenter.samsung.com/content/PM/202507/20250728135454825/EN/ENG/ENG/1_tv-guide_6.html | 2026-09-22 | high | Skip if you only use built-in apps. Older support pages said Settings → General → External Device Manager; 2025 user guide uses General & Privacy. Conservative: 2025 path, mention older name. |
 | HDMI enhanced (Sony) | Settings → Channels & Inputs → External inputs → HDMI signal format → Enhanced format (or Enhanced format 4K120 / VRR on labelled ports) | https://helpguide.sony.net/tv/iusltn1/v1/en-003/print.html | 2026-09-22 | high | If picture/sound fail, drop that port back to Standard format. |
@@ -39,7 +39,7 @@ Scene money (hook only, not a setting): JB Hi-Fi listed a Samsung 65" S90H OLED 
 | Tracking (LG Live Plus) | VERIFY | — | 2026-09-22 | VERIFY | LG privacy statement confirms ACR is optional and managed in TV settings. Exact Additional Settings path not on an LG support page this session. Out of numbered posts. |
 | Tracking (Sony Samba Interactive TV) | VERIFY | — | 2026-09-22 | VERIFY | Not on Sony helpguide this session. Google TV Ads path above still applies to Sony. |
 | Hisense Google TV / Roku motion labels | VERIFY | — | 2026-09-22 | VERIFY | Motion Enhancement / Action Smoothing from secondary writeups. VIDAA Ultra Smooth Motion is the kept Hisense path. |
-| Sharpness numeric default / “set to 0” | VERIFY | — | 2026-09-22 | VERIFY | No official default number. Cards say turn down, not a figure. |
+| Sharpness numeric default / "set to 0" | VERIFY | — | 2026-09-22 | VERIFY | No official default number. Cards say turn down, not a figure. |
 
 ## Gated controls
 
@@ -55,7 +55,7 @@ https://filmmakermode.com/about/ — 2026-09-22 — Motion interpolation Off, sh
 
 ## Conservative conflict rulings
 
-- Motion: **Off**, not Custom / Cinematic Movement / Smooth. Fork those only as a skip (“sport night, put it back”).
+- Motion: **Off**, not Custom / Cinematic Movement / Smooth. Fork those only as a skip ("sport night, put it back").
 - Sony film look: **Cinema**, never Filmmaker Mode.
 - Samsung energy: print **2025 path**, then the 2024 Support → Device Care fork.
 - LG energy: print **General → Energy Saving** (2022–2025 majority), then the 2026 System fork.

@@ -2,7 +2,7 @@ Setting 1: Motion Off
 
 The TV ships with motion processing on Auto. Movies are 24 frames a second. The set invents frames in between. That is the soap-opera effect. Netflix on a Sunday looks like daytime TV.
 
-There is no menu called Motion Smoothing. The label is the brand’s.
+There is no menu called Motion Smoothing. The label is the brand's.
 
 Samsung: Settings → Picture → Expert Settings → Auto Motion Plus Settings (some years say Picture Clarity Settings). Default is Auto. Set it to Off.
 

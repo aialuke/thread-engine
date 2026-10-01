@@ -8,13 +8,13 @@ Most 4K TVs get set up on delivery day and Picture is never opened again.
 
 Jess was about to spend $3,244 on a 65-inch OLED because a Sunday-night film on Netflix looked like a soap. Her brother, who hangs TVs on weekends, sat on the couch for ten minutes with the remote she already had.
 
-– Didn’t buy a new OLED.
-– Didn’t buy a soundbar.
-– Didn’t pay for a calibration.
+– Didn't buy a new OLED.
+– Didn't buy a soundbar.
+– Didn't pay for a calibration.
 
 He changed 7 settings. Same TV. Same film. Same seat.
 
-“Your panel was never the problem. The setup-day motion control was still on, the picture mode was still the delivery default, and energy saving was eating the brightness. The film look is already in Settings. Nobody on the box is going to walk you through it.”
+"Your panel was never the problem. The setup-day motion control was still on, the picture mode was still the delivery default, and energy saving was eating the brightness. The film look is already in Settings. Nobody on the box is going to walk you through it."
 
 🧵 Here are the 7 settings that fixed it:
 
@@ -24,7 +24,7 @@ Setting 1: Motion Off
 
 The TV ships with motion processing on Auto. Movies are 24 frames a second. The set invents frames in between. That is the soap-opera effect. Netflix on a Sunday looks like daytime TV.
 
-There is no menu called Motion Smoothing. The label is the brand’s.
+There is no menu called Motion Smoothing. The label is the brand's.
 
 Samsung: Settings → Picture → Expert Settings → Auto Motion Plus Settings (some years say Picture Clarity Settings). Default is Auto. Set it to Off.
 
@@ -42,7 +42,7 @@ Watching sport tonight? Put it back on Auto / Custom. No motion menu? Skip it.
 
 Setting 2: Picture mode
 
-Samsung’s official default is Standard. Store floors sit on Dynamic. Both juice the image. Skin goes neon. The film already had a grade.
+Samsung's official default is Standard. Store floors sit on Dynamic. Both juice the image. Skin goes neon. The film already had a grade.
 
 Samsung: Settings → All Settings → Picture → Picture Mode → FILMMAKER MODE. No Filmmaker row? Movie. Then Expert Settings → Apply Picture Settings → all input sources, so Netflix, YouTube, ABC iView, and HDMI share it.
 
@@ -158,4 +158,4 @@ Same TV. Same film. Same couch. Different picture.
 
 Ten minutes. No $3,244 OLED.
 
-Reply with the brand and year — Samsung, LG, Sony, Hisense — and which of these 7 the menu actually has.
+Which brand and year is yours? The menus differ, and 3 of these 7 matter most on each.

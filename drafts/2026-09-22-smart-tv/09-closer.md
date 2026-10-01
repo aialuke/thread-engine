@@ -6,4 +6,4 @@ Same TV. Same film. Same couch. Different picture.
 
 Ten minutes. No $3,244 OLED.
 
-Reply with the brand and year — Samsung, LG, Sony, Hisense — and which of these 7 the menu actually has.
+Which brand and year is yours? The menus differ, and 3 of these 7 matter most on each.

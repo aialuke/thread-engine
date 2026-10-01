@@ -1,6 +1,6 @@
 # iPhone Camera — 7 settings
 
-Shipped gold, compressed. conversation `2101926639198441689`. Full transcript wins. Beat labels are structure, not lines to copy.
+Shipped gold, compressed. conversation `2101926639198441689`. Full transcript wins on beats and cards. The closer follows Closer rules in `.claude/skills/hidden-settings/SKILL.md`. The posted closer is the comment under it. Beat labels are structure, not lines to copy.
 
 <!-- neglect -->
 iPhone set up on day one. Camera app never touched again.
@@ -12,9 +12,9 @@ Wedding guest. Reception photos flat, crooked, wide. About to spend $1,200 on a 
 Photographer at the next table. Four minutes with the phone.
 
 <!-- no-list -->
-– Didn’t install an app.
-– Didn’t edit anything.
-– Didn’t switch to Portrait mode.
+– Didn't install an app.
+– Didn't edit anything.
+– Didn't switch to Portrait mode.
 
 <!-- snap -->
 7 settings. Same phone. Same seat. Same photo. Different result.
@@ -84,4 +84,5 @@ Same phone. Same lens. Same wedding. Different photos.
 Four minutes. No app. No $1,200 body.
 
 <!-- cta -->
-Reply with the model — 13, 15, 16 Pro, 17 — so the next reply can say which of these 7 exist on it.
+Which iPhone is yours? The Camera menus differ, and 3 of these 7 matter most on each.
+<!-- posted closer, the gate refuses it: Reply with the model — 13, 15, 16 Pro, 17 — so the next reply can say which of these 7 exist on it. -->

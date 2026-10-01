@@ -2,21 +2,21 @@
 
 Shipped gold. Posted copy. conversation `2102172499031253210`.
 
-Beat labels are structure, not lines to copy. Wording is what shipped. Card jokes and unsourced figures stay in this file. Promoted rules live in `.claude/skills/hidden-settings/SKILL.md`.
+Beat labels are structure, not lines to copy. Wording is what shipped, except the closer, which follows Closer rules in `.claude/skills/hidden-settings/SKILL.md`. The posted closer is the comment under it. Card jokes and unsourced figures stay in this file.
 
 <!-- neglect -->
 Most MacBooks get unboxed, signed into iCloud, and then never opened past Wi-Fi and display brightness.
 
 <!-- scene -->
-Someone charged to 100% before a workday. By 3pm the machine was dead in a cafe, still mid-document. They were one click away from booking Apple’s battery replacement.
+Someone charged to 100% before a workday. By 3pm the machine was dead in a cafe, still mid-document. They were one click away from booking Apple's battery replacement.
 
 <!-- expert -->
 A friend who repairs Macs for a living sat down, opened System Settings, and spent 8 minutes in menus most owners never touch.
 
 <!-- no-list -->
-– Didn’t replace the battery
-– Didn’t buy a new charger
-– Didn’t install a “cleaner” app
+– Didn't replace the battery
+– Didn't buy a new charger
+– Didn't install a "cleaner" app
 
 <!-- snap -->
 He changed 7 settings.
@@ -24,7 +24,7 @@ He changed 7 settings.
 Same MacBook lasted into the evening on the next charge.
 
 <!-- thesis -->
-“Your battery was never as dead as it looked. macOS ships with a pile of background jobs left on — sleep that isn’t sleep, apps that launch themselves, indexing that never clocks off. Apple will sell you a new battery. They will not walk you through the free pass first.”
+"Your battery was never as dead as it looked. macOS ships with a pile of background jobs left on — sleep that isn't sleep, apps that launch themselves, indexing that never clocks off. Apple will sell you a new battery. They will not walk you through the free pass first."
 
 <!-- promise -->
 🧵 Here are the 7 settings that fixed it:
@@ -34,7 +34,7 @@ Same MacBook lasted into the evening on the next charge.
 <!-- card 1 -->
 Setting 1: Low Power Mode on battery only
 
-macOS defaults to Automatic. Fine on paper. In practice the machine keeps doing background work while you’re unplugged and wondering why 80% became 40% before lunch.
+macOS defaults to Automatic. Fine on paper. In practice the machine keeps doing background work while you're unplugged and wondering why 80% became 40% before lunch.
 
 Apple menu → System Settings → Battery
 
@@ -42,9 +42,9 @@ Set Low Power Mode to Only on Battery.
 
 On some versions this sits under Energy Mode → On battery → Low Power.
 
-Leave it off (or Automatic) when the charger is in. You want the saving when you’re walking around, not when you’re at a desk.
+Leave it off (or Automatic) when the charger is in. You want the saving when you're walking around, not when you're at a desk.
 
-This is the one-toggle version of “stop sprinting between meetings.”
+This is the one-toggle version of "stop sprinting between meetings."
 
 <!-- card 2 -->
 Setting 2: Wake for network access
@@ -61,12 +61,12 @@ or Only on Power Adapter if you actually share files from this laptop.
 
 If you needed the laptop reachable on the network while it sleeps, you would already know. Most people do not.
 
-This is the “why is my battery lower this morning than last night” setting.
+This is the "why is my battery lower this morning than last night" setting.
 
 <!-- card 3 -->
 Setting 3: Power Nap off
 
-Power Nap is Apple’s name for “keep doing work while you think this thing is asleep.” Mail. Time Machine. iCloud. Updates.
+Power Nap is Apple's name for "keep doing work while you think this thing is asleep." Mail. Time Machine. iCloud. Updates.
 
 Useful on a desktop that sits on a desk. Less useful on a laptop that lives in a backpack.
 
@@ -154,11 +154,9 @@ The full pass.
 
 Same MacBook. Same battery. Different day.
 
-Eight minutes. $0. No replacement. No “cleaner” app.
+Eight minutes. $0. No replacement. No "cleaner" app.
 
 Apple will quote you a few hundred dollars to swap a battery that still had hours left in it. The hours were going to background jobs you never asked for.
 
-Save this before you book the battery replacement.
-
-<!-- cta -->
-Reply with Intel or Apple Silicon + roughly how old the machine is, and I’ll tell you which 3 of these 7 move the needle first.
+Which Mac is yours? The menus differ, and 3 of these 7 matter most on each.
+<!-- posted closer, the gate refuses it: Save this before you book the battery replacement. Reply with Intel or Apple Silicon + roughly how old the machine is, and I'll tell you which 3 of these 7 move the needle first. -->

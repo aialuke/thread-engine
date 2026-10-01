@@ -4,7 +4,7 @@ Beat-check. A new settings draft takes its beat order from `SKILL.md`. Posted tr
 
 Sourced dollars below are from the shipped gold. A new draft omits a figure until it has a source.
 
-MacBook battery shipped gold is `examples/macbook-battery.md` (conversation `2102172499031253210`). Where snap, thesis, or the reply CTA differ from A and B, follow `SKILL.md`. The shipped transcripts in `examples/` close with "Reply with…" or "Save this before…", which the gate refuses as engagement solicitation; the closers below show the real-question form.
+MacBook battery shipped gold is `examples/macbook-battery.md` (conversation `2102172499031253210`). Where snap or thesis differ from A and B, follow `SKILL.md`. The closers in `examples/` use the question below. Posted "Reply with…" and "Save this before…" lines are HTML comments in those files. The gate refuses them.
 
 iPhone 18 Pro vs 17 Pro shipped gold is `examples/iphone-18-pro-aperture.md` (conversation `2102272933087363155`), a comparison: follow `.claude/skills/format-comparison/SKILL.md`.
 

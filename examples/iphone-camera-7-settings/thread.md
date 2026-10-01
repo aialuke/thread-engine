@@ -7,15 +7,15 @@ account: @exitzerocode
 
 Most iPhones get set up on day one and the Camera app is never touched again.
 
-A wedding guest was about to spend $1,200 on a “real camera” because every reception photo came out flat, crooked, and weirdly wide. The photographer at the next table borrowed the phone for four minutes.
+A wedding guest was about to spend $1,200 on a "real camera" because every reception photo came out flat, crooked, and weirdly wide. The photographer at the next table borrowed the phone for four minutes.
 
-- Didn’t install an app.
-- Didn’t edit anything.
-- Didn’t switch to Portrait mode.
+- Didn't install an app.
+- Didn't edit anything.
+- Didn't switch to Portrait mode.
 
 He changed 7 settings. Then he took the same photo from the same seat.
 
-“Your camera was never the problem. Apple shipped a serious camera with the training wheels still on — grid off, style set to the safest flat look, resolution wound down, and every choice you make gets wiped the second you close the app. Nobody in the setup screens is going to tell you the fix is already in Settings.”
+"Your camera was never the problem. Apple shipped a serious camera with the training wheels still on — grid off, style set to the safest flat look, resolution wound down, and every choice you make gets wiped the second you close the app. Nobody in the setup screens is going to tell you the fix is already in Settings."
 
 🧵 Here are the 7 settings that fixed it:
 
@@ -34,7 +34,7 @@ Grid is a 3×3 overlay. Put the face, the plate, or the skyline on a line or an 
 
 Level is the small bar that turns yellow when the phone is straight. Use it for tables, buildings, water, group shots.
 
-This one change is most of the “how does their phone look better than mine” gap. It is composition, not hardware.
+This one change is most of the "how does their phone look better than mine" gap. It is composition, not hardware.
 
 ---
 
@@ -111,7 +111,7 @@ Hold the phone like a camera, not like a phone. Index finger on the button. Elbo
 
 Burst is how you get one frame where nobody is blinking.
 
-Settings → Camera also has “Use Volume Up for Burst.” Turn that on if you want the hold-to-burst behaviour explicit.
+Settings → Camera also has "Use Volume Up for Burst." Turn that on if you want the hold-to-burst behaviour explicit.
 
 ---
 
@@ -145,6 +145,5 @@ Four minutes. No app. No $1,200 body.
 
 Apple set the Camera app up so anyone can point and shoot on day one. That setup is still running years later unless you change it.
 
-Save this before you buy a new phone for the camera.
-
-Reply with your model — 13, 15, 16 Pro, 17, whatever — and I’ll tell you which of these 7 actually exist on yours.
+Which iPhone is yours? The Camera menus differ, and 3 of these 7 matter most on each.
+<!-- posted closer, the gate refuses it: Save this before you buy a new phone for the camera. Reply with your model — 13, 15, 16 Pro, 17, whatever — and I'll tell you which of these 7 actually exist on yours. -->
