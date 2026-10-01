@@ -13,7 +13,7 @@ The clickable mock of the Thread Engine UI, version 22 (25 Sep 2026). Published 
 | `src/build.py` | Assembles `project/Main.dc.html` and `project/Mac.dc.html`, then fills `serve/` for testing. |
 | `test/` | Headless Chrome checks (`run.js`, `shots.js`, `sheet.js`), the page helper (`t.js`), scenarios, and `controls.py` (every control and binding, and the inventory check). |
 
-## Format rules that bite
+## Format rules
 
 `.dc.html` is the Design canvas's component format. `{{hole}}` is a dotted lookup into `renderVals()`, never an expression. `<sc-if value>` and `<sc-for list as>` are the only control flow. `<dc-import name="Thinking" cmd on-done>` embeds a component; kebab-case attributes become camelCase props. The canvas forbids global keydown handlers, so keys are handled on the `.te-root` element (`onKeyDown="{{rootKey}}"`). `inert` must be the string `'true'` or `null` (React 18 drops a boolean).
 

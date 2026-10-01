@@ -15,9 +15,9 @@ Decisions are cited as `Dnn` (`reviews/ui-direction.md`), algorithm facts as `An
 | Path | Kind | Date | Status |
 |---|---|---|---|
 | `research/x-rules.md` | synthesis, X's own rules for a drafting tool | 2026-09 | current |
-| `research/layer-1-switches-profiles.md` | synthesis, layer 1 | 2026-09-26 | snapshot (2026-09-26); Grok rows pre-date D88; not updated |
-| `research/layer-2-x-data-tiers.md` | synthesis, layer 2 | 2026-09-26 | snapshot (2026-09-26); cites D1–D87; not updated |
-| `research/layer-3-engines.md` | synthesis, layer 3, no Grok | 2026-09-27 | snapshot (2026-09-27); cites D37–D104; not updated |
+| `research/layer-1-switches-profiles.md` | synthesis, command switches and profiles | 2026-09-26 | snapshot (2026-09-26); Grok rows pre-date D88; not updated |
+| `research/layer-2-x-data-tiers.md` | synthesis, X data tiers | 2026-09-26 | snapshot (2026-09-26); cites D1–D87; not updated |
+| `research/layer-3-engines.md` | synthesis, AI engines, no Grok | 2026-09-27 | snapshot (2026-09-27); cites D37–D104; not updated |
 | `research/discovery-x-api-search-proposal.md` | proposal and decision (D88 path) | 2026-09-26 | orphan |
 | `research/jev-build-time-evaluation-2026-09-27.md` | proposal ("not evidence" for savings); its section "Judging text with Jev" records which question types are validated (cited by `jev-judge-run`) | 2026-09-27, section added 2026-09-30 | current |
 | `research/Jev cookbooks.md` | raw, vendor docs | 2026-09 | raw |

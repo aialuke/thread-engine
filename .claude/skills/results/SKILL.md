@@ -17,19 +17,69 @@ Plain English. No JSON, no code in what the operator reads. Say "not enough data
 3. Run `python3 scripts/loop.py status` and `python3 scripts/loop.py evaluate`. Read `ledger/SUMMARY.md`.
 4. If the operator typed `/results` without requesting a review and `review.review_due` from the `status` output is false, print the last 7 days from `ledger/SUMMARY.md` as a short table and stop.
 5. Otherwise read `experiments.md`, `learnings.md`, and the most recent weekly review matching `reviews/week-YYYY-Www.md`. If none exists, treat this as the first weekly review. Write `reviews/week-YYYY-Www.md` (ISO week, Australia/Brisbane) with these sections, each a few lines:
-   - **Rewards progress.** From the "Original Content Rewards" block in `ledger/SUMMARY.md`: verified followers against 500, qualified impressions against 500,000, and the share of organic impressions on originals that qualified. Say what pace each needs over the remaining days and how this week compared. Only originals count, so name the originals that did most.
-   - **Posts this week.** Table from `ledger/SUMMARY.md`: posted, slug, format, lane, organic impressions, non-organic %, profile visits, bookmarks, outside replies, follows, snapshot kind. Name late or missed reads and any post marked non-organic (boosted or otherwise); non-organic posts never count as wins.
-   - **Followers.** From the Account block in `ledger/SUMMARY.md`: followers now, new and lost this week, follows per profile visit, and which posts and replies brought the new followers (exact from the export; otherwise the credited lower bound). Say how far the credited count is from the export's, so the matching can be trusted or not.
-   - **Replies.** From this week's `reply` rows in `ledger/activity/`: how many, their organic reach, and their profile visits, grouped by topic (read the account's own reply text and X's labels). Name the reply that earned the most visits. Read the "Replies" section in `voice/exit-zero.md` for this check: flag any reply text used twice and the busiest 24 hours of replies.
-   - **Experiment.** The open one: its question, rounds so far, posts still needed. Closed ones: result and lesson id.
-   - **Lane.** `lane-share`: main posts out of the last 15, against the target in `reference/audience.md`. The format-trial line in Current state in `AGENTS.md` says whether a low share is only reported; say how `main` and `other` posts compare on organic reach and profile visits.
+   - **Rewards progress.** From the "Original Content Rewards" block in `ledger/SUMMARY.md`.
+     - Verified followers against 500.
+     - Qualified impressions against 500,000.
+     - The share of organic impressions on originals that qualified.
+     - What pace each needs over the remaining days.
+     - How this week compared.
+     - Only originals count. Name the originals that did most.
+   - **Posts this week.**
+     - A table from `ledger/SUMMARY.md`: posted, slug, format, lane, organic impressions, non-organic %, profile visits, bookmarks, outside replies, follows, snapshot kind.
+     - Name late or missed reads.
+     - Name any post marked non-organic, whether it was boosted or not.
+     - Non-organic posts never count as wins.
+   - **Followers.** From the Account block in `ledger/SUMMARY.md`.
+     - Followers now, and how many were new or lost this week.
+     - Follows per profile visit.
+     - Which posts and replies brought the new followers. Use the export when it exists. Otherwise use the credited lower bound.
+     - How far the credited count is from the export's count. That gap shows whether the matching can be trusted.
+   - **Replies.** From this week's `reply` rows in `ledger/activity/`.
+     - How many replies there were.
+     - Their organic reach and their profile visits, grouped by topic.
+     - Read the account's own reply text and X's labels to make the groups.
+     - Name the reply that earned the most visits.
+     - Read the "Replies" section in `voice/exit-zero.md`.
+     - Flag any reply text used twice.
+     - Flag the busiest 24 hours of replies.
+   - **Experiment.**
+     - The open one: its question, rounds so far, and posts still needed.
+     - Closed ones: result and lesson id.
+   - **Lane.**
+     - `lane-share`: main posts out of the last 15, against the target in `reference/audience.md`.
+     - The format-trial line in Current state in `AGENTS.md` says whether a low share is only reported.
+     - How `main` and `other` posts compare on organic reach.
+     - How `main` and `other` posts compare on profile visits.
    - **Spacing.** Hours between originals this week, as observations only.
-   - **Your edits.** Group this week's `preference` edits by kind across all ledger posts. A kind seen on 3 or more posts is a candidate: propose it as one sentence. On the operator's yes, run `python3 scripts/loop.py add-preference --statement "<sentence>" --evidence <ids>`. List `violation` edits separately and say the gate may need a new refusal; that change is made in a Claude Code session, not here.
-   - **Reader questions.** Run `python3 scripts/x_api.py mentions` and read this week's replies to the account. Up to 3 questions worth answering, each with the point a reply should make. Leave the person unnamed and their text out of the review (`voice/exit-zero.md` → Replies).
-   - **Lanes to review.** Posts the daily run recorded on its own (slug `x-<id>`, lane `other`) and any post whose lane looks wrong: test each against the three tests in `reference/audience.md` and propose `main` or `other` in one line. Judge by audience fit, whatever the format: a post passes test 3 only when every claim in it is sourced. On the operator's yes, run `python3 scripts/loop.py set-lane --root-id <id> --lane <lane> --reason "<which test>"`.
-   - **Rule changes proposed.** At most two, each tied to an `adopted` lesson with rule state `none`: the lesson id, the file under `.claude/skills/` or `voice/`, and the exact sentence to add or change. Say: "Type /apply <lesson id> to make this change, or ignore it."
-   - **Reverts proposed.** An applied rule whose next 3 posts all fell below their experiment bar or cohort median: say so and "Type /undo-rule <lesson id> to revert."
-   - **Profile.** Run `python3 scripts/x_api.py me`. Say whether the bio and the pinned post match `reference/audience.md`. The pin should be the newest PAID → FREE post that's live, sourced and unboosted; until one exists, nothing boosted. If not, read A14 in `reference/x-algorithm.md` before suggesting a one-sentence bio and a pin with no link or a well-known link.
-   - **PAID → FREE runway.** Count the `paid-free-*` rows still `queued` in `queue/topics.yaml`. When two or fewer remain, say so and ask whether the series ends, repeats with singles, or takes a new roster.
+   - **Your edits.**
+     - Group this week's `preference` edits by kind across all ledger posts.
+     - A kind seen on 3 or more posts is a candidate. Propose it as one sentence.
+     - On the operator's yes, run `python3 scripts/loop.py add-preference --statement "<sentence>" --evidence <ids>`.
+     - List `violation` edits separately.
+     - Say the gate may need a new refusal. That change is made in a Claude Code session, not here.
+   - **Reader questions.**
+     - Run `python3 scripts/x_api.py mentions` and read this week's replies to the account.
+     - Up to 3 questions worth answering, each with the point a reply should make.
+     - Leave the person unnamed and their text out of the review (`voice/exit-zero.md` → Replies).
+   - **Lanes to review.**
+     - Posts the daily run recorded on its own (slug `x-<id>`, lane `other`) and any post whose lane looks wrong.
+     - Test each against the three tests in `reference/audience.md` and propose `main` or `other` in one line.
+     - Judge by audience fit, whatever the format.
+     - A post passes test 3 only when every claim in it is sourced.
+     - On the operator's yes, run `python3 scripts/loop.py set-lane --root-id <id> --lane <lane> --reason "<which test>"`.
+   - **Rule changes proposed.**
+     - At most two, each tied to an `adopted` lesson with rule state `none`.
+     - For each: the lesson id, the file under `.claude/skills/` or `voice/`, and the exact sentence to add or change.
+     - Say: "Type /apply <lesson id> to make this change, or ignore it."
+   - **Reverts proposed.** An applied rule whose next 3 posts all fell below their experiment bar or cohort median.
+     - Say so, and say "Type /undo-rule <lesson id> to revert."
+   - **Profile.**
+     - Run `python3 scripts/x_api.py me`.
+     - Say whether the bio and the pinned post match `reference/audience.md`.
+     - The pin is the newest PAID → FREE post that is live, sourced, and unboosted.
+     - Until one exists, the pin is nothing that was boosted.
+     - If the bio or the pin does not match, read A14 in `reference/x-algorithm.md` before suggesting a one-sentence bio and a pin with no link or a well-known link.
+   - **PAID → FREE runway.** Count the `paid-free-*` rows still `queued` in `queue/topics.yaml`.
+     - When two or fewer remain, say so and ask whether the series ends, repeats with singles, or takes a new roster.
 6. Continue once the saved review covers every required section, identifying unavailable evidence and saying "not enough data yet" wherever applicable. Run `python3 scripts/loop.py mark-reviewed`, then `python3 scripts/loop.py commit-data --message "weekly review YYYY-Www" --paths reviews/week-YYYY-Www.md,reviews/log.md`.
 7. Tell the operator the three things that matter most, in three sentences, and where the full review is.

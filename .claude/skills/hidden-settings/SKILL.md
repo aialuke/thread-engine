@@ -42,7 +42,7 @@ Settings threads. Required, this order:
 
 For You shows one post per conversation, and a stranger can only be shown the root (`reference/x-algorithm.md` A1, A2). The root carries the result on its own. Keep the hook under 600 characters, the settings root cap in `scripts/formats.py`: scene and expert may share a sentence, and the no-list may be two or three lines.
 
-N is the number of setting cards, 3 to 7, and it is the number in the snap, the promise and the setting-card count. The thread has N + 2 posts: root, N setting cards, closer. When the queue row names an experiment arm, the arm's post count wins.
+N is the number of setting cards, 3 to 7, and it is the number in the snap, the promise and the setting-card count. The thread has N + 2 posts: root, N setting cards, closer. When the queue row names an Arm, the row's `treatment` text sets the post count.
 
 ## Card micro-structure
 

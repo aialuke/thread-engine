@@ -1,11 +1,11 @@
 ---
 name: format-build-log
 description: >
-  Build-log format: one standalone post on what the pipeline did, with
+  Build-log format: one standalone post on what the idea-to-video pipeline did, with
   real proof attached, how, and what broke. Use for a build-in-public
-  update, what the pipeline did today, or /format-build-log.
+  update, what the idea-to-video pipeline did today, or /format-build-log.
 disable-model-invocation: true
-when-to-use: Use for a build-in-public update, what the pipeline did today, or /format-build-log.
+when-to-use: Use for a build-in-public update, what the idea-to-video pipeline did today, or /format-build-log.
 ---
 
 # Format: build-log

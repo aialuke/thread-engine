@@ -26,7 +26,7 @@ The operator's gathered list of paid tools and free alternatives that PAID → F
 _Avoid_: tool list
 
 **Hook**:
-The first Card of a Draft, the one a stranger is shown (the root, once posted). In a single standalone post it is the whole post. Not a Claude Code hook. **Hook style** is how a Hook is written, not a separate thing; it is one of the levers a Lesson may change.
+The first Card of a Draft, the one a stranger is shown (the root, once posted). In a single standalone post it is the whole post. Not a Claude Code hook. **Hook style** is how a Hook is written, not a separate thing; it is one setting a Lesson may change.
 _Avoid_: opener, intro
 
 **Shout-out**:
@@ -90,8 +90,20 @@ A post recorded after the fact rather than when it went live. If its 48h window 
 _Avoid_: backdated post, late post
 
 **Edit**:
-One difference between a posted Card's live text and the Draft's Card, in either direction, so an added or removed Card counts. Recorded by `/posted` in exactly one of four classes. A **preference** is wording, length, order or emphasis with nothing factual changed; three posts showing the same kind make it a candidate Lesson. A **correction** is a fact the operator fixed. A **deviation** is a change that leaves the post no longer following its Experiment's Arm. Recording it drops the post out of that Experiment. A **violation** breaks the voice rules, a Gate refusal or the Truth budget; it is never learned as a preference, and it is reported so the Gate can gain a refusal. A change that is both a violation and a deviation is stored as a violation with `leaves` true, and recording it drops the post out of that Experiment.
+One difference between a posted Card's live text and the Draft's Card. The live text can add a Card the Draft lacks, or drop a Card the Draft has. An added Card is one Edit. A removed Card is one Edit. `/posted` records each Edit as exactly one class: Preference, Correction, Deviation, or Violation.
 _Avoid_: change, diff
+
+**Preference**:
+An Edit of wording, length, order, or emphasis, with nothing factual changed. Three posts showing the same kind make it a candidate Lesson.
+
+**Correction**:
+An Edit in which the operator fixed a fact.
+
+**Deviation**:
+An Edit that leaves the post no longer following its Experiment's Arm. Recording a Deviation drops the post out of that Experiment.
+
+**Violation**:
+An Edit that breaks the voice rules, a Gate refusal, or the Truth budget. A Violation is never learned as a Preference. A Violation is reported so the Gate can gain a refusal. An Edit that is both a Violation and a Deviation is stored as a Violation with `leaves` true. Recording that Edit drops the post out of that Experiment.
 
 ### Measuring
 
@@ -134,7 +146,7 @@ _Avoid_: input file, request, body
 ### Experiments
 
 **Experiment**:
-A treatment hypothesis judged in Rounds against a threshold fixed when it opens (the cohort's median times the effect), scored, for new proposals, on one organic rate: likes plus reposts, or profile visits, per 1,000 organic impressions. A post under 50 organic impressions is not a cohort member, and as a treatment post with measured numbers it counts as a miss; a post with no rate at all (no impressions or a missing count) is left out. One is open at a time; it ends adopted, not replicated or no effect.
+A treatment hypothesis judged in Rounds against a threshold fixed when it opens. The threshold is the cohort's median times the effect. For new proposals it is scored on one organic rate per 1,000 organic impressions: likes plus reposts, or profile visits. A post under 50 organic impressions is not a cohort member. As a treatment post with measured numbers, that post counts as a miss. A post with no rate at all (no impressions, or a missing count) is left out. One Experiment is open at a time. It closes as one of three results: adopted, not replicated, or no effect.
 _Avoid_: test, trial, A/B
 
 **Cohort**:
@@ -154,7 +166,7 @@ The next batch of unconsumed treatment posts, as many as the Experiment's size, 
 _Avoid_: cycle, batch
 
 **Arm**:
-A post's assignment inside an Experiment: Treatment, Control, or none for a post outside one. Only treatment posts enter Rounds, and a Retrospective post cannot join an Experiment, so its Arm is none. Skills and queue rows also say "the arm" for the Treatment's rule.
+A post's assignment inside an Experiment: Treatment, Control, or none for a post outside one. Only treatment posts enter Rounds, and a Retrospective post cannot join an Experiment, so its Arm is none. The Treatment holds the rule a treatment post follows.
 _Avoid_: group
 
 **Lesson**:

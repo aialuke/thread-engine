@@ -11,23 +11,21 @@ Chosen by the operator on 24 Sep 2026, from `reviews/audit-2026-09.md`. The week
 
 ## Main lane
 
-The builder path is the direction: posts from the build are preferred. While formats are trialled, `main` also covers **tech broadly** (AI, software, tools, devices and tech news), as Current state in `AGENTS.md` says; test 1 below applies in that wider form until the operator narrows it.
+The builder path is the direction: posts from the build are preferred. Current state in `AGENTS.md` says whether `main` still covers tech broadly, and whether a low share is only reported.
 
 A post is in the `main` lane when all three are true:
 
-1. **It comes from building, or for now from tech broadly.** Something the operator built, ran, measured, broke or chose; a take on tools, AI or tech news from a builder's point of view; or, for now, any useful tech post.
+1. **It comes from the build, or from tech broadly while Current state says so.** Until the operator narrows the lane, any useful tech post passes this test. Tests 2 and 3 still apply. After that narrowing, the post comes from building: something the operator built, ran, measured, broke, or chose. A device tip then passes only when it comes from the build, such as Mac settings changed to run the idea-to-video pipeline.
 2. **A builder or an AI-using creator gets something from it:** a result, a lesson, a verdict on a tool, a workflow, a free tool that holds up, or a question worth answering.
 3. **Every claim in it shows its proof:** real output, a screenshot, a number or a named source. The truth budget in `voice/exit-zero.md` applies. A question or an opinion makes no claim, so it passes. A PAID → FREE post passes when every claim in it is sourced in `CLAIMS.md` (the vendor's own page, or the operator's test).
 
 These fit:
-- build logs ("today the pipeline did X; here's the output and what broke");
+- build logs ("today the idea-to-video pipeline did X; here's the output and what broke");
 - lessons and mistakes;
 - tool verdicts from real use (e.g. Claude, Codex and Grok as blind reviewers of the same plan);
-- the free tools the pipeline actually uses;
-- free-tool lists (PAID → FREE, `.claude/skills/format-tool-swap/SKILL.md`) whose every swap passes the three tests, for now under tech broadly;
+- the free tools the idea-to-video pipeline actually uses;
+- free-tool lists (PAID → FREE, `.claude/skills/format-tool-swap/SKILL.md`) whose every swap passes the three tests;
 - AI and tech-policy takes from a builder's point of view (government tech failures, AI regulation, the tools).
-
-Device and settings tips count as `main` for now (tech broadly). Once the operator narrows the lane, they count only when they come from the build (for example, the Mac settings changed to run the pipeline).
 
 ## Other lane
 
@@ -35,7 +33,7 @@ Everything else is `other`: networking and connect posts, personal banter, and o
 
 `other` posts are allowed. The topic-share check in the algorithm reference (fact A8) counts the last 15 **originals**; replies don't count. The target is at least 12 of the last 15 originals in `main`, an editorial choice, not a proven algorithm threshold.
 
-**While the operator trials formats** (settings threads, comparisons and single tips included), the share is **reported, not enforced**. Every post keeps its lane label, so the review can show how each lane performs.
+Whether a low share is only reported is the format-trial line in Current state in `AGENTS.md`. Every post keeps its lane label, so the review can show how each lane performs.
 
 ## Replies
 

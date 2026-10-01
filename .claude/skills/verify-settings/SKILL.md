@@ -69,7 +69,7 @@ Mode: `paths` (default) checks menu paths into `PATHS.md`. `claims` checks every
 2. **Official source.** The vendor's own pricing, feature, spec or support page, opened in this verify run. Reviews, forums, and memory are not sources.
 
    "Tested" only when the operator says they did it.
-   **The operator's own run** (build-log and tool-verdict claims such as "the pipeline made this script in <n> minutes" or "<tool> caught <n> bugs <other tool> missed", and an optional tool-swap test such as "opened a <file type> in <tool>"): Source URL is `operator, <date>` plus the artifact that shows it, a screenshot in the draft's `images/` or a log file path. Vendor-stated or tested: `tested`. No artifact means the row is `VERIFY`.
+   **The operator's own run** (build-log and tool-verdict claims such as "the idea-to-video pipeline made this script in <n> minutes" or "<tool> caught <n> bugs <other tool> missed", and an optional tool-swap test such as "opened a <file type> in <tool>"): Source URL is `operator, <date>` plus the artifact that shows it, a screenshot in the draft's `images/` or a log file path. Vendor-stated or tested: `tested`. No artifact means the row is `VERIFY`.
 
 3. **Write `drafts/<slug>/CLAIMS.md`:**
 

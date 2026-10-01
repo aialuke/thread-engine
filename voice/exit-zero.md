@@ -13,7 +13,7 @@ Shared tone for every format. Format rules live in `.claude/skills/format-*/`. F
 
 ## What every post delivers
 
-Each post delivers the operator's own verdict, voice and lesson, with the human judgement visible in the post. Where the format rests on a run (build-log, tool-verdict), the operator's own test and numbers come with it; a tool-swap rests on sourced research, and the operator's choice of swaps and the judgement in the proof lines make it theirs. AI drafts and the pipeline makes clips; a generated clip or text is evidence, never the product. The reason: X's rewards program makes a post ineligible if it "was created or posted using automated means".
+Each post delivers the operator's own verdict, voice and lesson, with the human judgement visible in the post. Where the format rests on a run (build-log, tool-verdict), the operator's own test and numbers come with it; a tool-swap rests on sourced research, and the operator's choice of swaps and the judgement in the proof lines make it theirs. The agent drafts the cards. The idea-to-video pipeline makes the clips. A generated clip, or generated text, is evidence. The product is the operator's verdict. The reason: X's rewards program makes a post ineligible if it "was created or posted using automated means".
 
 ## Texture
 

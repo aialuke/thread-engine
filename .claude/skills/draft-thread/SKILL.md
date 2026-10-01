@@ -30,7 +30,7 @@ A queue slug. Bare `/draft-thread` → the queue row with `status: planned`. Wit
    Done: slug, folder, format and, if set, the experiment arm are written down.
 
 3. **Format.** Read `.claude/skills/format-<format>/SKILL.md`, its contract and checklist, and each reference whose stated condition applies to this draft. A settings row also reads `.claude/skills/hidden-settings/examples.md` and the gold threads in `examples/`. Take card texture and beat order from the gold; take the root's opening, length and closer from the format (`hidden-settings` says why the gold differs).
-   If the row is a `treatment` or `control` arm, the arm's description wins over the format's defaults (for example post count). Never change anything else about the post, so the test stays clean.
+   If the row's Arm is `treatment` or `control`, the row's `treatment` text wins over the format's defaults (for example post count). Never change anything else about the post, so the test stays clean.
    Done: the applicable shape, research and verification mode, image rule and checklist are identified, including any arm override.
 
 4. **Research, then write.** Finish research before any card prose, following the format's research rule. Collect the evidence the format requires: official sources for vendor claims, the operator's account plus real proof for claims about their own runs. No qualifying source → the item is omitted. A build-log or tool-verdict starts with the format's **Material** questions to the operator; without their answers and real proof, stop and suggest another format. A tool-swap needs only research; offer the operator an optional quick test once (see the format).

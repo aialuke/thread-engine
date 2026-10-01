@@ -8,7 +8,7 @@ Makes @exitzerocode posts and learns which ones grow the account. You type slash
 2. **`/draft-thread <slug>`** — the agent researches, checks every path and claim, and writes the cards. Start that session in Plan mode so you see the plan first.
 3. **Read the cards.** Change anything you like.
 4. **`/approve <slug>`** — only you can do this. It approves the cards exactly as they are. If a card changes later, approve again.
-5. **`/ready <slug>`** — the agent checks the draft and puts card 1 on your clipboard. Paste it into X as a new post. Say `next` for each following card and post it as a reply to the one before.
+5. **`/ready <slug>`** — the agent checks the draft and puts card 1 on your clipboard. Paste it into X as a new post. In that chat, type `next` for each following card. Post that card as a reply to the one before.
 6. **`/posted <link to the first post>`** — the agent records what actually went live and asks how long it took.
 
 ### PAID → FREE posts
@@ -35,7 +35,7 @@ Numbers are collected automatically by the daily job: every post, reply and quot
 
 ## Staying eligible for X's rewards program
 
-The target is X's Original Content Rewards: 500 verified followers and 500,000 verified Home Timeline impressions on your own posts in 90 days (replies and boosted reach don't count). `ledger/SUMMARY.md` shows progress. Things only you can do:
+Progress toward X's Original Content Rewards is in `ledger/SUMMARY.md`. Things only you can do:
 
 - **Account basics X requires:** two-factor authentication on, a verified email, and a complete profile (name, bio, avatar and header).
 - **Once a week:** export your analytics (X → Premium → Analytics → Content → Export, last 7 days) and read the two numbers on X → Creator Studio → Original Content Rewards. `/results` asks for both.
@@ -61,4 +61,4 @@ The agent drafts, measures and grades its own work. Once a month, ask a differen
 
 ## For maintainers
 
-Tests: `python3 -m unittest discover -s tests`. The contract for agents is `AGENTS.md`.
+The agent contract, including the test command, is `AGENTS.md`.

@@ -38,7 +38,7 @@ On or after that date, ask the operator whether to lift the pause. On a yes, edi
 1. Lane: read `reference/audience.md`. Say the `lane.share` in one line. The format-trial line in Current state in `AGENTS.md` says whether a low share is only reported.
 2. Demand: run two or three narrow searches for recent questions in the lane with `python3 scripts/x_read.py search "<query>"` (up to about $0.15 each: $0.005 a post plus $0.010 an author). Use X API syntax, keep replies in (many real requests are replies) and set no engagement floor, for example `("is there a free" OR "any free alternative") video editor lang:en -is:retweet`; x.com's website-only operators are refused. The results are X's own posts, so cite only what `x_read.py` returned. Record each hit as a lead: post id, the query, and that the search returns at most 10. Leads are not proof of demand.
 3. Queue: consider `status: queued` rows in `queue/topics.yaml`. PAID → FREE rows (`format: tool-swap`) go in the queue's order, one parent every other day: say when the last one went out.
-4. Timing: propose a posting time in Australia/Brisbane. At most two originals a day, hours apart: say how many originals went out today and how many hours since the last one. The operator should be there to reply in the first hour. A stranger only sees a post after its first like, and the like-based pool stops re-indexing at 48 hours (`reference/x-algorithm.md` A6), so prefer a time when builder mutuals and US Premium users are awake: the US-overlap windows, 22:00–23:00 or 05:00–07:00 Australia/Brisbane from Tuesday night to Friday morning, until experiment 3 in `experiment-list.md` says otherwise. The windows are a hypothesis from `reviews/reports/Driving verified home timeline impressions.md`, not a finding. When US clocks change, US mornings move an hour in Brisbane: shift the windows the same hour. The operator confirmed both windows work for them, first hour included.
+4. Timing: propose a posting time in Australia/Brisbane. At most two originals a day, hours apart. Say how many originals went out today and how many hours since the last one. Propose a time when the operator can reply in the first hour. A stranger only sees a post after its first like (`reference/x-algorithm.md` A6). The like-based pool stops re-indexing at 48 hours. Prefer 22:00–23:00 or 05:00–07:00 Australia/Brisbane, from Tuesday night to Friday morning, when builder mutuals and US Premium users are awake. Use those windows until experiment 3 in `experiment-list.md` says otherwise. The windows are a hypothesis in `reviews/reports/Driving verified home timeline impressions.md`. When US clocks change, US mornings move an hour in Brisbane. Shift the windows by that same hour. The operator confirmed both windows work for them, first hour included.
 
 Done: the lane share, the leads (or that none were found), the queue state and the timing figures have each been said in a line.
 
@@ -53,7 +53,7 @@ Propose one post in four lines: topic, format, experiment arm (or none), posting
     lane: <main|other>
     experiment: <E-00N or omit>
     arm: <treatment|control or omit>
-    treatment: <the arm's exact rule, or omit>
+    treatment: <the Treatment's exact rule, or omit>
     hypothesis: <one sentence, written now, before posting>
     post_at: <YYYY-MM-DD HH:MM Australia/Brisbane>
     leads: [<post ids>]
