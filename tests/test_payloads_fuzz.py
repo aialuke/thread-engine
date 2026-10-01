@@ -115,6 +115,33 @@ class WrongTypedFields(LoopCase):
                         escaped.append(f"{command} {path} {value!r}: exit {code}")
         self.assertEqual(escaped, [], f"{len(escaped)} escaped:\n" + "\n".join(escaped[:20]))
 
+    def tree(self) -> dict[str, bytes]:
+        """The files a refused command could have written. Payload files are the test's own input."""
+        paths = [self.root / "experiments.md", self.root / "learnings.md"]
+        for folder in ("ledger", "loop"):
+            root = self.root / folder
+            if root.is_dir():
+                paths.extend(path for path in root.rglob("*") if path.is_file())
+        return {str(path.relative_to(self.root)): path.read_bytes() for path in paths if path.is_file()}
+
+    def test_a_wrong_typed_field_is_refused_and_not_stored(self) -> None:
+        cases = (
+            ("record-post", ("hypothesis",), 1, "hypothesis must be text or null"),
+            ("record-post", ("media",), "x", "media must be a list of text"),
+            ("record-post", ("ai_media",), "x", "ai_media must be true or false"),
+            ("record-post", ("draft",), 1, "draft must be text or null"),
+            ("record-activity", ("items", 0, "text"), 1, "item text must be text"),
+            ("record-followers", ("total",), "x", "total must be a non-negative integer or null"),
+            ("open-experiment", ("reference_facts",), "x", "reference_facts must be a list of text"),
+        )
+        for command, path, value, message in cases:
+            with self.subTest(command=command, field=".".join(map(str, path))):
+                self.fresh(command)
+                before = self.tree()
+                code, err = self.run_case(command, mutate(BASE[command], path, value))
+                self.assertEqual((code, json.loads(err)["error"]), (1, message))
+                self.assertEqual(self.tree(), before)
+
 
 if __name__ == "__main__":
     unittest.main()

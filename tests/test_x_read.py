@@ -9,7 +9,9 @@ import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "scripts"))
@@ -62,9 +64,19 @@ class XRead(unittest.TestCase):
         self.assertEqual(set(post["metrics"].values()), {None})
 
     def test_options_reach_the_request(self) -> None:
-        _, _, _, _, opener = self.call(["search", "q", "--hours", "6", "--sort", "relevancy"], FakeResponse({}))
-        url = opener.requests[0].full_url
-        self.assertIn("sort_order=relevancy", url)
+        before = datetime.now(timezone.utc)
+        code, out, _, _, opener = self.call(
+            ["search", "q", "--hours", "6", "--sort", "relevancy"], FakeResponse({}))
+        after = datetime.now(timezone.utc)
+        data = json.loads(out)
+        self.assertEqual((code, data["hours"], data["sort"]), (0, 6, "relevancy"))
+        query = parse_qs(urlsplit(opener.requests[0].full_url).query)
+        self.assertEqual(query["sort_order"], ["relevancy"])
+        start = x_api.parse_time(query["start_time"][0])
+        end = x_api.parse_time(query["end_time"][0])
+        self.assertEqual(end - start, timedelta(hours=6))
+        self.assertGreaterEqual(end, before - timedelta(seconds=31))
+        self.assertLessEqual(end, after - timedelta(seconds=29))
 
     def test_website_syntax_is_refused_without_a_call_or_a_log_line(self) -> None:
         code, out, err, log, opener = self.call(["search", "free editor -filter:replies"])

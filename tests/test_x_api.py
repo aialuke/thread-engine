@@ -7,6 +7,7 @@ import io
 import json
 import subprocess
 import sys
+import tempfile
 import unittest
 import urllib.error
 from contextlib import redirect_stderr, redirect_stdout
@@ -240,6 +241,63 @@ class Reads(unittest.TestCase):
                 x_api.user(c, bad)
         self.assertEqual(opener.requests, [])
 
+    def test_mentions_sends_since_id_only_when_one_is_saved(self) -> None:
+        body = {"data": [{"id": "9", "author_id": "3", "text": "hi"}]}
+        c, opener = client(FakeResponse(body))
+        self.assertEqual(x_api.mentions(c, "2102736605039776235"), body["data"])
+        query = parse_qs(urlsplit(opener.requests[0].full_url).query)
+        self.assertEqual(urlsplit(opener.requests[0].full_url).path, f"/2/users/{x_api.USER_ID}/mentions")
+        self.assertEqual(query["since_id"], ["2102736605039776235"])
+        self.assertEqual(query["max_results"], ["100"])
+        self.assertEqual(query["tweet.fields"],
+                         ["created_at,author_id,conversation_id,in_reply_to_user_id,referenced_tweets"])
+        c, opener = client(FakeResponse({"data": [], "meta": {}}))
+        self.assertEqual(x_api.mentions(c), [])
+        self.assertNotIn("since_id", parse_qs(urlsplit(opener.requests[0].full_url).query))
+
+    def test_backfill_writes_the_raw_file_and_flags_only_paid_originals_and_quotes(self) -> None:
+        original = {"id": "1", "text": "own", "public_metrics": {"impression_count": 10},
+                    "organic_metrics": {"impression_count": 1}}
+        quote = {"id": "2", "text": "q", "referenced_tweets": [{"type": "quoted"}],
+                 "public_metrics": {"impression_count": 10}, "organic_metrics": {"impression_count": 9}}
+        reply = {"id": "3", "text": "r", "referenced_tweets": [{"type": "replied_to"}], "in_reply_to_user_id": "9",
+                 "public_metrics": {"impression_count": 10}, "organic_metrics": {"impression_count": 0}}
+        repost = {"id": "4", "text": "rt", "referenced_tweets": [{"type": "retweeted"}]}
+        c, opener = client(
+            FakeResponse({"data": [original, quote, reply, repost], "meta": {}}),
+            FakeResponse({"data": {"id": "1", "username": "exitzerocode"}}),
+            FakeResponse({"data": [{"id": "11", "username": "builder", "verified": True}], "meta": {}}),
+            FakeResponse({"data": [{"id": "9", "author_id": "3"}], "meta": {}}),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            old = x_api.ROOT
+            x_api.ROOT = Path(tmp)
+            self.addCleanup(setattr, x_api, "ROOT", old)
+            result = x_api.backfill(c, "2026-09-20T00:00:00Z", now=NOW)
+            raw_path = Path(tmp) / "ledger" / "raw" / "api" / "backfill-20260924T1200.json"
+            raw = json.loads(raw_path.read_text(encoding="utf-8"))
+        self.assertEqual(result, {
+            "raw_file": "ledger/raw/api/backfill-20260924T1200.json",
+            "items": 4,
+            "kinds": {"original": 1, "quote": 1, "reply": 1, "repost": 1},
+            "followers": 1,
+            "mentions": 1,
+            "nonorganic": [{"id": "1", "public": 10, "organic": 1, "share": 0.9}],
+        })
+        self.assertEqual(raw, {
+            "fetched_at": "2026-09-24T12:00:00Z",
+            "since": "2026-09-20T00:00:00Z",
+            "user_id": "1994313953191833600",
+            "me": {"id": "1", "username": "exitzerocode"},
+            "timeline": [original, quote, reply, repost],
+            "followers": [{"id": "11", "username": "builder", "verified": True}],
+            "mentions": [{"id": "9", "author_id": "3"}],
+        })
+        self.assertEqual([urlsplit(req.full_url).path for req in opener.requests], [
+            f"/2/users/{x_api.USER_ID}/tweets", "/2/users/me",
+            f"/2/users/{x_api.USER_ID}/followers", f"/2/users/{x_api.USER_ID}/mentions",
+        ])
+
     def test_kind_and_nonorganic_share(self) -> None:
         uid = x_api.USER_ID
         self.assertEqual(x_api.kind({}), "original")
@@ -248,6 +306,7 @@ class Reads(unittest.TestCase):
                          "reply")
         self.assertEqual(x_api.kind({"referenced_tweets": [{"type": "replied_to"}], "in_reply_to_user_id": uid}),
                          "thread_card")
+        self.assertEqual(x_api.kind({"referenced_tweets": [{"type": "retweeted"}]}), "repost")
         boosted = {"public_metrics": {"impression_count": 2082}, "organic_metrics": {"impression_count": 98}}
         self.assertAlmostEqual(x_api.nonorganic_share(boosted), 0.953, places=3)
         self.assertIsNone(x_api.nonorganic_share({"public_metrics": {"impression_count": 0}}))

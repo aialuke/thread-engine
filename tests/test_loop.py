@@ -167,6 +167,25 @@ class PostsAndSnapshots(LoopCase):
         self.post("1000000070", T0)
         self.assertEqual(self.ok("validate")["problems"], [])
 
+    def test_validate_names_a_bad_post_and_keeps_going(self) -> None:
+        self.post("1000000071", T0)
+        good = json.loads((self.root / "ledger" / "1000000071.json").read_text())
+        (self.root / "ledger" / "1000000072.json").write_text(json.dumps(good), encoding="utf-8")
+        bad = json.loads((self.root / "ledger" / "1000000071.json").read_text())
+        bad["lane"] = "unset"
+        (self.root / "ledger" / "1000000071.json").write_text(json.dumps(bad), encoding="utf-8")
+        broken = self.root / "ledger" / "1000000073.json"
+        broken.write_text("{", encoding="utf-8")
+        self.assertEqual(self.ok("validate"), {
+            "posts": 3,
+            "problems": [
+                "1000000071.json: lane must be main or other",
+                "1000000072.json: file name does not match root_id",
+                "1000000073.json: "
+                f"{broken.resolve()} is not valid JSON: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",
+            ],
+        })
+
 
 class Experiments(LoopCase):
     def seed_cohort(self, values=(100, 200, 300)) -> list[str]:
@@ -662,6 +681,25 @@ class ApiData(LoopCase):
         self.assertIn("1 new, 0 lost; 1 of the new credited", summary)
 
 
+class Reference(LoopCase):
+    def test_set_reference_records_the_status_the_time_and_the_files(self) -> None:
+        stale = self.ok("set-reference", "--status", "stale",
+                        "--files", "reference/x-algorithm.md,reference/x-api.md", now=hours(3))
+        self.assertEqual(stale, {"reference": {
+            "status": "stale", "checked_at": hours(3),
+            "changed_files": ["reference/x-algorithm.md", "reference/x-api.md"]}})
+        current = self.ok("set-reference", "--status", "current", now=hours(4))
+        self.assertEqual(current, {"reference": {"status": "current", "checked_at": hours(4), "changed_files": []}})
+        state = json.loads((self.root / "loop" / "state.json").read_text())
+        self.assertEqual(state["reference"], current["reference"])
+
+    def test_set_reference_refuses_a_bad_status_and_leaves_the_saved_one(self) -> None:
+        self.assertEqual(self.fails("set-reference", "--status", "gone", now=hours(3)),
+                         "status must be current or stale")
+        state = json.loads((self.root / "loop" / "state.json").read_text())
+        self.assertEqual(state["reference"], {"status": "current", "checked_at": T0, "changed_files": []})
+
+
 class Preferences(LoopCase):
     def test_needs_three_posts_with_preference_edits(self) -> None:
         for i in range(3):
@@ -752,6 +790,49 @@ class Rules(LoopCase):
         self.skill.write_text("v3 uncommitted\n", encoding="utf-8")
         self.assertIn("uncommitted", self.fails("undo", "--lesson", "L-001"))
         self.assertEqual(self.skill.read_text(), "v3 uncommitted\n")
+
+    def test_undo_aborts_a_conflict_and_reverts_nothing(self) -> None:
+        self.skill.write_text("v2\n", encoding="utf-8")
+        applied = self.ok("commit-rule", "--lesson", "L-001", "--files", self.rel, now=T0)
+        self.skill.write_text("later\n", encoding="utf-8")
+        subprocess.run(["git", "add", "--", self.rel], cwd=self.root, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-qm", "later"], cwd=self.root, check=True, capture_output=True)
+        error = self.fails("undo", "--lesson", "L-001")
+        self.assertEqual(error, f"revert of {applied['committed'][:8]} conflicted with a later change; "
+                         "nothing was reverted")
+        self.assertEqual(self.skill.read_text(encoding="utf-8"), "later\n")
+        rule = json.loads((self.root / "loop" / "state.json").read_text())["rules"][0]
+        self.assertEqual((rule["undone"], rule["revert_commit"]), (False, None))
+        status = subprocess.run(["git", "status"], cwd=self.root, capture_output=True, text=True, check=False)
+        self.assertNotIn("currently reverting", status.stdout)
+        revert = subprocess.run(["git", "rev-parse", "--verify", "REVERT_HEAD"], cwd=self.root,
+                                capture_output=True, text=True, check=False)
+        self.assertNotEqual(revert.returncode, 0)
+
+    def git(self, *args: str) -> subprocess.CompletedProcess[str]:
+        result = subprocess.run(["git", *args], cwd=self.root, capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return result
+
+    def test_commit_data_reports_a_clean_tree_and_commits_only_the_sweep(self) -> None:
+        self.git("add", "-A")
+        self.git("commit", "-qm", "sync")
+        self.ok("commit-data", "--message", "render")
+        self.git("add", "-A")
+        self.git("commit", "-qm", "views")
+        head = self.git("rev-parse", "HEAD").stdout.strip()
+        self.assertEqual(self.ok("commit-data", "--message", "weekly review"),
+                         {"committed": None, "reason": "nothing changed"})
+        self.assertEqual(self.git("rev-parse", "HEAD").stdout.strip(), head)
+        (self.root / "reviews").mkdir()
+        (self.root / "reviews" / "week.md").write_text("week\n", encoding="utf-8")
+        (self.root / "notes.md").write_text("nope\n", encoding="utf-8")
+        committed = self.ok("commit-data", "--message", "weekly review 2026-W40")
+        self.assertEqual(self.git("log", "-1", "--format=%s").stdout, "chore(data): weekly review 2026-W40\n")
+        self.assertEqual(self.git("rev-parse", "HEAD").stdout.strip(), committed["committed"])
+        self.assertEqual(self.git("show", "--name-only", "--format=", "HEAD").stdout.splitlines(),
+                         ["reviews/week.md"])
+        self.assertEqual(self.git("ls-files", "notes.md").stdout, "")
 
     def test_apply_does_not_sweep_other_files(self) -> None:
         other = self.root / "notes.md"

@@ -73,10 +73,16 @@ def validate_post(post: dict) -> None:
     need(isinstance(post.get("retrospective"), bool), "retrospective must be true or false")
     need(isinstance(post.get("made_in_repo"), bool), "made_in_repo must be true or false")
     need(post.get("arm", "none") in ARMS, f"arm must be one of {sorted(ARMS)}")
+    need(post.get("hypothesis") is None or isinstance(post.get("hypothesis"), str),
+         "hypothesis must be text or null")
     need(isinstance(post.get("cards", []), list), "cards must be a list")
     for card in post.get("cards", []):
         need(POST_ID_RE.fullmatch(str(card.get("id", ""))) is not None, "card id bad")
         need(isinstance(card.get("text", ""), str), "card text must be text")
+    media = post.get("media", [])
+    need(isinstance(media, list) and all(isinstance(item, str) for item in media), "media must be a list of text")
+    need(isinstance(post.get("ai_media", False), bool), "ai_media must be true or false")
+    need(post.get("draft") is None or isinstance(post.get("draft"), str), "draft must be text or null")
     for edit in post.get("edits", []):
         need(edit.get("class") in EDIT_CLASSES, f"edit class must be one of {sorted(EDIT_CLASSES)}")
     check_count(post.get("production_minutes"), "production_minutes")
@@ -111,6 +117,7 @@ def validate_item(item: dict) -> None:
             check_count(value, f"{group}.{key}")
     topics = item.get("topics", [])
     need(isinstance(topics, list) and all(isinstance(t, str) for t in topics), "item topics must be a list of text")
+    need(isinstance(item.get("text", ""), str), "item text must be text")
 
 
 @guarded("record-post")
@@ -263,7 +270,10 @@ def follower_inputs(payload: dict) -> tuple[datetime, list[str]]:
 @guarded("record-followers")
 def follower_total(payload: dict, ids: list[str]) -> object:
     """The account's follower count: the Payload's `total` when it gives one, else how many ids it listed."""
-    return payload.get("total", len(ids))
+    if "total" not in payload:
+        return len(ids)
+    check_count(payload["total"], "total")
+    return payload["total"]
 
 
 @guarded("record-followers")
@@ -298,8 +308,11 @@ def experiment_texts(payload: dict) -> dict:
     """The question, the two arms and any reference facts of an open-experiment Payload. The three texts are required."""
     for field in ("question", "treatment", "control"):
         need(isinstance(payload.get(field), str) and payload[field].strip(), f"{field} required")
+    facts = payload.get("reference_facts", [])
+    need(isinstance(facts, list) and all(isinstance(fact, str) for fact in facts),
+         "reference_facts must be a list of text")
     return {"question": payload["question"], "treatment": payload["treatment"], "control": payload["control"],
-            "reference_facts": payload.get("reference_facts", [])}
+            "reference_facts": facts}
 
 
 @guarded("record-snapshot")

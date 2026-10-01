@@ -410,13 +410,14 @@ def cmd_record_followers(repo: Repo, args) -> dict:
     repo.state()
     payload = read_json(Path(args.json))
     observed, ids = follower_inputs(payload)
+    total = follower_total(payload, ids)
     day = observed.date().isoformat()
     earlier = [p for p in sorted(repo.private_dir.glob("followers-*.json")) if p.stem[len("followers-"):] < day]
     previous = set(read_json(earlier[-1])["ids"]) if earlier else None
     write_json(repo.private_dir / f"followers-{day}.json", {"at": iso(observed), "ids": ids})
     for old in sorted(repo.private_dir.glob("followers-*.json"))[:-FOLLOWER_FILES_KEPT]:
         old.unlink()
-    row = {"date": day, "at": iso(observed), "followers": follower_total(payload, ids)}
+    row = {"date": day, "at": iso(observed), "followers": total}
     verified = verified_count(payload)
     if verified is not None:
         row["verified_followers"] = verified
