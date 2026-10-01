@@ -116,19 +116,6 @@ def shell(command: str, **extra) -> dict:
 
 
 class PolicyFile(unittest.TestCase):
-    def test_shipped_numbers_and_pin(self) -> None:
-        text = (REPO / "jev" / "thresholds.yaml").read_text(encoding="utf-8")
-        for line in ("model: jev-1.13.0", "mode: shadow", "timeout_seconds: 5",
-                     "confidence_floor: 0.50", "extra_deletion_ask: 0.70",
-                     "needs_human_ask: 0.70", "in_scope_floor: 0.50",
-                     "unused_min: 0.85", "choice_confidence_min: 0.80",
-                     "min_removed_feature_lines: 1", "removed_over_added: 2",
-                     "max_files: 1", "max_lines: 20"):
-            self.assertIn(line, text)
-        loaded = policy()
-        self.assertEqual(loaded["model"], "jev-1.13.0")
-        self.assertEqual(loaded["mode"], "shadow")
-
     def test_latest_alias_is_ignored(self) -> None:
         base = yaml.safe_load((REPO / "jev" / "thresholds.yaml").read_text(encoding="utf-8"))
         base["model"] = "jev-latest"

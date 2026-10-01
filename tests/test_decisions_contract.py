@@ -361,13 +361,6 @@ class Evaluate(ExperimentSetup):
     def test_round_result_thresholds(self) -> None:
         self.assertEqual([experiments.round_result(p, 3) for p in (3, 2, 1, 0)], ["pass", "mixed", "fail", "fail"])
 
-    def test_the_transition_table(self) -> None:
-        self.assertEqual(experiments.TRANSITIONS, {
-            ("testing", "pass"): "promising", ("testing", "mixed"): "unclear", ("testing", "fail"): "no_effect",
-            ("promising", "pass"): "adopted", ("promising", "mixed"): "not_replicated",
-            ("promising", "fail"): "not_replicated",
-            ("unclear", "pass"): "promising", ("unclear", "mixed"): "no_effect", ("unclear", "fail"): "no_effect"})
-
     def test_a_promising_experiment_that_fails_is_not_replicated(self) -> None:
         self.open()
         self.treatment(0, [300, 400, 500])

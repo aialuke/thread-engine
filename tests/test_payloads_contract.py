@@ -79,7 +79,8 @@ class PostPayload(LoopCase):
 
     def test_root_id_number_is_coerced_to_text(self) -> None:
         self.ok("record-post", "--json", self.payload({**self.BASE, "root_id": 1000000001}))
-        self.assertTrue((self.root / "ledger" / "1000000001.json").exists())
+        post = json.loads((self.root / "ledger" / "1000000001.json").read_text())
+        self.assertEqual(post["root_id"], "1000000001")
 
 
 class SnapshotPayload(LoopCase):

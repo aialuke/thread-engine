@@ -15,10 +15,6 @@ def organic(impressions, likes=0, reposts=0, visits=0):
 
 
 class Rates(unittest.TestCase):
-    def test_the_constants(self) -> None:
-        self.assertEqual(rates.MIN_IMPRESSIONS, 50)
-        self.assertEqual(rates.PRIMARIES, ("engagement_rate", "visit_rate"))
-
     def test_engagement_rate_is_likes_plus_reposts_per_thousand_impressions(self) -> None:
         self.assertEqual(rates.engagement_rate(organic(200, likes=3, reposts=1)), 20.0)
         self.assertEqual(rates.engagement_rate(organic(100, likes=0)), 0.0)

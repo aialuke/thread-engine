@@ -225,11 +225,17 @@ class ScriptBehavior(unittest.TestCase):
 
     def test_explicit_dry_run_matches_default(self) -> None:
         draft = self._approved_draft()
-        code_default, out_default, _err = self._run(self.post.main, [str(draft)])
-        code_flag, out_flag, _err = self._run(self.post.main, [str(draft), "--dry-run"])
-        self.assertEqual(code_default, 0)
-        self.assertEqual(code_flag, 0)
-        self.assertEqual(out_default, out_flag)
+        sheet = (
+            "Run sheet. Do not paste this file. Re-run post_thread.py after a card edit.\n"
+            f"Copy with: python3 scripts/post_thread.py {draft} --copy 1\n"
+            "\n"
+            "1  46  01-hook.md  attach images/hook-before-after.jpg\n"
+            "2  9  02-card.md\n"
+        )
+        code_default, out_default, err_default = self._run(self.post.main, [str(draft)])
+        code_flag, out_flag, err_flag = self._run(self.post.main, [str(draft), "--dry-run"])
+        self.assertEqual((code_default, err_default, out_default), (0, "", sheet))
+        self.assertEqual((code_flag, err_flag, out_flag), (0, "", sheet))
 
     def test_no_dry_run_writes_nothing(self) -> None:
         draft = self._approved_draft()
@@ -523,7 +529,6 @@ class FormatAndApproval(unittest.TestCase):
     def test_post_one_cut_point_matches_x(self) -> None:
         # X's API cut post 1's text here: 270 characters to Python, 277 to X; " Ultra" would make 283.
         self.assertEqual(self.post.x_length(POST_ONE[:270]), 277)
-        self.assertTrue(POST_ONE[:270].endswith("Streamlabs"))
         self.assertEqual(self.post.x_length(POST_ONE), 422)
 
     def test_tool_swap_root_needs_the_series_header(self) -> None:

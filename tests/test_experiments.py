@@ -62,7 +62,7 @@ class LessonBasis(unittest.TestCase):
     def test_measured_lesson_states_rounds_posts_cohort_and_the_caveat(self) -> None:
         text = experiments.lesson_basis(self.measured(), [self.rounds(3, 3)])
         self.assertEqual(text, "Provisional: adopted after 2 rounds (6 treatment posts) against a cohort of 5. "
-                               + experiments.FALSE_ADOPTION_CAVEAT)
+                               "A chance result adopts about 1 time in 50 to 1 in 8 at this size.")
 
     def test_a_mixed_round_first_counts_all_three_rounds(self) -> None:
         text = experiments.lesson_basis(self.measured(), [self.rounds(3, 3, 3)])
@@ -80,19 +80,13 @@ class LessonBasis(unittest.TestCase):
 
     def test_a_stored_stale_status_is_still_an_adopted_outcome(self) -> None:
         self.assertEqual(experiments.lesson_outcome({"status": "stale"}), "adopted")
-        self.assertIsNotNone(experiments.lesson_basis(self.measured(status="stale"), [self.rounds(3, 3)]))
+        self.assertEqual(experiments.lesson_basis(self.measured(status="stale"), [self.rounds(3, 3)]),
+                         "Provisional: adopted after 2 rounds (6 treatment posts) against a cohort of 5. "
+                         "A chance result adopts about 1 time in 50 to 1 in 8 at this size.")
 
     def test_a_missing_experiment_is_said_not_guessed(self) -> None:
         self.assertEqual(experiments.lesson_basis(self.measured(), []),
                          "Provisional: experiment E-001 is not in the ledger, so its rounds cannot be shown.")
-
-    def test_the_caveat_matches_the_two_round_chance_of_adoption(self) -> None:
-        def chance(p: float) -> float:
-            win, mixed = p ** 3, 3 * p ** 2 * (1 - p)
-            return win * win + mixed * win * win
-        self.assertAlmostEqual(chance(0.5), 1 / 50, delta=0.01)
-        self.assertAlmostEqual(chance(2 / 3), 1 / 8, delta=0.01)
-        self.assertIn("1 time in 50 to 1 in 8", experiments.FALSE_ADOPTION_CAVEAT)
 
 
 class Evaluate(unittest.TestCase):

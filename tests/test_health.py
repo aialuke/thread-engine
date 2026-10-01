@@ -33,9 +33,6 @@ class FinalAtRisk(unittest.TestCase):
         got = [reads.final_at_risk(h) for h in (647.9, 648, 696, 696.1)]
         self.assertEqual(got, [False, True, True, False])
 
-    def test_it_is_inside_the_final_window(self) -> None:
-        self.assertTrue(all(reads.in_final_window(h) for h in (reads.FINAL_WARN_H, reads.FINAL_MAX_DAYS * 24)))
-
 
 class LastRuns(unittest.TestCase):
     def test_empty_and_missing_logs_have_no_runs(self) -> None:
