@@ -34,16 +34,12 @@ Decisions are cited as `Dnn` (`reviews/ui-direction.md`), algorithm facts as `An
 | `reviews/factory-drop-grok-plan.md` | plan for D88, nothing done yet | current |
 | `reviews/week-2026-W39.md` | weekly review (`/results`) | snapshot |
 | `reviews/audit-2026-09.md` | audit that chose the audience promise | snapshot |
-| `reviews/agent-conventions-audit-2026-09-30.md` | audit of instructions that could confuse or steer an agent, with the fixes | snapshot |
 | `reviews/skills-audit-2026-10.md` | read-through of all 20 skills against skill-creator's guide, four proposed wording edits | snapshot |
-| `reviews/rules-blind-review-and-closing-list-2026-09-30.md` | before/after tests of two global rules (blind review before options, closing Assumed/Overlooked list) | snapshot |
 | `reviews/pstack-adoption.md` | adopt/adapt/skip of the pstack plugin, with a blind Codex review and outside-evidence addendum | snapshot |
-| `reviews/pstack-playbooks.md`, `pstack-principles-guide.md`, `pstack-skills.md` | reader reports on pstack's playbooks, principles and guide, and other skills (vendor text, unverified) | snapshot |
 | `reviews/paid-free-session-2026-09.md` | how PAID → FREE was designed | snapshot |
 | `reviews/2026-09-22.md` | early review of the repo and account | snapshot, orphan |
 | `reviews/ui-review-2026-09-24.md`, `ui-review-2026-09-25.md` | adversarial and code/browser reviews of the mock | snapshot, orphan |
 | `reviews/x-tools-pilot.md` | pilot of X tools | snapshot |
-| `reviews/prompt-audit-2026-09-24/`, `prompt-audit-2026-09-28/` | prompt audits, `REPORT.md` plus patches | snapshot |
 | `reviews/skill-review-2026-09/` | instruction-file review (`BRIEF.md` + one file per skill group) | snapshot |
 | `reviews/research_notes/Driving verified home timeline impressions/` | raw notes behind the report below | raw |
 | `reviews/reports/Driving verified home timeline impressions.md` | synthesis of those notes | snapshot |
