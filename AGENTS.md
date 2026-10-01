@@ -36,7 +36,7 @@ Each line holds until its exit condition; skills point here instead of restating
 - `scripts/post_thread.py` is the gate: it refuses without `APPROVED`, and applies the format and voice checks. Read the script for the exact refusals; `--count` prints X's character counts with no approval.
 - Working in `scripts/loop_core`: read `scripts/loop_core/README.md` first.
 - `scripts/jev_referee.py` runs as a hook in shadow mode and appends `receipts/decisions.jsonl`. It needs no action; commit the receipt as `chore(data)` when it is the only change.
-- Tests: `python3 -m unittest discover -s tests`.
+- Tests: `python3 -m unittest discover -s tests` (it also runs `research/jev-test/test_*.py`, which pin skill sentences by line number: a skill edit that moves one fails there until `conflict_items.json` is re-pinned).
 
 ## Cloud session notes
 

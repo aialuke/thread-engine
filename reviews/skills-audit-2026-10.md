@@ -27,7 +27,7 @@ Ranked by value. "Do" means a small edit I would make on a yes.
 5. **`jev-judge-run` is the heaviest skill** (58 lines, dense, many fixed numbers and dated results). The earlier review already moved the numbers to its README. What is left is the "Before any request" and "Run" checklists, which read as procedure and are the place to cut if the skill is trimmed later. No edit now: the Jev work is in progress (D1–D106 UI project), and trimming it blind could drop a rule that was learned the hard way.
 6. **Duplicated character-limit wording.** "Under 280 characters when possible, never over 600" appears in four format skills, and the gate (`post_thread.py` `ROOT_LIMIT`) enforces it. Left as is: each skill must read on its own when `draft-thread` loads only one.
 7. **`format-settings` is a pure pointer** to `hidden-settings`, one extra hop. It holds the checklist path that `tests/test_hooks.py` uses. Keep. A merge would touch the test and the hook guard for no gain.
-8. **Open dependency, not an edit:** `next` (three places) and `format-tool-swap` (two) call `scripts/x_read.py`, which still calls Grok underneath. When `reviews/factory-drop-grok-plan.md` lands, these five lines change with it. `AGENTS.md` line 28 already says so.
+8. **Resolved later the same day:** `next` and `format-tool-swap` call `scripts/x_read.py`, which read Grok when this audit was written. The Grok removal landed (commits `0800cb1` onward): `x_read.py` now reads X API search, and `next` uses API syntax.
 9. **`results` step 5 is a 14-section list in one step.** It works and is operator-only. `next` already moved its weekly work to `weekly.md`; `results` could do the same. Low value, leave unless it gets longer.
 
 ## What I would not touch
