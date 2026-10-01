@@ -62,6 +62,3 @@ Follower IDs (`loop/followers/`) and raw API responses (`ledger/raw/api/`) conta
 ## Spend
 
 Set in the developer console: a spending limit of $10 per billing cycle, auto-recharge off. Expected spend at September 2026 volume (about 40 items a day): under $0.25 a day. `ledger/runs.log` records the estimate for each run.
-
-
-`x_read.py` refuses a search once the day's logged searches reach $1.00 (`DAILY_CAP_USD`, UTC date, read from `ledger/runs.log`). A full search is up to about $0.15, so that is about 6 searches; raising it is a Claude Code change.
