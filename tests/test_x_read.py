@@ -8,6 +8,7 @@ import json
 import sys
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
@@ -28,12 +29,14 @@ BODY = {"data": [{"id": "2102736605039776235", "author_id": "77", "created_at": 
 
 
 class XRead(unittest.TestCase):
-    def call(self, argv, *replies):
+    def call(self, argv, *replies, prior_log=""):
         opener = FakeOpener(*replies)
         client = x_api.Client(keys=KEYS, opener=opener, sleep=lambda s: None)
         out, err = io.StringIO(), io.StringIO()
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp) / "runs.log"
+            if prior_log:
+                log.write_text(prior_log, encoding="utf-8")
             with redirect_stdout(out), redirect_stderr(err):
                 code = x_read.main(argv, client=client, log_path=log)
             text = log.read_text(encoding="utf-8") if log.exists() else ""
@@ -75,6 +78,21 @@ class XRead(unittest.TestCase):
         code, out, err, log, _ = self.call(["search", "q"], 401, 401)
         self.assertEqual((code, out, log), (1, "", ""))
         self.assertIn("HTTP 401", err)
+
+    def test_the_daily_cap_refuses_before_sending(self) -> None:
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        spent = (f"{today}T01:00:00Z x_read search ok api_items=20 cost_usd=0.6\n"
+                 f"{today}T02:00:00Z x_read search ok api_items=20 cost_usd=0.45\n")
+        code, out, err, _, opener = self.call(["search", "q"], prior_log=spent)
+        self.assertEqual((code, out, opener.requests), (1, "", []))
+        self.assertIn("cap $1.00", err)
+
+    def test_yesterdays_spend_and_other_log_lines_do_not_count(self) -> None:
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        old = (f"2020-01-01T01:00:00Z x_read search ok api_items=20 cost_usd=5.0\n"
+               f"{today}T01:00:00Z snapshot ok read48=0 final=0 followers=36 api_items=36 cost_usd=9.0\n")
+        code, _, _, _, opener = self.call(["search", "q"], FakeResponse({}), prior_log=old)
+        self.assertEqual((code, len(opener.requests)), (0, 1))
 
     def test_thread_command_is_gone(self) -> None:
         with self.assertRaises(SystemExit), redirect_stderr(io.StringIO()):
