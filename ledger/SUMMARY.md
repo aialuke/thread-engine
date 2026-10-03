@@ -27,19 +27,15 @@ Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snap
 Needs 500 verified followers and 500,000 verified Home Timeline impressions on originals in 90 days (no replies, no boosted reach).
 
 - X's eligibility screen, read 2026-09-24: 26 verified followers, 337 qualified impressions.
-- Verified followers from the daily read: 24 of 500.
+- Verified followers from the daily read: 23 of 500.
 - Organic impressions on originals and quotes, last 90 days: 2,669. This counts every viewer on every surface, so it is an upper bound; X counts only Premium viewers on the Home feed.
 - Share that qualified at the last screen reading: 12% (the two readings may be from different days).
 
 ## Account
 
-Followers: 36 on 2026-10-01. In the 7 days to then: 6 new, 6 lost; 1 of the new credited to a post or reply they engaged with (a lower bound).
-
-Follows per profile visit, items from those 7 days: 6 / 1.
+Followers: 36 on 2026-10-03. In the 7 days to then: 2 new, 4 lost; 0 of the new credited to a post or reply they engaged with (a lower bound).
 
 | Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 | New follows (X export) |
 |---|---:|---:|---:|---:|---:|---:|
-| original | 3 | 166 | 0 | 2 | 0.0 | – |
-| reply | 13 | 807 | 1 | 4 | 1.2 | – |
-
-Top topics by organic impressions (X's own labels, a proxy): developers (135), Artificial intelligence (65), Information security (65), OpenAI (65), Technology (65).
+| original | 1 | 15 | 0 | 0 | – | – |
+| reply | 1 | 364 | 0 | 0 | 0.0 | – |

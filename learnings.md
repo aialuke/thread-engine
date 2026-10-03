@@ -2,8 +2,8 @@
 
 # Learnings
 
-A lesson changes the drafting rules only when it is `adopted` and the operator types `/apply`.
+A lesson changes the drafting rules only when its status is `adopted` and the operator types `/apply`. Fresh is whether that evidence is still inside 42 days. Rule is the latest entry in the rules list.
 
-| Lesson | Status | Rule | Claim | Evidence | Last evidence | Basis |
-|---|---|---|---|---|---|---|
-| – | – | – | No lessons yet | – | – | – |
+| Lesson | Status | Fresh | Rule | Claim | Evidence | Last evidence | Basis |
+|---|---|---|---|---|---|---|---|
+| – | – | – | – | No lessons yet | – | – | – |
