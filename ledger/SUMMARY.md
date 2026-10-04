@@ -33,9 +33,8 @@ Needs 500 verified followers and 500,000 verified Home Timeline impressions on o
 
 ## Account
 
-Followers: 36 on 2026-10-03. In the 7 days to then: 2 new, 4 lost; 0 of the new credited to a post or reply they engaged with (a lower bound).
+Followers: 35 on 2026-10-04. In the 7 days to then: 2 new, 3 lost; 0 of the new credited to a post or reply they engaged with (a lower bound).
 
 | Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 | New follows (X export) |
 |---|---:|---:|---:|---:|---:|---:|
 | original | 1 | 15 | 0 | 0 | – | – |
-| reply | 1 | 364 | 0 | 0 | 0.0 | – |
