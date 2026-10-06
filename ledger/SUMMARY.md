@@ -27,13 +27,13 @@ Times are Australia/Brisbane. Views and Snapshot come from the 36–60 hour snap
 Needs 500 verified followers and 500,000 verified Home Timeline impressions on originals in 90 days (no replies, no boosted reach).
 
 - X's eligibility screen, read 2026-09-24: 26 verified followers, 337 qualified impressions.
-- Verified followers from the daily read: 23 of 500.
+- Verified followers from the daily read: 22 of 500.
 - Organic impressions on originals and quotes, last 90 days: 2,669. This counts every viewer on every surface, so it is an upper bound; X counts only Premium viewers on the Home feed.
 - Share that qualified at the last screen reading: 12% (the two readings may be from different days).
 
 ## Account
 
-Followers: 34 on 2026-10-05. In the 7 days to then: 1 new, 4 lost; 0 of the new credited to a post or reply they engaged with (a lower bound).
+Followers: 35 on 2026-10-06. In the 7 days to then: 2 new, 4 lost; 0 of the new credited to a post or reply they engaged with (a lower bound).
 
 | Kind | Items | Organic impressions | Profile visits | Likes | Visits per 1,000 | New follows (X export) |
 |---|---:|---:|---:|---:|---:|---:|
